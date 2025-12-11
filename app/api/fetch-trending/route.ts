@@ -34,15 +34,17 @@ export async function POST(request: Request) {
             const hfRes = await fetch('https://huggingface.co/api/daily_papers');
             if (hfRes.ok) {
                 const hfData = await hfRes.json();
-                // hfData is array of { title, publishedAt, id, author: {fullname} ... }
-                // Map to our format
-                const hfPapers = hfData.slice(0, count).map((p: any) => ({
-                    title: p.title,
-                    authors: p.authors.map((a: any) => a.name).join(', '),
-                    link: `https://arxiv.org/abs/${p.paper.id}`, // usually paper.id is arxiv id
-                    source: 'HuggingFace',
-                    abstract: p.paper.summary // we need this for TLDR generation
-                }));
+                // hfData is array of objects where 'paper' contains the details
+                const hfPapers = hfData.slice(0, count).map((p: any) => {
+                    const paper = p.paper;
+                    return {
+                        title: paper.title || p.title,
+                        authors: paper.authors ? paper.authors.map((a: any) => a.name).join(', ') : "Unknown",
+                        link: `https://arxiv.org/abs/${paper.id}`,
+                        source: 'HuggingFace',
+                        abstract: paper.summary || p.summary || "No abstract available"
+                    };
+                });
                 papers = [...papers, ...hfPapers];
             }
         } catch (e) {
