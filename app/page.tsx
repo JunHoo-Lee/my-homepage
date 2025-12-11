@@ -131,6 +131,7 @@ export default function Home() {
                                 venue="Preprint"
                                 year="2025"
                                 link="https://arxiv.org/abs/2510.13870"
+                                tag="Diffusion Language Model"
                                 tldr="Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
                             />
                         </div>
@@ -149,6 +150,7 @@ export default function Home() {
                                 venue="NeurIPS 2025"
                                 year="2025"
                                 link="https://arxiv.org/abs/2510.13865"
+                                tag="Deep Learning Theory"
                                 tldr="Just as humans perceive edges (high-frequency) as core components, deep features in neural networks exhibit the same tendency."
                             />
                             <PublicationItem
@@ -157,6 +159,7 @@ export default function Home() {
                                 venue="ICCV 2025"
                                 year="2025"
                                 link="https://arxiv.org/abs/2507.04667"
+                                tag="Audio-Visual Localization"
                                 tldr="Video-centric audio-visual localization benchmark (AVATAR) with temporal dynamics."
                             />
                             <PublicationItem
@@ -165,6 +168,7 @@ export default function Home() {
                                 venue="NeurIPS 2024"
                                 year="2024"
                                 link="https://arxiv.org/abs/2403.17329"
+                                tag="Deep Learning Theory"
                                 tldr="Deep learning has support vectors just like SVMs."
                             />
                             <PublicationItem
@@ -173,6 +177,7 @@ export default function Home() {
                                 venue="AAAI 2024"
                                 year="2024"
                                 link="https://arxiv.org/abs/2401.05097"
+                                tag="Meta-Learning"
                                 tldr="Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling."
                             />
                             <PublicationItem
@@ -181,6 +186,7 @@ export default function Home() {
                                 venue="NeurIPS 2023"
                                 year="2023"
                                 link="https://arxiv.org/abs/2310.02751"
+                                tag="Meta-Learning"
                                 tldr="The key to meta-learning adaptation is flattening the learning trajectory."
                             />
                         </div>
@@ -199,6 +205,7 @@ export default function Home() {
                                 venue="CVPR 2024 Workshop (Responsible Generative AI)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2404.15154"
+                                tag="Text-to-Image Generation"
                                 tldr="First discovery that negation doesn't work in large models — telling them not to generate something makes them generate it."
                             />
                             <PublicationItem
@@ -207,6 +214,7 @@ export default function Home() {
                                 venue="CVPR 2024 Workshop (Dataset Distillation)"
                                 year="2024"
                                 link="https://openaccess.thecvf.com/content/CVPR2024W/"
+                                tag="Coreset Selection"
                                 tldr="Efficient coreset selection method specifically designed for object detection tasks."
                             />
                             <PublicationItem
@@ -215,6 +223,7 @@ export default function Home() {
                                 venue="ECCV 2024 Workshop (Dataset Distillation Challenge)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2405.00348"
+                                tag="Dataset Distillation"
                                 tldr="Applying DeepKKT loss for dataset distillation when only partial data is accessible."
                             />
                         </div>
@@ -233,10 +242,12 @@ export default function Home() {
                                 venue="IEEE Access"
                                 year="2025"
                                 link="https://arxiv.org/abs/2508.20224"
+                                tag="Knowledge Distillation"
                                 tldr="Teacher's calibration error strongly correlates with student accuracy — well-calibrated teachers transfer knowledge better."
                             />
                         </div>
                     </div>
+
                 </div>
             </motion.section>
 
@@ -244,7 +255,7 @@ export default function Home() {
     );
 }
 
-function PublicationItem({ title, authors, venue, year, link, tldr }: { title: string, authors: string[], venue: string, year: string, link: string, tldr: string }) {
+function PublicationItem({ title, authors, venue, year, link, tldr, tag }: { title: string, authors: string[], venue: string, year: string, link: string, tldr: string, tag?: string }) {
     return (
         <div className="group relative">
             <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200">
@@ -267,6 +278,7 @@ function PublicationItem({ title, authors, venue, year, link, tldr }: { title: s
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 text-sm">
                 <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-0.5 rounded">{venue}</span>
+                {tag && <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{tag}</span>}
             </div>
 
             <p className="text-sm text-gray-600 leading-relaxed italic border-l-2 border-gray-200 pl-3">
