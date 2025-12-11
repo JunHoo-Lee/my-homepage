@@ -49,7 +49,7 @@ export default function Home() {
             {/* News Section */}
             <motion.section id="news" className="scroll-mt-20" variants={fadeInUp}>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">News</h2>
-                <ul className="space-y-4 text-gray-700">
+                <ul className="space-y-4 text-gray-700 text-sm">
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Dec 2025]</span>
                         <span>I will be at NeurIPS 2025 in San Diego, presenting our <a href="https://arxiv.org/abs/2510.13865" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Deep Edge Filter&quot;</a> paper!</span>
