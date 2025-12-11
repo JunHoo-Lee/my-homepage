@@ -29,55 +29,55 @@ export default function Home() {
                 <ul className="space-y-4 text-gray-700">
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Dec 2025]</span>
-                        <span>I will be at NeurIPS 2025 in San Diego, presenting our &quot;Deep Edge Filter&quot; paper!</span>
+                        <span>I will be at NeurIPS 2025 in San Diego, presenting our <a href="https://arxiv.org/abs/2510.13865" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Deep Edge Filter&quot;</a> paper!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Oct 2025]</span>
-                        <span>New preprint &quot;Unlocking the Potential of Diffusion Language Models through Template Infilling&quot; is now on arXiv!</span>
+                        <span>New preprint <a href="https://arxiv.org/abs/2510.13870" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Unlocking the Potential of Diffusion Language Models through Template Infilling&quot;</a> is now on arXiv!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Sep 2025]</span>
-                        <span>Our paper &quot;Deep Edge Filter&quot; is accepted to NeurIPS 2025! (co-first author)</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2510.13865" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Deep Edge Filter&quot;</a> is accepted to NeurIPS 2025! (co-first author)</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Jul 2025]</span>
-                        <span>Our paper &quot;What&#39;s Making That Sound Right Now?&quot; is accepted to ICCV 2025!</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2507.04667" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;What&#39;s Making That Sound Right Now?&quot;</a> is accepted to ICCV 2025!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Jun 2025]</span>
-                        <span>Our paper &quot;The Role of Teacher Calibration in Knowledge Distillation&quot; is published in IEEE Access!</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2508.20224" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;The Role of Teacher Calibration in Knowledge Distillation&quot;</a> is published in IEEE Access!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Dec 2024]</span>
-                        <span>I will be at NeurIPS 2024 in Vancouver, presenting our &quot;Deep Support Vectors&quot; paper!</span>
+                        <span>I will be at NeurIPS 2024 in Vancouver, presenting our <a href="https://arxiv.org/abs/2403.17329" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Deep Support Vectors&quot;</a> paper!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Sep 2024]</span>
-                        <span>Our paper &quot;Deep Support Vectors&quot; is accepted to NeurIPS 2024!</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2403.17329" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Deep Support Vectors&quot;</a> is accepted to NeurIPS 2024!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Jul 2024]</span>
-                        <span>Our paper &quot;Practical Dataset Distillation Based on Deep Support Vectors&quot; is presented at ECCV 2024 Workshop!</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2405.00348" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Practical Dataset Distillation Based on Deep Support Vectors&quot;</a> is presented at ECCV 2024 Workshop!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Apr 2024]</span>
-                        <span>Two workshop papers accepted to CVPR 2024 — &quot;Do Not Think About Pink Elephant!&quot; (co-first) and &quot;Coreset Selection for Object Detection&quot;!</span>
+                        <span>Two workshop papers accepted to CVPR 2024 — <a href="https://arxiv.org/abs/2404.15154" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Do Not Think About Pink Elephant!&quot;</a> (co-first) and <a href="https://arxiv.org/abs/2404.09161" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Coreset Selection for Object Detection&quot;</a>!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Feb 2024]</span>
-                        <span>I will be at AAAI 2024 in Vancouver, presenting our &quot;Any-Way Meta Learning&quot; paper!</span>
+                        <span>I will be at AAAI 2024 in Vancouver, presenting our <a href="https://arxiv.org/abs/2401.05097" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Any-Way Meta Learning&quot;</a> paper!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Dec 2023]</span>
-                        <span>Our paper &quot;Any-Way Meta Learning&quot; is accepted to AAAI 2024!</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2401.05097" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;Any-Way Meta Learning&quot;</a> is accepted to AAAI 2024!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Dec 2023]</span>
-                        <span>I will be at NeurIPS 2023 in New Orleans, presenting our SHOT paper!</span>
+                        <span>I will be at NeurIPS 2023 in New Orleans, presenting our <a href="https://arxiv.org/abs/2310.02751" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">SHOT</a> paper!</span>
                     </li>
                     <li className="flex gap-2">
                         <span className="font-bold min-w-[100px] text-gray-500">[Sep 2023]</span>
-                        <span>Our paper &quot;SHOT: Suppressing the Hessian along the Optimization Trajectory&quot; is accepted to NeurIPS 2023!</span>
+                        <span>Our paper <a href="https://arxiv.org/abs/2310.02751" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline">&quot;SHOT: Suppressing the Hessian along the Optimization Trajectory&quot;</a> is accepted to NeurIPS 2023!</span>
                     </li>
                 </ul>
             </section>
