@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
 
     // Protected routes
-    if (path.startsWith('/tasks') || path.startsWith('/papers')) {
+    if (path.startsWith('/private')) {
         const authCookie = request.cookies.get('auth_session');
 
         if (!authCookie) {
@@ -17,5 +17,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/tasks/:path*', '/papers/:path*'],
+    matcher: ['/private/:path*'],
 };

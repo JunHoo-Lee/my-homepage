@@ -9,39 +9,28 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Gemini API Key missing' }, { status: 500 });
     }
 
-    const { input } = await request.json();
+    const { input } = await request.json(); // input is link or text
 
-    // 1. Fetch existing tags for context
+    // Fetch existing tags
     const { data: tagsData } = await supabase.from('tags').select('name');
     const existingTags = tagsData?.map(t => t.name) || [];
 
-    // 2. Prompt Gemini
-    const currentDate = new Date().toISOString();
     const prompt = `
-    You are a smart personal assistant. Parse the natural language input into a structured JSON for a task manager.
+    You are a research assistant. Extract paper details from the input (citation string, link, or title).
     
-    Current Date: ${currentDate}
     Input: "${input}"
     Existing Tags: ${JSON.stringify(existingTags)}
     
-    Rules:
-    - "is_new" should be true.
-    - "priority": specific high/medium/low if mentioned or implied explicitly, else decide based on urgency.
-    - "due_date": Parse relative dates (e.g. "next friday") into YYYY-MM-DD format based on Current Date. If no date, null.
-    - "tags": Suggest relevant tags from Existing Tags, or create new short ones if necessary. Array of strings.
-    
     Output JSON Schema:
     {
-      "title": "string (concise)",
-      "memo": "string (details or null)",
-      "is_new": true,
-      "tags": ["string"],
-      "priority": "High" | "Medium" | "Low",
-      "due_date": "YYYY-MM-DD" | null
+      "title": "string",
+      "authors": "string (comma separated)",
+      "link": "string (url or null)",
+      "tags": ["string"] (suggest relevant tags)
     }
-
+    
     Return ONLY the raw JSON string.
-  `;
+    `;
 
     try {
         const response = await fetch(GEMINI_URL, {
@@ -53,19 +42,18 @@ export async function POST(request: Request) {
         });
 
         const data = await response.json();
-
         if (!data.candidates || data.candidates.length === 0) {
-            console.error('Gemini API Error Detail:', JSON.stringify(data, null, 2));
             return NextResponse.json({ error: 'Gemini returned no candidates.' }, { status: 500 });
         }
 
         const text = data.candidates[0].content.parts[0].text;
         const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsedTask = JSON.parse(jsonStr);
+        const parsedPaper = JSON.parse(jsonStr);
 
-        return NextResponse.json({ task: parsedTask });
+        return NextResponse.json({ paper: parsedPaper });
+
     } catch (error) {
         console.error('Gemini API Error:', error);
-        return NextResponse.json({ error: 'Failed to parse task' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to parse paper' }, { status: 500 });
     }
 }

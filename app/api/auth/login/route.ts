@@ -5,7 +5,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { password } = body;
 
-    if (password === process.env.ADMIN_PASSWORD) {
+    // Use PRIVATE_PASSWORD from env
+    if (password === process.env.PRIVATE_PASSWORD) {
         // Set cookie
         (await cookies()).set('auth_session', 'true', {
             httpOnly: true,

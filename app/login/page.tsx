@@ -17,7 +17,7 @@ export default function LoginPage() {
         });
 
         if (res.ok) {
-            router.push('/tasks');
+            router.push('/private');
             router.refresh();
         } else {
             setError('Incorrect password');
