@@ -21,8 +21,11 @@ export default function TasksPage() {
     const [isParsing, setIsParsing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [availableTags, setAvailableTags] = useState<string[]>([]);
+
     useEffect(() => {
         fetchTasks();
+        fetchTags();
     }, []);
 
     const fetchTasks = async () => {
@@ -35,6 +38,12 @@ export default function TasksPage() {
         if (data) setTasks(data);
         setIsLoading(false);
     };
+
+    const fetchTags = async () => {
+        const { data } = await supabase.from('tags').select('name');
+        if (data) setAvailableTags(data.map(t => t.name));
+    };
+
 
     const handleQuickAdd = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -93,6 +102,13 @@ export default function TasksPage() {
             <header>
                 <h1 className="text-3xl font-bold mb-2">Tasks</h1>
                 <p className="text-gray-500">Manage your research and life with AI.</p>
+                {availableTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        {availableTags.map(tag => (
+                            <span key={tag} className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">#{tag}</span>
+                        ))}
+                    </div>
+                )}
             </header>
 
             {/* Quick Add Area */}
