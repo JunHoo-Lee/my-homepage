@@ -127,7 +127,7 @@ export default function Home() {
                         <div className="space-y-8 pl-4 border-l-2 border-gray-100">
                             <PublicationItem
                                 title="Deep Edge Filter †"
-                                authors={["Junhoo Lee†", "Nojun Kwak"]}
+                                authors={["Junhoo Lee†", "et al."]}
                                 venue="NeurIPS 2025"
                                 year="2025"
                                 link="https://arxiv.org/abs/2510.13865"
@@ -135,7 +135,7 @@ export default function Home() {
                             />
                             <PublicationItem
                                 title="What's Making That Sound Right Now?"
-                                authors={["Junhoo Lee", "Jiyoung Lee", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="ICCV 2025"
                                 year="2025"
                                 link="https://arxiv.org/abs/2507.04667"
@@ -143,7 +143,7 @@ export default function Home() {
                             />
                             <PublicationItem
                                 title="Deep Support Vectors"
-                                authors={["Junhoo Lee", "Hyunho Lee", "Kyomin Hwang", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="NeurIPS 2024"
                                 year="2024"
                                 link="https://arxiv.org/abs/2403.17329"
@@ -151,7 +151,7 @@ export default function Home() {
                             />
                             <PublicationItem
                                 title="Any-Way Meta Learning"
-                                authors={["Junhoo Lee", "Jaehyun Choi", "Hyun Seo", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="AAAI 2024"
                                 year="2024"
                                 link="https://arxiv.org/abs/2401.05097"
@@ -159,7 +159,7 @@ export default function Home() {
                             />
                             <PublicationItem
                                 title="SHOT: Suppressing the Hessian along the Optimization Trajectory"
-                                authors={["Junhoo Lee", "Jiyoung Lee", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="NeurIPS 2023"
                                 year="2023"
                                 link="https://arxiv.org/abs/2310.02751"
@@ -177,7 +177,7 @@ export default function Home() {
                         <div className="space-y-8 pl-4 border-l-2 border-gray-100">
                             <PublicationItem
                                 title="Do Not Think About Pink Elephant! †"
-                                authors={["Junhoo Lee†", "Kaiwen Wei", "Nojun Kwak"]}
+                                authors={["Junhoo Lee†", "et al."]}
                                 venue="CVPR 2024 Workshop (Responsible Generative AI)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2404.15154"
@@ -185,7 +185,7 @@ export default function Home() {
                             />
                             <PublicationItem
                                 title="Coreset Selection for Object Detection"
-                                authors={["Junhoo Lee", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="CVPR 2024 Workshop (Dataset Distillation)"
                                 year="2024"
                                 link="https://openaccess.thecvf.com/content/CVPR2024W/"
@@ -193,7 +193,7 @@ export default function Home() {
                             />
                             <PublicationItem
                                 title="Practical Dataset Distillation Based on Deep Support Vectors"
-                                authors={["Junhoo Lee", "Hyunho Lee", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="ECCV 2024 Workshop (Dataset Distillation Challenge)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2405.00348"
@@ -211,7 +211,7 @@ export default function Home() {
                         <div className="space-y-8 pl-4 border-l-2 border-gray-100">
                             <PublicationItem
                                 title="The Role of Teacher Calibration in Knowledge Distillation"
-                                authors={["Junhoo Lee", "Suyoung Kim", "Seonguk", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="IEEE Access"
                                 year="2025"
                                 link="https://arxiv.org/abs/2508.20224"
@@ -229,7 +229,7 @@ export default function Home() {
                         <div className="space-y-8 pl-4 border-l-2 border-gray-100">
                             <PublicationItem
                                 title="Unlocking the Potential of Diffusion Language Models through Template Infilling"
-                                authors={["Junhoo Lee", "Nojun Kwak"]}
+                                authors={["Junhoo Lee", "et al."]}
                                 venue="Preprint"
                                 year="2025"
                                 link="https://arxiv.org/abs/2510.13870"
