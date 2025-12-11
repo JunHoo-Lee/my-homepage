@@ -23,6 +23,64 @@ export default function Home() {
                     </p>
                 </div>
             </section>
+            {/* News Section */}
+            <section id="news" className="scroll-mt-20">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">News</h2>
+                <ul className="space-y-4 text-gray-700">
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2025]</span>
+                        <span>I will be at NeurIPS 2025 in San Diego, presenting our &quot;Deep Edge Filter&quot; paper!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Oct 2025]</span>
+                        <span>New preprint &quot;Unlocking the Potential of Diffusion Language Models through Template Infilling&quot; is now on arXiv!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Sep 2025]</span>
+                        <span>Our paper &quot;Deep Edge Filter&quot; is accepted to NeurIPS 2025! (co-first author)</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Jul 2025]</span>
+                        <span>Our paper &quot;What&#39;s Making That Sound Right Now?&quot; is accepted to ICCV 2025!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Jun 2025]</span>
+                        <span>Our paper &quot;The Role of Teacher Calibration in Knowledge Distillation&quot; is published in IEEE Access!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2024]</span>
+                        <span>I will be at NeurIPS 2024 in Vancouver, presenting our &quot;Deep Support Vectors&quot; paper!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Sep 2024]</span>
+                        <span>Our paper &quot;Deep Support Vectors&quot; is accepted to NeurIPS 2024!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Jul 2024]</span>
+                        <span>Our paper &quot;Practical Dataset Distillation Based on Deep Support Vectors&quot; is presented at ECCV 2024 Workshop!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Apr 2024]</span>
+                        <span>Two workshop papers accepted to CVPR 2024 — &quot;Do Not Think About Pink Elephant!&quot; (co-first) and &quot;Coreset Selection for Object Detection&quot;!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Feb 2024]</span>
+                        <span>I will be at AAAI 2024 in Vancouver, presenting our &quot;Any-Way Meta Learning&quot; paper!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2023]</span>
+                        <span>Our paper &quot;Any-Way Meta Learning&quot; is accepted to AAAI 2024!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2023]</span>
+                        <span>I will be at NeurIPS 2023 in New Orleans, presenting our SHOT paper!</span>
+                    </li>
+                    <li className="flex gap-2">
+                        <span className="font-bold min-w-[100px] text-gray-500">[Sep 2023]</span>
+                        <span>Our paper &quot;SHOT: Suppressing the Hessian along the Optimization Trajectory&quot; is accepted to NeurIPS 2023!</span>
+                    </li>
+                </ul>
+            </section>
 
             {/* Publications Section */}
             <section id="publications" className="scroll-mt-20">
