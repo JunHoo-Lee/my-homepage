@@ -1,8 +1,30 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, Github, Linkedin, GraduationCap, MapPin } from "lucide-react";
+import { Mail, Github, Linkedin, GraduationCap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase";
 
 export default function Sidebar() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    checkUser();
+
+    // Subscribe to auth changes to update sidebar immediately on login/logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsAuthenticated(!!session);
+  };
+
   return (
     <aside className="w-full md:w-64 md:h-screen md:fixed left-0 top-0 bg-gray-50 border-r border-gray-200 p-6 flex flex-col items-center text-center overflow-y-auto z-10">
       <div className="mb-6">
@@ -45,14 +67,16 @@ export default function Sidebar() {
           <li><Link href="/#publications" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Publications</Link></li>
         </ul>
 
-        {/* Private Links - Discrete */}
-        <div className="mt-8 pt-4 border-t border-gray-100">
-          <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Personal</p>
-          <ul className="space-y-2 text-sm font-medium text-gray-600">
-            <li><Link href="/tasks" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Tasks</Link></li>
-            <li><Link href="/papers" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Papers</Link></li>
-          </ul>
-        </div>
+        {/* Private Links - Only visible when authenticated */}
+        {isAuthenticated && (
+          <div className="mt-8 pt-4 border-t border-gray-100">
+            <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Personal</p>
+            <ul className="space-y-2 text-sm font-medium text-gray-600">
+              <li><Link href="/tasks" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Tasks</Link></li>
+              <li><Link href="/papers" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Papers</Link></li>
+            </ul>
+          </div>
+        )}
       </nav>
 
       <div className="mt-8 text-xs text-gray-400">
