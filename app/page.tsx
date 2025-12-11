@@ -177,7 +177,7 @@ export default function Home() {
                         <div className="space-y-8 pl-4 border-l-2 border-gray-100">
                             <PublicationItem
                                 title="Do Not Think About Pink Elephant! †"
-                                authors={["Kyomin Hwang*", "Suyoung Kim*", "Junhoo Lee*", "Nojun Kwak"]}
+                                authors={["Kyomin Hwang†", "Suyoung Kim†", "Junhoo Lee†", "Nojun Kwak"]}
                                 venue="CVPR 2024 Workshop (Responsible Generative AI)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2404.15154"
@@ -254,11 +254,17 @@ function PublicationItem({ title, authors, venue, year, link, tldr }: { title: s
                 </a>
             </h4>
             <div className="text-gray-600 mb-2 font-medium">
-                {authors.map((author, i) => (
-                    <span key={i} className={author.includes("Junhoo Lee") ? "text-gray-900 font-semibold border-b-2 border-blue-100" : "text-gray-600"}>
-                        {author}{i < authors.length - 1 ? ", " : ""}
-                    </span>
-                ))}
+                {authors.map((author, i) => {
+                    const isJunhoo = author.includes("Junhoo Lee");
+                    return (
+                        <span key={i}>
+                            <span className={isJunhoo ? "text-gray-900 font-semibold border-b-2 border-blue-100" : "text-gray-600"}>
+                                {author}
+                            </span>
+                            {i < authors.length - 1 ? ", " : ""}
+                        </span>
+                    );
+                })}
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 text-sm">
                 <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-0.5 rounded">{venue}</span>
