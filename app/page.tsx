@@ -118,6 +118,24 @@ export default function Home() {
 
                 <div className="space-y-12">
 
+                    {/* Preprint */}
+                    <div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                            Preprint
+                        </h3>
+                        <div className="space-y-8 pl-4 border-l-2 border-gray-100">
+                            <PublicationItem
+                                title="Unlocking the Potential of Diffusion Language Models through Template Infilling"
+                                authors={["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"]}
+                                venue="Preprint"
+                                year="2025"
+                                link="https://arxiv.org/abs/2510.13870"
+                                tldr="Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
+                            />
+                        </div>
+                    </div>
+
                     {/* Main Conference */}
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -219,25 +237,6 @@ export default function Home() {
                             />
                         </div>
                     </div>
-
-                    {/* Preprint */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                            Preprint
-                        </h3>
-                        <div className="space-y-8 pl-4 border-l-2 border-gray-100">
-                            <PublicationItem
-                                title="Unlocking the Potential of Diffusion Language Models through Template Infilling"
-                                authors={["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"]}
-                                venue="Preprint"
-                                year="2025"
-                                link="https://arxiv.org/abs/2510.13870"
-                                tldr="Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
-                            />
-                        </div>
-                    </div>
-
                 </div>
             </motion.section>
 
