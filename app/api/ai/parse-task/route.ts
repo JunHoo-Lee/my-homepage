@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 export async function POST(request: Request) {
     if (!GEMINI_API_KEY) {
@@ -45,6 +45,12 @@ export async function POST(request: Request) {
         });
 
         const data = await response.json();
+
+        if (!data.candidates || data.candidates.length === 0) {
+            console.error('Gemini API Error Detail:', JSON.stringify(data, null, 2));
+            return NextResponse.json({ error: 'Gemini returned no candidates. Check logs.' }, { status: 500 });
+        }
+
         const text = data.candidates[0].content.parts[0].text;
 
         // Clean up markdown block if present
