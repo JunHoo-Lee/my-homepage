@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+}
+
+/* 
+  In Tailwind v4, we can set base styles on the body element directly 
+  or use @apply in standard CSS blocks if configured, 
+  but putting classes in layout.tsx is safer and preferred.
+*/
