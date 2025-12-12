@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+import { generateJSON } from '@/utils/ai';
 
 export async function POST(request: Request) {
-    if (!GEMINI_API_KEY) {
-        return NextResponse.json({ error: 'Gemini API Key missing' }, { status: 500 });
-    }
-
     const { input } = await request.json();
 
     // 1. Fetch existing tags for context
@@ -44,28 +38,14 @@ export async function POST(request: Request) {
   `;
 
     try {
-        const response = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
-
-        const data = await response.json();
-
-        if (!data.candidates || data.candidates.length === 0) {
-            console.error('Gemini API Error Detail:', JSON.stringify(data, null, 2));
-            return NextResponse.json({ error: 'Gemini returned no candidates.' }, { status: 500 });
+        const parsedTask = await generateJSON(prompt);
+        if (!parsedTask) {
+            return NextResponse.json({ error: 'AI failed to parse task' }, { status: 500 });
         }
-
-        const text = data.candidates[0].content.parts[0].text;
-        const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsedTask = JSON.parse(jsonStr);
 
         return NextResponse.json({ task: parsedTask });
     } catch (error) {
-        console.error('Gemini API Error:', error);
+        console.error('API Error:', error);
         return NextResponse.json({ error: 'Failed to parse task' }, { status: 500 });
     }
 }

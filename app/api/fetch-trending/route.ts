@@ -1,11 +1,6 @@
 // /app/api/fetch-trending/route.ts
 import { NextResponse } from 'next/server';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+import { generateText } from '@/utils/ai';
 
 // Helper to fetch HTML text
 async function fetchHTML(url: string) {
@@ -19,64 +14,19 @@ async function fetchHTML(url: string) {
     }
 }
 
-// Helper: Summarize with Gemini
-async function summarizeWithGemini(title: string, abstract: string): Promise<string | null> {
-    if (!GEMINI_API_KEY) return null;
-    try {
-        const prompt = `
-            Summarize this paper abstract into a ONE sentence TLDR in Korean.
-            Title: ${title}
-            Abstract: ${abstract}
-            Output: Korean TLDR string only.
-        `;
-        const res = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        const data = await res.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-    } catch (e) {
-        console.error("Gemini summary failed", e);
-        return null;
-    }
-}
-
-// Helper: Summarize with OpenAI
-async function summarizeWithOpenAI(title: string, abstract: string): Promise<string | null> {
-    if (!OPENAI_API_KEY) return null;
-    try {
-        const prompt = `Summarize this paper into a ONE sentence TLDR in Korean.\nTitle: ${title}\nAbstract: ${abstract}`;
-        const res = await fetch(OPENAI_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini", // Cost effective
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 100
-            })
-        });
-        const data = await res.json();
-        return data.choices?.[0]?.message?.content?.trim() || null;
-    } catch (e) {
-        console.error("OpenAI summary failed", e);
-        return null;
-    }
-}
-
-// Robust Summarizer
+// Robust Summarizer using shared utility
 async function getTLDR(title: string, abstract: string) {
-    // 1. Try Gemini
-    let tldr = await summarizeWithGemini(title, abstract);
-    if (tldr && !tldr.includes("요약 불가")) return tldr;
+    const prompt = `
+        Summarize this paper abstract into a ONE sentence TLDR in Korean.
+        Title: ${title}
+        Abstract: ${abstract}
+        Output: Korean TLDR string only.
+    `;
 
-    // 2. Fallback to OpenAI
-    console.log(`Falling back to OpenAI for: ${title}`);
-    tldr = await summarizeWithOpenAI(title, abstract);
-    if (tldr) return tldr;
+    // generateText handles Gemini -> OpenAI fallback internally
+    const tldr = await generateText(prompt);
+
+    if (tldr && !tldr.includes("요약 불가")) return tldr.trim();
 
     return "요약 불가 (서비스 오류)";
 }
@@ -107,19 +57,6 @@ async function getCollectionPapers(url: string, sourceLabel: string, count: numb
 
     // Convert to array
     const allIds = Array.from(uniqueIds);
-
-    // Slice for pagination
-    // For collections, we want to fetch metadata then sort, THEN slice? 
-    // Or slice then fetch?
-    // Problem: logic requires sorting by date. If we slice the regex matches (which are likely roughly chronological but not guaranteed), 
-    // we might miss newer papers if the page isn't perfectly ordered.
-    // However, fetching ALL metadata to sort is too slow.
-    // Compromise: Fetch a larger batch (e.g. count * 2 + offset), sort, then take the requested page. 
-    // For now, let's trust the page order partially but fetch a bit more to be safe? 
-    // Actually, looking at HF collections, they seem manual.
-    // Let's fetch the slice requested + buffer?
-    // User asked for "Sort by newest". 
-    // Ideally we fetch metadata for ALL ids found on page (limited to reasonable number like 50), sort them, then paginate.
 
     const limit = 50; // Cap to avoid timeouts
     const idsToFetch = allIds.slice(0, limit);
@@ -152,13 +89,6 @@ async function getCollectionPapers(url: string, sourceLabel: string, count: numb
         const dateB = new Date(b.publishedAt).getTime();
         return dateB - dateA;
     });
-
-    // Apply Pagination (on the sorted list)
-    // Note: This "local" pagination works if we always fetch the top N papers. 
-    // But true "Next Page" for a generic collection requires stable ordering.
-    // Since we fetch the TOP 50 from the page, slicing locally is okay as long as the user hasn't scrolled past 50.
-    // If offset > 50, we might need a different strategy or just show what we have.
-    // Given the request, let's just slice the validPapers.
 
     return validPapers.slice(offset, offset + count);
 }
@@ -203,13 +133,6 @@ export async function POST(request: Request) {
             const hfRes = await fetch('https://huggingface.co/api/daily_papers');
             if (hfRes.ok) {
                 const hfData = await hfRes.json();
-
-                // If it's the first load (offset 0), we random shuffle.
-                // If it's a "Load More" (pagination), we probably shouldn't shuffle or we get duplicates.
-                // BUT, Daily Papers usually doesn't have infinite scroll in this context, just "Refresh".
-                // The user asked for "Random 10 on Refresh".
-                // So if offset > 0 (pagination), we might just return empty or remaining?
-                // Let's assume Daily is just a static shuffled list for now.
 
                 // Map first
                 let allPapers = hfData.map((p: any) => {

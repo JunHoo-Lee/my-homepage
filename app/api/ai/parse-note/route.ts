@@ -1,15 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+import { generateJSON } from '@/utils/ai';
 
 export async function POST(request: Request) {
-    if (!GEMINI_API_KEY) {
-        console.error('Gemini API Key missing');
-        return NextResponse.json({ error: 'Gemini API Key missing in environment variables' }, { status: 500 });
-    }
-
     const { input } = await request.json(); // input is raw text of fleeting note
 
     // Fetch existing tags and folders (if we had a folders table, but we assume folder is text, so we can fetch distinct folders from notes)
@@ -61,44 +54,16 @@ export async function POST(request: Request) {
     `;
 
     try {
-        const response = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
+        const parsedNote = await generateJSON(prompt);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Gemini API Error Response:', errorText);
-            throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        if (!data.candidates || data.candidates.length === 0) {
-            console.error('Gemini returned no candidates:', data);
-            return NextResponse.json({ error: 'Gemini returned no candidates.' }, { status: 500 });
-        }
-
-        const text = data.candidates[0].content.parts[0].text;
-        console.log('Gemini Raw Response:', text); // Debug log
-
-        // Improved JSON cleaning: handle code blocks and potential noise
-        const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
-        let parsedNote;
-        try {
-            parsedNote = JSON.parse(jsonStr);
-        } catch (parseError) {
-            console.error('JSON Parse Error:', parseError, 'Raw String:', jsonStr);
-            return NextResponse.json({ error: 'Failed to parse AI response as JSON' }, { status: 500 });
+        if (!parsedNote) {
+            return NextResponse.json({ error: 'AI failed to parse note' }, { status: 500 });
         }
 
         return NextResponse.json({ note: parsedNote });
 
     } catch (error: any) {
-        console.error('Gemini API Error:', error);
+        console.error('API Error:', error);
         return NextResponse.json({ error: error.message || 'Failed to parse note' }, { status: 500 });
     }
 }
