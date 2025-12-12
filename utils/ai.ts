@@ -42,7 +42,11 @@ export async function generateText(prompt: string): Promise<string | null> {
                 messages: [{ role: "user", content: prompt }],
                 max_tokens: 500, // Reasonable default
             });
-            return response.choices[0]?.message?.content || null;
+            const content = response.choices[0]?.message?.content || null;
+            if (content) {
+                console.log("OpenAI Text Generation successful.");
+                return content;
+            }
         } catch (error: any) {
             console.error("OpenAI Text Generation failed:", error.message);
         }
@@ -88,7 +92,11 @@ export async function generateJSON(prompt: string): Promise<any | null> {
                 response_format: { type: "json_object" }
             });
             const content = response.choices[0]?.message?.content;
-            if (content) return JSON.parse(content);
+            if (content) {
+                const parsed = JSON.parse(content);
+                console.log("OpenAI JSON Generation successful.");
+                return parsed;
+            }
         } catch (error: any) {
             console.error("OpenAI JSON Generation failed:", error.message);
         }
