@@ -83,7 +83,7 @@ export default function RichTextEditor({ value, onChange, placeholder = "Write h
     };
 
     return (
-        <div className="flex flex-col border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+        <div className="flex flex-col border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm h-full">
             {/* Toolbar */}
             <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100 bg-gray-50">
                 <div className="flex gap-2">
