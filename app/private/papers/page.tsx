@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw } from 'lucide-react';
+import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown } from 'lucide-react';
 
 export default function PapersPage() {
     const [activeTab, setActiveTab] = useState<'my_papers' | 'trending' | 'for_you'>('my_papers');
@@ -12,11 +12,14 @@ export default function PapersPage() {
     const [trendingPapers, setTrendingPapers] = useState<any[]>([]);
     const [recommendedPapers, setRecommendedPapers] = useState<any[]>([]);
     const [trendingSource, setTrendingSource] = useState<'daily' | 'trending' | 'deepseek' | 'bytedance'>('daily');
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
 
     // Loading States
     const [loadingMyParams, setLoadingMyParams] = useState(true);
     const [loadingTrending, setLoadingTrending] = useState(false); // Lazy load
     const [loadingForYou, setLoadingForYou] = useState(false); // Lazy load
+    const [loadingMore, setLoadingMore] = useState(false);
 
     // Input State
     const [input, setInput] = useState('');
@@ -31,10 +34,6 @@ export default function PapersPage() {
     const [manualAddModal, setManualAddModal] = useState(false);
     const [newPaper, setNewPaper] = useState({ title: '', authors: '', link: '', status: 'unread', memo: '' });
 
-    useEffect(() => {
-        fetchMyPapers();
-    }, []);
-
     const fetchMyPapers = async () => {
         setLoadingMyParams(true);
         const { data } = await supabase.from('papers').select('*').order('created_at', { ascending: false });
@@ -42,21 +41,43 @@ export default function PapersPage() {
         setLoadingMyParams(false);
     };
 
-    const fetchTrending = async (sourceOverride?: string) => {
+    const fetchTrending = async (sourceOverride?: string, isLoadMore = false) => {
         const source = sourceOverride || trendingSource;
-        setLoadingTrending(true);
-        setTrendingPapers([]); // Clear previous to show loading
+
+        if (isLoadMore) {
+            setLoadingMore(true);
+        } else {
+            setLoadingTrending(true);
+            setTrendingPapers([]); // Clear previous if full refresh
+            setOffset(0);
+            setHasMore(true);
+        }
+
+        const currentOffset = isLoadMore ? offset : 0;
+
         try {
             const res = await fetch('/api/fetch-trending', {
                 method: 'POST',
-                body: JSON.stringify({ source, count: 10 })
+                body: JSON.stringify({ source, count: 10, offset: currentOffset })
             });
             const data = await res.json();
-            setTrendingPapers(data.papers || []);
+            const newPapers = data.papers || [];
+
+            if (isLoadMore) {
+                setTrendingPapers(prev => [...prev, ...newPapers]);
+                setOffset(prev => prev + 10);
+            } else {
+                setTrendingPapers(newPapers);
+                setOffset(10); // Ready for next page
+            }
+
+            if (newPapers.length < 10) setHasMore(false);
+
         } catch (e) {
             console.error(e);
         } finally {
             setLoadingTrending(false);
+            setLoadingMore(false);
         }
     };
 
@@ -310,6 +331,12 @@ export default function PapersPage() {
                                             <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
                                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
                                         </div>
+                                        {/* Date/Source Info */}
+                                        {p.publishedAt && (
+                                            <p className="text-gray-400 text-xs mt-1">
+                                                {new Date(p.publishedAt).toLocaleDateString()}
+                                            </p>
+                                        )}
                                         <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
 
                                         <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
@@ -330,6 +357,20 @@ export default function PapersPage() {
                                         </div>
                                     </div>
                                 ))}
+
+                                {/* Load More Button for Collections */}
+                                {(trendingSource === 'deepseek' || trendingSource === 'bytedance') && hasMore && (
+                                    <div className="flex justify-center mt-6">
+                                        <button
+                                            onClick={() => fetchTrending(undefined, true)}
+                                            disabled={loadingMore}
+                                            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                        >
+                                            {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
+                                            Load More
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -423,7 +464,7 @@ export default function PapersPage() {
                                 <FormSelect
                                     label="Status"
                                     value={editingPaper.status}
-                                    onChange={v => setEditingPaper({ ...editingPaper, status: v })}
+                                    onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
                                     options={['unread', 'reading', 'read']}
                                 />
                                 <div className="flex-1">
