@@ -8,11 +8,13 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import RichTextEditor from '@/app/components/RichTextEditor';
 import Backlinks from '@/app/components/Backlinks';
+import ViewToggle from '@/app/components/ViewToggle';
 
 export default function NotesPage() {
     const [notes, setNotes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [view, setView] = useState<'list' | 'edit'>('list');
+    const [view, setView] = useState<'list' | 'edit'>('list'); // Main mode: list or edit note
+    const [viewType, setViewType] = useState<'list' | 'card'>('card'); // Display mode for list
     const [currentNote, setCurrentNote] = useState<any>(null);
     const [input, setInput] = useState(''); // for fleeting note
     const [processing, setProcessing] = useState(false);
@@ -80,7 +82,10 @@ export default function NotesPage() {
         <div className="space-y-6">
             {view === 'list' && (
                 <>
-                    <h1 className="text-3xl font-bold text-gray-900">Notes</h1>
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold text-gray-900">Notes</h1>
+                        <ViewToggle view={viewType} onChange={setViewType} />
+                    </div>
 
                     {/* Fleeting Note Input */}
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -110,30 +115,52 @@ export default function NotesPage() {
                         </form>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {loading ? <p>Loading...</p> : notes.map(note => (
-                            <div
-                                key={note.id}
-                                onClick={() => { setCurrentNote(note); setView('edit'); }}
-                                className="bg-white p-5 rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md transition-all h-64 overflow-hidden relative group"
-                            >
-                                <h3 className="font-bold text-lg text-gray-800 mb-2">{note.title}</h3>
-                                <div className="text-gray-500 text-sm line-clamp-6 prose prose-sm prose-img:rounded-md">
-                                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                        {note.content}
-                                    </ReactMarkdown>
-                                </div>
+                    {loading ? <p>Loading...</p> : (
+                        <div className={viewType === 'card' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-2"}>
+                            {notes.map(note => (
+                                <div
+                                    key={note.id}
+                                    onClick={() => { setCurrentNote(note); setView('edit'); }}
+                                    className={`bg-white rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md transition-all group ${viewType === 'card' ? 'p-5 h-64 overflow-hidden relative' : 'p-4 flex justify-between items-center'}`}
+                                >
+                                    {viewType === 'card' ? (
+                                        <>
+                                            <h3 className="font-bold text-lg text-gray-800 mb-2">{note.title}</h3>
+                                            <div className="text-gray-500 text-sm line-clamp-6 prose prose-sm prose-img:rounded-md">
+                                                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                                    {note.content}
+                                                </ReactMarkdown>
+                                            </div>
 
-                                <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent" />
-                                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                                    <span className="text-xs text-gray-400">{new Date(note.updated_at).toLocaleDateString()}</span>
-                                    <div className="flex gap-1">
-                                        {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-gray-100 px-1 rounded text-gray-500">#{t}</span>)}
-                                    </div>
+                                            <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent" />
+                                            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                                                <span className="text-xs text-gray-400">{new Date(note.updated_at).toLocaleDateString()}</span>
+                                                <div className="flex gap-1">
+                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-gray-100 px-1 rounded text-gray-500">#{t}</span>)}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><FileText size={18} /></div>
+                                                <div>
+                                                    <h3 className="font-medium text-gray-900">{note.title}</h3>
+                                                    <p className="text-xs text-gray-500">{new Date(note.updated_at).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex gap-1">
+                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-gray-100 px-1 rounded text-gray-500">#{t}</span>)}
+                                                </div>
+                                                <ChevronRight size={16} className="text-gray-300" />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </>
             )}
 

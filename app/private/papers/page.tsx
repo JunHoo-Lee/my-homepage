@@ -8,9 +8,11 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import RichTextEditor from '@/app/components/RichTextEditor';
 import Backlinks from '@/app/components/Backlinks';
+import ViewToggle from '@/app/components/ViewToggle';
 
 export default function PapersPage() {
     const [activeTab, setActiveTab] = useState<'my_papers' | 'trending' | 'for_you'>('my_papers');
+    const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
     // Data States
     const [myPapers, setMyPapers] = useState<any[]>([]);
@@ -264,32 +266,23 @@ export default function PapersPage() {
                             >
                                 Manual Add
                             </button>
+                            <div className="ml-auto">
+                                <ViewToggle view={viewMode} onChange={setViewMode} />
+                            </div>
                         </div>
 
                         {loadingMyParams ? <p>Loading...</p> : (
-                            <div className="grid gap-4">
+                            <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
                                 {myPapers.map(p => (
                                     <div
                                         key={p.id}
                                         onClick={() => setEditingPaper(p)}
-                                        className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                                        className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}
                                     >
-                                        <div className="flex justify-between items-start">
+                                        <div className="flex justify-between items-start mb-2">
                                             <div>
-                                                <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">{p.title}</h3>
+                                                <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{p.title}</h3>
                                                 <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
-                                                <div className="flex gap-2 mt-3 items-center">
-                                                    <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                        p.status === 'reading' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                            'bg-gray-50 text-gray-700 border-gray-200'
-                                                        }`}>
-                                                        {(p.status || 'unread').toUpperCase()}
-                                                    </span>
-                                                    {p.tags?.map((t: string) => (
-                                                        <span key={t} className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500">#{t}</span>
-                                                    ))}
-                                                    {p.memo && <span className="text-xs text-gray-400 flex items-center gap-1"><BookOpen size={12} /> Has Notes</span>}
-                                                </div>
                                             </div>
                                             <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                                                 {p.link && (
@@ -298,6 +291,27 @@ export default function PapersPage() {
                                                     </a>
                                                 )}
                                             </div>
+                                        </div>
+
+                                        {viewMode === 'card' && p.memo && (
+                                            <div className="mb-3 p-3 bg-gray-50 rounded text-sm text-gray-700 prose prose-sm max-w-none line-clamp-6 prose-img:rounded-md flex-1">
+                                                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                                    {p.memo}
+                                                </ReactMarkdown>
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-2 mt-auto items-center">
+                                            <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                p.status === 'reading' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                    'bg-gray-50 text-gray-700 border-gray-200'
+                                                }`}>
+                                                {(p.status || 'unread').toUpperCase()}
+                                            </span>
+                                            {p.tags?.map((t: string) => (
+                                                <span key={t} className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500">#{t}</span>
+                                            ))}
+                                            {viewMode === 'list' && p.memo && <span className="text-xs text-gray-400 flex items-center gap-1"><BookOpen size={12} /> Has Notes</span>}
                                         </div>
                                     </div>
                                 ))}
@@ -429,83 +443,87 @@ export default function PapersPage() {
             </div>
 
             {/* Manual Add Modal */}
-            {manualAddModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
-                        <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
-                        <form onSubmit={handleManualSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
-                                <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
-                                <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
-                            </div>
-                            <div className="flex justify-end gap-2 mt-6">
-                                <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
-                            </div>
-                        </form>
+            {
+                manualAddModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+                            <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
+                            <form onSubmit={handleManualSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                    <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
+                                    <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
+                                    <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
+                                </div>
+                                <div className="flex justify-end gap-2 mt-6">
+                                    <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Edit Paper Modal */}
-            {editingPaper && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
-                        <div className="flex justify-between items-start mb-4">
-                            <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
-                            <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+            {
+                editingPaper && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
+                            <div className="flex justify-between items-start mb-4">
+                                <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
+                                <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+                            </div>
+
+                            <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
+                                <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
+                                    <FormSelect
+                                        label="Status"
+                                        value={editingPaper.status}
+                                        onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
+                                        options={['unread', 'reading', 'read']}
+                                    />
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
+                                        <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 flex flex-col min-h-0">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
+                                    <RichTextEditor
+                                        value={editingPaper.memo || ''}
+                                        onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
+                                        minHeight="300px"
+                                    />
+                                    <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
+                                </div>
+
+                                <div className="flex justify-between items-center pt-2 border-t mt-auto">
+                                    <button
+                                        type="button"
+                                        onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
+                                        className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
+                                    >
+                                        Delete Paper
+                                    </button>
+                                    <div className="flex gap-2">
+                                        <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-
-                        <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
-                            <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
-                                <FormSelect
-                                    label="Status"
-                                    value={editingPaper.status}
-                                    onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
-                                    options={['unread', 'reading', 'read']}
-                                />
-                                <div className="flex-1">
-                                    <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
-                                    <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
-                                </div>
-                            </div>
-
-                            <div className="flex-1 flex flex-col min-h-0">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
-                                <RichTextEditor
-                                    value={editingPaper.memo || ''}
-                                    onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
-                                    minHeight="300px"
-                                />
-                                <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
-                            </div>
-
-                            <div className="flex justify-between items-center pt-2 border-t mt-auto">
-                                <button
-                                    type="button"
-                                    onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
-                                    className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
-                                >
-                                    Delete Paper
-                                </button>
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
-                                </div>
-                            </div>
-                        </form>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
 
