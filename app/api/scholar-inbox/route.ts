@@ -32,21 +32,13 @@ export async function POST(request: Request) {
         // We will keep the context gathering as is to mix dynamic + static
 
         // 1. Gather Context (User Interests)
-        // We prioritize the SCHOLAR_PROFILE (static) content. 
-        // We add dynamic signs of life (Active tasks, Recent Papers) as "Current Context",
-        // but we STOP merging old hardcoded publications to avoid noise.
+        // User explicitly requested to ONLY use the Scholar Profile and REMOVE tasks/recent papers.
+        // "그냥 내 초창기 관심사 내가 준거. 그거만 가지고 해." -> Just use the initial profile.
 
-        const { data: tasks } = await supabase.from('tasks').select('title, memo').eq('completed', false).limit(5);
-        const taskInterests = tasks?.map(t => `${t.title} ${t.memo || ''}`) || [];
+        const uniqueInterests: string[] = [];
+        // We pass empty array because SCHOLAR_PROFILE in the system prompt contains all the necessary context.
 
-        const { data: recentPapers } = await supabase.from('papers').select('title, tags').order('created_at', { ascending: false }).limit(5);
-        const paperInterests = recentPapers?.map(p => p.title) || [];
-
-        // Combine only active/recent dynamic interests
-        const allInterestsSource = [...taskInterests, ...paperInterests];
-        const uniqueInterests = Array.from(new Set(allInterestsSource)).slice(0, 10);
-
-        console.log("Searching with Profile + Context:", uniqueInterests);
+        console.log("Searching with STRICT Profile only.");
 
         // 2. Perform Agentic Search
         // Pass dynamic interests + STATIC PROFILE

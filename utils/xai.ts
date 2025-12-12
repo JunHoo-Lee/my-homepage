@@ -68,9 +68,14 @@ export async function performScholarSearch(interests: string[], userProfile: str
                 { role: "user", content: "Check for the latest interesting papers/updates." }
             ],
             // The xAI API requires 'function' or 'live_search'.
-            // 'live_search' allows the model to browse the web/X.
+            // 'live_search' requires 'sources' field.
             tools: [
-                { type: "live_search" }
+                {
+                    type: "live_search",
+                    live_search: {
+                        sources: ["web", "x"] // Adding explicit sources to fix 422 error
+                    }
+                }
             ] as any,
             tool_choice: "auto",
         });
