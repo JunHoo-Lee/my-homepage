@@ -12,6 +12,7 @@ export default function NotesPage() {
     const [currentNote, setCurrentNote] = useState<any>(null);
     const [input, setInput] = useState(''); // for fleeting note
     const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchNotes();
@@ -28,24 +29,35 @@ export default function NotesPage() {
         e.preventDefault();
         if (!input.trim()) return;
         setProcessing(true);
+        setError(null);
         try {
             const res = await fetch('/api/ai/parse-note', {
                 method: 'POST',
                 body: JSON.stringify({ input })
             });
-            const { note } = await res.json();
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Failed to parse note');
+
+            const { note } = data;
             if (note) {
                 // Insert
-                const { data } = await supabase.from('notes').insert([note]).select().single();
-                if (data) {
-                    setNotes([data, ...notes]);
-                    setCurrentNote(data);
+                const { data: insertData, error: insertError } = await supabase.from('notes').insert([note]).select().single();
+                if (insertError) throw insertError;
+
+                if (insertData) {
+                    setNotes([insertData, ...notes]);
+                    setCurrentNote(insertData);
                     setView('edit');
                     setInput('');
                 }
             }
-        } catch (e) { console.error(e); }
-        finally { setProcessing(false); }
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || 'An error occurred');
+        } finally {
+            setProcessing(false);
+        }
     };
 
     const handleSave = async () => {
@@ -86,6 +98,11 @@ export default function NotesPage() {
                                     {processing ? <Loader2 className="animate-spin" /> : <SparklesIcon />} Process & Save
                                 </button>
                             </div>
+                            {error && (
+                                <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                                    {error}
+                                </div>
+                            )}
                         </form>
                     </div>
 

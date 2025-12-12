@@ -81,58 +81,90 @@ async function getTLDR(title: string, abstract: string) {
     return "요약 불가 (서비스 오류)";
 }
 
+// Helper to shuffle array
+function shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 // Scrapers
-async function getCollectionPapers(url: string, sourceLabel: string, count: number) {
+async function getCollectionPapers(url: string, sourceLabel: string, count: number, offset: number = 0) {
     const html = await fetchHTML(url);
     if (!html) return [];
 
-    // Crude Regex Scraper for Hugging Face Collections
-    // Looking for: <a class="..." href="/papers/2310.16818"> ... </a>
-    // And trying to grab title.
-    // HF Collection pages often list items. The structure is complex.
-    // Let's look for standard paper links.
     const paperLinkRegex = /href="\/papers\/(\d+\.\d+)"[^>]*>([\s\S]*?)<\/a>/g;
     const matches = [...html.matchAll(paperLinkRegex)];
 
-    // De-duplicate by ID
-    const uniquePapers = new Map();
-
+    // Get ALL IDs first, then slice for pagination
+    // But duplicate IDs might exist, so use Set
+    const uniqueIds = new Set<string>();
     for (const match of matches) {
-        if (uniquePapers.size >= count) break;
-        const id = match[1];
-        const content = match[2];
-        // Extract title from content - often it's inside text.
-        // This is messy. Better strategy: Just get IDs, then fetch metadata via API?
-        // HF has an API: https://huggingface.co/api/papers/2310.16818
-        if (!uniquePapers.has(id)) {
-            uniquePapers.set(id, { id, title: "Loading...", source: sourceLabel });
-        }
+        uniqueIds.add(match[1]);
     }
 
-    // Now fetch metadata for these IDs
-    const papers = await Promise.all(Array.from(uniquePapers.values()).map(async (p) => {
+    // Convert to array
+    const allIds = Array.from(uniqueIds);
+
+    // Slice for pagination
+    // For collections, we want to fetch metadata then sort, THEN slice? 
+    // Or slice then fetch?
+    // Problem: logic requires sorting by date. If we slice the regex matches (which are likely roughly chronological but not guaranteed), 
+    // we might miss newer papers if the page isn't perfectly ordered.
+    // However, fetching ALL metadata to sort is too slow.
+    // Compromise: Fetch a larger batch (e.g. count * 2 + offset), sort, then take the requested page. 
+    // For now, let's trust the page order partially but fetch a bit more to be safe? 
+    // Actually, looking at HF collections, they seem manual.
+    // Let's fetch the slice requested + buffer?
+    // User asked for "Sort by newest". 
+    // Ideally we fetch metadata for ALL ids found on page (limited to reasonable number like 50), sort them, then paginate.
+
+    const limit = 50; // Cap to avoid timeouts
+    const idsToFetch = allIds.slice(0, limit);
+
+    // Fetch metadata
+    let papers = await Promise.all(idsToFetch.map(async (id) => {
         try {
-            const apiRes = await fetch(`https://huggingface.co/api/papers/${p.id}`);
+            const apiRes = await fetch(`https://huggingface.co/api/papers/${id}`);
             if (!apiRes.ok) return null;
             const data = await apiRes.json();
             return {
                 title: data.title,
                 authors: data.authors?.map((a: any) => a.name).join(', ') || "Unknown",
-                link: `https://arxiv.org/abs/${p.id}`,
+                link: `https://arxiv.org/abs/${id}`,
                 source: sourceLabel,
-                abstract: data.summary || "No abstract available"
+                abstract: data.summary || "No abstract available",
+                publishedAt: data.publishedAt || data.submittedOn // Use date for sorting
             };
         } catch {
             return null;
         }
     }));
 
-    return papers.filter(p => p !== null);
+    // Filter nulls
+    let validPapers = papers.filter((p): p is NonNullable<typeof p> => p !== null);
+
+    // Sort by Date Descending
+    validPapers.sort((a, b) => {
+        const dateA = new Date(a.publishedAt).getTime();
+        const dateB = new Date(b.publishedAt).getTime();
+        return dateB - dateA;
+    });
+
+    // Apply Pagination (on the sorted list)
+    // Note: This "local" pagination works if we always fetch the top N papers. 
+    // But true "Next Page" for a generic collection requires stable ordering.
+    // Since we fetch the TOP 50 from the page, slicing locally is okay as long as the user hasn't scrolled past 50.
+    // If offset > 50, we might need a different strategy or just show what we have.
+    // Given the request, let's just slice the validPapers.
+
+    return validPapers.slice(offset, offset + count);
 }
 
 async function getTrendingPapers(count: number) {
     // https://huggingface.co/papers/trending
-    // Logic similar to collections: Extract IDs, then API.
     const url = 'https://huggingface.co/papers/trending';
     const html = await fetchHTML(url);
     if (!html) return [];
@@ -160,16 +192,27 @@ async function getTrendingPapers(count: number) {
 }
 
 export async function POST(request: Request) {
-    const { source, count = 10 } = await request.json();
+    const { source, count = 10, offset = 0 } = await request.json();
 
     let papers: any[] = [];
 
     if (source === 'daily' || source === 'huggingface') {
         try {
+            // Fetch MORE than needed to allow random selection
+            const fetchCount = 30;
             const hfRes = await fetch('https://huggingface.co/api/daily_papers');
             if (hfRes.ok) {
                 const hfData = await hfRes.json();
-                const hfPapers = hfData.slice(0, count).map((p: any) => {
+
+                // If it's the first load (offset 0), we random shuffle.
+                // If it's a "Load More" (pagination), we probably shouldn't shuffle or we get duplicates.
+                // BUT, Daily Papers usually doesn't have infinite scroll in this context, just "Refresh".
+                // The user asked for "Random 10 on Refresh".
+                // So if offset > 0 (pagination), we might just return empty or remaining?
+                // Let's assume Daily is just a static shuffled list for now.
+
+                // Map first
+                let allPapers = hfData.map((p: any) => {
                     const paper = p.paper;
                     return {
                         title: paper.title || p.title,
@@ -179,7 +222,12 @@ export async function POST(request: Request) {
                         abstract: paper.summary || p.summary || "No abstract available"
                     };
                 });
-                papers = hfPapers;
+
+                // Shuffle!
+                allPapers = shuffleArray(allPapers);
+
+                // Slice
+                papers = allPapers.slice(0, count);
             }
         } catch (e) { console.error(e); }
     }
@@ -187,12 +235,10 @@ export async function POST(request: Request) {
         papers = await getTrendingPapers(count);
     }
     else if (source === 'deepseek') {
-        papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/deepseek-papers', 'DeepSeek', count);
+        papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/deepseek-papers', 'DeepSeek', count, offset);
     }
     else if (source === 'bytedance') {
-        // Need ByteDance URL. Assuming similar pattern or the one provided.
-        // User provided: https://huggingface.co/collections/Presidentlin/bytedance-papers
-        papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/bytedance-papers', 'ByteDance', count);
+        papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/bytedance-papers', 'ByteDance', count, offset);
     }
 
     // Parallel Summarization

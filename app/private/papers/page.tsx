@@ -26,6 +26,15 @@ export default function PapersPage() {
         fetchMyPapers();
     }, []);
 
+    // Edit/View State
+    const [editingPaper, setEditingPaper] = useState<any | null>(null);
+    const [manualAddModal, setManualAddModal] = useState(false);
+    const [newPaper, setNewPaper] = useState({ title: '', authors: '', link: '', status: 'unread', memo: '' });
+
+    useEffect(() => {
+        fetchMyPapers();
+    }, []);
+
     const fetchMyPapers = async () => {
         setLoadingMyParams(true);
         const { data } = await supabase.from('papers').select('*').order('created_at', { ascending: false });
@@ -95,16 +104,13 @@ export default function PapersPage() {
 
     const handleAddPaper = async (paper: any) => {
         // Add to Supabase
-        // If manually adding, paper is parsed from input.
-        // If from Trending/For You, paper object is passed.
-
         const newPaper = {
             title: paper.title,
             authors: paper.authors,
             link: paper.link,
-            tags: paper.tags || [], // Trending papers might not have tags initially unless we AI parse them too, avoiding for now to save tokens
+            tags: paper.tags || [],
             status: 'unread',
-            memo: paper.tldr_kr // Store TLDR in memo? Or maybe separate field? Schema has memo. Let's use memo for now.
+            memo: paper.tldr_kr
         };
 
         const { error } = await supabase.from('papers').insert([newPaper]);
@@ -116,7 +122,7 @@ export default function PapersPage() {
         }
     };
 
-    const handleManualAdd = async (e: React.FormEvent) => {
+    const handleQuickAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         setAdding(true);
         try {
@@ -132,13 +138,52 @@ export default function PapersPage() {
             }
         } catch (e) {
             console.error(e);
+            alert('AI Parse failed. Try Manual Add.');
+            setManualAddModal(true);
         } finally {
             setAdding(false);
         }
     };
 
+    const handleManualSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { error } = await supabase.from('papers').insert([newPaper]);
+        if (!error) {
+            setManualAddModal(false);
+            setNewPaper({ title: '', authors: '', link: '', status: 'unread', memo: '' });
+            fetchMyPapers();
+        } else {
+            alert('Failed to save paper');
+        }
+    };
+
+    const handleUpdatePaper = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingPaper) return;
+
+        const { error } = await supabase.from('papers').update({
+            memo: editingPaper.memo,
+            status: editingPaper.status,
+            tags: editingPaper.tags
+        }).eq('id', editingPaper.id);
+
+        if (!error) {
+            setEditingPaper(null);
+            fetchMyPapers();
+        } else {
+            alert('Failed to update');
+        }
+    };
+
+    const deletePaper = async (id: string) => {
+        if (confirm('Are you sure you want to delete this paper?')) {
+            await supabase.from('papers').delete().eq('id', id);
+            setMyPapers(myPapers.filter(p => p.id !== id));
+        }
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-gray-900">Papers</h1>
             </div>
@@ -169,48 +214,65 @@ export default function PapersPage() {
             <div className="min-h-[50vh]">
                 {activeTab === 'my_papers' && (
                     <div className="space-y-6">
-                        {/* Manual Add */}
-                        <form onSubmit={handleManualAdd} className="flex gap-4">
-                            <input
-                                value={input}
-                                onChange={e => setInput(e.target.value)}
-                                placeholder="Add paper by link or citation..."
-                                className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                disabled={adding}
-                            />
+                        {/* Add Area */}
+                        <div className="flex gap-2">
+                            <form onSubmit={handleQuickAdd} className="flex gap-2 flex-1">
+                                <input
+                                    value={input}
+                                    onChange={e => setInput(e.target.value)}
+                                    placeholder="Paste link or citation (AI Auto-fill)..."
+                                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={adding}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={adding}
+                                    className="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50 whitespace-nowrap"
+                                >
+                                    {adding ? <Loader2 className="animate-spin" /> : 'AI Add'}
+                                </button>
+                            </form>
                             <button
-                                type="submit"
-                                disabled={adding}
-                                className="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                                onClick={() => setManualAddModal(true)}
+                                className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 whitespace-nowrap"
                             >
-                                {adding ? <Loader2 className="animate-spin" /> : <Plus />}
+                                Manual Add
                             </button>
-                        </form>
+                        </div>
 
                         {loadingMyParams ? <p>Loading...</p> : (
                             <div className="grid gap-4">
                                 {myPapers.map(p => (
-                                    <div key={p.id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-between items-start">
-                                        <div>
-                                            <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
-                                            <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
-                                            <div className="flex gap-2 mt-2">
-                                                <span className={`px-2 py-1 rounded text-xs ${p.status === 'read' ? 'bg-green-100 text-green-700' :
-                                                    p.status === 'reading' ? 'bg-blue-100 text-blue-700' :
-                                                        'bg-gray-100 text-gray-700'
-                                                    }`}>
-                                                    {p.status}
-                                                </span>
-                                                {p.tags?.map((t: string) => (
-                                                    <span key={t} className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-500">#{t}</span>
-                                                ))}
+                                    <div
+                                        key={p.id}
+                                        onClick={() => setEditingPaper(p)}
+                                        className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">{p.title}</h3>
+                                                <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
+                                                <div className="flex gap-2 mt-3 items-center">
+                                                    <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                        p.status === 'reading' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                            'bg-gray-50 text-gray-700 border-gray-200'
+                                                        }`}>
+                                                        {p.status.toUpperCase()}
+                                                    </span>
+                                                    {p.tags?.map((t: string) => (
+                                                        <span key={t} className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500">#{t}</span>
+                                                    ))}
+                                                    {p.memo && <span className="text-xs text-gray-400 flex items-center gap-1"><BookOpen size={12} /> Has Notes</span>}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                                                {p.link && (
+                                                    <a href={p.link} target="_blank" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                                                        <ExternalLink size={20} />
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
-                                        {p.link && (
-                                            <a href={p.link} target="_blank" className="text-gray-400 hover:text-blue-600">
-                                                <ExternalLink size={20} />
-                                            </a>
-                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -319,6 +381,97 @@ export default function PapersPage() {
                     </div>
                 )}
             </div>
+
+            {/* Manual Add Modal */}
+            {manualAddModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+                        <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
+                        <form onSubmit={handleManualSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
+                                <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
+                                <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
+                            </div>
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Paper Modal */}
+            {editingPaper && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
+                            <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+                        </div>
+
+                        <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
+                            <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
+                                <FormSelect
+                                    label="Status"
+                                    value={editingPaper.status}
+                                    onChange={v => setEditingPaper({ ...editingPaper, status: v })}
+                                    options={['unread', 'reading', 'read']}
+                                />
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
+                                    <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 flex flex-col">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
+                                <textarea
+                                    className="w-full flex-1 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                    placeholder="Write your notes here..."
+                                    value={editingPaper.memo || ''}
+                                    onChange={e => setEditingPaper({ ...editingPaper, memo: e.target.value })}
+                                ></textarea>
+                            </div>
+
+                            <div className="flex justify-between items-center pt-2 border-t mt-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
+                                    className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
+                                >
+                                    Delete Paper
+                                </button>
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
+const FormSelect = ({ label, value, onChange, options }: any) => (
+    <div>
+        <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+        <select
+            className="p-1.5 border rounded text-sm bg-white"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+        >
+            {options.map((o: string) => <option key={o} value={o}>{o.toUpperCase()}</option>)}
+        </select>
+    </div>
+);

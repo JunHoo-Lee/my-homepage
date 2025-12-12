@@ -8,6 +8,7 @@ export default function JournalPage() {
     const [entries, setEntries] = useState<any[]>([]);
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchJournal();
@@ -23,12 +24,16 @@ export default function JournalPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!content.trim()) return;
+        setError(null);
 
         // Simple journal entry
-        const { error } = await supabase.from('journal').insert([{ content }]);
-        if (!error) {
+        const { error: insertError } = await supabase.from('journal').insert([{ content }]);
+        if (!insertError) {
             setContent('');
             fetchJournal();
+        } else {
+            console.error(insertError);
+            setError(insertError.message);
         }
     };
 
@@ -48,6 +53,11 @@ export default function JournalPage() {
                         Post
                     </button>
                 </div>
+                {error && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
             </form>
 
             <div className="space-y-6">

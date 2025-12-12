@@ -6,7 +6,8 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemi
 
 export async function POST(request: Request) {
     if (!GEMINI_API_KEY) {
-        return NextResponse.json({ error: 'Gemini API Key missing' }, { status: 500 });
+        console.error('Gemini API Key missing');
+        return NextResponse.json({ error: 'Gemini API Key missing in environment variables' }, { status: 500 });
     }
 
     const { input } = await request.json(); // input is raw text of fleeting note
@@ -68,19 +69,36 @@ export async function POST(request: Request) {
             })
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Gemini API Error Response:', errorText);
+            throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
         if (!data.candidates || data.candidates.length === 0) {
+            console.error('Gemini returned no candidates:', data);
             return NextResponse.json({ error: 'Gemini returned no candidates.' }, { status: 500 });
         }
 
         const text = data.candidates[0].content.parts[0].text;
+        console.log('Gemini Raw Response:', text); // Debug log
+
+        // Improved JSON cleaning: handle code blocks and potential noise
         const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsedNote = JSON.parse(jsonStr);
+
+        let parsedNote;
+        try {
+            parsedNote = JSON.parse(jsonStr);
+        } catch (parseError) {
+            console.error('JSON Parse Error:', parseError, 'Raw String:', jsonStr);
+            return NextResponse.json({ error: 'Failed to parse AI response as JSON' }, { status: 500 });
+        }
 
         return NextResponse.json({ note: parsedNote });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Gemini API Error:', error);
-        return NextResponse.json({ error: 'Failed to parse note' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to parse note' }, { status: 500 });
     }
 }
