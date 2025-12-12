@@ -11,6 +11,7 @@ export default function PapersPage() {
     const [myPapers, setMyPapers] = useState<any[]>([]);
     const [trendingPapers, setTrendingPapers] = useState<any[]>([]);
     const [recommendedPapers, setRecommendedPapers] = useState<any[]>([]);
+    const [trendingSource, setTrendingSource] = useState<'daily' | 'trending' | 'deepseek' | 'bytedance'>('daily');
 
     // Loading States
     const [loadingMyParams, setLoadingMyParams] = useState(true);
@@ -32,13 +33,14 @@ export default function PapersPage() {
         setLoadingMyParams(false);
     };
 
-    const fetchTrending = async () => {
-        if (trendingPapers.length > 0) return; // already fetched
+    const fetchTrending = async (sourceOverride?: string) => {
+        const source = sourceOverride || trendingSource;
         setLoadingTrending(true);
+        setTrendingPapers([]); // Clear previous to show loading
         try {
             const res = await fetch('/api/fetch-trending', {
                 method: 'POST',
-                body: JSON.stringify({ source: 'huggingface', count: 10 })
+                body: JSON.stringify({ source, count: 10 })
             });
             const data = await res.json();
             setTrendingPapers(data.papers || []);
@@ -63,7 +65,7 @@ export default function PapersPage() {
             if (candidates.length === 0) {
                 const res = await fetch('/api/fetch-trending', {
                     method: 'POST',
-                    body: JSON.stringify({ source: 'huggingface', count: 15 })
+                    body: JSON.stringify({ source: 'daily', count: 15 }) // Use daily for recommendations base
                 });
                 const data = await res.json();
                 candidates = data.papers || [];
@@ -194,8 +196,8 @@ export default function PapersPage() {
                                             <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
                                             <div className="flex gap-2 mt-2">
                                                 <span className={`px-2 py-1 rounded text-xs ${p.status === 'read' ? 'bg-green-100 text-green-700' :
-                                                        p.status === 'reading' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-gray-100 text-gray-700'
+                                                    p.status === 'reading' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-gray-100 text-gray-700'
                                                     }`}>
                                                     {p.status}
                                                 </span>
@@ -218,13 +220,24 @@ export default function PapersPage() {
 
                 {activeTab === 'trending' && (
                     <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <p className="text-sm text-gray-500">Source: HuggingFace Daily Papers</p>
-                            <button onClick={() => { setTrendingPapers([]); fetchTrending(); }} className="text-sm text-blue-600 flex items-center gap-1">
-                                <RefreshCw size={14} /> Refresh
-                            </button>
+                        <div className="flex flex-col gap-4">
+                            <div className="flex justify-between items-center">
+                                <div className="flex gap-2">
+                                    {['daily', 'trending', 'deepseek', 'bytedance'].map((s) => (
+                                        <button
+                                            key={s}
+                                            onClick={() => { setTrendingSource(s as any); fetchTrending(s); }}
+                                            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${trendingSource === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                        >
+                                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button onClick={() => fetchTrending()} className="text-sm text-blue-600 flex items-center gap-1">
+                                    <RefreshCw size={14} /> Refresh
+                                </button>
+                            </div>
                         </div>
-
                         {loadingTrending ? (
                             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
                         ) : (
@@ -233,7 +246,7 @@ export default function PapersPage() {
                                     <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                                         <div className="flex justify-between items-start">
                                             <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
-                                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">HF</span>
+                                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
                                         </div>
                                         <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
 
