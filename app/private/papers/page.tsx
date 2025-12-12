@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
 import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import RichTextEditor from '@/app/components/RichTextEditor';
+import Backlinks from '@/app/components/Backlinks';
 
 export default function PapersPage() {
     const [activeTab, setActiveTab] = useState<'my_papers' | 'trending' | 'for_you'>('my_papers');
@@ -473,14 +478,14 @@ export default function PapersPage() {
                                 </div>
                             </div>
 
-                            <div className="flex-1 flex flex-col">
+                            <div className="flex-1 flex flex-col min-h-0">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
-                                <textarea
-                                    className="w-full flex-1 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                    placeholder="Write your notes here..."
+                                <RichTextEditor
                                     value={editingPaper.memo || ''}
-                                    onChange={e => setEditingPaper({ ...editingPaper, memo: e.target.value })}
-                                ></textarea>
+                                    onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
+                                    minHeight="300px"
+                                />
+                                <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
                             </div>
 
                             <div className="flex justify-between items-center pt-2 border-t mt-auto">

@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
 import { Loader2, Plus, FileText, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import RichTextEditor from '@/app/components/RichTextEditor';
+import Backlinks from '@/app/components/Backlinks';
 
 export default function NotesPage() {
     const [notes, setNotes] = useState<any[]>([]);
@@ -114,8 +118,10 @@ export default function NotesPage() {
                                 className="bg-white p-5 rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md transition-all h-64 overflow-hidden relative group"
                             >
                                 <h3 className="font-bold text-lg text-gray-800 mb-2">{note.title}</h3>
-                                <div className="text-gray-500 text-sm line-clamp-6 prose prose-sm">
-                                    <ReactMarkdown>{note.content}</ReactMarkdown>
+                                <div className="text-gray-500 text-sm line-clamp-6 prose prose-sm prose-img:rounded-md">
+                                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                        {note.content}
+                                    </ReactMarkdown>
                                 </div>
 
                                 <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent" />
@@ -150,12 +156,14 @@ export default function NotesPage() {
                             ))}
                             {/* Tag editing could be added here */}
                         </div>
-                        <textarea
-                            value={currentNote.content}
-                            onChange={e => setCurrentNote({ ...currentNote, content: e.target.value })}
-                            className="flex-1 w-full resize-none focus:outline-none font-mono text-gray-800 text-lg leading-relaxed"
-                            placeholder="Write in markdown..."
-                        />
+                        <div className="flex-1 min-h-0 flex flex-col">
+                            <RichTextEditor
+                                value={currentNote.content || ''}
+                                onChange={val => setCurrentNote((prev: any) => ({ ...prev, content: val }))}
+                                minHeight="400px"
+                            />
+                        </div>
+                        <Backlinks currentId={currentNote.id} currentTitle={currentNote.title} />
                     </div>
                 </div>
             )}

@@ -13,12 +13,15 @@
     "@supabase/supabase-js": "^2.87.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
+    "katex": "^0.16.27",
     "lucide-react": "^0.560.0",
     "next": "16.0.8",
     "openai": "^6.10.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
