@@ -72,9 +72,11 @@ export async function performScholarSearch(interests: string[], userProfile: str
             tools: [
                 {
                     type: "live_search",
-                    sources: ["web", "x"], // Try adding at root based on error "tools[0]: missing field sources"
                     live_search: {
-                        sources: ["web", "x"]
+                        sources: [
+                            { type: "web" },
+                            { type: "x" }
+                        ]
                     }
                 }
             ] as any,
