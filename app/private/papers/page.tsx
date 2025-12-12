@@ -225,6 +225,25 @@ export default function PapersPage() {
         }
     };
 
+    const formatAuthors = (authors: string) => {
+        if (!authors) return '';
+        const list = authors.split(',').map(a => a.trim());
+        if (list.length > 4) {
+            return list.slice(0, 4).join(', ') + ' et al.';
+        }
+        return authors;
+    };
+
+    const getPreviewText = (memo: string) => {
+        if (!memo) return '';
+        // Check for explicit TLDR marker from Scholar Inbox
+        const tldrMatch = memo.match(/\*\*TL;DR\*\*:\s*(.*)/);
+        if (tldrMatch) return tldrMatch[1];
+
+        // Fallback: just remove markdown formatting roughly and return first line
+        return memo.replace(/[#*`_]/g, '').split('\n')[0];
+    };
+
     return (
         <div className="space-y-6 relative">
             <div className="flex justify-between items-center">
@@ -295,11 +314,19 @@ export default function PapersPage() {
                                         className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}
                                     >
                                         <div className="flex justify-between items-start mb-2">
-                                            <div>
+                                            <div className="flex-1 min-w-0 pr-4">
                                                 <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{p.title}</h3>
-                                                <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
+                                                <p className="text-gray-600 text-sm mt-1">{formatAuthors(p.authors)}</p>
+
+                                                {/* TLDR Preview for List View only if not in Card mode (Card handles it differently) */}
+                                                {viewMode === 'list' && p.memo && (
+                                                    <div className="flex items-start gap-2 mt-2 text-sm text-gray-500">
+                                                        <BookOpen size={14} className="mt-0.5 text-blue-400 shrink-0" />
+                                                        <span className="line-clamp-1">{getPreviewText(p.memo)}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                                            <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                 {p.link && (
                                                     <a href={p.link} target="_blank" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
                                                         <ExternalLink size={20} />
