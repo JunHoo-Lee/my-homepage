@@ -88,40 +88,42 @@ export default function PapersPage() {
         }
     };
 
-    const fetchForYou = async () => {
-        if (recommendedPapers.length > 0) return;
+    const fetchForYou = async (isRefresh = false) => {
         setLoadingForYou(true);
-
-        try {
-            // 1. Need My Tags
-            const { data: tagsData } = await supabase.from('tags').select('name').order('usage_count', { ascending: false }).limit(10);
-            const userTags = tagsData?.map(t => t.name) || [];
-
-            // 2. Need Trending Papers (reuse if exists, else fetch)
-            let candidates = trendingPapers;
-            if (candidates.length === 0) {
-                const res = await fetch('/api/fetch-trending', {
-                    method: 'POST',
-                    body: JSON.stringify({ source: 'daily', count: 15 }) // Use daily for recommendations base
-                });
+        if (isRefresh) {
+            // Trigger new search
+            try {
+                const res = await fetch('/api/scholar-inbox', { method: 'POST' });
                 const data = await res.json();
-                candidates = data.papers || [];
-                if (trendingPapers.length === 0) setTrendingPapers(candidates); // Cache it
+                if (data.papers) {
+                    setRecommendedPapers(prev => [...data.papers, ...prev]);
+                }
+                await fetchInboxFromDB(); // Reload from DB to be safe/consistent
+            } catch (e) {
+                console.error("Scholar Search Failed", e);
+                alert("Failed to fetch new items from Scholar Inbox.");
+            } finally {
+                setLoadingForYou(false);
             }
-
-            // 3. Get Recommendations
-            const recRes = await fetch('/api/recommend-papers', {
-                method: 'POST',
-                body: JSON.stringify({ user_tags: userTags, recent_papers: candidates })
-            });
-            const recData = await recRes.json();
-            setRecommendedPapers(recData.papers || []);
-
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoadingForYou(false);
+            return;
         }
+
+        // Default: Just load from DB
+        if (recommendedPapers.length === 0) {
+            await fetchInboxFromDB();
+        }
+        setLoadingForYou(false);
+    };
+
+    const fetchInboxFromDB = async () => {
+        const { data } = await supabase
+            .from('papers')
+            .select('*')
+            .contains('tags', ['Scholar Inbox'])
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        if (data) setRecommendedPapers(data);
     };
 
     // Tab Switching Logic
@@ -203,10 +205,23 @@ export default function PapersPage() {
         }
     };
 
+    const updateStatus = async (id: string, status: string) => {
+        const { error } = await supabase.from('papers').update({ status }).eq('id', id);
+        if (!error) {
+            // Update local state in all lists to reflect change
+            setMyPapers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+            setRecommendedPapers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+            setTrendingPapers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+        } else {
+            console.error("Failed to update status", error);
+        }
+    };
+
     const deletePaper = async (id: string) => {
         if (confirm('Are you sure you want to delete this paper?')) {
             await supabase.from('papers').delete().eq('id', id);
             setMyPapers(myPapers.filter(p => p.id !== id));
+            setRecommendedPapers(recommendedPapers.filter(p => p.id !== id)); // Also remove from recs if there
         }
     };
 
@@ -408,34 +423,70 @@ export default function PapersPage() {
                         {loadingForYou ? (
                             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-600" size={32} /></div>
                         ) : (
-                            <div className="grid gap-4">
-                                {recommendedPapers.length === 0 ? <p className="text-gray-500">No specific recommendations found today.</p> : recommendedPapers.map((p, idx) => (
-                                    <div key={idx} className="bg-white p-4 rounded-lg border border-purple-100 shadow-sm hover:shadow-md transition-shadow ring-1 ring-purple-50">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
-                                            <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Recommended</span>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-1">
+                                    <p className="text-sm text-gray-500">Items found by your Scholar Agent.</p>
+                                    <button
+                                        onClick={() => fetchForYou(true)}
+                                        className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors flex items-center gap-1"
+                                    >
+                                        <RefreshCw size={12} /> Check for New Updates
+                                    </button>
+                                </div>
+                                <div className="grid gap-4">
+                                    {recommendedPapers.length === 0 ? (
+                                        <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed text-gray-400">
+                                            No inbox items yet. Click "Check for Updates" to start your agent.
                                         </div>
-                                        <p className="text-sm text-purple-600 mt-2 font-medium">✨ {p.relevance_reason}</p>
-                                        <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
+                                    ) : recommendedPapers.map((p, idx) => (
+                                        <div key={idx} className="bg-white p-4 rounded-lg border border-purple-100 shadow-sm hover:shadow-md transition-all ring-1 ring-purple-50 group">
+                                            <div className="flex justify-between items-start">
+                                                <h3 className="font-semibold text-lg text-gray-900 leading-snug">{p.title}</h3>
+                                                <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ml-2 ${p.tags?.includes('X') ? 'bg-black text-white' : 'bg-blue-100 text-blue-800'
+                                                    }`}>
+                                                    {p.tags?.includes('X') ? 'Source: X' : 'Source: Web'}
+                                                </span>
+                                            </div>
 
-                                        <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
-                                            <span className="font-bold mr-2">TLDR (KR):</span>
-                                            {p.tldr_kr}
-                                        </div>
+                                            {/* Date/Authors placeholder if we had them */}
+                                            {p.authors && <p className="text-gray-600 text-sm mt-1">{p.authors}</p>}
 
-                                        <div className="mt-4 flex gap-3">
-                                            <button
-                                                onClick={() => handleAddPaper(p)}
-                                                className="px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 transition-colors"
-                                            >
-                                                + Add to Library
-                                            </button>
-                                            <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700">
-                                                View Arxiv
-                                            </a>
+                                            <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
+                                                <span className="font-bold mr-2 text-purple-600">TLDR:</span>
+                                                {p.memo || p.tldr_kr}
+                                            </div>
+
+                                            <div className="mt-4 flex gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                {/* Move to My Papers essentially just removes the 'Scholar Inbox' tag or changes status? 
+                                                     Actually, they are ALREADY in the DB. "Adding" usually means "Accepting" them 
+                                                     into the main reading list (e.g. changing status from unread silent to priority?).
+                                                     For now, let's say "Add to Library" removes the specialized Inbox tag 
+                                                     or just alerts user it's there. 
+                                                     
+                                                     Actually, since they are already in the DB, we might want to "Mark as Interested" 
+                                                     or just let them exist. 
+                                                     
+                                                     Let's assume "Add to Library" means "Okay, I want to read this" -> change status to 'reading'?
+                                                 */}
+                                                <button
+                                                    onClick={() => updateStatus(p.id, 'reading')}
+                                                    className="px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 transition-colors"
+                                                >
+                                                    Add to Reading List
+                                                </button>
+                                                <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700 flex items-center gap-1">
+                                                    View Source <ExternalLink size={14} />
+                                                </a>
+                                                <button
+                                                    onClick={() => deletePaper(p.id)}
+                                                    className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+                                                >
+                                                    Dismiss
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
