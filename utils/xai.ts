@@ -39,10 +39,12 @@ export async function performScholarSearch(interests: string[], userProfile: str
     ${interests.join(", ")}
     
     ## Instructions:
-    1. Use 'x_search' to find recent high-impact Twitter threads, discussions, or papers from the "Groups & Labs" or widely discussed by top researchers (e.g., Kaiming He, Andrej Karpathy, Yann LeCun).
-    2. Use 'web_search' to find the newest arXiv papers matching the "Research Topics".
-    3. FILTER aggressively: Only keep items that match the "Paper Style Preferences" (Simple, First-principles, High Impact).
-    4. Output strictly a JSON array.
+    1. **Analyze** the user's profile and keywords.
+    2. **SEARCH**: Use the \`live_search\` tool.
+        - **IMPORTANT**: You must use \`live_search\` to search **X (Twitter)** for "site:x.com [topic]" or just "[topic]" to find viral threads/discussions.
+        - Also use \`live_search\` to find recent arXiv papers.
+    3. **FILTER**: Only keep items that match the "Paper Style Preferences".
+    4. **FORMAT**: Output strictly a JSON array.
     
     ## Output Format (JSON Array ONLY):
     [
@@ -65,10 +67,10 @@ export async function performScholarSearch(interests: string[], userProfile: str
                 { role: "system", content: systemPrompt },
                 { role: "user", content: "Check for the latest interesting papers/updates." }
             ],
-            // @ts-ignore - xAI specific tools format compatible with OpenAI SDK but types might be strict
+            // The xAI API requires 'function' or 'live_search'.
+            // 'live_search' allows the model to browse the web/X.
             tools: [
-                { type: "web_search" },
-                { type: "x_search" }
+                { type: "live_search" }
             ] as any,
             tool_choice: "auto",
         });
