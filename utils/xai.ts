@@ -61,29 +61,50 @@ export async function performScholarSearch(interests: string[], userProfile: str
     `;
 
     try {
-        const completion = await client.chat.completions.create({
-            model: "grok-4-1-fast", // User requested "fast/cheap" model
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: "Check for the latest interesting papers/updates." }
-            ],
-            // The xAI API requires 'function' or 'live_search'.
-            // 'live_search' requires 'sources' field.
-            tools: [
-                {
-                    type: "live_search",
-                    live_search: {
-                        sources: [
-                            { type: "web" },
-                            { type: "x" }
-                        ]
-                    }
-                }
-            ] as any,
-            tool_choice: "auto",
+        const response = await fetch('https://api.x.ai/v1/responses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${XAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "grok-4-1-fast",
+                input: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: "Check for the latest interesting papers/updates." }
+                ],
+                tools: [
+                    { type: "web_search" },
+                    { type: "x_search" }
+                ],
+                stream: false
+            })
         });
 
-        const content = completion.choices[0]?.message?.content;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Grok API Error:", response.status, errorText);
+            return [];
+        }
+
+        const data = await response.json();
+
+        // The /v1/responses endpoint returns an 'output' array.
+        // We need to find the entry that contains 'content'.
+        // Example: { output: [ { type: 'tool_call' }, { content: [{ text: "..." }] } ] }
+
+        let content = "";
+        if (data.output && Array.isArray(data.output)) {
+            for (const item of data.output) {
+                if (item.content && Array.isArray(item.content)) {
+                    for (const part of item.content) {
+                        if (part.type === 'output_text' && part.text) {
+                            content += part.text;
+                        }
+                    }
+                }
+            }
+        }
 
         if (!content) return [];
 
@@ -95,7 +116,6 @@ export async function performScholarSearch(interests: string[], userProfile: str
             if (Array.isArray(parsed)) {
                 return parsed as ScholarInboxItem[];
             }
-            // If it returned an object with a key like "items": []
             if (parsed.items && Array.isArray(parsed.items)) {
                 return parsed.items as ScholarInboxItem[];
             }
