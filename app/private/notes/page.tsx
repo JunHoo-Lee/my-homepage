@@ -83,77 +83,77 @@ export default function NotesPage() {
             {view === 'list' && (
                 <>
                     <div className="flex justify-between items-center">
-                        <h1 className="text-3xl font-bold text-gray-900">Notes</h1>
+                        <h1 className="text-3xl font-bold text-stone-100">Notes</h1>
                         <ViewToggle view={viewType} onChange={setViewType} />
                     </div>
 
                     {/* Fleeting Note Input */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h2 className="text-sm font-semibold text-gray-500 mb-2 uppercase">New Fleeting Note</h2>
+                    <div className="bg-stone-900 p-6 rounded-xl shadow-sm border border-stone-800">
+                        <h2 className="text-sm font-semibold text-stone-500 mb-2 uppercase">New Fleeting Note</h2>
                         <form onSubmit={handleFleetingNote}>
                             <textarea
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
                                 placeholder="Write a thought... (AI will format it)"
-                                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                                className="w-full p-4 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50 min-h-[100px]"
                                 disabled={processing}
                             />
                             <div className="flex justify-end mt-2">
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                                    className="bg-stone-100 text-stone-900 px-6 py-2 rounded-lg font-medium hover:bg-white transition-colors disabled:opacity-50 flex items-center gap-2"
                                 >
                                     {processing ? <Loader2 className="animate-spin" /> : <SparklesIcon />} Process & Save
                                 </button>
                             </div>
                             {error && (
-                                <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/20 text-red-400 rounded-lg text-sm">
                                     {error}
                                 </div>
                             )}
                         </form>
                     </div>
 
-                    {loading ? <p>Loading...</p> : (
+                    {loading ? <p className="text-stone-500">Loading...</p> : (
                         <div className={viewType === 'card' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-2"}>
                             {notes.map(note => (
                                 <div
                                     key={note.id}
                                     onClick={() => { setCurrentNote(note); setView('edit'); }}
-                                    className={`bg-white rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md transition-all group ${viewType === 'card' ? 'p-5 h-64 overflow-hidden relative' : 'p-4 flex justify-between items-center'}`}
+                                    className={`bg-stone-900 rounded-lg border border-stone-800 hover:border-amber-900/50 cursor-pointer shadow-sm hover:shadow-md transition-all group ${viewType === 'card' ? 'p-5 h-64 overflow-hidden relative' : 'p-4 flex justify-between items-center'}`}
                                 >
                                     {viewType === 'card' ? (
                                         <>
-                                            <h3 className="font-bold text-lg text-gray-800 mb-2">{note.title}</h3>
-                                            <div className="text-gray-500 text-sm line-clamp-6 prose prose-sm prose-img:rounded-md">
+                                            <h3 className="font-bold text-lg text-stone-200 mb-2">{note.title}</h3>
+                                            <div className="text-stone-500 text-sm line-clamp-6 prose prose-sm prose-invert prose-p:text-stone-500">
                                                 <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                     {note.content}
                                                 </ReactMarkdown>
                                             </div>
 
-                                            <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent" />
+                                            <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-stone-900 to-transparent" />
                                             <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                                                <span className="text-xs text-gray-400">{new Date(note.updated_at).toLocaleDateString()}</span>
+                                                <span className="text-xs text-stone-600">{new Date(note.updated_at).toLocaleDateString()}</span>
                                                 <div className="flex gap-1">
-                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-gray-100 px-1 rounded text-gray-500">#{t}</span>)}
+                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-stone-800 px-1.5 py-0.5 rounded text-stone-400 border border-stone-700">#{t}</span>)}
                                                 </div>
                                             </div>
                                         </>
                                     ) : (
                                         <>
                                             <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><FileText size={18} /></div>
+                                                <div className="p-2 bg-stone-800 text-stone-400 rounded-lg"><FileText size={18} /></div>
                                                 <div>
-                                                    <h3 className="font-medium text-gray-900">{note.title}</h3>
-                                                    <p className="text-xs text-gray-500">{new Date(note.updated_at).toLocaleDateString()}</p>
+                                                    <h3 className="font-medium text-stone-200">{note.title}</h3>
+                                                    <p className="text-xs text-stone-600">{new Date(note.updated_at).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="flex gap-1">
-                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-gray-100 px-1 rounded text-gray-500">#{t}</span>)}
+                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-stone-800 px-1.5 py-0.5 rounded text-stone-400 border border-stone-700">#{t}</span>)}
                                                 </div>
-                                                <ChevronRight size={16} className="text-gray-300" />
+                                                <ChevronRight size={16} className="text-stone-700" />
                                             </div>
                                         </>
                                     )}
@@ -165,21 +165,21 @@ export default function NotesPage() {
             )}
 
             {view === 'edit' && currentNote && (
-                <div className="max-w-4xl mx-auto bg-white min-h-[80vh] rounded-xl shadow-sm border border-gray-200 flex flex-col">
-                    <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                        <button onClick={() => setView('list')} className="text-gray-500 hover:text-gray-900">← Back</button>
-                        <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+                <div className="max-w-4xl mx-auto bg-stone-900 min-h-[80vh] rounded-xl shadow-lg border border-stone-800 flex flex-col">
+                    <div className="p-4 border-b border-stone-800 flex justify-between items-center">
+                        <button onClick={() => setView('list')} className="text-stone-500 hover:text-stone-200 transition-colors">← Back</button>
+                        <button onClick={handleSave} className="bg-stone-100 text-stone-900 px-4 py-2 rounded hover:bg-white font-medium transition-colors">Save</button>
                     </div>
                     <div className="p-8 flex-1 flex flex-col h-full">
                         <input
                             value={currentNote.title}
                             onChange={e => setCurrentNote({ ...currentNote, title: e.target.value })}
-                            className="text-3xl font-bold mb-6 focus:outline-none w-full"
+                            className="text-3xl font-bold mb-6 bg-transparent text-stone-100 focus:outline-none w-full placeholder-stone-700"
                             placeholder="Title"
                         />
                         <div className="flex gap-2 mb-6">
                             {currentNote.tags?.map((t: string) => (
-                                <span key={t} className="bg-gray-100 px-2 py-1 rounded text-sm text-gray-600">#{t}</span>
+                                <span key={t} className="bg-stone-800 px-2 py-1 rounded text-sm text-stone-400 border border-stone-700">#{t}</span>
                             ))}
                             {/* Tag editing could be added here */}
                         </div>

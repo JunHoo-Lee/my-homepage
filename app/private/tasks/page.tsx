@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Loader2, Plus, GripVertical, Check, Trash2, Calendar, Tag, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, GripVertical, Check, Trash2, Calendar, Tag, AlertCircle, Sparkles } from 'lucide-react';
 
 export default function TasksPage() {
     const [tasks, setTasks] = useState<any[]>([]);
@@ -92,38 +92,38 @@ export default function TasksPage() {
 
     const getPriorityColor = (p: string) => {
         switch (p) {
-            case 'High': return 'bg-rose-100 text-rose-700 border-rose-200';
-            case 'Medium': return 'bg-amber-100 text-amber-700 border-amber-200';
-            default: return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            case 'High': return 'bg-rose-950/30 text-rose-400 border-rose-900/40';
+            case 'Medium': return 'bg-amber-950/30 text-amber-400 border-amber-900/40';
+            default: return 'bg-emerald-950/30 text-emerald-400 border-emerald-900/40';
         }
     };
 
     return (
         <div className="max-w-5xl mx-auto space-y-10">
             {/* Header */}
-            <div className="flex flex-col gap-2 border-b border-slate-200 pb-8">
-                <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 font-sans">
+            <div className="flex flex-col gap-2 border-b border-stone-800 pb-8">
+                <h1 className="text-4xl font-extrabold tracking-tight text-stone-100 font-sans">
                     Tasks
                 </h1>
-                <p className="text-lg text-slate-500 font-light">
+                <p className="text-lg text-stone-400 font-light">
                     Manage your priorities and deadlines effectively.
                 </p>
             </div>
 
             {/* Input Hero */}
-            <div className="bg-white p-2 rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100">
+            <div className="bg-stone-900 p-2 rounded-2xl shadow-lg shadow-stone-900/50 border border-stone-800">
                 <form onSubmit={handleAdd} className="flex gap-2">
                     <input
                         value={input}
                         onChange={e => setInput(e.target.value)}
                         placeholder="Add a new task... (e.g. 'Review paper by Friday priority high')"
-                        className="flex-1 p-4 bg-transparent text-lg placeholder:text-slate-400 focus:outline-none"
+                        className="flex-1 p-4 bg-transparent text-lg placeholder:text-stone-600 text-stone-200 focus:outline-none"
                         disabled={processing}
                     />
                     <button
                         type="submit"
                         disabled={processing}
-                        className="bg-slate-900 text-white px-8 rounded-xl font-medium hover:bg-slate-800 disabled:opacity-50 transition-all shadow-md active:scale-95 flex items-center gap-2"
+                        className="bg-stone-100 text-stone-900 px-8 rounded-xl font-medium hover:bg-white disabled:opacity-50 transition-all shadow-md active:scale-95 flex items-center gap-2"
                     >
                         {processing ? <Loader2 className="animate-spin" /> : <Plus />}
                         Create Task
@@ -134,16 +134,16 @@ export default function TasksPage() {
             {/* Task List */}
             <div className="space-y-6">
                 <div className="flex items-center justify-between px-2">
-                    <h2 className="text-xl font-bold text-slate-900">Task List</h2>
+                    <h2 className="text-xl font-bold text-stone-200">Task List</h2>
                     {tasks.some(t => t.completed) && (
-                        <button onClick={deleteCompleted} className="text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                        <button onClick={deleteCompleted} className="text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 px-3 py-1.5 rounded-lg transition-colors">
                             Clear Completed
                         </button>
                     )}
                 </div>
 
                 {loading ? (
-                    <div className="py-20 flex justify-center text-slate-400">
+                    <div className="py-20 flex justify-center text-stone-500">
                         <Loader2 className="animate-spin" />
                     </div>
                 ) : (
@@ -153,26 +153,26 @@ export default function TasksPage() {
                                 key={task.id}
                                 onClick={() => setEditingTask(task)}
                                 className={`
-                                    group flex items-start gap-4 p-5 bg-white rounded-xl border transition-all cursor-pointer 
+                                    group flex items-start gap-4 p-5 rounded-xl border transition-all cursor-pointer 
                                     ${task.completed
-                                        ? 'bg-slate-50 border-slate-100 opacity-60'
-                                        : 'border-slate-200 hover:border-indigo-300 hover:shadow-md'
+                                        ? 'bg-stone-900/30 border-stone-800/50 opacity-50'
+                                        : 'bg-stone-900 border-stone-800 hover:border-amber-900/50 hover:shadow-md'
                                     }
                                 `}
                             >
                                 <div
                                     className={`
                                         mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                        ${task.completed ? 'bg-slate-400 border-slate-400' : 'border-slate-300 group-hover:border-indigo-500'}
+                                        ${task.completed ? 'bg-stone-700 border-stone-700' : 'border-stone-600 group-hover:border-amber-500'}
                                     `}
                                     onClick={(e) => { e.stopPropagation(); toggleComplete(task.id, task.completed); }}
                                 >
-                                    {task.completed && <Check size={14} className="text-white" />}
+                                    {task.completed && <Check size={14} className="text-stone-300" />}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                                        <h3 className={`font-medium text-lg leading-snug ${task.completed ? 'line-through text-slate-500' : 'text-slate-800'}`}>
+                                        <h3 className={`font-medium text-lg leading-snug ${task.completed ? 'line-through text-stone-500' : 'text-stone-200'}`}>
                                             {task.title}
                                         </h3>
                                         <div className="flex items-center gap-2 shrink-0">
@@ -185,21 +185,21 @@ export default function TasksPage() {
                                     </div>
 
                                     {(task.memo || task.due_date || (task.tags && task.tags.length > 0)) && (
-                                        <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-500">
+                                        <div className="mt-3 flex flex-wrap gap-4 text-sm text-stone-500">
                                             {task.due_date && (
-                                                <div className="flex items-center gap-1.5 text-slate-500">
+                                                <div className="flex items-center gap-1.5 text-stone-500">
                                                     <Calendar size={14} />
                                                     <span>{new Date(task.due_date).toLocaleDateString()}</span>
                                                 </div>
                                             )}
                                             {task.tags?.map((t: string) => (
-                                                <div key={t} className="flex items-center gap-1 text-slate-500">
+                                                <div key={t} className="flex items-center gap-1 text-stone-500">
                                                     <Tag size={14} />
                                                     <span>{t}</span>
                                                 </div>
                                             ))}
                                             {task.memo && (
-                                                <p className="w-full text-slate-500 mt-1 line-clamp-1">{task.memo}</p>
+                                                <p className="w-full text-stone-500 mt-1 line-clamp-1">{task.memo}</p>
                                             )}
                                         </div>
                                     )}
@@ -207,7 +207,7 @@ export default function TasksPage() {
                             </div>
                         ))}
                         {tasks.length === 0 && (
-                            <div className="text-center py-20 text-slate-400 bg-white rounded-xl border border-dashed border-slate-200">
+                            <div className="text-center py-20 text-stone-500 bg-stone-900/50 rounded-xl border border-dashed border-stone-800">
                                 No tasks yet. Add one above!
                             </div>
                         )}
@@ -217,20 +217,20 @@ export default function TasksPage() {
 
             {/* Edit Modal */}
             {editingTask && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-stone-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-200 border border-stone-800">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-slate-900">Edit Task</h2>
-                            <button onClick={() => setEditingTask(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                                <Plus className="rotate-45 text-slate-500" size={24} />
+                            <h2 className="text-2xl font-bold text-stone-100">Edit Task</h2>
+                            <button onClick={() => setEditingTask(null)} className="p-2 hover:bg-stone-800 rounded-full transition-colors">
+                                <Plus className="rotate-45 text-stone-500" size={24} />
                             </button>
                         </div>
 
                         <form onSubmit={handleUpdateTask} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">Task Title</label>
+                                <label className="block text-sm font-bold text-stone-400 mb-2">Task Title</label>
                                 <input
-                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                                    className="w-full p-3 bg-stone-950 border border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-900/50 transition-all font-medium text-stone-200"
                                     value={editingTask.title}
                                     onChange={e => setEditingTask({ ...editingTask, title: e.target.value })}
                                 />
@@ -238,10 +238,10 @@ export default function TasksPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Priority</label>
+                                    <label className="block text-sm font-bold text-stone-400 mb-2">Priority</label>
                                     <div className="relative">
                                         <select
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none font-medium"
+                                            className="w-full p-3 bg-stone-950 border border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-900/50 appearance-none font-medium text-stone-300"
                                             value={editingTask.priority || 'Low'}
                                             onChange={e => setEditingTask({ ...editingTask, priority: e.target.value })}
                                         >
@@ -249,14 +249,14 @@ export default function TasksPage() {
                                             <option value="Medium">Medium Priority</option>
                                             <option value="Low">Low Priority</option>
                                         </select>
-                                        <AlertCircle className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" size={16} />
+                                        <AlertCircle className="absolute right-3 top-3.5 text-stone-600 pointer-events-none" size={16} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Due Date</label>
+                                    <label className="block text-sm font-bold text-stone-400 mb-2">Due Date</label>
                                     <input
                                         type="date"
-                                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium text-slate-600"
+                                        className="w-full p-3 bg-stone-950 border border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-900/50 font-medium text-stone-300"
                                         value={editingTask.due_date || ''}
                                         onChange={e => setEditingTask({ ...editingTask, due_date: e.target.value })}
                                     />
@@ -264,20 +264,20 @@ export default function TasksPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">Notes</label>
+                                <label className="block text-sm font-bold text-stone-400 mb-2">Notes</label>
                                 <textarea
-                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl h-32 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600 leading-relaxed"
+                                    className="w-full p-3 bg-stone-950 border border-stone-800 rounded-xl h-32 resize-none focus:outline-none focus:ring-2 focus:ring-amber-900/50 text-stone-300 leading-relaxed placeholder-stone-700"
                                     placeholder="Add detailed notes..."
                                     value={editingTask.memo || ''}
                                     onChange={e => setEditingTask({ ...editingTask, memo: e.target.value })}
                                 ></textarea>
                             </div>
 
-                            <div className="flex justify-between items-center pt-6 border-t border-slate-100">
+                            <div className="flex justify-between items-center pt-6 border-t border-stone-800">
                                 <button
                                     type="button"
                                     onClick={() => deleteTask(editingTask.id)}
-                                    className="text-red-500 hover:bg-red-50 hover:text-red-600 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+                                    className="text-red-400 hover:bg-red-900/20 hover:text-red-300 px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
                                 >
                                     <Trash2 size={16} /> Delete Task
                                 </button>
@@ -285,13 +285,13 @@ export default function TasksPage() {
                                     <button
                                         type="button"
                                         onClick={() => setEditingTask(null)}
-                                        className="px-6 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+                                        className="px-6 py-2.5 text-stone-400 hover:bg-stone-800 rounded-xl font-medium transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 shadow-lg shadow-slate-900/10 transition-all hover:-translate-y-0.5"
+                                        className="px-6 py-2.5 bg-stone-100 text-stone-950 rounded-xl font-medium hover:bg-white shadow-lg shadow-stone-900/10 transition-all hover:-translate-y-0.5"
                                     >
                                         Save Changes
                                     </button>

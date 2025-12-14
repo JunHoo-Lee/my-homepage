@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown } from 'lucide-react';
+import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -268,28 +268,28 @@ export default function PapersPage() {
     return (
         <div className="space-y-6 relative">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Papers</h1>
+                <h1 className="text-3xl font-bold text-stone-100">Papers</h1>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 border-b border-gray-200">
+            <div className="flex gap-4 border-b border-stone-800">
                 <button
                     onClick={() => setActiveTab('my_papers')}
-                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'my_papers' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
                 >
                     My Papers
                 </button>
                 <button
                     onClick={() => setActiveTab('trending')}
-                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'trending' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'trending' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
                 >
                     Trending
                 </button>
                 <button
                     onClick={() => setActiveTab('for_you')}
-                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'for_you' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'for_you' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
                 >
-                    For You <Sparkles size={14} className="inline ml-1 text-yellow-500" />
+                    For You <Sparkles size={14} className="inline ml-1 text-amber-400" />
                 </button>
             </div>
 
@@ -304,20 +304,20 @@ export default function PapersPage() {
                                     value={input}
                                     onChange={e => setInput(e.target.value)}
                                     placeholder="Paste link or citation (AI Auto-fill)..."
-                                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="flex-1 p-3 bg-stone-900 border border-stone-800 rounded-lg text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
                                     disabled={adding}
                                 />
                                 <button
                                     type="submit"
                                     disabled={adding}
-                                    className="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50 whitespace-nowrap"
+                                    className="bg-stone-100 text-stone-950 px-6 py-3 rounded-lg hover:bg-white disabled:opacity-50 whitespace-nowrap font-medium"
                                 >
                                     {adding ? <Loader2 className="animate-spin" /> : 'AI Add'}
                                 </button>
                             </form>
                             <button
                                 onClick={() => setManualAddModal(true)}
-                                className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 whitespace-nowrap"
+                                className="px-4 py-3 border border-stone-700 rounded-lg hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors"
                             >
                                 Manual Add
                             </button>
@@ -326,21 +326,21 @@ export default function PapersPage() {
                             </div>
                         </div>
 
-                        {loadingMyParams ? <p>Loading...</p> : (
+                        {loadingMyParams ? <p className="text-stone-500">Loading...</p> : (
                             <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
                                 {myPapers.filter(p => !p.tags?.includes('Scholar Inbox')).map(p => (
                                     <div
                                         key={p.id}
                                         onClick={() => setEditingPaper(p)}
-                                        className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}
+                                        className={`bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md hover:border-amber-900/40 transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}
                                     >
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex-1 min-w-0 pr-4">
-                                                <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{p.title}</h3>
-                                                <p className="text-gray-600 text-sm mt-1">{formatAuthors(p.authors)}</p>
+                                                <h3 className="font-semibold text-lg text-stone-200 group-hover:text-amber-500 transition-colors line-clamp-2">{p.title}</h3>
+                                                <p className="text-stone-500 text-sm mt-1">{formatAuthors(p.authors)}</p>
 
                                                 {viewMode === 'list' && p.memo && (
-                                                    <div className="flex items-start gap-2 mt-2 text-sm text-gray-500">
+                                                    <div className="flex items-start gap-2 mt-2 text-sm text-stone-500">
                                                         <BookOpen size={14} className="mt-0.5 text-blue-400 shrink-0" />
                                                         <span className="line-clamp-1">{getPreviewText(p.memo)}</span>
                                                     </div>
@@ -348,7 +348,7 @@ export default function PapersPage() {
                                             </div>
                                             <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                                                 {p.link && (
-                                                    <a href={p.link} target="_blank" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                                                    <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors">
                                                         <ExternalLink size={20} />
                                                     </a>
                                                 )}
@@ -356,7 +356,7 @@ export default function PapersPage() {
                                         </div>
 
                                         {viewMode === 'card' && p.memo && (
-                                            <div className="mb-3 p-3 bg-gray-50 rounded text-sm text-gray-700 prose prose-sm max-w-none line-clamp-6 prose-img:rounded-md flex-1">
+                                            <div className="mb-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-6 prose-img:rounded-md flex-1 border border-stone-800/50">
                                                 <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                     {p.memo}
                                                 </ReactMarkdown>
@@ -364,16 +364,16 @@ export default function PapersPage() {
                                         )}
 
                                         <div className="flex gap-2 mt-auto items-center">
-                                            <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                p.status === 'reading' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                    'bg-gray-50 text-gray-700 border-gray-200'
+                                            <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-900/20 text-green-400 border-green-500/20' :
+                                                p.status === 'reading' ? 'bg-blue-900/20 text-blue-400 border-blue-500/20' :
+                                                    'bg-stone-800 text-stone-400 border-stone-700'
                                                 }`}>
                                                 {(p.status || 'unread').toUpperCase()}
                                             </span>
                                             {p.tags?.map((t: string) => (
-                                                <span key={t} className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500">#{t}</span>
+                                                <span key={t} className="px-2 py-0.5 rounded text-xs bg-stone-800 text-stone-500 border border-stone-700">#{t}</span>
                                             ))}
-                                            {viewMode === 'list' && p.memo && <span className="text-xs text-gray-400 flex items-center gap-1"><BookOpen size={12} /> Has Notes</span>}
+                                            {viewMode === 'list' && p.memo && <span className="text-xs text-stone-600 flex items-center gap-1"><BookOpen size={12} /> Has Notes</span>}
                                         </div>
                                     </div>
                                 ))}
@@ -384,19 +384,19 @@ export default function PapersPage() {
 
                 {activeTab === 'for_you' && (
                     <div className="space-y-6">
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
-                            <h2 className="text-blue-900 font-semibold flex items-center gap-2">
-                                <Sparkles size={18} className="text-blue-600" />
+                        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-4 rounded-lg border border-blue-500/10">
+                            <h2 className="text-blue-300 font-semibold flex items-center gap-2">
+                                <Sparkles size={18} className="text-blue-400" />
                                 AI Recommended for You
                             </h2>
-                            <p className="text-blue-700 text-sm mt-1">Based on your tags and reading patterns.</p>
+                            <p className="text-blue-400/70 text-sm mt-1">Based on your tags and reading patterns.</p>
                         </div>
 
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-600">Search Since:</span>
+                                <span className="text-sm text-stone-500">Search Since:</span>
                                 <select
-                                    className="text-sm border rounded p-1"
+                                    className="text-sm border border-stone-700 rounded p-1 bg-stone-900 text-stone-300 focus:outline-none focus:ring-1 focus:ring-stone-600"
                                     value={dateMargin}
                                     onChange={(e) => setDateMargin(e.target.value)}
                                 >
@@ -412,7 +412,7 @@ export default function PapersPage() {
                             <button
                                 onClick={() => fetchForYou(true)}
                                 disabled={loadingForYou}
-                                className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors flex items-center gap-1 disabled:opacity-50"
+                                className="text-xs bg-purple-900/30 text-purple-300 px-3 py-1.5 rounded-full hover:bg-purple-900/50 transition-colors flex items-center gap-1 disabled:opacity-50 border border-purple-500/20"
                             >
                                 <RefreshCw size={12} className={loadingForYou ? "animate-spin" : ""} />
                                 {loadingForYou ? "Searching..." : "Check for Updates"}
@@ -420,13 +420,13 @@ export default function PapersPage() {
                         </div>
 
                         {loadingForYou ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-600" size={32} /></div>
+                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-500" size={32} /></div>
                         ) : (
                             <div className="space-y-4">
-                                <p className="text-sm text-gray-500">Items found by your Scholar Agent.</p>
+                                <p className="text-sm text-stone-500">Items found by your Scholar Agent.</p>
                                 <div className="grid gap-4">
                                     {recommendedPapers.length === 0 ? (
-                                        <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed text-gray-400">
+                                        <div className="text-center py-10 bg-stone-900/50 rounded-lg border border-dashed border-stone-800 text-stone-500">
                                             No inbox items yet. Click "Check for Updates" to start your agent.
                                         </div>
                                     ) : recommendedPapers.map((p, idx) => {
@@ -435,27 +435,27 @@ export default function PapersPage() {
                                         const isXSource = p.tags?.includes('X');
 
                                         return (
-                                            <div key={idx} className="bg-white p-4 rounded-lg border border-purple-100 shadow-sm hover:shadow-md transition-all ring-1 ring-purple-50 group">
+                                            <div key={idx} className="bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md transition-all hover:border-purple-500/30 group">
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1">
-                                                        <h3 className="font-semibold text-lg text-gray-900 leading-snug">{p.title}</h3>
+                                                        <h3 className="font-semibold text-lg text-stone-200 leading-snug">{p.title}</h3>
                                                         {isDuplicate && (
-                                                            <div className="text-xs text-orange-600 flex items-center gap-1 mt-1">
+                                                            <div className="text-xs text-orange-400 flex items-center gap-1 mt-1">
                                                                 <span className="font-bold">⚠️ Already in Library:</span> {duplicateItem.title}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-2 ml-2 shrink-0">
-                                                        <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ${isXSource ? 'bg-black text-white' : 'bg-blue-100 text-blue-800'}`}>
+                                                        <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ${isXSource ? 'bg-stone-800 text-stone-300 border border-stone-700' : 'bg-blue-900/20 text-blue-300 border border-blue-500/20'}`}>
                                                             {isXSource ? 'Source: X' : 'Source: Web'}
                                                         </span>
                                                     </div>
                                                 </div>
 
-                                                {p.authors && <p className="text-gray-600 text-sm mt-1">{p.authors}</p>}
+                                                {p.authors && <p className="text-stone-500 text-sm mt-1">{p.authors}</p>}
 
-                                                <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
-                                                    <span className="font-bold mr-2 text-purple-600">TLDR:</span>
+                                                <div className="mt-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 border border-stone-800/50">
+                                                    <span className="font-bold mr-2 text-purple-400">TLDR:</span>
                                                     {p.memo || p.tldr_kr}
                                                 </div>
 
@@ -475,23 +475,23 @@ export default function PapersPage() {
 
                                                             if (!error) {
                                                                 btn.innerText = "Added to Library!";
-                                                                btn.className = "px-4 py-2 rounded text-sm bg-green-100 text-green-700 cursor-default";
+                                                                btn.className = "px-4 py-2 rounded text-sm bg-green-900/20 text-green-400 border border-green-500/20 cursor-default";
                                                             } else {
                                                                 btn.disabled = false;
                                                                 btn.innerText = "Failed";
                                                             }
                                                         }}
                                                         disabled={isDuplicate}
-                                                        className={`px-4 py-2 rounded text-sm transition-colors ${isDuplicate ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}
+                                                        className={`px-4 py-2 rounded text-sm transition-colors font-medium ${isDuplicate ? 'bg-stone-800 text-stone-600 cursor-not-allowed border border-stone-800' : 'bg-stone-100 text-stone-900 hover:bg-white'}`}
                                                     >
                                                         {isDuplicate ? 'Already in Library' : 'Add to Reading List'}
                                                     </button>
-                                                    <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700 flex items-center gap-1">
+                                                    <a href={p.link} target="_blank" className="px-4 py-2 border border-stone-700 rounded text-sm hover:bg-stone-800 text-stone-300 flex items-center gap-1 transition-colors">
                                                         View Source <ExternalLink size={14} />
                                                     </a>
                                                     <button
                                                         onClick={() => deletePaper(p.id)}
-                                                        className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+                                                        className="px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
                                                     >
                                                         Dismiss
                                                     </button>
@@ -514,47 +514,47 @@ export default function PapersPage() {
                                         <button
                                             key={s}
                                             onClick={() => { setTrendingSource(s as any); fetchTrending(s); }}
-                                            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${trendingSource === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${trendingSource === s ? 'bg-blue-600 text-white' : 'bg-stone-800 text-stone-400 hover:bg-stone-700'}`}
                                         >
                                             {s.charAt(0).toUpperCase() + s.slice(1)}
                                         </button>
                                     ))}
                                 </div>
-                                <button onClick={() => fetchTrending()} className="text-sm text-blue-600 flex items-center gap-1">
+                                <button onClick={() => fetchTrending()} className="text-sm text-blue-400 flex items-center gap-1 hover:text-blue-300">
                                     <RefreshCw size={14} /> Refresh
                                 </button>
                             </div>
                         </div>
                         {loadingTrending ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
+                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>
                         ) : (
                             <div className="grid gap-4">
                                 {trendingPapers.map((p, idx) => (
-                                    <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                                    <div key={idx} className="bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md transition-shadow">
                                         <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
-                                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
+                                            <h3 className="font-semibold text-lg text-stone-200">{p.title}</h3>
+                                            <span className="bg-amber-900/20 text-amber-500 border border-amber-500/20 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
                                         </div>
                                         {p.publishedAt && (
-                                            <p className="text-gray-400 text-xs mt-1">
+                                            <p className="text-stone-500 text-xs mt-1">
                                                 {new Date(p.publishedAt).toLocaleDateString()}
                                             </p>
                                         )}
-                                        <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
+                                        <p className="text-stone-400 text-sm mt-1">{p.authors}</p>
 
-                                        <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
-                                            <span className="font-bold mr-2">TLDR (KR):</span>
+                                        <div className="mt-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 border border-stone-800/50">
+                                            <span className="font-bold mr-2 text-stone-500">TLDR (KR):</span>
                                             {p.tldr_kr}
                                         </div>
 
                                         <div className="mt-4 flex gap-3">
                                             <button
                                                 onClick={() => handleAddPaper(p)}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+                                                className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-500 transition-colors font-medium"
                                             >
                                                 + Add to My Papers
                                             </button>
-                                            <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700">
+                                            <a href={p.link} target="_blank" className="px-4 py-2 border border-stone-700 rounded text-sm hover:bg-stone-800 text-stone-300">
                                                 View Arxiv
                                             </a>
                                         </div>
@@ -566,7 +566,7 @@ export default function PapersPage() {
                                         <button
                                             onClick={() => fetchTrending(undefined, true)}
                                             disabled={loadingMore}
-                                            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-2 bg-stone-800 text-stone-300 px-6 py-2 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50"
                                         >
                                             {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
                                             Load More
@@ -582,25 +582,25 @@ export default function PapersPage() {
             {/* Manual Add Modal */}
             {
                 manualAddModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
-                            <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <div className="bg-stone-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-stone-800">
+                            <h2 className="text-xl font-bold mb-4 text-stone-100">Add Paper Manually</h2>
                             <form onSubmit={handleManualSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                    <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                                    <label className="block text-sm font-medium text-stone-400 mb-1">Title</label>
+                                    <input required className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
-                                    <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
+                                    <label className="block text-sm font-medium text-stone-400 mb-1">Authors</label>
+                                    <input className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
-                                    <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
+                                    <label className="block text-sm font-medium text-stone-400 mb-1">Link</label>
+                                    <input className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
                                 </div>
                                 <div className="flex justify-end gap-2 mt-6">
-                                    <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
+                                    <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-stone-400 hover:text-stone-200 hover:bg-stone-800 rounded-lg transition-colors">Cancel</button>
+                                    <button type="submit" className="px-4 py-2 bg-stone-100 text-stone-950 rounded-lg hover:bg-white font-medium">Save Paper</button>
                                 </div>
                             </form>
                         </div>
@@ -611,29 +611,29 @@ export default function PapersPage() {
             {/* Edit Paper Modal */}
             {
                 editingPaper && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <div className="bg-stone-900 rounded-xl max-w-2xl w-full p-6 shadow-2xl h-[80vh] flex flex-col border border-stone-800">
                             <div className="flex justify-between items-start mb-4">
-                                <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
-                                <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+                                <h2 className="text-xl font-bold pr-8 text-stone-100">{editingPaper.title}</h2>
+                                <button onClick={() => setEditingPaper(null)} className="text-stone-500 hover:text-stone-300 transition-colors"><Plus className="rotate-45" size={24} /></button>
                             </div>
 
-                            <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
-                                <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
+                            <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto custom-scrollbar pr-2">
+                                <div className="flex gap-4 p-3 bg-stone-950/50 rounded-lg border border-stone-800">
                                     <FormSelect
                                         label="Status"
                                         value={editingPaper.status}
                                         onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
                                         options={['unread', 'reading', 'read']}
                                     />
-                                    <div className="flex-1">
-                                        <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
-                                        <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
+                                    <div className="flex-1 min-w-0">
+                                        <label className="block text-xs font-medium text-stone-500 mb-1">Link</label>
+                                        <a href={editingPaper.link} target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
                                     </div>
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-h-0">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
+                                    <label className="block text-sm font-medium text-stone-400 mb-2">Notes & Thoughts</label>
                                     <RichTextEditor
                                         value={editingPaper.memo || ''}
                                         onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
@@ -642,17 +642,17 @@ export default function PapersPage() {
                                     <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
                                 </div>
 
-                                <div className="flex justify-between items-center pt-2 border-t mt-auto">
+                                <div className="flex justify-between items-center pt-4 border-t border-stone-800 mt-auto">
                                     <button
                                         type="button"
                                         onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
-                                        className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
+                                        className="text-red-400 hover:bg-red-900/20 hover:text-red-300 px-3 py-2 rounded text-sm transition-colors"
                                     >
                                         Delete Paper
                                     </button>
                                     <div className="flex gap-2">
-                                        <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
+                                        <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-stone-400 hover:bg-stone-800 hover:text-stone-200 rounded-lg transition-colors">Cancel</button>
+                                        <button type="submit" className="px-4 py-2 bg-stone-100 text-stone-950 rounded-lg hover:bg-white font-medium transition-colors">Save Changes</button>
                                     </div>
                                 </div>
                             </form>
@@ -666,9 +666,9 @@ export default function PapersPage() {
 
 const FormSelect = ({ label, value, onChange, options }: any) => (
     <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+        <label className="block text-xs font-medium text-stone-500 mb-1">{label}</label>
         <select
-            className="p-1.5 border rounded text-sm bg-white"
+            className="p-1.5 border border-stone-700 rounded text-sm bg-stone-900 text-stone-200 focus:outline-none focus:ring-1 focus:ring-stone-600"
             value={value}
             onChange={e => onChange(e.target.value)}
         >

@@ -1,88 +1,62 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
+import { Search, Plus, Sparkles, Book, CheckSquare, FileText, ArrowRight, Clock } from 'lucide-react';
 import Link from 'next/link';
-import { Loader2, ArrowRight, CheckCircle2, FileText, BookOpen, Sparkles } from 'lucide-react';
 
 export default function DashboardPage() {
-    const [loading, setLoading] = useState(true);
+    // State
     const [tasks, setTasks] = useState<any[]>([]);
-    const [recentNotes, setRecentNotes] = useState<any[]>([]);
-    const [readingPapers, setReadingPapers] = useState<any[]>([]);
+    const [papers, setPapers] = useState<any[]>([]);
+    const [notes, setNotes] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Quick Capture
     const [input, setInput] = useState('');
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        fetchDashboardData();
+        const fetchData = async () => {
+            setLoading(true);
+            const [tasksRes, papersRes, notesRes] = await Promise.all([
+                supabase.from('tasks').select('*').order('created_at', { ascending: false }).limit(5),
+                supabase.from('papers').select('*').order('created_at', { ascending: false }).limit(5),
+                supabase.from('notes').select('*').order('updated_at', { ascending: false }).limit(5)
+            ]);
+
+            setTasks(tasksRes.data || []);
+            setPapers(papersRes.data || []);
+            setNotes(notesRes.data || []);
+            setLoading(false);
+        };
+        fetchData();
     }, []);
 
-    const fetchDashboardData = async () => {
-        setLoading(true);
-
-        // Top 5 incomplete tasks (latest first)
-        const { data: tasksData } = await supabase
-            .from('tasks')
-            .select('*')
-            .eq('completed', false)
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-        // Recent Notes
-        const { data: notesData } = await supabase
-            .from('notes')
-            .select('id, title, updated_at')
-            .order('updated_at', { ascending: false })
-            .limit(5);
-
-        // Reading Papers
-        const { data: papersData } = await supabase
-            .from('papers')
-            .select('id, title, authors')
-            .eq('status', 'reading')
-            .limit(5);
-
-        setTasks(tasksData || []);
-        setRecentNotes(notesData || []);
-        setReadingPapers(papersData || []);
-        setLoading(false);
-    };
-
-    const handleQuickAdd = async (e: React.FormEvent) => {
+    const handleQuickCapture = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim()) return;
-
         setProcessing(true);
         try {
-            const res = await fetch('/api/ai/parse-task', {
+            const res = await fetch('/api/ai/quick-capture', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ input })
             });
-            const { task } = await res.json();
-
-            if (task) {
-                await supabase.from('tasks').insert([task]);
-                fetchDashboardData();
-                setInput('');
-            }
-        } catch (err) {
-            console.error(err);
+            const data = await res.json();
+            if (data.type === 'task') setTasks([data.data, ...tasks]);
+            if (data.type === 'note') setNotes([data.data, ...notes]);
+            if (data.type === 'paper') setPapers([data.data, ...papers]);
+            setInput('');
+            alert(`Added to ${data.type}s!`);
+        } catch (e) {
+            console.error(e);
+            alert('Failed to capture');
         } finally {
             setProcessing(false);
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex h-96 items-center justify-center text-stone-500">
-                <Loader2 className="animate-spin" size={32} />
-            </div>
-        );
-    }
-
     return (
-        <div className="max-w-6xl mx-auto space-y-10">
+        <div className="max-w-6xl mx-auto space-y-12">
             {/* Header */}
             <div className="flex flex-col gap-2 border-b border-stone-800 pb-8">
                 <h1 className="text-4xl font-extrabold tracking-tight text-stone-100 font-sans">
@@ -93,14 +67,15 @@ export default function DashboardPage() {
                 </p>
             </div>
 
-            {/* Quick Add Hero */}
+            {/* Quick Capture Hero */}
             <div className="bg-gradient-to-br from-stone-800 to-stone-900 p-8 rounded-2xl shadow-xl border border-stone-700/50 text-white relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500 rounded-full blur-3xl opacity-10 -mr-16 -mt-16 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-amber-500/20"></div>
+
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2 relative z-10 text-stone-200">
                     <Sparkles className="text-amber-400" size={20} />
                     Quick Capture
                 </h2>
-                <form onSubmit={handleQuickAdd} className="flex gap-3 relative z-10">
+                <form onSubmit={handleQuickCapture} className="flex gap-4 relative z-10">
                     <input
                         type="text"
                         value={input}
@@ -112,108 +87,95 @@ export default function DashboardPage() {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="bg-amber-600 text-stone-950 px-8 py-4 rounded-xl font-bold hover:bg-amber-500 disabled:opacity-50 transition-all shadow-lg shadow-amber-900/20 active:scale-95"
+                        className="bg-stone-100/90 text-stone-900 hover:bg-white px-8 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 active:scale-95"
                     >
-                        {processing ? <Loader2 className="animate-spin" /> : 'Add Task'}
+                        {processing ? 'Processing...' : 'Capture'}
                     </button>
                 </form>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Tasks Widget */}
-                <div className="flex flex-col bg-stone-900 rounded-2xl shadow-sm border border-stone-800 overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="p-5 border-b border-stone-800 flex justify-between items-center bg-stone-900/50">
-                        <div className="flex items-center gap-2 font-bold text-stone-200">
-                            <CheckCircle2 className="text-emerald-500" size={18} />
-                            Top Tasks
-                        </div>
-                        <Link href="/private/tasks" className="text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 group">
-                            View All <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+            {/* Dashboard Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Tasks Column */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-stone-200 flex items-center gap-2">
+                            <CheckSquare className="text-emerald-500" size={20} /> Top Tasks
+                        </h2>
+                        <Link href="/private/tasks" className="text-sm text-stone-500 hover:text-stone-300 flex items-center gap-1">
+                            View All <ArrowRight size={14} />
                         </Link>
                     </div>
-                    <div className="p-4 space-y-3 flex-1">
+                    <div className="bg-stone-900 rounded-xl border border-stone-800 shadow-sm overflow-hidden">
                         {tasks.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-stone-500 text-sm py-8">
-                                <CheckCircle2 size={32} className="mb-2 opacity-20" />
-                                All caught up!
-                            </div>
-                        ) : tasks.map(task => (
-                            <div key={task.id} className="p-3 bg-stone-950/50 rounded-xl border border-stone-800 hover:border-amber-900/50 hover:bg-stone-800/50 transition-all flex justify-between items-start group">
-                                <div className="min-w-0">
-                                    <p className="font-medium text-stone-300 text-sm truncate group-hover:text-amber-100 transition-colors">{task.title}</p>
-                                    <div className="flex gap-2 mt-1.5">
-                                        {task.priority && (
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide ${task.priority === 'High' ? 'bg-rose-950/30 text-rose-400 border border-rose-900/30' :
-                                                    task.priority === 'Medium' ? 'bg-amber-950/30 text-amber-400 border border-amber-900/30' :
-                                                        'bg-emerald-950/30 text-emerald-400 border border-emerald-900/30'
-                                                }`}>{task.priority}</span>
-                                        )}
-                                        {task.due_date && (
-                                            <span className="text-[10px] text-stone-500 bg-stone-900 px-2 py-0.5 rounded-full border border-stone-800">
-                                                {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                            </span>
-                                        )}
+                            <div className="p-8 text-center text-stone-500 text-sm">No pending tasks</div>
+                        ) : (
+                            <div className="divide-y divide-stone-800">
+                                {tasks.map(t => (
+                                    <div key={t.id} className="p-4 hover:bg-stone-800/50 transition-colors group cursor-default">
+                                        <div className="flex items-start gap-3">
+                                            <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${t.priority === 'High' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`font-medium text-stone-300 truncate ${t.completed ? 'line-through text-stone-600' : ''}`}>{t.title}</p>
+                                                {t.due_date && <p className="text-xs text-stone-500 mt-1 flex items-center gap-1"><Clock size={10} />Due {new Date(t.due_date).toLocaleDateString()}</p>}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 
-                {/* Papers Widget */}
-                <div className="flex flex-col bg-stone-900 rounded-2xl shadow-sm border border-stone-800 overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="p-5 border-b border-stone-800 flex justify-between items-center bg-stone-900/50">
-                        <div className="flex items-center gap-2 font-bold text-stone-200">
-                            <BookOpen className="text-blue-400" size={18} />
-                            Reading List
-                        </div>
-                        <Link href="/private/papers" className="text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 group">
-                            View All <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                {/* Papers Column */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-stone-200 flex items-center gap-2">
+                            <Book className="text-blue-500" size={20} /> Reading List
+                        </h2>
+                        <Link href="/private/papers" className="text-sm text-stone-500 hover:text-stone-300 flex items-center gap-1">
+                            Library <ArrowRight size={14} />
                         </Link>
                     </div>
-                    <div className="p-4 space-y-3 flex-1">
-                        {readingPapers.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-stone-500 text-sm py-8">
-                                <BookOpen size={32} className="mb-2 opacity-20" />
-                                No active papers.
+                    <div className="bg-stone-900 rounded-xl border border-stone-800 shadow-sm overflow-hidden">
+                        {papers.length === 0 ? (
+                            <div className="p-8 text-center text-stone-500 text-sm">No papers saved</div>
+                        ) : (
+                            <div className="divide-y divide-stone-800">
+                                {papers.map(p => (
+                                    <a href={p.link} target="_blank" key={p.id} className="block p-4 hover:bg-stone-800/50 transition-colors group">
+                                        <p className="font-medium text-stone-300 line-clamp-2 leading-snug group-hover:text-amber-500 transition-colors">{p.title}</p>
+                                        <p className="text-xs text-stone-500 mt-2 line-clamp-1">{p.authors}</p>
+                                    </a>
+                                ))}
                             </div>
-                        ) : readingPapers.map(paper => (
-                            <div key={paper.id} className="p-3 bg-stone-950/50 rounded-xl border border-stone-800 hover:border-blue-900/30 hover:bg-stone-800/50 transition-all group">
-                                <p className="font-medium text-stone-300 text-sm line-clamp-2 group-hover:text-blue-300 transition-colors">{paper.title}</p>
-                                <p className="text-xs text-stone-500 mt-1.5 truncate">{paper.authors}</p>
-                            </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 
-                {/* Recent Notes Widget */}
-                <div className="flex flex-col bg-stone-900 rounded-2xl shadow-sm border border-stone-800 overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="p-5 border-b border-stone-800 flex justify-between items-center bg-stone-900/50">
-                        <div className="flex items-center gap-2 font-bold text-stone-200">
-                            <FileText className="text-purple-400" size={18} />
-                            Recent Notes
-                        </div>
-                        <Link href="/private/notes" className="text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 group">
-                            View All <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                {/* Notes Column */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-stone-200 flex items-center gap-2">
+                            <FileText className="text-purple-500" size={20} /> Recent Notes
+                        </h2>
+                        <Link href="/private/notes" className="text-sm text-stone-500 hover:text-stone-300 flex items-center gap-1">
+                            All Notes <ArrowRight size={14} />
                         </Link>
                     </div>
-                    <div className="p-4 space-y-3 flex-1">
-                        {recentNotes.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-stone-500 text-sm py-8">
-                                <FileText size={32} className="mb-2 opacity-20" />
-                                Start writing...
+                    <div className="bg-stone-900 rounded-xl border border-stone-800 shadow-sm overflow-hidden">
+                        {notes.length === 0 ? (
+                            <div className="p-8 text-center text-stone-500 text-sm">No notes yet</div>
+                        ) : (
+                            <div className="divide-y divide-stone-800">
+                                {notes.map(n => (
+                                    <div key={n.id} className="p-4 hover:bg-stone-800/50 transition-colors cursor-pointer">
+                                        <h3 className="font-medium text-stone-300 truncate mb-1">{n.title || 'Untitled Note'}</h3>
+                                        <p className="text-xs text-stone-500 line-clamp-2">{n.content?.substring(0, 100)}...</p>
+                                    </div>
+                                ))}
                             </div>
-                        ) : recentNotes.map(note => (
-                            <Link key={note.id} href={`/private/notes?id=${note.id}`} className="block p-3 bg-stone-950/50 rounded-xl border border-stone-800 hover:border-purple-900/30 hover:bg-stone-800/50 transition-all group">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 group-hover:scale-125 transition-transform"></div>
-                                    <p className="font-medium text-stone-300 text-sm truncate group-hover:text-purple-300 transition-colors">{note.title}</p>
-                                </div>
-                                <p className="text-[10px] text-stone-500 mt-1.5 pl-3.5">
-                                    Edited {new Date(note.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                </p>
-                            </Link>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>

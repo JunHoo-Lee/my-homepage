@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -83,26 +83,26 @@ export default function RichTextEditor({ value, onChange, placeholder = "Write h
     };
 
     return (
-        <div className="flex flex-col border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm h-full">
+        <div className="flex flex-col border border-stone-800 rounded-lg overflow-hidden bg-stone-950 shadow-sm h-full">
             {/* Toolbar */}
-            <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100 bg-gray-50">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-stone-800 bg-stone-900">
                 <div className="flex gap-2">
                     <button
                         type="button"
                         onClick={() => setView('edit')}
-                        className={`text-sm flex items-center gap-1 px-2 py-1 rounded ${view === 'edit' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
+                        className={`text-sm flex items-center gap-1 px-2 py-1 rounded transition-colors ${view === 'edit' ? 'bg-stone-800 text-stone-200' : 'text-stone-500 hover:text-stone-300'}`}
                     >
                         <Edit2 size={14} /> Edit
                     </button>
                     <button
                         type="button"
                         onClick={() => setView('preview')}
-                        className={`text-sm flex items-center gap-1 px-2 py-1 rounded ${view === 'preview' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
+                        className={`text-sm flex items-center gap-1 px-2 py-1 rounded transition-colors ${view === 'preview' ? 'bg-stone-800 text-stone-200' : 'text-stone-500 hover:text-stone-300'}`}
                     >
                         <Eye size={14} /> Preview
                     </button>
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-stone-500">
                     {uploading ? <span className="flex items-center gap-1 text-blue-500"><Loader2 size={12} className="animate-spin" /> Uploading...</span> : 'Support Markdown & LaTeX'}
                 </div>
             </div>
@@ -118,10 +118,10 @@ export default function RichTextEditor({ value, onChange, placeholder = "Write h
                         onDrop={handleDrop}
                         onDragOver={e => e.preventDefault()}
                         placeholder={placeholder}
-                        className="w-full h-full p-4 resize-none focus:outline-none font-mono text-sm leading-relaxed"
+                        className="w-full h-full p-4 resize-none focus:outline-none font-mono text-sm leading-relaxed bg-stone-950 text-stone-300 placeholder-stone-700"
                     />
                 ) : (
-                    <div className="w-full h-full p-4 overflow-auto prose prose-blue max-w-none prose-img:rounded-lg">
+                    <div className="w-full h-full p-4 overflow-auto prose prose-invert prose-stone max-w-none prose-img:rounded-lg">
                         <ReactMarkdown
                             remarkPlugins={[remarkMath]}
                             rehypePlugins={[rehypeKatex]}
@@ -133,8 +133,8 @@ export default function RichTextEditor({ value, onChange, placeholder = "Write h
 
                 {/* Drag Overlay Hint */}
                 {view === 'edit' && !uploading && (
-                    <div className="absolute bottom-2 right-2 pointer-events-none opacity-50">
-                        <ImageIcon size={16} className="text-gray-400" />
+                    <div className="absolute bottom-2 right-2 pointer-events-none opacity-30">
+                        <ImageIcon size={16} className="text-stone-500" />
                     </div>
                 )}
             </div>
