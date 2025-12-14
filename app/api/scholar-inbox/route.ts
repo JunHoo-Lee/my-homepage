@@ -28,8 +28,7 @@ import { SCHOLAR_PROFILE } from './profile';
 
 export async function POST(request: Request) {
     try {
-        // 1. Gather Context (User Interests)
-        // We will keep the context gathering as is to mix dynamic + static
+        const { dateMargin } = await request.json().catch(() => ({}));
 
         // 1. Gather Context (User Interests)
         // User explicitly requested to ONLY use the Scholar Profile and REMOVE tasks/recent papers.
@@ -38,11 +37,15 @@ export async function POST(request: Request) {
         const uniqueInterests: string[] = [];
         // We pass empty array because SCHOLAR_PROFILE in the system prompt contains all the necessary context.
 
-        console.log("Searching with STRICT Profile only.");
+        // However, user requested to pass "Recently added paper list" as input to avoid duplicates.
+        const { data: recentPapers } = await supabase.from('papers').select('title').order('created_at', { ascending: false }).limit(20);
+        const existingTitles = recentPapers?.map(p => p.title) || [];
+
+        console.log("Searching with STRICT Profile only. Date Margin:", dateMargin);
 
         // 2. Perform Agentic Search
-        // Pass dynamic interests + STATIC PROFILE
-        const searchResults = await performScholarSearch(uniqueInterests, SCHOLAR_PROFILE);
+        // Pass dynamic interests + STATIC PROFILE + Existing Titles + Date Margin
+        const searchResults = await performScholarSearch(uniqueInterests, SCHOLAR_PROFILE, existingTitles, dateMargin);
 
         if (searchResults.length === 0) {
             return NextResponse.json({ message: "No results found", papers: [] });

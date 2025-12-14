@@ -9,7 +9,8 @@ import {
     BookOpen,
     PenTool,
     Tags,
-    LogOut
+    LogOut,
+    Twitter
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -17,6 +18,7 @@ const MENU_ITEMS = [
     { href: '/private', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/private/tasks', label: 'Tasks', icon: CheckSquare },
     { href: '/private/papers', label: 'Papers', icon: BookOpen },
+    { href: '/private/x', label: 'X Feed', icon: Twitter },
     { href: '/private/notes', label: 'Notes', icon: FileText },
     { href: '/private/journal', label: 'Journal', icon: PenTool },
     { href: '/private/tags', label: 'Tags', icon: Tags },
@@ -51,8 +53,8 @@ export default function PrivateSidebar() {
                             key={item.href}
                             href={item.href}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
-                                    ? 'bg-blue-600 text-white shadow-md'
-                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                ? 'bg-blue-600 text-white shadow-md'
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                                 }`}
                         >
                             <Icon size={20} />

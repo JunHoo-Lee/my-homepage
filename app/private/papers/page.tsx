@@ -21,6 +21,7 @@ export default function PapersPage() {
     const [trendingSource, setTrendingSource] = useState<'daily' | 'trending' | 'deepseek' | 'bytedance'>('daily');
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const [dateMargin, setDateMargin] = useState('');
 
     // Loading States
     const [loadingMyParams, setLoadingMyParams] = useState(true);
@@ -307,7 +308,7 @@ export default function PapersPage() {
 
                         {loadingMyParams ? <p>Loading...</p> : (
                             <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
-                                {myPapers.map(p => (
+                                {myPapers.filter(p => !p.tags?.includes('X')).map(p => (
                                     <div
                                         key={p.id}
                                         onClick={() => setEditingPaper(p)}
@@ -318,7 +319,6 @@ export default function PapersPage() {
                                                 <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{p.title}</h3>
                                                 <p className="text-gray-600 text-sm mt-1">{formatAuthors(p.authors)}</p>
 
-                                                {/* TLDR Preview for List View only if not in Card mode (Card handles it differently) */}
                                                 {viewMode === 'list' && p.memo && (
                                                     <div className="flex items-start gap-2 mt-2 text-sm text-gray-500">
                                                         <BookOpen size={14} className="mt-0.5 text-blue-400 shrink-0" />
@@ -362,6 +362,136 @@ export default function PapersPage() {
                     </div>
                 )}
 
+                {activeTab === 'for_you' && (
+                    <div className="space-y-6">
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
+                            <h2 className="text-blue-900 font-semibold flex items-center gap-2">
+                                <Sparkles size={18} className="text-blue-600" />
+                                AI Recommended for You
+                            </h2>
+                            <p className="text-blue-700 text-sm mt-1">Based on your tags and reading patterns.</p>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600">Search Since:</span>
+                                <select
+                                    className="text-sm border rounded p-1"
+                                    value={dateMargin}
+                                    onChange={(e) => setDateMargin(e.target.value)}
+                                >
+                                    <option value="">Last 3 Months</option>
+                                    <option value="2024-01-01">2024 (Jan)</option>
+                                    <option value="2024-06-01">2024 (Jun)</option>
+                                    <option value="2024-10-01">2024 (Oct)</option>
+                                    <option value="2024-11-01">2024 (Nov)</option>
+                                    <option value="2024-12-01">2024 (Dec)</option>
+                                </select>
+                            </div>
+                            <button
+                                onClick={() => fetchForYou(true)}
+                                disabled={loadingForYou}
+                                className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors flex items-center gap-1 disabled:opacity-50"
+                            >
+                                <RefreshCw size={12} className={loadingForYou ? "animate-spin" : ""} />
+                                {loadingForYou ? "Searching..." : "Check for Updates"}
+                            </button>
+                        </div>
+
+                        {loadingForYou ? (
+                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-600" size={32} /></div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-1">
+                                    <p className="text-sm text-gray-500">Items found by your Scholar Agent.</p>
+                                    <button
+                                        onClick={() => fetchForYou(true)}
+                                        className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors flex items-center gap-1"
+                                    >
+                                        <RefreshCw size={12} /> Check for New Updates
+                                    </button>
+                                </div>
+                                <div className="grid gap-4">
+                                    {recommendedPapers.length === 0 ? (
+                                        <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed text-gray-400">
+                                            No inbox items yet. Click "Check for Updates" to start your agent.
+                                        </div>
+                                    ) : recommendedPapers.map((p, idx) => {
+                                        const duplicateItem = myPapers.find(mp => (mp.link === p.link || mp.title === p.title) && mp.id !== p.id);
+                                        const isDuplicate = !!duplicateItem;
+                                        const isXSource = p.tags?.includes('X');
+
+                                        return (
+                                            <div key={idx} className="bg-white p-4 rounded-lg border border-purple-100 shadow-sm hover:shadow-md transition-all ring-1 ring-purple-50 group">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex-1">
+                                                        <h3 className="font-semibold text-lg text-gray-900 leading-snug">{p.title}</h3>
+                                                        {isDuplicate && (
+                                                            <div className="text-xs text-orange-600 flex items-center gap-1 mt-1">
+                                                                <span className="font-bold">⚠️ Already in Library:</span> {duplicateItem.title}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 ml-2 shrink-0">
+                                                        <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ${isXSource ? 'bg-black text-white' : 'bg-blue-100 text-blue-800'}`}>
+                                                            {isXSource ? 'Source: X' : 'Source: Web'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {p.authors && <p className="text-gray-600 text-sm mt-1">{p.authors}</p>}
+
+                                                <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
+                                                    <span className="font-bold mr-2 text-purple-600">TLDR:</span>
+                                                    {p.memo || p.tldr_kr}
+                                                </div>
+
+                                                <div className="mt-4 flex gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={async (e) => {
+                                                            const btn = e.currentTarget;
+                                                            btn.disabled = true;
+                                                            btn.innerText = "Adding...";
+
+                                                            const newTags = (p.tags || []).filter((t: string) => t !== 'Scholar Inbox');
+
+                                                            const { error } = await supabase.from('papers').update({
+                                                                tags: newTags,
+                                                                status: 'unread'
+                                                            }).eq('id', p.id);
+
+                                                            if (!error) {
+                                                                btn.innerText = "Added to Library!";
+                                                                btn.className = "px-4 py-2 rounded text-sm bg-green-100 text-green-700 cursor-default";
+                                                            } else {
+                                                                btn.disabled = false;
+                                                                btn.innerText = "Failed";
+                                                            }
+                                                        }}
+                                                        disabled={isDuplicate}
+                                                        className={`px-4 py-2 rounded text-sm transition-colors ${isDuplicate ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}
+                                                    >
+                                                        {isDuplicate ? 'Already in Library' : 'Add to Reading List'}
+                                                    </button>
+                                                    <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700 flex items-center gap-1">
+                                                        View Source <ExternalLink size={14} />
+                                                    </a>
+                                                    <button
+                                                        onClick={() => deletePaper(p.id)}
+                                                        className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+                                                    >
+                                                        Dismiss
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {activeTab === 'trending' && (
                     <div className="space-y-6">
                         <div className="flex flex-col gap-4">
@@ -392,7 +522,6 @@ export default function PapersPage() {
                                             <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
                                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
                                         </div>
-                                        {/* Date/Source Info */}
                                         {p.publishedAt && (
                                             <p className="text-gray-400 text-xs mt-1">
                                                 {new Date(p.publishedAt).toLocaleDateString()}
@@ -419,7 +548,6 @@ export default function PapersPage() {
                                     </div>
                                 ))}
 
-                                {/* Load More Button for Collections */}
                                 {(trendingSource === 'deepseek' || trendingSource === 'bytedance') && hasMore && (
                                     <div className="flex justify-center mt-6">
                                         <button
@@ -436,172 +564,86 @@ export default function PapersPage() {
                         )}
                     </div>
                 )}
-
-                {activeTab === 'for_you' && (
-                    <div className="space-y-6">
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
-                            <h2 className="text-blue-900 font-semibold flex items-center gap-2">
-                                <Sparkles size={18} className="text-blue-600" />
-                                AI Recommended for You
-                            </h2>
-                            <p className="text-blue-700 text-sm mt-1">Based on your tags and reading patterns.</p>
-                        </div>
-
-                        {loadingForYou ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-600" size={32} /></div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center px-1">
-                                    <p className="text-sm text-gray-500">Items found by your Scholar Agent.</p>
-                                    <button
-                                        onClick={() => fetchForYou(true)}
-                                        className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors flex items-center gap-1"
-                                    >
-                                        <RefreshCw size={12} /> Check for New Updates
-                                    </button>
-                                </div>
-                                <div className="grid gap-4">
-                                    {recommendedPapers.length === 0 ? (
-                                        <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed text-gray-400">
-                                            No inbox items yet. Click "Check for Updates" to start your agent.
-                                        </div>
-                                    ) : recommendedPapers.map((p, idx) => (
-                                        <div key={idx} className="bg-white p-4 rounded-lg border border-purple-100 shadow-sm hover:shadow-md transition-all ring-1 ring-purple-50 group">
-                                            <div className="flex justify-between items-start">
-                                                <h3 className="font-semibold text-lg text-gray-900 leading-snug">{p.title}</h3>
-                                                <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ml-2 ${p.tags?.includes('X') ? 'bg-black text-white' : 'bg-blue-100 text-blue-800'
-                                                    }`}>
-                                                    {p.tags?.includes('X') ? 'Source: X' : 'Source: Web'}
-                                                </span>
-                                            </div>
-
-                                            {/* Date/Authors placeholder if we had them */}
-                                            {p.authors && <p className="text-gray-600 text-sm mt-1">{p.authors}</p>}
-
-                                            <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
-                                                <span className="font-bold mr-2 text-purple-600">TLDR:</span>
-                                                {p.memo || p.tldr_kr}
-                                            </div>
-
-                                            <div className="mt-4 flex gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                {/* Move to My Papers essentially just removes the 'Scholar Inbox' tag or changes status? 
-                                                     Actually, they are ALREADY in the DB. "Adding" usually means "Accepting" them 
-                                                     into the main reading list (e.g. changing status from unread silent to priority?).
-                                                     For now, let's say "Add to Library" removes the specialized Inbox tag 
-                                                     or just alerts user it's there. 
-                                                     
-                                                     Actually, since they are already in the DB, we might want to "Mark as Interested" 
-                                                     or just let them exist. 
-                                                     
-                                                     Let's assume "Add to Library" means "Okay, I want to read this" -> change status to 'reading'?
-                                                 */}
-                                                <button
-                                                    onClick={() => updateStatus(p.id, 'reading')}
-                                                    className="px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 transition-colors"
-                                                >
-                                                    Add to Reading List
-                                                </button>
-                                                <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700 flex items-center gap-1">
-                                                    View Source <ExternalLink size={14} />
-                                                </a>
-                                                <button
-                                                    onClick={() => deletePaper(p.id)}
-                                                    className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
-                                                >
-                                                    Dismiss
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
 
             {/* Manual Add Modal */}
-            {
-                manualAddModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
-                            <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
-                            <form onSubmit={handleManualSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                    <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
-                                    <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
-                                    <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
-                                </div>
-                                <div className="flex justify-end gap-2 mt-6">
-                                    <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
-                                </div>
-                            </form>
-                        </div>
+            {manualAddModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+                        <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
+                        <form onSubmit={handleManualSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
+                                <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
+                                <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
+                            </div>
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
+                            </div>
+                        </form>
                     </div>
-                )
-            }
+                </div>
+            )}
 
             {/* Edit Paper Modal */}
-            {
-                editingPaper && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
-                            <div className="flex justify-between items-start mb-4">
-                                <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
-                                <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+            {editingPaper && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
+                            <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+                        </div>
+
+                        <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
+                            <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
+                                <FormSelect
+                                    label="Status"
+                                    value={editingPaper.status}
+                                    onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
+                                    options={['unread', 'reading', 'read']}
+                                />
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
+                                    <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
+                                </div>
                             </div>
 
-                            <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
-                                <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
-                                    <FormSelect
-                                        label="Status"
-                                        value={editingPaper.status}
-                                        onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
-                                        options={['unread', 'reading', 'read']}
-                                    />
-                                    <div className="flex-1">
-                                        <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
-                                        <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
-                                    </div>
-                                </div>
+                            <div className="flex-1 flex flex-col min-h-0">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
+                                <RichTextEditor
+                                    value={editingPaper.memo || ''}
+                                    onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
+                                    minHeight="300px"
+                                />
+                                <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
+                            </div>
 
-                                <div className="flex-1 flex flex-col min-h-0">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
-                                    <RichTextEditor
-                                        value={editingPaper.memo || ''}
-                                        onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
-                                        minHeight="300px"
-                                    />
-                                    <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
+                            <div className="flex justify-between items-center pt-2 border-t mt-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
+                                    className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
+                                >
+                                    Delete Paper
+                                </button>
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
                                 </div>
-
-                                <div className="flex justify-between items-center pt-2 border-t mt-auto">
-                                    <button
-                                        type="button"
-                                        onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
-                                        className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
-                                    >
-                                        Delete Paper
-                                    </button>
-                                    <div className="flex gap-2">
-                                        <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            )}
+        </div>
     );
 }
 
