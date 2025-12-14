@@ -328,7 +328,7 @@ export default function PapersPage() {
 
                         {loadingMyParams ? <p className="text-stone-500">Loading...</p> : (
                             <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
-                                {myPapers.filter(p => !p.tags?.includes('Scholar Inbox')).map(p => (
+                                {myPapers.filter(p => !p.tags?.includes('Scholar Inbox') && !p.tags?.includes('X')).map(p => (
                                     <div
                                         key={p.id}
                                         onClick={() => setEditingPaper(p)}

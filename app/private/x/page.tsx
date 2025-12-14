@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
 import { Loader2, ExternalLink, RefreshCw, Bookmark, Share2, MessageCircle, Heart, Repeat, Flame, Layers } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import Link from 'next/link';
 
 interface TweetCard {
     id: string;
@@ -111,6 +112,13 @@ export default function XFeedPage() {
                     </h1>
                     <p className="text-stone-400 mt-2 font-medium">Curated viral AI research discussions & threads.</p>
                 </div>
+                <Link
+                    href="/private/x/library"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-stone-100 rounded-full hover:bg-stone-700 border border-stone-700 transition-all shadow-lg hover:shadow-xl font-medium"
+                >
+                    <Bookmark size={18} />
+                    Library
+                </Link>
                 <button
                     onClick={handleRefresh}
                     disabled={refreshing}
