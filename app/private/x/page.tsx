@@ -2,11 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Loader2, ExternalLink, RefreshCw, MessageCircle, Heart, Repeat } from 'lucide-react';
+import { Loader2, ExternalLink, RefreshCw, Bookmark, Share2, MessageCircle, Heart, Repeat, Flame, Layers } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
+interface TweetCard {
+    id: string;
+    title: string;
+    authors: string;
+    link: string;
+    memo: string;
+    tags: string[];
+    created_at: string;
+}
+
 export default function XFeedPage() {
-    const [tweets, setTweets] = useState<any[]>([]);
+    const [tweets, setTweets] = useState<TweetCard[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -19,7 +29,7 @@ export default function XFeedPage() {
         const { data } = await supabase
             .from('papers')
             .select('*')
-            .contains('tags', ['X']) // Fetch only X content
+            .contains('tags', ['X'])
             .order('created_at', { ascending: false })
             .limit(50);
 
@@ -29,15 +39,8 @@ export default function XFeedPage() {
 
     const handleRefresh = async () => {
         setRefreshing(true);
-        // Trigger the agent search specifically for X
         try {
-            const res = await fetch('/api/scholar-inbox', {
-                method: 'POST',
-                // We might want to pass a param to force X search, but the current agent does both.
-                // For now, just calling it will refresh the inbox.
-            });
-            await res.json();
-            // Re-fetch from DB
+            await fetch('/api/scholar-inbox', { method: 'POST' });
             await fetchTweets();
         } catch (e) {
             console.error("Refresh failed", e);
@@ -47,112 +50,200 @@ export default function XFeedPage() {
         }
     };
 
-    // Helper to format "faves/RTs" if we had them (Currently we don't store them explicitly but we might parse them)
-    // For now, just visual placeholder or if memo contains stats.
-
-    const handleRead = async (id: string, currentTags: string[]) => {
-        // "Mark as Read" or "Add to Library" - effectively removing 'Scholar Inbox' if present
-        // If it's just a feed, maybe we just want to keep it there?
-        // User said "Add to reading list".
-        // Let's allow adding.
-
+    const handleSaveToLibrary = async (id: string, currentTags: string[]) => {
+        // Remove 'Scholar Inbox' to "save" it to the permanent library
         const newTags = currentTags.filter(t => t !== 'Scholar Inbox');
-        // Check if already added
+
+        // If it essentially hasn't changed (meaning it wasn't in inbox or already saved), 
+        // we might strictly want to ensure it is considered "saved".
+        // In our logic, simply having 'X' and NOT 'Scholar Inbox' makes it visible in My Papers.
+
         if (currentTags.length === newTags.length && !currentTags.includes('Scholar Inbox')) {
-            // Already "in library"
-            return;
+            return; // Already saved
         }
 
         const { error } = await supabase.from('papers').update({
             tags: newTags,
-            status: 'unread'
+            status: 'unread' // Mark as unread so user notices it in their library
         }).eq('id', id);
 
         if (!error) {
-            // Update local state
             setTweets(tweets.map(t => t.id === id ? { ...t, tags: newTags } : t));
         }
     };
 
+    // Parser for the specific format user provided
+    const parseMemo = (memo: string) => {
+        // Default values
+        let tldr = '';
+        let relation = '';
+        let cleanMemo = memo;
+
+        // Try to extract TL;DR
+        const tldrMatch = memo.match(/(?:TL;?DR|Summary):\s*(.*?)(?=(?:\n|$|Relation:))/is);
+        if (tldrMatch) {
+            tldr = tldrMatch[1].trim();
+        }
+
+        // Try to extract Relation
+        const relationMatch = memo.match(/Relation:\s*(.*?)(?=(?:\n|$|\(Source:))/is);
+        if (relationMatch) {
+            relation = relationMatch[1].trim();
+        }
+
+        // If we found structured data, we might want to use that.
+        // If not, we fall back to displaying the whole memo.
+        const hasStructure = tldr || relation;
+
+        return { tldr, relation, hasStructure };
+    };
+
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="max-w-3xl mx-auto pb-20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-10 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <span className="bg-black text-white p-2 rounded-lg"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg></span>
-                        Viral AI Feed
+                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                        <span className="bg-black text-white p-2 rounded-xl">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                        </span>
+                        X Feed
                     </h1>
-                    <p className="text-gray-500 mt-2">Latest viral threads & discussions from X (Twitter) about AI.</p>
+                    <p className="text-gray-500 mt-2 font-medium">Curated viral AI research discussions & threads.</p>
                 </div>
                 <button
                     onClick={handleRefresh}
                     disabled={refreshing}
-                    className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-full hover:bg-black transition-all shadow-lg hover:shadow-xl disabled:opacity-70 font-medium"
                 >
-                    <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
-                    {refreshing ? "Checking X..." : "Refresh Feed"}
+                    <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
+                    {refreshing ? "Syncing..." : "Sync Feed"}
                 </button>
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-20">
-                    <Loader2 className="animate-spin text-gray-400" size={40} />
+                <div className="flex flex-col items-center justify-center py-20">
+                    <Loader2 className="animate-spin text-gray-900 mb-4" size={40} />
+                    <p className="text-gray-400 font-medium">Fetching latent space signals...</p>
                 </div>
             ) : (
-                <div className="space-y-6">
+                <div className="space-y-8">
                     {tweets.length === 0 ? (
-                        <div className="text-center py-20 text-gray-400">
-                            No viral threads found yet. Click "Refresh Feed" to start the agent.
+                        <div className="text-center py-24 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                            <p className="text-gray-500 font-medium text-lg">No viral threads currently.</p>
+                            <p className="text-gray-400 text-sm mt-1">Tap 'Sync Feed' to run the agent.</p>
                         </div>
                     ) : (
-                        <div className="grid gap-6">
-                            {tweets.map(tweet => {
-                                const isAdded = !tweet.tags?.includes('Scholar Inbox');
+                        tweets.map(tweet => {
+                            const isAdded = !tweet.tags?.includes('Scholar Inbox');
+                            const { tldr, relation, hasStructure } = parseMemo(tweet.memo);
 
-                                return (
-                                    <div key={tweet.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                                        <div className="p-6">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className="font-bold text-xl text-gray-900 leading-snug mb-1">{tweet.title}</h3>
-                                                    <p className="text-gray-500 text-sm">{tweet.authors}</p>
+                            // Detect tags from memo or explicit tags (if we had them in a separate column, but we'll use regex on memo or title if needed)
+                            const isViral = tweet.tags?.includes('Viral') || tweet.memo.toLowerCase().includes('viral');
+                            const isThread = tweet.tags?.includes('Thread') || tweet.memo.toLowerCase().includes('thread');
+
+                            return (
+                                <div key={tweet.id} className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
+                                    {/* Card Header / Author Info */}
+                                    <div className="p-6 md:p-8 pb-4">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xl font-bold text-gray-400">
+                                                    {tweet.authors ? tweet.authors[0].toUpperCase() : 'A'}
                                                 </div>
-                                                <a
-                                                    href={tweet.link}
-                                                    target="_blank"
-                                                    className="text-gray-400 hover:text-blue-500 p-2 hover:bg-blue-50 rounded-full transition-colors"
-                                                >
-                                                    <ExternalLink size={20} />
-                                                </a>
-                                            </div>
-
-                                            <div className="prose prose-sm max-w-none text-gray-700 bg-gray-50 p-4 rounded-lg">
-                                                <ReactMarkdown>{tweet.memo}</ReactMarkdown>
-                                            </div>
-
-                                            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-                                                <div className="flex items-center gap-4 text-gray-400 text-sm">
-                                                    {/* Placeholder stats or real if we had them */}
-                                                    <div className="flex items-center gap-1"><Heart size={16} /> Viral</div>
-                                                    <div className="flex items-center gap-1"><Repeat size={16} /> Thread</div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-gray-900 text-lg leading-tight line-clamp-1">{tweet.authors || "Unknown Author"}</span>
+                                                    <span className="text-gray-400 text-sm">@{tweet.authors?.split(' ')[0]?.toLowerCase() || 'handle'}</span>
                                                 </div>
-
-                                                <button
-                                                    onClick={() => handleRead(tweet.id, tweet.tags)}
-                                                    disabled={isAdded}
-                                                    className={`px-6 py-2 rounded-full font-medium text-sm transition-all ${isAdded
-                                                            ? 'bg-green-50 text-green-600 border border-green-200 cursor-default'
-                                                            : 'bg-black text-white hover:bg-gray-800 shadow-lg shadow-gray-200'
-                                                        }`}
-                                                >
-                                                    {isAdded ? "Saved to Library" : "Add to Library"}
-                                                </button>
                                             </div>
+                                            <a
+                                                href={tweet.link}
+                                                target="_blank"
+                                                className="text-gray-300 hover:text-blue-500 transition-colors p-2"
+                                            >
+                                                <ExternalLink size={24} />
+                                            </a>
+                                        </div>
+
+                                        <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
+                                            {tweet.title}
+                                        </h2>
+                                    </div>
+
+                                    {/* Card Body */}
+                                    <div className="px-6 md:px-8 pb-6">
+                                        <div className="bg-gray-50 rounded-2xl p-5 md:p-6 space-y-4">
+                                            {hasStructure ? (
+                                                <>
+                                                    {tldr && (
+                                                        <div>
+                                                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TL;DR</div>
+                                                            <p className="text-gray-800 font-medium leading-relaxed">{tldr}</p>
+                                                        </div>
+                                                    )}
+                                                    {relation && (
+                                                        <div className="pt-2 border-t border-gray-200/60">
+                                                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Relation</div>
+                                                            <p className="text-gray-600 leading-relaxed">{relation}</p>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div className="prose prose-sm max-w-none text-gray-700">
+                                                    <ReactMarkdown>{tweet.memo}</ReactMarkdown>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+
+                                    {/* Footer / Actions */}
+                                    <div className="px-6 md:px-8 pb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                                        {/* Badges */}
+                                        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold whitespace-nowrap">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                                                Source: X
+                                            </span>
+                                            {isViral && (
+                                                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-50 text-pink-600 text-sm font-semibold whitespace-nowrap">
+                                                    <Flame size={14} /> Viral
+                                                </span>
+                                            )}
+                                            {isThread && (
+                                                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 text-purple-600 text-sm font-semibold whitespace-nowrap">
+                                                    <Layers size={14} /> Thread
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Save Button */}
+                                        <button
+                                            onClick={() => handleSaveToLibrary(tweet.id, tweet.tags)}
+                                            disabled={isAdded}
+                                            className={`
+                                                relative w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all
+                                                ${isAdded
+                                                    ? 'bg-green-100 text-green-700 cursor-default'
+                                                    : 'bg-gray-900 text-white hover:bg-black hover:scale-105 shadow-xl hover:shadow-2xl shadow-gray-200'
+                                                }
+                                            `}
+                                        >
+                                            {isAdded ? (
+                                                <>
+                                                    <Bookmark size={16} fill="currentColor" />
+                                                    Saved to Library
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Bookmark size={16} />
+                                                    Save to Library
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })
                     )}
                 </div>
             )}
