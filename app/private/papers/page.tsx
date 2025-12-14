@@ -92,9 +92,29 @@ export default function PapersPage() {
     const fetchForYou = async (isRefresh = false) => {
         setLoadingForYou(true);
         if (isRefresh) {
+            // Calculate date from dropdown value or default to 3 months
+            const calculateDate = (val: string) => {
+                const now = new Date();
+                switch (val) {
+                    case '1week': now.setDate(now.getDate() - 7); break;
+                    case '2weeks': now.setDate(now.getDate() - 14); break;
+                    case '1month': now.setMonth(now.getMonth() - 1); break;
+                    case '6months': now.setMonth(now.getMonth() - 6); break;
+                    case '1year': now.setFullYear(now.getFullYear() - 1); break;
+                    case '2years': now.setFullYear(now.getFullYear() - 2); break;
+                    default: now.setMonth(now.getMonth() - 3); break; // Default 3 months
+                }
+                return now.toISOString().split('T')[0];
+            };
+
+            const dateStr = calculateDate(dateMargin);
+
             // Trigger new search
             try {
-                const res = await fetch('/api/scholar-inbox', { method: 'POST' });
+                const res = await fetch('/api/scholar-inbox', {
+                    method: 'POST',
+                    body: JSON.stringify({ dateMargin: dateStr })
+                });
                 const data = await res.json();
                 if (data.papers) {
                     setRecommendedPapers(prev => [...data.papers, ...prev]);
@@ -380,12 +400,13 @@ export default function PapersPage() {
                                     value={dateMargin}
                                     onChange={(e) => setDateMargin(e.target.value)}
                                 >
-                                    <option value="">Last 3 Months</option>
-                                    <option value="2024-01-01">2024 (Jan)</option>
-                                    <option value="2024-06-01">2024 (Jun)</option>
-                                    <option value="2024-10-01">2024 (Oct)</option>
-                                    <option value="2024-11-01">2024 (Nov)</option>
-                                    <option value="2024-12-01">2024 (Dec)</option>
+                                    <option value="">Last 3 Months (Default)</option>
+                                    <option value="1week">Last 1 Week</option>
+                                    <option value="2weeks">Last 2 Weeks</option>
+                                    <option value="1month">Last 1 Month</option>
+                                    <option value="6months">Last 6 Months</option>
+                                    <option value="1year">Last 1 Year</option>
+                                    <option value="2years">Last 2 Years</option>
                                 </select>
                             </div>
                             <button
@@ -402,14 +423,7 @@ export default function PapersPage() {
                             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-600" size={32} /></div>
                         ) : (
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center px-1">
                                     <p className="text-sm text-gray-500">Items found by your Scholar Agent.</p>
-                                    <button
-                                        onClick={() => fetchForYou(true)}
-                                        className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors flex items-center gap-1"
-                                    >
-                                        <RefreshCw size={12} /> Check for New Updates
-                                    </button>
                                 </div>
                                 <div className="grid gap-4">
                                     {recommendedPapers.length === 0 ? (
@@ -488,162 +502,166 @@ export default function PapersPage() {
                                     })}
                                 </div>
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'trending' && (
-                    <div className="space-y-6">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex justify-between items-center">
-                                <div className="flex gap-2">
-                                    {['daily', 'trending', 'deepseek', 'bytedance'].map((s) => (
-                                        <button
-                                            key={s}
-                                            onClick={() => { setTrendingSource(s as any); fetchTrending(s); }}
-                                            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${trendingSource === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                                        >
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button onClick={() => fetchTrending()} className="text-sm text-blue-600 flex items-center gap-1">
-                                    <RefreshCw size={14} /> Refresh
-                                </button>
-                            </div>
-                        </div>
-                        {loadingTrending ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
-                        ) : (
-                            <div className="grid gap-4">
-                                {trendingPapers.map((p, idx) => (
-                                    <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
-                                            <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
-                                        </div>
-                                        {p.publishedAt && (
-                                            <p className="text-gray-400 text-xs mt-1">
-                                                {new Date(p.publishedAt).toLocaleDateString()}
-                                            </p>
-                                        )}
-                                        <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
-
-                                        <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
-                                            <span className="font-bold mr-2">TLDR (KR):</span>
-                                            {p.tldr_kr}
-                                        </div>
-
-                                        <div className="mt-4 flex gap-3">
-                                            <button
-                                                onClick={() => handleAddPaper(p)}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
-                                            >
-                                                + Add to My Papers
-                                            </button>
-                                            <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700">
-                                                View Arxiv
-                                            </a>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {(trendingSource === 'deepseek' || trendingSource === 'bytedance') && hasMore && (
-                                    <div className="flex justify-center mt-6">
-                                        <button
-                                            onClick={() => fetchTrending(undefined, true)}
-                                            disabled={loadingMore}
-                                            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-                                        >
-                                            {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
-                                            Load More
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
                 )}
             </div>
+                )}
 
-            {/* Manual Add Modal */}
-            {manualAddModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
-                        <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
-                        <form onSubmit={handleManualSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+            {activeTab === 'trending' && (
+                <div className="space-y-6">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                            <div className="flex gap-2">
+                                {['daily', 'trending', 'deepseek', 'bytedance'].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => { setTrendingSource(s as any); fetchTrending(s); }}
+                                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${trendingSource === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                    >
+                                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                                    </button>
+                                ))}
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
-                                <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
-                                <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
-                            </div>
-                            <div className="flex justify-end gap-2 mt-6">
-                                <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Edit Paper Modal */}
-            {editingPaper && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
-                        <div className="flex justify-between items-start mb-4">
-                            <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
-                            <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+                            <button onClick={() => fetchTrending()} className="text-sm text-blue-600 flex items-center gap-1">
+                                <RefreshCw size={14} /> Refresh
+                            </button>
                         </div>
-
-                        <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
-                            <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
-                                <FormSelect
-                                    label="Status"
-                                    value={editingPaper.status}
-                                    onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
-                                    options={['unread', 'reading', 'read']}
-                                />
-                                <div className="flex-1">
-                                    <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
-                                    <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
-                                </div>
-                            </div>
-
-                            <div className="flex-1 flex flex-col min-h-0">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
-                                <RichTextEditor
-                                    value={editingPaper.memo || ''}
-                                    onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
-                                    minHeight="300px"
-                                />
-                                <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
-                            </div>
-
-                            <div className="flex justify-between items-center pt-2 border-t mt-auto">
-                                <button
-                                    type="button"
-                                    onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
-                                    className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
-                                >
-                                    Delete Paper
-                                </button>
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
-                                </div>
-                            </div>
-                        </form>
                     </div>
+                    {loadingTrending ? (
+                        <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
+                    ) : (
+                        <div className="grid gap-4">
+                            {trendingPapers.map((p, idx) => (
+                                <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-semibold text-lg text-gray-900">{p.title}</h3>
+                                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
+                                    </div>
+                                    {p.publishedAt && (
+                                        <p className="text-gray-400 text-xs mt-1">
+                                            {new Date(p.publishedAt).toLocaleDateString()}
+                                        </p>
+                                    )}
+                                    <p className="text-gray-600 text-sm mt-1">{p.authors}</p>
+
+                                    <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
+                                        <span className="font-bold mr-2">TLDR (KR):</span>
+                                        {p.tldr_kr}
+                                    </div>
+
+                                    <div className="mt-4 flex gap-3">
+                                        <button
+                                            onClick={() => handleAddPaper(p)}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+                                        >
+                                            + Add to My Papers
+                                        </button>
+                                        <a href={p.link} target="_blank" className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 text-gray-700">
+                                            View Arxiv
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {(trendingSource === 'deepseek' || trendingSource === 'bytedance') && hasMore && (
+                                <div className="flex justify-center mt-6">
+                                    <button
+                                        onClick={() => fetchTrending(undefined, true)}
+                                        disabled={loadingMore}
+                                        className="flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                    >
+                                        {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
+                                        Load More
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
+
+            {/* Manual Add Modal */ }
+    {
+        manualAddModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+                    <h2 className="text-xl font-bold mb-4">Add Paper Manually</h2>
+                    <form onSubmit={handleManualSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <input required className="w-full p-2 border rounded" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
+                            <input className="w-full p-2 border rounded" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
+                            <input className="w-full p-2 border rounded" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
+                        </div>
+                        <div className="flex justify-end gap-2 mt-6">
+                            <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Paper</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        )
+    }
+
+    {/* Edit Paper Modal */ }
+    {
+        editingPaper && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl h-[80vh] flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                        <h2 className="text-xl font-bold pr-8">{editingPaper.title}</h2>
+                        <button onClick={() => setEditingPaper(null)} className="text-gray-400 hover:text-gray-600"><Plus className="rotate-45" size={24} /></button>
+                    </div>
+
+                    <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto">
+                        <div className="flex gap-4 p-2 bg-gray-50 rounded-lg">
+                            <FormSelect
+                                label="Status"
+                                value={editingPaper.status}
+                                onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
+                                options={['unread', 'reading', 'read']}
+                            />
+                            <div className="flex-1">
+                                <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
+                                <a href={editingPaper.link} target="_blank" className="text-blue-600 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col min-h-0">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Notes & Thoughts</label>
+                            <RichTextEditor
+                                value={editingPaper.memo || ''}
+                                onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
+                                minHeight="300px"
+                            />
+                            <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
+                        </div>
+
+                        <div className="flex justify-between items-center pt-2 border-t mt-auto">
+                            <button
+                                type="button"
+                                onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
+                                className="text-red-500 hover:bg-red-50 px-3 py-2 rounded text-sm"
+                            >
+                                Delete Paper
+                            </button>
+                            <div className="flex gap-2">
+                                <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        )
+    }
+        </div >
     );
 }
 

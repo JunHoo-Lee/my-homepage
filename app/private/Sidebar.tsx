@@ -45,7 +45,7 @@ export default function PrivateSidebar({ isOpen, onClose }: PrivateSidebarProps)
                 className={`
                     fixed lg:static inset-y-0 left-0 z-50
                     w-[280px] bg-stone-900 text-stone-400 flex flex-col h-full border-r border-stone-800
-                    transition-transform duration-300 ease-in-out lg:transform-none shadow-xl lg:shadow-none
+                    transition-transform duration-300 ease-in-out lg:transform-none lg:translate-x-0 shadow-xl lg:shadow-none
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 `}
             >
