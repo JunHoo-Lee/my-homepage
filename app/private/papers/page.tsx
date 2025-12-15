@@ -255,13 +255,29 @@ export default function PapersPage() {
         if (!confirm('Are you sure you want to delete this paper?')) return false;
 
         try {
-            const { error } = await supabase.from('papers').delete().eq('id', id);
+            console.log('Attempting to delete paper:', id);
+            const { error, count } = await supabase.from('papers').delete({ count: 'exact' }).eq('id', id);
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase delete error:', error);
+                throw error;
+            }
 
-            // Functional updates ensure we're working with latest state
+            console.log('Deleted count:', count);
+
+            if (count === 0) {
+                alert('Delete failed: Item not found or permission denied (RLS).');
+                return false;
+            }
+
+            // Success
+            // Functional updates for immediate UI response
             setMyPapers(prev => prev.filter(p => p.id !== id));
             setRecommendedPapers(prev => prev.filter(p => p.id !== id));
+
+            // Background refresh to ensure consistency
+            fetchMyPapers();
+
             return true;
         } catch (error: any) {
             console.error('Delete failed:', error);
