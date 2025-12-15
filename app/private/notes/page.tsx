@@ -78,6 +78,18 @@ export default function NotesPage() {
         fetchNotes();
     };
 
+    const handleRemoveTag = (tagToRemove: string) => {
+        const newTags = currentNote.tags?.filter((t: string) => t !== tagToRemove) || [];
+        setCurrentNote({ ...currentNote, tags: newTags });
+    };
+
+    const handleAddTag = (tagToAdd: string) => {
+        const newTags = [...(currentNote.tags || []), tagToAdd];
+        setCurrentNote({ ...currentNote, tags: newTags });
+    };
+
+    const allTags = Array.from(new Set(notes.flatMap(n => n.tags || []))).sort();
+
     return (
         <div className="space-y-6">
             {view === 'list' && (
@@ -183,16 +195,45 @@ export default function NotesPage() {
                     </div>
                     <div className="p-8 flex-1 flex flex-col h-full">
                         <input
-                            value={currentNote.title}
+                            value={currentNote.title || ''}
                             onChange={e => setCurrentNote({ ...currentNote, title: e.target.value })}
                             className="text-3xl font-bold mb-6 bg-transparent text-stone-100 focus:outline-none w-full placeholder-stone-700"
                             placeholder="Title"
                         />
-                        <div className="flex gap-2 mb-6">
+                        <div className="flex flex-wrap gap-2 mb-6 items-center">
                             {currentNote.tags?.map((t: string) => (
-                                <span key={t} className="bg-stone-800 px-2 py-1 rounded text-sm text-stone-400 border border-stone-700">#{t}</span>
+                                <span key={t} className="bg-stone-800 px-2.5 py-1 rounded text-sm text-stone-400 border border-stone-700 flex items-center gap-1.5 group/tag">
+                                    #{t}
+                                    <button
+                                        onClick={() => handleRemoveTag(t)}
+                                        className="hover:text-red-400 transition-colors opacity-0 group-hover/tag:opacity-100"
+                                        title="Remove tag"
+                                    >
+                                        ×
+                                    </button>
+                                </span>
                             ))}
-                            {/* Tag editing could be added here */}
+
+                            <div className="relative">
+                                <select
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            handleAddTag(e.target.value);
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    className="bg-stone-800 text-stone-400 text-sm border border-stone-700 rounded px-3 py-1 focus:outline-none focus:border-amber-500 appearance-none pr-8 cursor-pointer hover:bg-stone-700 transition-colors h-[29px]"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>+ Add Tag</option>
+                                    {allTags.filter(t => !currentNote.tags?.includes(t)).map(t => (
+                                        <option key={t} value={t}>{t}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500">
+                                    <Plus size={14} />
+                                </div>
+                            </div>
                         </div>
                         <div className="flex-1 min-h-0 flex flex-col">
                             <RichTextEditor
