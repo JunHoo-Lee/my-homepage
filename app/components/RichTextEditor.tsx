@@ -108,7 +108,7 @@ export default function RichTextEditor({ value, onChange, placeholder = "Write h
             </div>
 
             {/* Editor Area */}
-            <div className="relative flex-1" style={{ minHeight }}>
+            <div className="relative flex-1 flex flex-col" style={{ minHeight }}>
                 {view === 'edit' ? (
                     <textarea
                         ref={textareaRef}
@@ -118,10 +118,10 @@ export default function RichTextEditor({ value, onChange, placeholder = "Write h
                         onDrop={handleDrop}
                         onDragOver={e => e.preventDefault()}
                         placeholder={placeholder}
-                        className="w-full h-full p-4 resize-none focus:outline-none font-mono text-sm leading-relaxed bg-stone-950 text-stone-300 placeholder-stone-700"
+                        className="w-full flex-1 p-4 resize-none focus:outline-none font-mono text-sm leading-relaxed bg-stone-950 text-stone-300 placeholder-stone-700"
                     />
                 ) : (
-                    <div className="w-full h-full p-4 overflow-auto prose prose-invert prose-stone max-w-none prose-img:rounded-lg">
+                    <div className="w-full flex-1 p-4 overflow-auto prose prose-invert prose-stone max-w-none prose-img:rounded-lg">
                         <ReactMarkdown
                             remarkPlugins={[remarkMath]}
                             rehypePlugins={[rehypeKatex]}
