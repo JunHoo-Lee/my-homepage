@@ -50,12 +50,10 @@ export default function PrivateSidebar({ isOpen, onClose }: PrivateSidebarProps)
                 `}
             >
                 <div className="p-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold tracking-tight text-stone-100 flex items-center gap-2">
-                            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-amber-900/20">P</span>
-                            Workspace
+                    <div className="mb-2">
+                        <h1 className="text-xl font-bold tracking-tight text-stone-100">
+                            Junhoo Lee
                         </h1>
-                        <p className="text-[10px] text-stone-500 mt-1.5 font-bold tracking-widest uppercase ml-10">Private Area</p>
                     </div>
                     {/* Close button for mobile */}
                     <button
