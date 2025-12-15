@@ -102,7 +102,7 @@ export default function NotesPage() {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="bg-stone-100 text-stone-900 px-6 py-2 rounded-lg font-medium hover:bg-white transition-colors disabled:opacity-50 flex items-center gap-2"
+                                    className="bg-stone-800 text-stone-200 border border-stone-700 px-6 py-2 rounded-lg font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-lg"
                                 >
                                     {processing ? <Loader2 className="animate-spin" /> : <SparklesIcon />} Process & Save
                                 </button>
@@ -179,7 +179,7 @@ export default function NotesPage() {
                 <div className="max-w-4xl mx-auto bg-stone-900 min-h-[80vh] rounded-xl shadow-lg border border-stone-800 flex flex-col">
                     <div className="p-4 border-b border-stone-800 flex justify-between items-center">
                         <button onClick={() => setView('list')} className="text-stone-500 hover:text-stone-200 transition-colors">← Back</button>
-                        <button onClick={handleSave} className="bg-stone-100 text-stone-900 px-4 py-2 rounded hover:bg-white font-medium transition-colors">Save</button>
+                        <button onClick={handleSave} className="bg-stone-800 text-stone-200 border border-stone-700 px-4 py-2 rounded hover:bg-stone-700 font-medium transition-colors shadow-lg">Save</button>
                     </div>
                     <div className="p-8 flex-1 flex flex-col h-full">
                         <input
