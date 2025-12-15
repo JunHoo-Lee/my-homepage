@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Loader2, ExternalLink, ArrowLeft, Layers, Flame, Trash2 } from 'lucide-react';
+import { Loader2, ExternalLink, ArrowLeft, Layers, Flame, Trash2, BookDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 
@@ -47,6 +47,20 @@ export default function XLibraryPage() {
         // If we delete:
         const { error } = await supabase.from('papers').delete().eq('id', id);
         if (!error) {
+            setTweets(tweets.filter(t => t.id !== id));
+        }
+    };
+
+    const handleMoveToPapers = async (id: string, tags: string[]) => {
+        if (!confirm('Move to main paper list?')) return;
+
+        // Remove 'X' from tags
+        const newTags = tags.filter(t => t !== 'X');
+
+        const { error } = await supabase.from('papers').update({ tags: newTags }).eq('id', id);
+
+        if (!error) {
+            // Remove from current view as it no longer has 'X' tag
             setTweets(tweets.filter(t => t.id !== id));
         }
     };
@@ -136,13 +150,22 @@ export default function XLibraryPage() {
                                             {isViral && <Flame size={14} className="text-pink-400" />}
                                             {isThread && <Layers size={14} className="text-purple-400" />}
                                         </div>
-                                        <button
-                                            onClick={() => handleDelete(tweet.id)}
-                                            className="text-stone-600 hover:text-red-400 transition-colors"
-                                            title="Remove from library"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleMoveToPapers(tweet.id, tweet.tags)}
+                                                className="text-stone-600 hover:text-blue-400 transition-colors flex items-center gap-1 text-xs"
+                                                title="Move to Main Papers"
+                                            >
+                                                <BookDown size={16} /> Move to Papers
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(tweet.id)}
+                                                className="text-stone-600 hover:text-red-400 transition-colors"
+                                                title="Remove from library"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             );

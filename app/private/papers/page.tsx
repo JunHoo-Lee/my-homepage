@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown, CheckCircle2, GraduationCap } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -347,6 +347,14 @@ export default function PapersPage() {
                                                 )}
                                             </div>
                                             <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                <a
+                                                    href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`}
+                                                    target="_blank"
+                                                    className="p-2 text-stone-500 hover:text-blue-400 hover:bg-stone-800 rounded-full transition-colors"
+                                                    title="Search on Google Scholar"
+                                                >
+                                                    <GraduationCap size={20} />
+                                                </a>
                                                 {p.link && (
                                                     <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors">
                                                         <ExternalLink size={20} />
