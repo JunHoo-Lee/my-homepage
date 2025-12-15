@@ -336,7 +336,7 @@ export default function PapersPage() {
                                     >
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex-1 min-w-0 pr-4">
-                                                <h3 className="font-semibold text-lg text-stone-200 group-hover:text-amber-500 transition-colors line-clamp-2">{p.title}</h3>
+                                                <h3 className="font-semibold text-base text-stone-200 group-hover:text-amber-500 transition-colors line-clamp-2">{p.title}</h3>
                                                 <p className="text-stone-500 text-sm mt-1">{formatAuthors(p.authors)}</p>
 
                                                 {viewMode === 'list' && p.memo && (
@@ -364,7 +364,7 @@ export default function PapersPage() {
                                         </div>
 
                                         {viewMode === 'card' && p.memo && (
-                                            <div className="mb-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-6 prose-img:rounded-md flex-1 border border-stone-800/50">
+                                            <div className="mb-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-[12] prose-img:rounded-md flex-1 border border-stone-800/50">
                                                 <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                     {p.memo}
                                                 </ReactMarkdown>
