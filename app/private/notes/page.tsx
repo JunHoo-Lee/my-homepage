@@ -121,19 +121,19 @@ export default function NotesPage() {
                                 <div
                                     key={note.id}
                                     onClick={() => { setCurrentNote(note); setView('edit'); }}
-                                    className={`bg-stone-900 border border-stone-800 hover:border-stone-700 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 group ${viewType === 'card' ? 'p-6 rounded-3xl h-[340px]' : 'p-4 rounded-xl flex justify-between items-center'}`}
+                                    className={`bg-stone-900 border border-stone-800 hover:border-stone-700 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 group ${viewType === 'card' ? 'p-6 rounded-3xl h-[450px]' : 'p-4 rounded-xl flex justify-between items-center'}`}
                                 >
                                     {viewType === 'card' ? (
                                         <div className="flex flex-col h-full">
                                             {/* Header */}
                                             <div className="mb-4">
-                                                <h3 className="font-bold text-xl text-stone-100 group-hover:text-amber-500 transition-colors leading-snug mb-1">{note.title || "Untitled Note"}</h3>
+                                                <h3 className="font-semibold text-base text-stone-100 group-hover:text-amber-500 transition-colors leading-snug mb-1 line-clamp-2">{note.title || "Untitled Note"}</h3>
                                                 <span className="text-xs text-stone-500 font-medium">{new Date(note.updated_at).toLocaleDateString()}</span>
                                             </div>
 
                                             {/* Content Preview */}
                                             <div className="flex-1 bg-stone-950/50 rounded-2xl p-4 border border-stone-800/50 mb-4 overflow-hidden relative">
-                                                <div className="text-stone-400 text-sm prose prose-sm prose-invert max-w-none prose-p:text-stone-400 prose-headings:text-stone-300 line-clamp-4">
+                                                <div className="text-stone-400 text-sm prose prose-sm prose-invert max-w-none prose-p:text-stone-400 prose-headings:text-stone-300 line-clamp-[12]">
                                                     <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                                                         {note.content}
                                                     </ReactMarkdown>
