@@ -121,25 +121,36 @@ export default function NotesPage() {
                                 <div
                                     key={note.id}
                                     onClick={() => { setCurrentNote(note); setView('edit'); }}
-                                    className={`bg-stone-900 rounded-lg border border-stone-800 hover:border-amber-900/50 cursor-pointer shadow-sm hover:shadow-md transition-all group ${viewType === 'card' ? 'p-5 h-64 overflow-hidden relative' : 'p-4 flex justify-between items-center'}`}
+                                    className={`bg-stone-900 border border-stone-800 hover:border-stone-700 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 group ${viewType === 'card' ? 'p-6 rounded-3xl h-[340px]' : 'p-4 rounded-xl flex justify-between items-center'}`}
                                 >
                                     {viewType === 'card' ? (
-                                        <>
-                                            <h3 className="font-bold text-lg text-stone-200 mb-2">{note.title}</h3>
-                                            <div className="text-stone-500 text-sm line-clamp-6 prose prose-sm prose-invert prose-p:text-stone-500">
-                                                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                                    {note.content}
-                                                </ReactMarkdown>
+                                        <div className="flex flex-col h-full">
+                                            {/* Header */}
+                                            <div className="mb-4">
+                                                <h3 className="font-bold text-xl text-stone-100 group-hover:text-amber-500 transition-colors leading-snug mb-1">{note.title || "Untitled Note"}</h3>
+                                                <span className="text-xs text-stone-500 font-medium">{new Date(note.updated_at).toLocaleDateString()}</span>
                                             </div>
 
-                                            <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-stone-900 to-transparent" />
-                                            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                                                <span className="text-xs text-stone-600">{new Date(note.updated_at).toLocaleDateString()}</span>
-                                                <div className="flex gap-1">
-                                                    {note.tags?.slice(0, 3).map((t: string) => <span key={t} className="text-xs bg-stone-800 px-1.5 py-0.5 rounded text-stone-400 border border-stone-700">#{t}</span>)}
+                                            {/* Content Preview */}
+                                            <div className="flex-1 bg-stone-950/50 rounded-2xl p-4 border border-stone-800/50 mb-4 overflow-hidden relative">
+                                                <div className="text-stone-400 text-sm prose prose-sm prose-invert max-w-none prose-p:text-stone-400 prose-headings:text-stone-300 line-clamp-4">
+                                                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                                        {note.content}
+                                                    </ReactMarkdown>
                                                 </div>
+                                                {/* Fade out effect */}
+                                                <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-stone-950/50 to-transparent pointer-events-none" />
                                             </div>
-                                        </>
+
+                                            {/* Footer */}
+                                            <div className="flex gap-2 flex-wrap mt-auto">
+                                                {note.tags?.slice(0, 3).map((t: string) => (
+                                                    <span key={t} className="px-2.5 py-1 rounded-full text-xs font-medium bg-stone-800 text-stone-400 border border-stone-700">
+                                                        #{t}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
                                     ) : (
                                         <>
                                             <div className="flex items-center gap-3">

@@ -159,7 +159,6 @@ export default function PapersPage() {
             title: paper.title,
             authors: paper.authors,
             link: paper.link,
-            link: paper.link,
             tags: (paper.tags || []).filter((t: string) => t !== 'X' && t !== 'Scholar Inbox'),
             status: 'unread',
             memo: paper.tldr_kr
