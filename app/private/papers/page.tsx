@@ -33,6 +33,9 @@ export default function PapersPage() {
     const [input, setInput] = useState('');
     const [adding, setAdding] = useState(false);
 
+    // Action States for list items (id -> status)
+    const [actionStates, setActionStates] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
+
     useEffect(() => {
         fetchMyPapers();
     }, []);
@@ -153,7 +156,10 @@ export default function PapersPage() {
         if (activeTab === 'for_you') fetchForYou();
     }, [activeTab]);
 
-    const handleAddPaper = async (paper: any) => {
+    const handleAddToLibrary = async (paper: any) => {
+        const id = paper.id || paper.link; // Fallback ID if needed
+        setActionStates(prev => ({ ...prev, [id]: 'loading' }));
+
         // Add to Supabase
         const newPaper = {
             title: paper.title,
@@ -166,10 +172,17 @@ export default function PapersPage() {
 
         const { error } = await supabase.from('papers').insert([newPaper]);
         if (!error) {
-            alert('Added to library!');
+            setActionStates(prev => ({ ...prev, [id]: 'success' }));
             fetchMyPapers(); // Refresh my papers
+
+            // Revert success state after 2 seconds
+            setTimeout(() => {
+                setActionStates(prev => ({ ...prev, [id]: 'idle' }));
+            }, 2000);
         } else {
+            console.error(error);
             alert('Failed to add');
+            setActionStates(prev => ({ ...prev, [id]: 'error' }));
         }
     };
 
@@ -239,10 +252,21 @@ export default function PapersPage() {
     };
 
     const deletePaper = async (id: string) => {
-        if (confirm('Are you sure you want to delete this paper?')) {
-            await supabase.from('papers').delete().eq('id', id);
-            setMyPapers(myPapers.filter(p => p.id !== id));
-            setRecommendedPapers(recommendedPapers.filter(p => p.id !== id)); // Also remove from recs if there
+        if (!confirm('Are you sure you want to delete this paper?')) return false;
+
+        try {
+            const { error } = await supabase.from('papers').delete().eq('id', id);
+
+            if (error) throw error;
+
+            // Functional updates ensure we're working with latest state
+            setMyPapers(prev => prev.filter(p => p.id !== id));
+            setRecommendedPapers(prev => prev.filter(p => p.id !== id));
+            return true;
+        } catch (error: any) {
+            console.error('Delete failed:', error);
+            alert('Failed to delete paper: ' + (error.message || 'Unknown error'));
+            return false;
         }
     };
 
@@ -557,10 +581,15 @@ export default function PapersPage() {
 
                                         <div className="mt-4 flex gap-3">
                                             <button
-                                                onClick={() => handleAddPaper(p)}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-500 transition-colors font-medium"
+                                                onClick={() => handleAddToLibrary(p)}
+                                                disabled={actionStates[p.id || p.link] === 'loading' || actionStates[p.id || p.link] === 'success'}
+                                                className={`px-4 py-2 rounded text-sm transition-colors font-medium flex items-center gap-2
+                                                    ${actionStates[p.id || p.link] === 'success'
+                                                        ? 'bg-green-900/20 text-green-400 border border-green-500/20'
+                                                        : 'bg-stone-100 text-stone-900 hover:bg-white disabled:opacity-50'}`}
                                             >
-                                                + Add to My Papers
+                                                {actionStates[p.id || p.link] === 'loading' && <Loader2 size={14} className="animate-spin" />}
+                                                {actionStates[p.id || p.link] === 'success' ? 'Added to Library' : '+ Add to My Papers'}
                                             </button>
                                             <a href={p.link} target="_blank" className="px-4 py-2 border border-stone-700 rounded text-sm hover:bg-stone-800 text-stone-300">
                                                 View Arxiv
@@ -653,7 +682,10 @@ export default function PapersPage() {
                                 <div className="flex justify-between items-center pt-4 border-t border-stone-800 mt-auto">
                                     <button
                                         type="button"
-                                        onClick={() => { deletePaper(editingPaper.id); setEditingPaper(null); }}
+                                        onClick={async () => {
+                                            const success = await deletePaper(editingPaper.id);
+                                            if (success) setEditingPaper(null);
+                                        }}
                                         className="text-red-400 hover:bg-red-900/20 hover:text-red-300 px-3 py-2 rounded text-sm transition-colors"
                                     >
                                         Delete Paper
