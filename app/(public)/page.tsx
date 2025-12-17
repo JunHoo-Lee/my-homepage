@@ -156,7 +156,8 @@ export default function Home() {
                                 venue="Preprint"
                                 year="2025"
                                 link="https://arxiv.org/abs/2510.13870"
-                                tag="Diffusion Language Model"
+                                category="Large Language Models"
+                                subTag="Diffusion Language Models"
                                 tldr="Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
                             />
                         </div>
@@ -175,7 +176,8 @@ export default function Home() {
                                 venue="NeurIPS 2025"
                                 year="2025"
                                 link="https://arxiv.org/abs/2510.13865"
-                                tag="Deep Learning Theory"
+                                category="Learning Theory"
+                                subTag="Representation Analysis"
                                 tldr="Just as humans perceive edges (high-frequency) as core components, deep features in neural networks exhibit the same tendency."
                             />
                             <PublicationItem
@@ -184,7 +186,8 @@ export default function Home() {
                                 venue="ICCV 2025"
                                 year="2025"
                                 link="https://arxiv.org/abs/2507.04667"
-                                tag="Audio-Visual Localization"
+                                category="Generative Models"
+                                subTag="Audio-Visual Localization"
                                 tldr="Video-centric audio-visual localization benchmark (AVATAR) with temporal dynamics."
                             />
                             <PublicationItem
@@ -193,7 +196,8 @@ export default function Home() {
                                 venue="NeurIPS 2024"
                                 year="2024"
                                 link="https://arxiv.org/abs/2403.17329"
-                                tag="Deep Learning Theory"
+                                category="Learning Theory"
+                                subTag="Isometry"
                                 tldr="Deep learning has support vectors just like SVMs."
                             />
                             <PublicationItem
@@ -202,7 +206,8 @@ export default function Home() {
                                 venue="AAAI 2024"
                                 year="2024"
                                 link="https://arxiv.org/abs/2401.05097"
-                                tag="Meta-Learning"
+                                category="Meta-Learning"
+                                subTag="Few-Shot Learning"
                                 tldr="Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling."
                             />
                             <PublicationItem
@@ -211,7 +216,8 @@ export default function Home() {
                                 venue="NeurIPS 2023"
                                 year="2023"
                                 link="https://arxiv.org/abs/2310.02751"
-                                tag="Meta-Learning"
+                                category="Meta-Learning"
+                                subTag="Optimization"
                                 tldr="The key to meta-learning adaptation is flattening the learning trajectory."
                             />
                         </div>
@@ -230,7 +236,8 @@ export default function Home() {
                                 venue="CVPR 2024 Workshop (Responsible Generative AI)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2404.15154"
-                                tag="Text-to-Image Generation"
+                                category="Generative Models"
+                                subTag="Safety"
                                 tldr="First discovery that negation doesn't work in large models — telling them not to generate something makes them generate it."
                             />
                             <PublicationItem
@@ -239,7 +246,8 @@ export default function Home() {
                                 venue="CVPR 2024 Workshop (Dataset Distillation)"
                                 year="2024"
                                 link="https://openaccess.thecvf.com/content/CVPR2024W/"
-                                tag="Coreset Selection"
+                                category="Data Efficiency"
+                                subTag="Dataset Pruning"
                                 tldr="Efficient coreset selection method specifically designed for object detection tasks."
                             />
                             <PublicationItem
@@ -248,7 +256,8 @@ export default function Home() {
                                 venue="ECCV 2024 Workshop (Dataset Distillation Challenge)"
                                 year="2024"
                                 link="https://arxiv.org/abs/2405.00348"
-                                tag="Dataset Distillation"
+                                category="Data Efficiency"
+                                subTag="Dataset Distillation"
                                 tldr="Applying DeepKKT loss for dataset distillation when only partial data is accessible."
                             />
                         </div>
@@ -267,7 +276,8 @@ export default function Home() {
                                 venue="IEEE Access"
                                 year="2025"
                                 link="https://arxiv.org/abs/2508.20224"
-                                tag="Knowledge Distillation"
+                                category="Knowledge Distillation"
+                                subTag="Calibration"
                                 tldr="Teacher's calibration error strongly correlates with student accuracy — well-calibrated teachers transfer knowledge better."
                             />
                         </div>
@@ -293,14 +303,40 @@ export default function Home() {
     );
 }
 
-function PublicationItem({ title, authors, venue, year, link, tldr, tag }: { title: string, authors: string[], venue: string, year: string, link: string, tldr: string, tag?: string }) {
+function PublicationItem({ title, authors, venue, year, link, tldr, category, subTag }: { title: string, authors: string[], venue: string, year: string, link: string, tldr: string, category: string, subTag: string }) {
+
+    const getCategoryColor = (cat: string) => {
+        switch (cat) {
+            case 'Large Language Models': return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'Generative Models': return 'bg-violet-100 text-violet-800 border-violet-200';
+            case 'Learning Theory': return 'bg-slate-100 text-slate-800 border-slate-200';
+            case 'Knowledge Distillation': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            case 'Meta-Learning': return 'bg-sky-100 text-sky-800 border-sky-200';
+            case 'Data Efficiency': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
     return (
         <div className="group relative">
-            <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200">
+            <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 flex items-start justify-between gap-4">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
                     {title}
                 </a>
             </h4>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${getCategoryColor(category)}`}>
+                    {category}
+                </span>
+                <span className="text-xs font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                    {subTag}
+                </span>
+                <span className="text-xs font-medium text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-100">
+                    {venue}
+                </span>
+            </div>
+
             <div className="text-gray-600 mb-2 font-medium">
                 {authors.map((author, i) => {
                     const isJunhoo = author.includes("Junhoo Lee");
@@ -314,9 +350,9 @@ function PublicationItem({ title, authors, venue, year, link, tldr, tag }: { tit
                     );
                 })}
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 text-sm">
-                <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-0.5 rounded">{venue}</span>
-                {tag && <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{tag}</span>}
+
+            <div className="hidden">
+                {/* Leftover for backward compat layout if needed but cleaner to remove */}
             </div>
 
             <p className="text-sm text-gray-600 leading-relaxed italic border-l-2 border-gray-200 pl-3">
