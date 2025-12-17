@@ -46,6 +46,32 @@ export default function Home() {
                 </div>
             </motion.section>
 
+            {/* Education Section */}
+            <motion.section id="education" className="scroll-mt-20" variants={fadeInUp}>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Education</h2>
+                <div className="space-y-8">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900">Ph.D. Candidate in Intelligence and Information</h3>
+                            <div className="text-gray-700">Seoul National University</div>
+                            <div className="text-sm text-gray-500 mt-1">Expected Graduation: Aug 2026</div>
+                        </div>
+                        <div className="text-gray-600 font-medium whitespace-nowrap">
+                            Sep 2021 – Present
+                        </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900">B.Sc. in Electrical and Computer Engineering</h3>
+                            <div className="text-gray-700">Seoul National University</div>
+                        </div>
+                        <div className="text-gray-600 font-medium whitespace-nowrap">
+                            Mar 2017 – Sep 2021
+                        </div>
+                    </div>
+                </div>
+            </motion.section>
+
             {/* News Section */}
             <motion.section id="news" className="scroll-mt-20" variants={fadeInUp}>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">News</h2>
@@ -249,6 +275,37 @@ export default function Home() {
                     </div>
 
                 </div>
+            </motion.section>
+
+            {/* Awards & Honors Section */}
+            <motion.section id="awards" className="scroll-mt-20" variants={fadeInUp}>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Awards & Honors</h2>
+                <ul className="space-y-4 text-gray-700">
+                    <li className="flex gap-3">
+                        <span className="font-bold min-w-[60px] text-gray-500">2023</span>
+                        <span>BK21 Future Innovation Talent Bronze Prize (KRW 1,000,000)</span>
+                    </li>
+                    <li className="flex gap-3">
+                        <span className="font-bold min-w-[60px] text-gray-500">2023</span>
+                        <span>BK21 Outstanding Research Talent Fellowship (KRW 3,500,000)</span>
+                    </li>
+                    <li className="flex gap-3">
+                        <span className="font-bold min-w-[60px] text-gray-500">2022</span>
+                        <span>Yulchon AI Star Scholarship (KRW 8,000,000)</span>
+                    </li>
+                    <li className="flex gap-3">
+                        <span className="font-bold min-w-[60px] text-gray-500">2021</span>
+                        <span>3rd Place, SNU FastMRI Challenge (out of 107 teams) (3,000,000 KRW)</span>
+                    </li>
+                    <li className="flex gap-3">
+                        <span className="font-bold min-w-[60px] text-gray-500">2021</span>
+                        <span>Kwanak Scholarship</span>
+                    </li>
+                    <li className="flex gap-3">
+                        <span className="font-bold min-w-[60px] text-gray-500">2017</span>
+                        <span>National Science and Engineering Scholarship (KRW 3,000,000 per semester)</span>
+                    </li>
+                </ul>
             </motion.section>
 
         </motion.div>
