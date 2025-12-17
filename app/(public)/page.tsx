@@ -49,23 +49,22 @@ export default function Home() {
             {/* Education Section */}
             <motion.section id="education" className="scroll-mt-20" variants={fadeInUp}>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Education</h2>
-                <div className="space-y-8">
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900">Ph.D. Candidate in Intelligence and Information</h3>
-                            <div className="text-gray-700">Seoul National University</div>
-                            <div className="text-sm text-gray-500 mt-1">Expected Graduation: Aug 2026</div>
+                <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-gray-100 pb-4">
+                        <div className="flex flex-col">
+                            <h3 className="text-lg font-bold text-gray-900">Ph.D. Candidate in Intelligence and Information</h3>
+                            <span className="text-gray-600">Seoul National University</span>
                         </div>
-                        <div className="text-gray-600 font-medium whitespace-nowrap">
-                            Sep 2021 – Present
+                        <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0">
+                            Sep 2021 – Aug 2026 (Expected)
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900">B.Sc. in Electrical and Computer Engineering</h3>
-                            <div className="text-gray-700">Seoul National University</div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-gray-100 pb-4">
+                        <div className="flex flex-col">
+                            <h3 className="text-lg font-bold text-gray-900">B.Sc. in Electrical and Computer Engineering</h3>
+                            <span className="text-gray-600">Seoul National University</span>
                         </div>
-                        <div className="text-gray-600 font-medium whitespace-nowrap">
+                        <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0">
                             Mar 2017 – Sep 2021
                         </div>
                     </div>
@@ -280,32 +279,14 @@ export default function Home() {
             {/* Awards & Honors Section */}
             <motion.section id="awards" className="scroll-mt-20" variants={fadeInUp}>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Awards & Honors</h2>
-                <ul className="space-y-4 text-gray-700">
-                    <li className="flex gap-3">
-                        <span className="font-bold min-w-[60px] text-gray-500">2023</span>
-                        <span>BK21 Future Innovation Talent Bronze Prize (KRW 1,000,000)</span>
-                    </li>
-                    <li className="flex gap-3">
-                        <span className="font-bold min-w-[60px] text-gray-500">2023</span>
-                        <span>BK21 Outstanding Research Talent Fellowship (KRW 3,500,000)</span>
-                    </li>
-                    <li className="flex gap-3">
-                        <span className="font-bold min-w-[60px] text-gray-500">2022</span>
-                        <span>Yulchon AI Star Scholarship (KRW 8,000,000)</span>
-                    </li>
-                    <li className="flex gap-3">
-                        <span className="font-bold min-w-[60px] text-gray-500">2021</span>
-                        <span>3rd Place, SNU FastMRI Challenge (out of 107 teams) (3,000,000 KRW)</span>
-                    </li>
-                    <li className="flex gap-3">
-                        <span className="font-bold min-w-[60px] text-gray-500">2021</span>
-                        <span>Kwanak Scholarship</span>
-                    </li>
-                    <li className="flex gap-3">
-                        <span className="font-bold min-w-[60px] text-gray-500">2017</span>
-                        <span>National Science and Engineering Scholarship (KRW 3,000,000 per semester)</span>
-                    </li>
-                </ul>
+                <div className="space-y-4">
+                    <AwardsItem year="2023" title="BK21 Future Innovation Talent Bronze Prize" amount="KRW 1,000,000" />
+                    <AwardsItem year="2023" title="BK21 Outstanding Research Talent Fellowship" amount="KRW 3,500,000" />
+                    <AwardsItem year="2022" title="Yulchon AI Star Scholarship" amount="KRW 8,000,000" />
+                    <AwardsItem year="2021" title="3rd Place, SNU FastMRI Challenge (out of 107 teams)" amount="KRW 3,000,000" />
+                    <AwardsItem year="2021" title="Kwanak Scholarship" />
+                    <AwardsItem year="2017" title="National Science and Engineering Scholarship" amount="KRW 3,000,000 per semester" />
+                </div>
             </motion.section>
 
         </motion.div>
@@ -346,6 +327,18 @@ function PublicationItem({ title, authors, venue, year, link, tldr, tag }: { tit
                 <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
                     <FileText size={14} /> View Paper
                 </a>
+            </div>
+        </div>
+    )
+}
+
+function AwardsItem({ year, title, amount }: { year: string, title: string, amount?: string }) {
+    return (
+        <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 text-gray-700">
+            <span className="font-bold text-gray-400 font-mono w-[60px] shrink-0">{year}</span>
+            <div className="flex flex-col sm:flex-row sm:gap-2">
+                <span className="font-medium text-gray-800">{title}</span>
+                {amount && <span className="text-gray-500 text-sm sm:text-base">({amount})</span>}
             </div>
         </div>
     )
