@@ -44,32 +44,32 @@ export default function Home() {
                         I am always open to discussing new ideas and potential collaborations. Feel free to reach out to me via email at <a href="mailto:mrjunoo@snu.ac.kr" className="text-blue-600 hover:text-blue-800 transition-colors">mrjunoo@snu.ac.kr</a>.
                     </p>
                 </div>
-            </motion.section>
 
-            {/* Education Section */}
-            <motion.section id="education" className="scroll-mt-20" variants={fadeInUp}>
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Education</h2>
-                <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-gray-100 pb-4">
-                        <div className="flex flex-col">
-                            <h3 className="text-lg font-bold text-gray-900">Ph.D. Candidate in Intelligence and Information</h3>
-                            <span className="text-gray-600">Seoul National University</span>
+                <div className="mt-10 pt-8 border-t border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">Education</h3>
+                    <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
+                            <div className="flex flex-col">
+                                <span className="font-bold text-gray-900">Ph.D. Candidate in Intelligence and Information</span>
+                                <span className="text-gray-600">Seoul National University</span>
+                            </div>
+                            <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0 shrink-0">
+                                Sep 2021 – Aug 2026 (Expected)
+                            </div>
                         </div>
-                        <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0">
-                            Sep 2021 – Aug 2026 (Expected)
-                        </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-gray-100 pb-4">
-                        <div className="flex flex-col">
-                            <h3 className="text-lg font-bold text-gray-900">B.Sc. in Electrical and Computer Engineering</h3>
-                            <span className="text-gray-600">Seoul National University</span>
-                        </div>
-                        <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0">
-                            Mar 2017 – Sep 2021
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
+                            <div className="flex flex-col">
+                                <span className="font-bold text-gray-900">B.Sc. in Electrical and Computer Engineering</span>
+                                <span className="text-gray-600">Seoul National University</span>
+                            </div>
+                            <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0 shrink-0">
+                                Mar 2017 – Sep 2021
+                            </div>
                         </div>
                     </div>
                 </div>
             </motion.section>
+
 
             {/* News Section */}
             <motion.section id="news" className="scroll-mt-20" variants={fadeInUp}>
@@ -284,7 +284,7 @@ export default function Home() {
                     <AwardsItem year="2023" title="BK21 Outstanding Research Talent Fellowship" amount="KRW 3,500,000" />
                     <AwardsItem year="2022" title="Yulchon AI Star Scholarship" amount="KRW 8,000,000" />
                     <AwardsItem year="2021" title="3rd Place, SNU FastMRI Challenge (out of 107 teams)" amount="KRW 3,000,000" />
-                    <AwardsItem year="2021" title="Kwanak Scholarship" />
+                    <AwardsItem year="2021" title="Kwanak Scholarship" amount="KRW 4,000,000" />
                     <AwardsItem year="2017" title="National Science and Engineering Scholarship" amount="KRW 3,000,000 per semester" />
                 </div>
             </motion.section>
@@ -336,9 +336,9 @@ function AwardsItem({ year, title, amount }: { year: string, title: string, amou
     return (
         <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 text-gray-700">
             <span className="font-bold text-gray-400 font-mono w-[60px] shrink-0">{year}</span>
-            <div className="flex flex-col sm:flex-row sm:gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
                 <span className="font-medium text-gray-800">{title}</span>
-                {amount && <span className="text-gray-500 text-sm sm:text-base">({amount})</span>}
+                {amount && <span className="text-gray-400 text-xs sm:text-sm font-normal">({amount})</span>}
             </div>
         </div>
     )
