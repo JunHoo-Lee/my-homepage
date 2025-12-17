@@ -327,13 +327,13 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
 
             <div className="flex flex-wrap gap-2 mb-3">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded border ${getCategoryColor(category)}`}>
-                    {category}
+                    {venue}
                 </span>
                 <span className="text-xs font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                    {subTag}
+                    {category}
                 </span>
                 <span className="text-xs font-medium text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-100">
-                    {venue}
+                    {subTag}
                 </span>
             </div>
 
