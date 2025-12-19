@@ -19,7 +19,10 @@ export default function JournalPage() {
 
     const fetchJournal = async () => {
         setLoading(true);
-        const { data } = await supabase.from('journal').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('journal').select('*').order('created_at', { ascending: false });
+        if (error) {
+            console.error('Error fetching journal:', error);
+        }
         setEntries(data || []);
         setLoading(false);
     };
@@ -28,13 +31,17 @@ export default function JournalPage() {
         if (!content.trim() || submitting) return;
         setSubmitting(true);
 
-        const { error: insertError } = await supabase.from('journal').insert([{ content }]);
+        const { error: insertError } = await supabase.from('journal').insert([{
+            id: crypto.randomUUID(),
+            content,
+            created_at: new Date().toISOString()
+        }]);
         if (!insertError) {
             setContent('');
             await fetchJournal(); // Refresh list to show new entry at top
         } else {
             console.error(insertError);
-            alert('Failed to post entry');
+            alert(`Failed to post entry: ${insertError.message || JSON.stringify(insertError)}`);
         }
         setSubmitting(false);
     };
