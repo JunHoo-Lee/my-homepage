@@ -11,7 +11,7 @@ import Backlinks from '@/app/components/Backlinks';
 import ViewToggle from '@/app/components/ViewToggle';
 
 export default function PapersPage() {
-    const [activeTab, setActiveTab] = useState<'my_papers' | 'huggingface' | 'arxiv_search'>('my_papers');
+    const [activeTab, setActiveTab] = useState<'my_papers' | 'huggingface' | 'ai_search'>('my_papers');
     const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
     // HuggingFace State
@@ -25,10 +25,13 @@ export default function PapersPage() {
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
 
-    // Arxiv Search State
-    const [arxivQuery, setArxivQuery] = useState('');
-    const [arxivPapers, setArxivPapers] = useState<any[]>([]);
-    const [loadingArxiv, setLoadingArxiv] = useState(false);
+    // AI Search State
+    const [aiSearchMode, setAiSearchMode] = useState<'arxiv' | 'conference' | 'keyword'>('conference'); // Default to conference for visibility
+    const [aiQuery, setAiQuery] = useState('');
+    const [aiConferenceName, setAiConferenceName] = useState('');
+    const [aiDateMargin, setAiDateMargin] = useState('2024-01-01');
+    const [aiResults, setAiResults] = useState<any[]>([]);
+    const [loadingAi, setLoadingAi] = useState(false);
 
     // Loading States
     const [loadingMyParams, setLoadingMyParams] = useState(true);
@@ -114,21 +117,83 @@ export default function PapersPage() {
         }
     };
 
-    const searchArxiv = async () => {
-        if (!arxivQuery.trim()) return;
-        setLoadingArxiv(true);
+    const handleAiSearch = async () => {
+        setLoadingAi(true);
+        setAiResults([]);
         try {
-            const res = await fetch('/api/arxiv-search', {
-                method: 'POST',
-                body: JSON.stringify({ query: arxivQuery })
-            });
-            const data = await res.json();
-            setArxivPapers(data.papers || []);
+            let body: any = {};
+
+            if (aiSearchMode === 'arxiv') {
+                // Legacy Arxiv Search
+                const res = await fetch('/api/arxiv-search', {
+                    method: 'POST',
+                    body: JSON.stringify({ query: aiQuery })
+                });
+                const data = await res.json();
+                setAiResults(data.papers || []);
+            } else {
+                // New Agentic Search
+                body = {
+                    mode: aiSearchMode,
+                    query: aiQuery,
+                    dateLimit: aiDateMargin,
+                    conferenceName: aiConferenceName
+                };
+
+                const res = await fetch('/api/ai-search', {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+
+                // Map results to UI format if needed
+                // API returns ScholarInboxItem[]: { title, authors, link, tldr, relevance_reason, source, published_date }
+                // UI expects: { title, authors, summary (mapped from tldr), link, published (mapped from published_date), pdf? }
+                const mapped = (data.papers || []).map((p: any) => ({
+                    ...p,
+                    summary: `**TL;DR**: ${p.tldr}\n\n**Reason**: ${p.relevance_reason}`,
+                    published: p.published_date || new Date().toISOString()
+                }));
+                setAiResults(mapped);
+            }
         } catch (e) {
             console.error(e);
-            alert('Arxiv search failed');
+            alert('Search failed');
         } finally {
-            setLoadingArxiv(false);
+            setLoadingAi(false);
+        }
+    };
+
+    const handleRelatedSearch = async (paper: any) => {
+        setActiveTab('ai_search');
+        setAiSearchMode('keyword'); // Re-use keyword UI or generic
+        // Actually best to auto-trigger the related search
+        setLoadingAi(true);
+        setAiResults([]);
+
+        // We set query to title just for visibility
+        setAiQuery(`Related to: ${paper.title}`);
+
+        try {
+            const res = await fetch('/api/ai-search', {
+                method: 'POST',
+                body: JSON.stringify({
+                    mode: 'related',
+                    targetPaperTitle: paper.title,
+                    targetPaperContext: paper.abstract || paper.memo
+                })
+            });
+            const data = await res.json();
+            const mapped = (data.papers || []).map((p: any) => ({
+                ...p,
+                summary: `**Rel**: ${p.relevance_reason}\n\n${p.tldr}`,
+                published: p.published_date
+            }));
+            setAiResults(mapped);
+        } catch (e) {
+            alert('Related search failed');
+        } finally {
+            setLoadingAi(false);
         }
     };
 
@@ -290,7 +355,7 @@ export default function PapersPage() {
             <div className="flex gap-4 border-b border-stone-800">
                 <button onClick={() => setActiveTab('my_papers')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>My Papers</button>
                 <button onClick={() => setActiveTab('huggingface')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'huggingface' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>HuggingFace</button>
-                <button onClick={() => setActiveTab('arxiv_search')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'arxiv_search' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>Arxiv Search</button>
+                <button onClick={() => setActiveTab('ai_search')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'ai_search' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>AI Discovery</button>
             </div>
 
             {/* Content */}
@@ -433,6 +498,9 @@ export default function PapersPage() {
                                                         {actionStates[p.id || p.link] === 'loading' ? <Loader2 size={12} className="animate-spin" /> : <Plus size={14} />}
                                                         {actionStates[p.id || p.link] === 'success' ? 'Added' : 'Add'}
                                                     </button>
+                                                    <button onClick={() => handleRelatedSearch(p)} className="bg-stone-800 hover:bg-stone-700 text-stone-400 p-1.5 rounded-full transition-colors" title="Find Related">
+                                                        <Search size={14} />
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -448,48 +516,126 @@ export default function PapersPage() {
                     </div>
                 )}
 
-                {/* ARXIV SEARCH TAB */}
-                {activeTab === 'arxiv_search' && (
+                {/* AI SEARCH TAB */}
+                {activeTab === 'ai_search' && (
                     <div className="space-y-6">
-                        <div className="flex gap-4">
-                            <input
-                                value={arxivQuery}
-                                onChange={e => setArxivQuery(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && searchArxiv()}
-                                placeholder="Search Arxiv..."
-                                className="flex-1 bg-stone-900 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
-                            />
-                            <button onClick={searchArxiv} className="bg-stone-100 text-stone-950 px-6 rounded-lg font-medium hover:bg-white flex items-center gap-2">
-                                {loadingArxiv ? <Loader2 className="animate-spin" /> : <Search size={18} />}
-                                Search
-                            </button>
+                        {/* Sub Tabs */}
+                        <div className="flex gap-2 p-1 bg-stone-900 border border-stone-800 rounded-lg w-fit">
+                            {[
+                                { id: 'conference', label: 'Conference' },
+                                { id: 'keyword', label: 'Topic Search' },
+                                { id: 'arxiv', label: 'Arxiv Basic' }
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    onClick={() => { setAiSearchMode(mode.id as any); setAiResults([]); }}
+                                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${aiSearchMode === mode.id ? 'bg-stone-100 text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200'}`}
+                                >
+                                    {mode.label}
+                                </button>
+                            ))}
                         </div>
 
-                        {loadingArxiv ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-stone-500" size={32} /></div>
+                        {/* Controls */}
+                        <div className="flex flex-col md:flex-row gap-4 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
+                            {aiSearchMode === 'conference' && (
+                                <div className="flex-1 flex gap-4">
+                                    <input
+                                        value={aiConferenceName}
+                                        onChange={e => setAiConferenceName(e.target.value)}
+                                        placeholder="Conference Name (e.g. ACL 2025, CVPR 2024)..."
+                                        className="flex-1 bg-stone-950 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                                    />
+                                    <button onClick={handleAiSearch} disabled={!aiConferenceName} className="bg-amber-600 text-white px-6 rounded-lg font-bold hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Scrape Top Papers
+                                    </button>
+                                </div>
+                            )}
+
+                            {aiSearchMode === 'keyword' && (
+                                <div className="flex-1 flex flex-col md:flex-row gap-4">
+                                    <input
+                                        value={aiQuery}
+                                        onChange={e => setAiQuery(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleAiSearch()}
+                                        placeholder="Topic (e.g. Diffusion Language Models)..."
+                                        className="flex-[2] bg-stone-950 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                                    />
+                                    <div className="flex items-center gap-2 bg-stone-950 border border-stone-800 rounded-lg px-3">
+                                        <span className="text-stone-500 text-xs font-bold uppercase whitespace-nowrap">Since</span>
+                                        <input
+                                            type="date"
+                                            value={aiDateMargin}
+                                            onChange={e => setAiDateMargin(e.target.value)}
+                                            className="bg-transparent text-stone-300 text-sm focus:outline-none py-3"
+                                        />
+                                    </div>
+                                    <button onClick={handleAiSearch} disabled={!aiQuery} className="bg-amber-600 text-white px-6 rounded-lg font-bold hover:bg-amber-500 disabled:opacity-50 whitespace-nowrap">
+                                        Find Papers
+                                    </button>
+                                </div>
+                            )}
+
+                            {aiSearchMode === 'arxiv' && (
+                                <div className="flex-1 flex gap-4">
+                                    <input
+                                        value={aiQuery}
+                                        onChange={e => setAiQuery(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleAiSearch()}
+                                        placeholder="Search Arxiv (Title, Abstract)..."
+                                        className="flex-1 bg-stone-950 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                                    />
+                                    <button onClick={handleAiSearch} className="bg-stone-100 text-stone-950 px-6 rounded-lg font-bold hover:bg-white flex items-center gap-2">
+                                        <Search size={18} /> Search
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {loadingAi ? (
+                            <div className="flex flex-col items-center justify-center p-20 gap-4">
+                                <Loader2 className="animate-spin text-amber-500" size={40} />
+                                <p className="text-stone-500 animate-pulse">Agent is searching & analysing...</p>
+                            </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {arxivPapers.map((p, idx) => (
-                                    <div key={idx} className="bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm flex flex-col md:flex-row gap-4">
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold text-lg text-stone-100">{p.title}</h3>
-                                            <p className="text-stone-500 text-sm mt-1">{p.authors} • {new Date(p.published).getFullYear()}</p>
-                                            <p className="text-stone-400 text-sm mt-2 line-clamp-3">{p.summary}</p>
+                                {aiResults.map((p, idx) => (
+                                    <div key={idx} className="bg-stone-900 p-5 rounded-xl border border-stone-800 shadow-sm flex flex-col gap-3 hover:border-amber-900/40 transition-colors group">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="font-bold text-lg text-stone-100 group-hover:text-amber-500 transition-colors">{p.title}</h3>
+                                                <p className="text-stone-500 text-sm mt-1">{p.authors} • {p.published?.split('T')[0]}</p>
+                                            </div>
+                                            {p.source && <span className="text-xs bg-stone-800 px-2 py-1 rounded text-stone-400 border border-stone-700">{p.source}</span>}
                                         </div>
-                                        <div className="flex flex-col gap-2 shrink-0 md:w-32 justify-center">
+
+                                        <div className="bg-stone-950/50 p-4 rounded-lg text-stone-300 text-sm leading-relaxed border border-stone-800/50 prose prose-invert prose-sm max-w-none">
+                                            <ReactMarkdown>{p.summary || p.abstract}</ReactMarkdown>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 pt-2">
                                             <button
-                                                onClick={() => handleAddToLibrary({ ...p, tldr_kr: p.summary })} // Pass summary as memo for now
-                                                disabled={actionStates[p.id] === 'loading' || actionStates[p.id] === 'success'}
-                                                className={`w-full py-2 rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors
-                                                ${actionStates[p.id] === 'success' ? 'bg-green-900/20 text-green-400' : 'bg-stone-100 text-stone-900 hover:bg-white'}`}
+                                                onClick={() => handleAddToLibrary({ ...p, tldr_kr: p.summary, memo: p.summary })}
+                                                disabled={actionStates[p.id || p.link] === 'loading' || actionStates[p.id || p.link] === 'success'}
+                                                className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors
+                                                ${actionStates[p.id || p.link] === 'success' ? 'bg-green-900/20 text-green-400 border border-green-500/20' : 'bg-stone-100 text-stone-900 hover:bg-white'}`}
                                             >
-                                                {actionStates[p.id] === 'loading' ? <Loader2 size={14} className="animate-spin" /> : null}
-                                                {actionStates[p.id] === 'success' ? 'Added' : 'Add'}
+                                                {actionStates[p.id || p.link] === 'loading' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={16} />}
+                                                {actionStates[p.id || p.link] === 'success' ? 'Added to Library' : 'Add to Library'}
                                             </button>
-                                            {p.pdf && <a href={p.pdf} target="_blank" className="w-full py-2 border border-stone-700 rounded text-stone-300 text-sm hover:bg-stone-800 text-center">PDF</a>}
+                                            <button onClick={() => handleRelatedSearch(p)} className="px-4 py-2 rounded-lg text-sm font-medium bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white transition-colors flex items-center gap-2">
+                                                <Search size={14} /> Find Related
+                                            </button>
+                                            {p.link && <a href={p.link} target="_blank" className="ml-auto text-stone-500 hover:text-blue-400 flex items-center gap-1 text-sm"><ExternalLink size={14} /> Source</a>}
+                                            {p.pdf && <a href={p.pdf} target="_blank" className="text-stone-500 hover:text-red-400 flex items-center gap-1 text-sm"><FileText size={14} /> PDF</a>}
                                         </div>
                                     </div>
                                 ))}
+                                {aiResults.length === 0 && !loadingAi && (
+                                    <div className="text-center py-20 text-stone-500 border border-dashed border-stone-800 rounded-xl">
+                                        No papers found. Try adjusting your search.
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
