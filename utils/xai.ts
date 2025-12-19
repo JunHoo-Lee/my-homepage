@@ -273,10 +273,11 @@ export async function performAdvancedSearch(config: SearchConfig): Promise<Schol
         if (!response.ok) {
             const errorText = await response.text();
             console.error("Grok Advanced Search API Error:", response.status, errorText);
-            throw new Error(`Grok API Error: ${response.status}`);
+            throw new Error(`Grok API Error: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        // console.log("Grok Raw Response:", JSON.stringify(data, null, 2));
 
         // Parsing Logic (Reuse from performScholarSearch or similar)
         let content = "";
@@ -292,14 +293,23 @@ export async function performAdvancedSearch(config: SearchConfig): Promise<Schol
             }
         }
 
-        if (!content) return [];
+        if (!content) {
+            console.warn("Grok returned empty content in advanced search");
+            return [];
+        }
 
         const cleanJson = content.replace(/```json/g, '').replace(/```/g, '').trim();
+        console.log("Parsing Grok Content:", cleanJson.substring(0, 200) + "...");
+        // Log start of content to check validity
         const parsed = JSON.parse(cleanJson);
 
-        let items: ScholarInboxItem[] = [];
-        if (Array.isArray(parsed)) items = parsed;
-        else if (parsed.items && Array.isArray(parsed.items)) items = parsed.items;
+        let rawItems: any[] = [];
+        if (Array.isArray(parsed)) rawItems = parsed;
+        else if (parsed.items && Array.isArray(parsed.items)) rawItems = parsed.items;
+
+        const items: ScholarInboxItem[] = rawItems.filter((item: any) =>
+            item && typeof item === 'object' && item.title
+        );
 
         return items;
 

@@ -156,9 +156,9 @@ export default function PapersPage() {
                 }));
                 setAiResults(mapped);
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Search failed');
+            alert(`Search failed: ${e.message}`);
         } finally {
             setLoadingAi(false);
         }
