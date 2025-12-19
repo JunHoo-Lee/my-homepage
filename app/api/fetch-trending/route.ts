@@ -122,7 +122,7 @@ async function getTrendingPapers(count: number) {
 }
 
 export async function POST(request: Request) {
-    const { source, count = 10, offset = 0 } = await request.json();
+    const { source, count = 10, offset = 0, date } = await request.json();
 
     let papers: any[] = [];
 
@@ -130,7 +130,12 @@ export async function POST(request: Request) {
         try {
             // Fetch MORE than needed to allow random selection
             const fetchCount = 30;
-            const hfRes = await fetch('https://huggingface.co/api/daily_papers');
+            // Append date if provided
+            const url = date
+                ? `https://huggingface.co/api/daily_papers?date=${date}`
+                : 'https://huggingface.co/api/daily_papers';
+
+            const hfRes = await fetch(url);
             if (hfRes.ok) {
                 const hfData = await hfRes.json();
 
@@ -138,18 +143,24 @@ export async function POST(request: Request) {
                 let allPapers = hfData.map((p: any) => {
                     const paper = p.paper;
                     return {
+                        id: paper.id, // Keep ID for Arxiv link construction if needed
                         title: paper.title || p.title,
                         authors: paper.authors ? paper.authors.map((a: any) => a.name).join(', ') : "Unknown",
                         link: `https://arxiv.org/abs/${paper.id}`,
+                        pdf: `https://arxiv.org/pdf/${paper.id}.pdf`,
                         source: 'Daily',
-                        abstract: paper.summary || p.summary || "No abstract available"
+                        abstract: paper.summary || p.summary || "No abstract available",
+                        publishedAt: p.publishedAt || paper.publishedAt
                     };
                 });
 
-                // Shuffle!
-                allPapers = shuffleArray(allPapers);
+                // Do NOT shuffle if date is specific? Keep it consistent? 
+                // Creating a stable list is better for pagination, but HF daily papers list is small enough.
+                // The original code shuffled. Let's keep shuffling or maybe removing it to be deterministic?
+                // For "Daily", we usually want *all* of them or ordered by popularity (upvotes). 
+                // HF API returns them sorted by upvotes usually. Let's Return VALID papers without shuffling for now to match "Ranking".
+                // actually original code shuffled. Let's not shuffle if we want "Trending" feel.
 
-                // Slice
                 papers = allPapers.slice(0, count);
             }
         } catch (e) { console.error(e); }
@@ -164,11 +175,8 @@ export async function POST(request: Request) {
         papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/bytedance-papers', 'ByteDance', count, offset);
     }
 
-    // Parallel Summarization
-    const papersWithTLDR = await Promise.all(papers.map(async (p) => {
-        const tldr = await getTLDR(p.title, p.abstract);
-        return { ...p, tldr_kr: tldr };
-    }));
+    // REMOVED EAGER TLDR GENERATION
+    // meaningful improvement in latency
 
-    return NextResponse.json({ papers: papersWithTLDR });
+    return NextResponse.json({ papers });
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown, CheckCircle2, GraduationCap } from 'lucide-react';
+import { Plus, Loader2, Sparkles, BookOpen, ExternalLink, RefreshCw, ChevronDown, CheckCircle2, GraduationCap, ChevronLeft, ChevronRight, Search, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -11,29 +11,39 @@ import Backlinks from '@/app/components/Backlinks';
 import ViewToggle from '@/app/components/ViewToggle';
 
 export default function PapersPage() {
-    const [activeTab, setActiveTab] = useState<'my_papers' | 'trending' | 'for_you'>('my_papers');
+    const [activeTab, setActiveTab] = useState<'my_papers' | 'huggingface' | 'arxiv_search'>('my_papers');
     const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+
+    // HuggingFace State
+    const [hfSubTab, setHfSubTab] = useState<'trending' | 'daily' | 'weekly' | 'monthly'>('trending');
+    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     // Data States
     const [myPapers, setMyPapers] = useState<any[]>([]);
     const [trendingPapers, setTrendingPapers] = useState<any[]>([]);
-    const [recommendedPapers, setRecommendedPapers] = useState<any[]>([]);
-    const [trendingSource, setTrendingSource] = useState<'daily' | 'trending' | 'deepseek' | 'bytedance'>('daily');
+    const [recommendedPapers, setRecommendedPapers] = useState<any[]>([]); // For "For You" if needed or hidden
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const [dateMargin, setDateMargin] = useState('');
+
+    // Arxiv Search State
+    const [arxivQuery, setArxivQuery] = useState('');
+    const [arxivPapers, setArxivPapers] = useState<any[]>([]);
+    const [loadingArxiv, setLoadingArxiv] = useState(false);
 
     // Loading States
     const [loadingMyParams, setLoadingMyParams] = useState(true);
-    const [loadingTrending, setLoadingTrending] = useState(false); // Lazy load
-    const [loadingForYou, setLoadingForYou] = useState(false); // Lazy load
+    const [loadingTrending, setLoadingTrending] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
 
-    // Input State
+    // Analysis State
+    const [analyzing, setAnalyzing] = useState<Record<string, boolean>>({});
+    const [analysisResults, setAnalysisResults] = useState<Record<string, string>>({}); // id -> tldr
+
+    // Input State (Local Add)
     const [input, setInput] = useState('');
     const [adding, setAdding] = useState(false);
 
-    // Action States for list items (id -> status)
+    // Action States
     const [actionStates, setActionStates] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
 
     useEffect(() => {
@@ -52,24 +62,35 @@ export default function PapersPage() {
         setLoadingMyParams(false);
     };
 
-    const fetchTrending = async (sourceOverride?: string, isLoadMore = false) => {
-        const source = sourceOverride || trendingSource;
-
+    const fetchTrending = async (isLoadMore = false) => {
         if (isLoadMore) {
             setLoadingMore(true);
         } else {
             setLoadingTrending(true);
-            setTrendingPapers([]); // Clear previous if full refresh
+            setTrendingPapers([]);
             setOffset(0);
             setHasMore(true);
         }
 
         const currentOffset = isLoadMore ? offset : 0;
+        // Map subtabs to sources
+        // trending -> 'trending'
+        // daily -> 'daily' (requires date)
+        // weekly -> map to trending for now or not implemented
+        // monthly -> map to trending for now or not implemented
+
+        let source = 'trending';
+        if (hfSubTab === 'daily') source = 'daily';
 
         try {
+            const body: any = { source, count: 10, offset: currentOffset };
+            if (hfSubTab === 'daily') {
+                body.date = selectedDate;
+            }
+
             const res = await fetch('/api/fetch-trending', {
                 method: 'POST',
-                body: JSON.stringify({ source, count: 10, offset: currentOffset })
+                body: JSON.stringify(body)
             });
             const data = await res.json();
             const newPapers = data.papers || [];
@@ -79,9 +100,10 @@ export default function PapersPage() {
                 setOffset(prev => prev + 10);
             } else {
                 setTrendingPapers(newPapers);
-                setOffset(10); // Ready for next page
+                setOffset(10);
             }
 
+            // If we get fewer results than requested, no more papers
             if (newPapers.length < 10) setHasMore(false);
 
         } catch (e) {
@@ -92,90 +114,76 @@ export default function PapersPage() {
         }
     };
 
-    const fetchForYou = async (isRefresh = false) => {
-        setLoadingForYou(true);
-        if (isRefresh) {
-            // Calculate date from dropdown value or default to 3 months
-            const calculateDate = (val: string) => {
-                const now = new Date();
-                switch (val) {
-                    case '1week': now.setDate(now.getDate() - 7); break;
-                    case '2weeks': now.setDate(now.getDate() - 14); break;
-                    case '1month': now.setMonth(now.getMonth() - 1); break;
-                    case '6months': now.setMonth(now.getMonth() - 6); break;
-                    case '1year': now.setFullYear(now.getFullYear() - 1); break;
-                    case '2years': now.setFullYear(now.getFullYear() - 2); break;
-                    default: now.setMonth(now.getMonth() - 3); break; // Default 3 months
-                }
-                return now.toISOString().split('T')[0];
-            };
-
-            const dateStr = calculateDate(dateMargin);
-
-            // Trigger new search
-            try {
-                const res = await fetch('/api/scholar-inbox', {
-                    method: 'POST',
-                    body: JSON.stringify({ dateMargin: dateStr })
-                });
-                const data = await res.json();
-                if (data.papers) {
-                    setRecommendedPapers(prev => [...data.papers, ...prev]);
-                }
-                await fetchInboxFromDB(); // Reload from DB to be safe/consistent
-            } catch (e) {
-                console.error("Scholar Search Failed", e);
-                alert("Failed to fetch new items from Scholar Inbox.");
-            } finally {
-                setLoadingForYou(false);
-            }
-            return;
+    const searchArxiv = async () => {
+        if (!arxivQuery.trim()) return;
+        setLoadingArxiv(true);
+        try {
+            const res = await fetch('/api/arxiv-search', {
+                method: 'POST',
+                body: JSON.stringify({ query: arxivQuery })
+            });
+            const data = await res.json();
+            setArxivPapers(data.papers || []);
+        } catch (e) {
+            console.error(e);
+            alert('Arxiv search failed');
+        } finally {
+            setLoadingArxiv(false);
         }
-
-        // Default: Just load from DB
-        if (recommendedPapers.length === 0) {
-            await fetchInboxFromDB();
-        }
-        setLoadingForYou(false);
     };
 
-    const fetchInboxFromDB = async () => {
-        const { data } = await supabase
-            .from('papers')
-            .select('*')
-            .contains('tags', ['Scholar Inbox'])
-            .order('created_at', { ascending: false })
-            .limit(20);
-
-        if (data) setRecommendedPapers(data);
-    };
-
-    // Tab Switching Logic
+    // Effects
     useEffect(() => {
-        if (activeTab === 'trending') fetchTrending();
-        if (activeTab === 'for_you') fetchForYou();
-    }, [activeTab]);
+        if (activeTab === 'huggingface') {
+            fetchTrending();
+        }
+    }, [activeTab, hfSubTab, selectedDate]);
+
+
+    const handleAnalyze = async (paper: any) => {
+        const id = paper.id || paper.link;
+        if (analysisResults[id]) return; // Already analyzed
+
+        setAnalyzing(prev => ({ ...prev, [id]: true }));
+        try {
+            const res = await fetch('/api/analyze-paper', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: paper.title,
+                    abstract: paper.abstract || paper.summary
+                })
+            });
+            const data = await res.json();
+            if (data.tldr) {
+                setAnalysisResults(prev => ({ ...prev, [id]: data.tldr }));
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Analysis failed');
+        } finally {
+            setAnalyzing(prev => ({ ...prev, [id]: false }));
+        }
+    };
 
     const handleAddToLibrary = async (paper: any) => {
-        const id = paper.id || paper.link; // Fallback ID if needed
+        const id = paper.id || paper.link;
         setActionStates(prev => ({ ...prev, [id]: 'loading' }));
 
-        // Add to Supabase
+        const tldr = analysisResults[id] || paper.tldr_kr || paper.memo;
+
         const newPaper = {
             title: paper.title,
             authors: paper.authors,
             link: paper.link,
             tags: (paper.tags || []).filter((t: string) => t !== 'X' && t !== 'Scholar Inbox'),
             status: 'unread',
-            memo: paper.tldr_kr
+            memo: tldr
         };
 
         const { error } = await supabase.from('papers').insert([newPaper]);
         if (!error) {
             setActionStates(prev => ({ ...prev, [id]: 'success' }));
-            fetchMyPapers(); // Refresh my papers
-
-            // Revert success state after 2 seconds
+            fetchMyPapers();
             setTimeout(() => {
                 setActionStates(prev => ({ ...prev, [id]: 'idle' }));
             }, 2000);
@@ -184,6 +192,68 @@ export default function PapersPage() {
             alert('Failed to add');
             setActionStates(prev => ({ ...prev, [id]: 'error' }));
         }
+    };
+
+    // Existing helper functions
+    const handleManualSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { error } = await supabase.from('papers').insert([newPaper]);
+        if (!error) {
+            setManualAddModal(false);
+            setNewPaper({ title: '', authors: '', link: '', status: 'unread', memo: '' });
+            fetchMyPapers();
+        } else {
+            alert('Failed to save paper');
+        }
+    };
+
+    const handleUpdatePaper = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingPaper) return;
+        const { error } = await supabase.from('papers').update({
+            memo: editingPaper.memo,
+            status: editingPaper.status,
+            tags: editingPaper.tags
+        }).eq('id', editingPaper.id);
+
+        if (!error) {
+            setEditingPaper(null);
+            fetchMyPapers();
+        } else {
+            alert('Failed to update');
+        }
+    };
+
+    const deletePaper = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this paper?')) return false;
+        try {
+            const { error, count } = await supabase.from('papers').delete({ count: 'exact' }).eq('id', id);
+            if (error) throw error;
+            if (count === 0) {
+                alert('Delete failed: Item not found.');
+                return false;
+            }
+            setMyPapers(prev => prev.filter(p => p.id !== id));
+            fetchMyPapers();
+            return true;
+        } catch (error: any) {
+            console.error('Delete failed:', error);
+            return false;
+        }
+    };
+
+    const formatAuthors = (authors: string) => {
+        if (!authors) return '';
+        const list = authors.split(',').map(a => a.trim());
+        if (list.length > 4) return list.slice(0, 4).join(', ') + ' et al.';
+        return authors;
+    };
+
+    const getPreviewText = (memo: string) => {
+        if (!memo) return '';
+        const tldrMatch = memo.match(/\*\*TL;DR\*\*:\s*(.*)/);
+        if (tldrMatch) return tldrMatch[1];
+        return memo.replace(/[#*`_]/g, '').split('\n')[0];
     };
 
     const handleQuickAdd = async (e: React.FormEvent) => {
@@ -209,101 +279,6 @@ export default function PapersPage() {
         }
     };
 
-    const handleManualSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const { error } = await supabase.from('papers').insert([newPaper]);
-        if (!error) {
-            setManualAddModal(false);
-            setNewPaper({ title: '', authors: '', link: '', status: 'unread', memo: '' });
-            fetchMyPapers();
-        } else {
-            alert('Failed to save paper');
-        }
-    };
-
-    const handleUpdatePaper = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editingPaper) return;
-
-        const { error } = await supabase.from('papers').update({
-            memo: editingPaper.memo,
-            status: editingPaper.status,
-            tags: editingPaper.tags
-        }).eq('id', editingPaper.id);
-
-        if (!error) {
-            setEditingPaper(null);
-            fetchMyPapers();
-        } else {
-            alert('Failed to update');
-        }
-    };
-
-    const updateStatus = async (id: string, status: string) => {
-        const { error } = await supabase.from('papers').update({ status }).eq('id', id);
-        if (!error) {
-            // Update local state in all lists to reflect change
-            setMyPapers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
-            setRecommendedPapers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
-            setTrendingPapers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
-        } else {
-            console.error("Failed to update status", error);
-        }
-    };
-
-    const deletePaper = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this paper?')) return false;
-
-        try {
-            console.log('Attempting to delete paper:', id);
-            const { error, count } = await supabase.from('papers').delete({ count: 'exact' }).eq('id', id);
-
-            if (error) {
-                console.error('Supabase delete error:', error);
-                throw error;
-            }
-
-            console.log('Deleted count:', count);
-
-            if (count === 0) {
-                alert('Delete failed: Item not found or permission denied (RLS).');
-                return false;
-            }
-
-            // Success
-            // Functional updates for immediate UI response
-            setMyPapers(prev => prev.filter(p => p.id !== id));
-            setRecommendedPapers(prev => prev.filter(p => p.id !== id));
-
-            // Background refresh to ensure consistency
-            fetchMyPapers();
-
-            return true;
-        } catch (error: any) {
-            console.error('Delete failed:', error);
-            alert('Failed to delete paper: ' + (error.message || 'Unknown error'));
-            return false;
-        }
-    };
-
-    const formatAuthors = (authors: string) => {
-        if (!authors) return '';
-        const list = authors.split(',').map(a => a.trim());
-        if (list.length > 4) {
-            return list.slice(0, 4).join(', ') + ' et al.';
-        }
-        return authors;
-    };
-
-    const getPreviewText = (memo: string) => {
-        if (!memo) return '';
-        // Check for explicit TLDR marker from Scholar Inbox
-        const tldrMatch = memo.match(/\*\*TL;DR\*\*:\s*(.*)/);
-        if (tldrMatch) return tldrMatch[1];
-
-        // Fallback: just remove markdown formatting roughly and return first line
-        return memo.replace(/[#*`_]/g, '').split('\n')[0];
-    };
 
     return (
         <div className="space-y-6 relative">
@@ -313,115 +288,49 @@ export default function PapersPage() {
 
             {/* Tabs */}
             <div className="flex gap-4 border-b border-stone-800">
-                <button
-                    onClick={() => setActiveTab('my_papers')}
-                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
-                >
-                    My Papers
-                </button>
-                <button
-                    onClick={() => setActiveTab('trending')}
-                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'trending' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
-                >
-                    Trending
-                </button>
-                <button
-                    onClick={() => setActiveTab('for_you')}
-                    className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'for_you' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
-                >
-                    For You <Sparkles size={14} className="inline ml-1 text-amber-400" />
-                </button>
+                <button onClick={() => setActiveTab('my_papers')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>My Papers</button>
+                <button onClick={() => setActiveTab('huggingface')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'huggingface' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>HuggingFace</button>
+                <button onClick={() => setActiveTab('arxiv_search')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'arxiv_search' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>Arxiv Search</button>
             </div>
 
             {/* Content */}
             <div className="min-h-[50vh]">
+
+                {/* MY PAPERS TAB */}
                 {activeTab === 'my_papers' && (
                     <div className="space-y-6">
-                        {/* Add Area */}
                         <div className="flex gap-2">
                             <form onSubmit={handleQuickAdd} className="flex gap-2 flex-1">
-                                <input
-                                    value={input}
-                                    onChange={e => setInput(e.target.value)}
-                                    placeholder="Paste link or citation (AI Auto-fill)..."
-                                    className="flex-1 p-3 bg-stone-900 border border-stone-800 rounded-lg text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
-                                    disabled={adding}
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={adding}
-                                    className="bg-stone-100 text-stone-950 px-6 py-3 rounded-lg hover:bg-white disabled:opacity-50 whitespace-nowrap font-medium"
-                                >
-                                    {adding ? <Loader2 className="animate-spin" /> : 'AI Add'}
-                                </button>
+                                <input value={input} onChange={e => setInput(e.target.value)} placeholder="Paste link or citation (AI Auto-fill)..." className="flex-1 p-3 bg-stone-900 border border-stone-800 rounded-lg text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50" disabled={adding} />
+                                <button type="submit" disabled={adding} className="bg-stone-100 text-stone-950 px-6 py-3 rounded-lg hover:bg-white disabled:opacity-50 whitespace-nowrap font-medium">{adding ? <Loader2 className="animate-spin" /> : 'AI Add'}</button>
                             </form>
-                            <button
-                                onClick={() => setManualAddModal(true)}
-                                className="px-4 py-3 border border-stone-700 rounded-lg hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors"
-                            >
-                                Manual Add
-                            </button>
-                            <div className="ml-auto">
-                                <ViewToggle view={viewMode} onChange={setViewMode} />
-                            </div>
+                            <button onClick={() => setManualAddModal(true)} className="px-4 py-3 border border-stone-700 rounded-lg hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors">Manual Add</button>
+                            <div className="ml-auto"><ViewToggle view={viewMode} onChange={setViewMode} /></div>
                         </div>
 
                         {loadingMyParams ? <p className="text-stone-500">Loading...</p> : (
                             <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
                                 {myPapers.filter(p => !p.tags?.includes('Scholar Inbox') && !p.tags?.includes('X')).map(p => (
-                                    <div
-                                        key={p.id}
-                                        onClick={() => setEditingPaper(p)}
-                                        className={`bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md hover:border-amber-900/40 transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}
-                                    >
+                                    <div key={p.id} onClick={() => setEditingPaper(p)} className={`bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md hover:border-amber-900/40 transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}>
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex-1 min-w-0 pr-4">
                                                 <h3 className="font-semibold text-base text-stone-200 group-hover:text-amber-500 transition-colors line-clamp-2">{p.title}</h3>
                                                 <p className="text-stone-500 text-sm mt-1">{formatAuthors(p.authors)}</p>
-
-                                                {viewMode === 'list' && p.memo && (
-                                                    <div className="flex items-start gap-2 mt-2 text-sm text-stone-500">
-                                                        <BookOpen size={14} className="mt-0.5 text-blue-400 shrink-0" />
-                                                        <span className="line-clamp-1">{getPreviewText(p.memo)}</span>
-                                                    </div>
-                                                )}
+                                                {viewMode === 'list' && p.memo && <div className="flex items-start gap-2 mt-2 text-sm text-stone-500"><BookOpen size={14} className="mt-0.5 text-blue-400 shrink-0" /><span className="line-clamp-1">{getPreviewText(p.memo)}</span></div>}
                                             </div>
                                             <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                <a
-                                                    href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`}
-                                                    target="_blank"
-                                                    className="p-2 text-stone-500 hover:text-blue-400 hover:bg-stone-800 rounded-full transition-colors"
-                                                    title="Search on Google Scholar"
-                                                >
-                                                    <GraduationCap size={20} />
-                                                </a>
-                                                {p.link && (
-                                                    <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors">
-                                                        <ExternalLink size={20} />
-                                                    </a>
-                                                )}
+                                                <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`} target="_blank" className="p-2 text-stone-500 hover:text-blue-400 hover:bg-stone-800 rounded-full transition-colors"><GraduationCap size={20} /></a>
+                                                {p.link && <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors"><ExternalLink size={20} /></a>}
                                             </div>
                                         </div>
-
                                         {viewMode === 'card' && p.memo && (
                                             <div className="mb-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-[12] prose-img:rounded-md flex-1 border border-stone-800/50">
-                                                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                                    {p.memo}
-                                                </ReactMarkdown>
+                                                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{p.memo}</ReactMarkdown>
                                             </div>
                                         )}
-
                                         <div className="flex gap-2 mt-auto items-center">
-                                            <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-900/20 text-green-400 border-green-500/20' :
-                                                p.status === 'reading' ? 'bg-blue-900/20 text-blue-400 border-blue-500/20' :
-                                                    'bg-stone-800 text-stone-400 border-stone-700'
-                                                }`}>
-                                                {(p.status || 'unread').toUpperCase()}
-                                            </span>
-                                            {p.tags?.map((t: string) => (
-                                                <span key={t} className="px-2 py-0.5 rounded text-xs bg-stone-800 text-stone-500 border border-stone-700">#{t}</span>
-                                            ))}
-                                            {viewMode === 'list' && p.memo && <span className="text-xs text-stone-600 flex items-center gap-1"><BookOpen size={12} /> Has Notes</span>}
+                                            <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-900/20 text-green-400 border-green-500/20' : p.status === 'reading' ? 'bg-blue-900/20 text-blue-400 border-blue-500/20' : 'bg-stone-800 text-stone-400 border-stone-700'}`}>{(p.status || 'unread').toUpperCase()}</span>
+                                            {p.tags?.map((t: string) => <span key={t} className="px-2 py-0.5 rounded text-xs bg-stone-800 text-stone-500 border border-stone-700">#{t}</span>)}
                                         </div>
                                     </div>
                                 ))}
@@ -430,293 +339,242 @@ export default function PapersPage() {
                     </div>
                 )}
 
-                {activeTab === 'for_you' && (
+                {/* HUGGINGFACE TAB */}
+                {activeTab === 'huggingface' && (
                     <div className="space-y-6">
-                        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-4 rounded-lg border border-blue-500/10">
-                            <h2 className="text-blue-300 font-semibold flex items-center gap-2">
-                                <Sparkles size={18} className="text-blue-400" />
-                                AI Recommended for You
-                            </h2>
-                            <p className="text-blue-400/70 text-sm mt-1">Based on your tags and reading patterns.</p>
+                        <div className="flex flex-wrap items-center justify-between gap-4 p-1 bg-stone-900 border border-stone-800 rounded-lg">
+                            <div className="flex gap-1 p-1">
+                                {['trending', 'daily', 'weekly', 'monthly'].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => setHfSubTab(s as any)}
+                                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${hfSubTab === s ? 'bg-white text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
+                                    >
+                                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Date Picker (Only for Daily/Weekly?) */}
+                            <div className="flex items-center gap-2 px-2">
+                                <button onClick={() => {
+                                    const d = new Date(selectedDate);
+                                    d.setDate(d.getDate() - 1);
+                                    setSelectedDate(d.toISOString().split('T')[0]);
+                                }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronLeft size={20} /></button>
+
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    className="bg-stone-950 border border-stone-800 rounded px-2 py-1 text-stone-200 text-sm focus:outline-none focus:border-stone-600"
+                                />
+
+                                <button onClick={() => {
+                                    const d = new Date(selectedDate);
+                                    d.setDate(d.getDate() + 1);
+                                    setSelectedDate(d.toISOString().split('T')[0]);
+                                }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronRight size={20} /></button>
+                            </div>
                         </div>
 
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-stone-500">Search Since:</span>
-                                <select
-                                    className="text-sm border border-stone-700 rounded p-1 bg-stone-900 text-stone-300 focus:outline-none focus:ring-1 focus:ring-stone-600"
-                                    value={dateMargin}
-                                    onChange={(e) => setDateMargin(e.target.value)}
-                                >
-                                    <option value="">Last 3 Months (Default)</option>
-                                    <option value="1week">Last 1 Week</option>
-                                    <option value="2weeks">Last 2 Weeks</option>
-                                    <option value="1month">Last 1 Month</option>
-                                    <option value="6months">Last 6 Months</option>
-                                    <option value="1year">Last 1 Year</option>
-                                    <option value="2years">Last 2 Years</option>
-                                </select>
+                        {loadingTrending ? (
+                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-stone-500" size={32} /></div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {trendingPapers.length === 0 ? <p className="col-span-2 text-center text-stone-500 py-10">No papers found for this selection.</p> : null}
+                                {trendingPapers.map((p, idx) => (
+                                    <div key={idx} className="bg-stone-900 rounded-xl border border-stone-800 overflow-hidden flex flex-col hover:border-amber-900/30 transition-all shadow-sm group">
+                                        {/* Header Image Placeholder or Abstract Highlight could go here */}
+                                        <div className="p-5 flex flex-col h-full">
+                                            <h3 className="font-bold text-lg text-stone-100 leading-tight mb-2 line-clamp-2">{p.title}</h3>
+                                            <p className="text-stone-500 text-sm mb-4 line-clamp-1">{p.authors}</p>
+
+                                            {/* Abstract / TLDR Area */}
+                                            <div className="flex-1 mb-4">
+                                                {analysisResults[p.id || p.link] ? (
+                                                    <div className="bg-amber-900/10 border border-amber-900/20 p-3 rounded-lg text-sm text-stone-300 animate-in fade-in zoom-in-95 duration-300">
+                                                        <span className="text-amber-500 font-bold block mb-1 flex items-center gap-1"><Sparkles size={12} /> TLDR</span>
+                                                        {analysisResults[p.id || p.link]}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-stone-400 text-sm line-clamp-4 leading-relaxed">{p.abstract}</p>
+                                                )}
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="flex items-center gap-3 mt-auto pt-4 border-t border-stone-800/50">
+                                                {p.pdf && (
+                                                    <a href={p.pdf} target="_blank" className="flex items-center gap-1.5 text-xs font-medium text-stone-400 hover:text-stone-200 transition-colors">
+                                                        <FileText size={14} /> PDF
+                                                    </a>
+                                                )}
+
+                                                <div className="ml-auto flex gap-2">
+                                                    {!analysisResults[p.id || p.link] && (
+                                                        <button
+                                                            onClick={() => handleAnalyze(p)}
+                                                            disabled={analyzing[p.id || p.link]}
+                                                            className="bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors"
+                                                        >
+                                                            {analyzing[p.id || p.link] ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                                            Analyze
+                                                        </button>
+                                                    )}
+
+                                                    <button
+                                                        onClick={() => handleAddToLibrary(p)}
+                                                        disabled={actionStates[p.id || p.link] === 'loading' || actionStates[p.id || p.link] === 'success'}
+                                                        className={`text-xs px-4 py-1.5 rounded-full font-medium transition-colors flex items-center gap-1.5
+                                                            ${actionStates[p.id || p.link] === 'success'
+                                                                ? 'bg-green-900/20 text-green-400 border border-green-500/20'
+                                                                : 'bg-stone-100 text-stone-900 hover:bg-white'}`}
+                                                    >
+                                                        {actionStates[p.id || p.link] === 'loading' ? <Loader2 size={12} className="animate-spin" /> : <Plus size={14} />}
+                                                        {actionStates[p.id || p.link] === 'success' ? 'Added' : 'Add'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <button
-                                onClick={() => fetchForYou(true)}
-                                disabled={loadingForYou}
-                                className="text-xs bg-purple-900/30 text-purple-300 px-3 py-1.5 rounded-full hover:bg-purple-900/50 transition-colors flex items-center gap-1 disabled:opacity-50 border border-purple-500/20"
-                            >
-                                <RefreshCw size={12} className={loadingForYou ? "animate-spin" : ""} />
-                                {loadingForYou ? "Searching..." : "Check for Updates"}
+                        )}
+                        {hasMore && hfSubTab === 'trending' && (
+                            <div className="flex justify-center mt-8">
+                                <button onClick={() => fetchTrending(true)} disabled={loadingMore} className="bg-stone-800 text-stone-300 px-6 py-2 rounded-full hover:bg-stone-700 transition-colors flex items-center gap-2 text-sm">{loadingMore ? <Loader2 className="animate-spin" size={16} /> : 'Load More'}</button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ARXIV SEARCH TAB */}
+                {activeTab === 'arxiv_search' && (
+                    <div className="space-y-6">
+                        <div className="flex gap-4">
+                            <input
+                                value={arxivQuery}
+                                onChange={e => setArxivQuery(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && searchArxiv()}
+                                placeholder="Search Arxiv..."
+                                className="flex-1 bg-stone-900 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                            />
+                            <button onClick={searchArxiv} className="bg-stone-100 text-stone-950 px-6 rounded-lg font-medium hover:bg-white flex items-center gap-2">
+                                {loadingArxiv ? <Loader2 className="animate-spin" /> : <Search size={18} />}
+                                Search
                             </button>
                         </div>
 
-                        {loadingForYou ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-purple-500" size={32} /></div>
+                        {loadingArxiv ? (
+                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-stone-500" size={32} /></div>
                         ) : (
-                            <div className="space-y-4">
-                                <p className="text-sm text-stone-500">Items found by your Scholar Agent.</p>
-                                <div className="grid gap-4">
-                                    {recommendedPapers.length === 0 ? (
-                                        <div className="text-center py-10 bg-stone-900/50 rounded-lg border border-dashed border-stone-800 text-stone-500">
-                                            No inbox items yet. Click "Check for Updates" to start your agent.
+                            <div className="grid grid-cols-1 gap-4">
+                                {arxivPapers.map((p, idx) => (
+                                    <div key={idx} className="bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm flex flex-col md:flex-row gap-4">
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-lg text-stone-100">{p.title}</h3>
+                                            <p className="text-stone-500 text-sm mt-1">{p.authors} • {new Date(p.published).getFullYear()}</p>
+                                            <p className="text-stone-400 text-sm mt-2 line-clamp-3">{p.summary}</p>
                                         </div>
-                                    ) : recommendedPapers.map((p, idx) => {
-                                        const duplicateItem = myPapers.find(mp => (mp.link === p.link || mp.title === p.title) && mp.id !== p.id);
-                                        const isDuplicate = !!duplicateItem;
-                                        const isXSource = p.tags?.includes('X');
-
-                                        return (
-                                            <div key={idx} className="bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md transition-all hover:border-purple-500/30 group">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex-1">
-                                                        <h3 className="font-semibold text-lg text-stone-200 leading-snug">{p.title}</h3>
-                                                        {isDuplicate && (
-                                                            <div className="text-xs text-orange-400 flex items-center gap-1 mt-1">
-                                                                <span className="font-bold">⚠️ Already in Library:</span> {duplicateItem.title}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 ml-2 shrink-0">
-                                                        <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ${isXSource ? 'bg-stone-800 text-stone-300 border border-stone-700' : 'bg-blue-900/20 text-blue-300 border border-blue-500/20'}`}>
-                                                            {isXSource ? 'Source: X' : 'Source: Web'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {p.authors && <p className="text-stone-500 text-sm mt-1">{p.authors}</p>}
-
-                                                <div className="mt-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 border border-stone-800/50">
-                                                    <span className="font-bold mr-2 text-purple-400">TLDR:</span>
-                                                    {p.memo || p.tldr_kr}
-                                                </div>
-
-                                                <div className="mt-4 flex gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={async (e) => {
-                                                            const btn = e.currentTarget;
-                                                            btn.disabled = true;
-                                                            btn.innerText = "Adding...";
-
-                                                            const newTags = (p.tags || []).filter((t: string) => t !== 'Scholar Inbox' && t !== 'X');
-
-                                                            const { error } = await supabase.from('papers').update({
-                                                                tags: newTags,
-                                                                status: 'unread'
-                                                            }).eq('id', p.id);
-
-                                                            if (!error) {
-                                                                btn.innerText = "Added to Library!";
-                                                                btn.className = "px-4 py-2 rounded text-sm bg-green-900/20 text-green-400 border border-green-500/20 cursor-default";
-                                                            } else {
-                                                                btn.disabled = false;
-                                                                btn.innerText = "Failed";
-                                                            }
-                                                        }}
-                                                        disabled={isDuplicate}
-                                                        className={`px-4 py-2 rounded text-sm transition-colors font-medium ${isDuplicate ? 'bg-stone-800 text-stone-600 cursor-not-allowed border border-stone-800' : 'bg-stone-100 text-stone-900 hover:bg-white'}`}
-                                                    >
-                                                        {isDuplicate ? 'Already in Library' : 'Add to Reading List'}
-                                                    </button>
-                                                    <a href={p.link} target="_blank" className="px-4 py-2 border border-stone-700 rounded text-sm hover:bg-stone-800 text-stone-300 flex items-center gap-1 transition-colors">
-                                                        View Source <ExternalLink size={14} />
-                                                    </a>
-                                                    <button
-                                                        onClick={() => deletePaper(p.id)}
-                                                        className="px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
-                                                    >
-                                                        Dismiss
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'trending' && (
-                    <div className="space-y-6">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex justify-between items-center">
-                                <div className="flex gap-2">
-                                    {['daily', 'trending', 'deepseek', 'bytedance'].map((s) => (
-                                        <button
-                                            key={s}
-                                            onClick={() => { setTrendingSource(s as any); fetchTrending(s); }}
-                                            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${trendingSource === s ? 'bg-blue-600 text-white' : 'bg-stone-800 text-stone-400 hover:bg-stone-700'}`}
-                                        >
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button onClick={() => fetchTrending()} className="text-sm text-blue-400 flex items-center gap-1 hover:text-blue-300">
-                                    <RefreshCw size={14} /> Refresh
-                                </button>
-                            </div>
-                        </div>
-                        {loadingTrending ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>
-                        ) : (
-                            <div className="grid gap-4">
-                                {trendingPapers.map((p, idx) => (
-                                    <div key={idx} className="bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md transition-shadow">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-lg text-stone-200">{p.title}</h3>
-                                            <span className="bg-amber-900/20 text-amber-500 border border-amber-500/20 text-xs px-2 py-1 rounded">{p.source || 'HF'}</span>
-                                        </div>
-                                        {p.publishedAt && (
-                                            <p className="text-stone-500 text-xs mt-1">
-                                                {new Date(p.publishedAt).toLocaleDateString()}
-                                            </p>
-                                        )}
-                                        <p className="text-stone-400 text-sm mt-1">{p.authors}</p>
-
-                                        <div className="mt-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 border border-stone-800/50">
-                                            <span className="font-bold mr-2 text-stone-500">TLDR (KR):</span>
-                                            {p.tldr_kr}
-                                        </div>
-
-                                        <div className="mt-4 flex gap-3">
+                                        <div className="flex flex-col gap-2 shrink-0 md:w-32 justify-center">
                                             <button
-                                                onClick={() => handleAddToLibrary(p)}
-                                                disabled={actionStates[p.id || p.link] === 'loading' || actionStates[p.id || p.link] === 'success'}
-                                                className={`px-4 py-2 rounded text-sm transition-colors font-medium flex items-center gap-2
-                                                    ${actionStates[p.id || p.link] === 'success'
-                                                        ? 'bg-green-900/20 text-green-400 border border-green-500/20'
-                                                        : 'bg-stone-100 text-stone-900 hover:bg-white disabled:opacity-50'}`}
+                                                onClick={() => handleAddToLibrary({ ...p, tldr_kr: p.summary })} // Pass summary as memo for now
+                                                disabled={actionStates[p.id] === 'loading' || actionStates[p.id] === 'success'}
+                                                className={`w-full py-2 rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors
+                                                ${actionStates[p.id] === 'success' ? 'bg-green-900/20 text-green-400' : 'bg-stone-100 text-stone-900 hover:bg-white'}`}
                                             >
-                                                {actionStates[p.id || p.link] === 'loading' && <Loader2 size={14} className="animate-spin" />}
-                                                {actionStates[p.id || p.link] === 'success' ? 'Added to Library' : '+ Add to My Papers'}
+                                                {actionStates[p.id] === 'loading' ? <Loader2 size={14} className="animate-spin" /> : null}
+                                                {actionStates[p.id] === 'success' ? 'Added' : 'Add'}
                                             </button>
-                                            <a href={p.link} target="_blank" className="px-4 py-2 border border-stone-700 rounded text-sm hover:bg-stone-800 text-stone-300">
-                                                View Arxiv
-                                            </a>
+                                            {p.pdf && <a href={p.pdf} target="_blank" className="w-full py-2 border border-stone-700 rounded text-stone-300 text-sm hover:bg-stone-800 text-center">PDF</a>}
                                         </div>
                                     </div>
                                 ))}
-
-                                {(trendingSource === 'deepseek' || trendingSource === 'bytedance') && hasMore && (
-                                    <div className="flex justify-center mt-6">
-                                        <button
-                                            onClick={() => fetchTrending(undefined, true)}
-                                            disabled={loadingMore}
-                                            className="flex items-center gap-2 bg-stone-800 text-stone-300 px-6 py-2 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50"
-                                        >
-                                            {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} />}
-                                            Load More
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Manual Add Modal */}
-            {
-                manualAddModal && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                        <div className="bg-stone-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-stone-800">
-                            <h2 className="text-xl font-bold mb-4 text-stone-100">Add Paper Manually</h2>
-                            <form onSubmit={handleManualSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-400 mb-1">Title</label>
-                                    <input required className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-400 mb-1">Authors</label>
-                                    <input className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-400 mb-1">Link</label>
-                                    <input className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
-                                </div>
-                                <div className="flex justify-end gap-2 mt-6">
-                                    <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-stone-400 hover:text-stone-200 hover:bg-stone-800 rounded-lg transition-colors">Cancel</button>
-                                    <button type="submit" className="px-4 py-2 bg-stone-100 text-stone-950 rounded-lg hover:bg-white font-medium">Save Paper</button>
-                                </div>
-                            </form>
-                        </div>
+            {/* Modals remain the same */}
+            {manualAddModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-stone-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-stone-800">
+                        <h2 className="text-xl font-bold mb-4 text-stone-100">Add Paper Manually</h2>
+                        <form onSubmit={handleManualSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-stone-400 mb-1">Title</label>
+                                <input required className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-stone-400 mb-1">Authors</label>
+                                <input className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.authors} onChange={e => setNewPaper({ ...newPaper, authors: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-stone-400 mb-1">Link</label>
+                                <input className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.link} onChange={e => setNewPaper({ ...newPaper, link: e.target.value })} />
+                            </div>
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button type="button" onClick={() => setManualAddModal(false)} className="px-4 py-2 text-stone-400 hover:text-stone-200 hover:bg-stone-800 rounded-lg transition-colors">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-stone-100 text-stone-950 rounded-lg hover:bg-white font-medium">Save Paper</button>
+                            </div>
+                        </form>
                     </div>
-                )
-            }
+                </div>
+            )}
+            {editingPaper && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-stone-900 rounded-xl max-w-2xl w-full p-6 shadow-2xl h-[80vh] flex flex-col border border-stone-800">
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-xl font-bold pr-8 text-stone-100">{editingPaper.title}</h2>
+                            <button onClick={() => setEditingPaper(null)} className="text-stone-500 hover:text-stone-300 transition-colors"><Plus className="rotate-45" size={24} /></button>
+                        </div>
 
-            {/* Edit Paper Modal */}
-            {
-                editingPaper && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                        <div className="bg-stone-900 rounded-xl max-w-2xl w-full p-6 shadow-2xl h-[80vh] flex flex-col border border-stone-800">
-                            <div className="flex justify-between items-start mb-4">
-                                <h2 className="text-xl font-bold pr-8 text-stone-100">{editingPaper.title}</h2>
-                                <button onClick={() => setEditingPaper(null)} className="text-stone-500 hover:text-stone-300 transition-colors"><Plus className="rotate-45" size={24} /></button>
+                        <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto custom-scrollbar pr-2">
+                            <div className="flex gap-4 p-3 bg-stone-950/50 rounded-lg border border-stone-800">
+                                <FormSelect
+                                    label="Status"
+                                    value={editingPaper.status}
+                                    onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
+                                    options={['unread', 'reading', 'read']}
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <label className="block text-xs font-medium text-stone-500 mb-1">Link</label>
+                                    <a href={editingPaper.link} target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
+                                </div>
                             </div>
 
-                            <form onSubmit={handleUpdatePaper} className="flex-1 flex flex-col space-y-4 overflow-y-auto custom-scrollbar pr-2">
-                                <div className="flex gap-4 p-3 bg-stone-950/50 rounded-lg border border-stone-800">
-                                    <FormSelect
-                                        label="Status"
-                                        value={editingPaper.status}
-                                        onChange={(v: string) => setEditingPaper({ ...editingPaper, status: v })}
-                                        options={['unread', 'reading', 'read']}
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <label className="block text-xs font-medium text-stone-500 mb-1">Link</label>
-                                        <a href={editingPaper.link} target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline text-sm truncate block">{editingPaper.link || 'No link'}</a>
-                                    </div>
-                                </div>
+                            <div className="flex-1 flex flex-col min-h-0">
+                                <label className="block text-sm font-medium text-stone-400 mb-2">Notes & Thoughts</label>
+                                <RichTextEditor
+                                    value={editingPaper.memo || ''}
+                                    onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
+                                    minHeight="300px"
+                                />
+                                <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
+                            </div>
 
-                                <div className="flex-1 flex flex-col min-h-0">
-                                    <label className="block text-sm font-medium text-stone-400 mb-2">Notes & Thoughts</label>
-                                    <RichTextEditor
-                                        value={editingPaper.memo || ''}
-                                        onChange={val => setEditingPaper((prev: any) => ({ ...prev, memo: val }))}
-                                        minHeight="300px"
-                                    />
-                                    <Backlinks currentId={editingPaper.id} currentTitle={editingPaper.title} />
+                            <div className="flex justify-between items-center pt-4 border-t border-stone-800 mt-auto">
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const success = await deletePaper(editingPaper.id);
+                                        if (success) setEditingPaper(null);
+                                    }}
+                                    className="text-red-400 hover:bg-red-900/20 hover:text-red-300 px-3 py-2 rounded text-sm transition-colors"
+                                >
+                                    Delete Paper
+                                </button>
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-stone-400 hover:bg-stone-800 hover:text-stone-200 rounded-lg transition-colors">Cancel</button>
+                                    <button type="submit" className="px-4 py-2 bg-stone-100 text-stone-950 rounded-lg hover:bg-white font-medium transition-colors">Save Changes</button>
                                 </div>
-
-                                <div className="flex justify-between items-center pt-4 border-t border-stone-800 mt-auto">
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            const success = await deletePaper(editingPaper.id);
-                                            if (success) setEditingPaper(null);
-                                        }}
-                                        className="text-red-400 hover:bg-red-900/20 hover:text-red-300 px-3 py-2 rounded text-sm transition-colors"
-                                    >
-                                        Delete Paper
-                                    </button>
-                                    <div className="flex gap-2">
-                                        <button type="button" onClick={() => setEditingPaper(null)} className="px-4 py-2 text-stone-400 hover:bg-stone-800 hover:text-stone-200 rounded-lg transition-colors">Cancel</button>
-                                        <button type="submit" className="px-4 py-2 bg-stone-100 text-stone-950 rounded-lg hover:bg-white font-medium transition-colors">Save Changes</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            )}
+        </div>
     );
 }
 
