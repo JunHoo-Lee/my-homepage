@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { performAdvancedSearch, SearchConfig } from '@/utils/xai';
 
-export const maxDuration = 60; // Allow longer timeout for agentic search
+export const maxDuration = 300; // Allow longer timeout for agentic search
 
 export async function POST(request: Request) {
     try {

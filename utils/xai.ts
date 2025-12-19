@@ -195,12 +195,12 @@ export async function performAdvancedSearch(config: SearchConfig): Promise<Schol
     switch (config.mode) {
         case 'conference':
             systemPrompt += `
-            \nTASK: Find the topmost high-scoring/impactful papers from a specific conference.
+            \nTASK: Find 5-10 top papers from "${config.conferenceName}" QUICKLY.
             \nCRITERIA:
-            1. Target Conference: "${config.conferenceName}"
-            2. Prioritize: Award-winning papers (Best Paper, Outstanding), Oral presentations, or heavily discussed/cited papers from this venue.
-            3. Randomness: If there are many good ones, randomly select a diverse set of 5-10 high-quality papers.
-            4. USE TOOLS: Check official proceedings or trusted summaries via web_search. Check X discussions for "viral" papers from this conference.
+            1. Use *web_search* to find a "best papers" or "highlights" list for this conference.
+            2. Select 5-10 unique titles from that list.
+            3. Do NOT cross-reference every paper. Trust the list.
+            4. If no list is found, check X discussions for "viral" papers.
             ${baseOutputFormat}
             `;
             userMessage = `Find top papers from ${config.conferenceName}.`;
