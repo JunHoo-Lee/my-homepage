@@ -32,13 +32,15 @@ export default function Home() {
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">About Me</h2>
                 <div className="prose prose-lg text-gray-700 leading-relaxed">
                     <p className="mb-4">
-                        Hi, I'm <strong>Junhoo Lee</strong>. I am a PhD student at <a href="https://mipal.snu.ac.kr/" className="text-blue-600 hover:text-blue-800 transition-colors">Seoul National University (MIPAL)</a>,
+                        Hi, I'm <strong>Junhoo Lee</strong>. I am a PhD candidate at <a href="https://mipal.snu.ac.kr/" className="text-blue-600 hover:text-blue-800 transition-colors">Seoul National University (MIPAL)</a>,
                         advised by Prof. <a href="http://mipal.snu.ac.kr/index.php/Nojun_Kwak" className="text-blue-600 hover:text-blue-800 transition-colors">Nojun Kwak</a>.
                     </p>
                     <p className="mb-4">
-                        My primary research interests lie in the intersection of <strong>Diffusion Models</strong>, <strong>Large Language Models (LLMs)</strong>,
-                        <strong>Machine Learning Theory</strong>, and <strong>Lifelong Learning</strong>. I am passionate about understanding the fundamental principles of
-                        generative models and applying them to solve complex problems.
+                        My research aims to bridge the gap between <strong>optimization theory</strong> and <strong>modern generative AI</strong>. Instead of merely scaling up models, I investigate the training dynamics of overparameterized networks and design inductive biases
+                        (such as geometric constraints or explicit filtering) to ensure robust in-distribution learning.
+                    </p>
+                    <p className="mb-4">
+                        Currently, I am exploring the fundamental principles of <strong>Diffusion Models</strong> and <strong>LLMs</strong> to make them more efficient, explainable, and controllable.
                     </p>
                     <p>
                         I am always open to discussing new ideas and potential collaborations. Feel free to reach out to me via email at <a href="mailto:mrjunoo@snu.ac.kr" className="text-blue-600 hover:text-blue-800 transition-colors">mrjunoo@snu.ac.kr</a>.
