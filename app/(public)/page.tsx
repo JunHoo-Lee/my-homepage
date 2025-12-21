@@ -1,8 +1,20 @@
 'use client';
 
 import Link from "next/link";
-import { ArrowUpRight, FileText } from "lucide-react";
+import { ArrowUpRight, FileText, Download } from "lucide-react";
 import { motion } from "framer-motion";
+import { PROFILE, EDUCATION, NEWS, PUBLICATIONS, AWARDS } from "@/app/lib/data";
+import dynamic from "next/dynamic";
+import CVDocument from "@/app/components/CVDocument";
+
+// Dynamically import PDFDownloadLink to avoid SSR issues
+const PDFDownloadLink = dynamic(
+    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+    {
+        ssr: false,
+        loading: () => <button className="text-sm font-medium text-gray-500 cursor-wait">Loading PDF...</button>,
+    }
+);
 
 export default function Home() {
     const fadeInUp = {
@@ -29,45 +41,64 @@ export default function Home() {
 
             {/* About Section */}
             <motion.section id="about" className="scroll-mt-20" variants={fadeInUp}>
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">About Me</h2>
+                <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-8">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900">About Me</h2>
+
+                    {/* CV Download Button */}
+                    <div className="flex items-center gap-2">
+                        <PDFDownloadLink
+                            document={<CVDocument />}
+                            fileName="Junhoo_Lee_CV.pdf"
+                            className="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-md border border-stone-200 hover:border-stone-400 bg-white"
+                        >
+                            {({ blob, url, loading, error }) =>
+                                loading ? "Generating..." : (
+                                    <>
+                                        <Download size={14} /> Download CV
+                                    </>
+                                )
+                            }
+                        </PDFDownloadLink>
+                    </div>
+                </div>
+
                 <div className="prose prose-lg text-gray-700 leading-relaxed">
-                    <p className="mb-4">
-                        Hi, I'm <strong>Junhoo Lee</strong>. I am a PhD candidate at <a href="https://mipal.snu.ac.kr/" className="text-blue-600 hover:text-blue-800 transition-colors">Seoul National University (MIPAL)</a>,
-                        advised by Prof. <a href="http://mipal.snu.ac.kr/index.php/Nojun_Kwak" className="text-blue-600 hover:text-blue-800 transition-colors">Nojun Kwak</a>.
-                    </p>
-                    <p className="mb-4">
-                        My research aims to bridge the gap between <strong>optimization theory</strong> and <strong>modern generative AI</strong>. Instead of merely scaling up models, I investigate the training dynamics of overparameterized networks and design inductive biases
-                        (such as geometric constraints or explicit filtering) to ensure robust in-distribution learning.
-                    </p>
-                    <p className="mb-4">
-                        Currently, I am exploring the fundamental principles of <strong>Diffusion Models</strong> and <strong>LLMs</strong> to make them more efficient, explainable, and controllable.
-                    </p>
+                    {PROFILE.bio.map((paragraph, i) => (
+                        <p key={i} className="mb-4" dangerouslySetInnerHTML={{
+                            // Simple hack to render HTML in bio strings if needed, 
+                            // or just render text. The current data has plain text mostly.
+                            // For safety/flexibility let's assume simple text for now or simple inner HTML replacers if we want bold.
+                            // Actual data.ts has plain strings but the original had <strong>. 
+                            // Let's re-inject strong tags or handle it. 
+                            // For now, let's just render the text. 
+                            // If we want bolding, we should parse it or keep it simple.
+                            __html: paragraph
+                                .replace("Junhoo Lee", "<strong>Junhoo Lee</strong>")
+                                .replace("optimization theory", "<strong>optimization theory</strong>")
+                                .replace("modern generative AI", "<strong>modern generative AI</strong>")
+                                .replace("Diffusion Models", "<strong>Diffusion Models</strong>")
+                                .replace("LLMs", "<strong>LLMs</strong>")
+                        }}></p>
+                    ))}
                     <p>
-                        I am always open to discussing new ideas and potential collaborations. Feel free to reach out to me via email at <a href="mailto:mrjunoo@snu.ac.kr" className="text-blue-600 hover:text-blue-800 transition-colors">mrjunoo@snu.ac.kr</a>.
+                        I am always open to discussing new ideas and potential collaborations. Feel free to reach out to me via email at <a href={`mailto:${PROFILE.email}`} className="text-blue-600 hover:text-blue-800 transition-colors">{PROFILE.email}</a>.
                     </p>
                 </div>
 
                 <div className="mt-10 pt-8 border-t border-gray-100">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">Education</h3>
                     <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
-                            <div className="flex flex-col">
-                                <span className="font-bold text-gray-900">Ph.D. Candidate in Intelligence and Information</span>
-                                <span className="text-gray-600">Seoul National University</span>
+                        {EDUCATION.map((edu, i) => (
+                            <div key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-gray-900">{edu.degree}</span>
+                                    <span className="text-gray-600">{edu.institution}</span>
+                                </div>
+                                <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0 shrink-0">
+                                    {edu.period}
+                                </div>
                             </div>
-                            <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0 shrink-0">
-                                Sep 2021 – Aug 2026 (Expected)
-                            </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
-                            <div className="flex flex-col">
-                                <span className="font-bold text-gray-900">B.Sc. in Electrical and Computer Engineering</span>
-                                <span className="text-gray-600">Seoul National University</span>
-                            </div>
-                            <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0 shrink-0">
-                                Mar 2017 – Sep 2021
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </motion.section>
@@ -77,60 +108,18 @@ export default function Home() {
             <motion.section id="news" className="scroll-mt-20" variants={fadeInUp}>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">News</h2>
                 <ul className="space-y-4 text-gray-700 text-sm">
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2025]</span>
-                        <span>I will be at NeurIPS 2025 in San Diego, presenting our <a href="https://arxiv.org/abs/2510.13865" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Deep Edge Filter&quot;</a> paper!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Oct 2025]</span>
-                        <span>New preprint <a href="https://arxiv.org/abs/2510.13870" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Unlocking the Potential of Diffusion Language Models through Template Infilling&quot;</a> is now on arXiv!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Sep 2025]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2510.13865" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Deep Edge Filter&quot;</a> is accepted to NeurIPS 2025! (co-first author)</span>
-                    </li>
-                    {/* ... (Other news items kept same but with cleaner classNames if needed, assuming user likes current news content) ... */}
-                    {/* Truncating for brevity in this replace, in reality I would keep all items or mapped properly. For this tool call I will keep the full list to be safe. */}
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Jul 2025]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2507.04667" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;What&#39;s Making That Sound Right Now?&quot;</a> is accepted to ICCV 2025!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Jun 2025]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2508.20224" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;The Role of Teacher Calibration in Knowledge Distillation&quot;</a> is published in IEEE Access!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2024]</span>
-                        <span>I will be at NeurIPS 2024 in Vancouver, presenting our <a href="https://arxiv.org/abs/2403.17329" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Deep Support Vectors&quot;</a> paper!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[ Sep 2024]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2403.17329" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Deep Support Vectors&quot;</a> is accepted to NeurIPS 2024!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Jul 2024]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2405.00348" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Practical Dataset Distillation Based on Deep Support Vectors&quot;</a> is presented at ECCV 2024 Workshop!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Apr 2024]</span>
-                        <span>Two workshop papers accepted to CVPR 2024 — <a href="https://arxiv.org/abs/2404.15154" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Do Not Think About Pink Elephant!&quot;</a> (co-first) and <a href="https://arxiv.org/abs/2404.09161" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Coreset Selection for Object Detection&quot;</a>!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Feb 2024]</span>
-                        <span>I will be at AAAI 2024 in Vancouver, presenting our <a href="https://arxiv.org/abs/2401.05097" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Any-Way Meta Learning&quot;</a> paper!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2023]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2401.05097" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;Any-Way Meta Learning&quot;</a> is accepted to AAAI 2024!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Dec 2023]</span>
-                        <span>I will be at NeurIPS 2023 in New Orleans, presenting our <a href="https://arxiv.org/abs/2310.02751" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">SHOT</a> paper!</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold min-w-[100px] text-gray-500">[Sep 2023]</span>
-                        <span>Our paper <a href="https://arxiv.org/abs/2310.02751" target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">&quot;SHOT: Suppressing the Hessian along the Optimization Trajectory&quot;</a> is accepted to NeurIPS 2023!</span>
-                    </li>
+                    {NEWS.map((item, i) => (
+                        <li key={i} className="flex gap-2">
+                            <span className="font-bold min-w-[100px] text-gray-500">[{item.date}]</span>
+                            <span>
+                                {item.content.split(item.linkText)[0]}
+                                <a href={item.link} target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                                    {item.linkText}
+                                </a>
+                                {item.content.split(item.linkText)[1]}
+                            </span>
+                        </li>
+                    ))}
                 </ul>
             </motion.section>
 
@@ -144,147 +133,29 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-12">
+                    {PUBLICATIONS.map((section, i) => {
+                        const sectionColorMap: Record<string, string> = {
+                            blue: 'bg-blue-600',
+                            teal: 'bg-teal-500',
+                            indigo: 'bg-indigo-500',
+                            gray: 'bg-gray-400'
+                        };
+                        const colorClass = sectionColorMap[section.color] || 'bg-gray-400';
 
-                    {/* Preprint */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                            Preprint
-                        </h3>
-                        <div className="space-y-8 pl-4 border-l-2 border-gray-100">
-                            <PublicationItem
-                                title="Unlocking the Potential of Diffusion Language Models through Template Infilling"
-                                authors={["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"]}
-                                venue="Preprint"
-                                year="2025"
-                                link="https://arxiv.org/abs/2510.13870"
-                                category="Large Language Models"
-                                subTag="Diffusion Language Models"
-                                tldr="Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
-                            />
-                        </div>
-                    </div>
-
-                    {/* Main Conference */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                            Main Conference (First Author / Co-first †)
-                        </h3>
-                        <div className="space-y-8 pl-4 border-l-2 border-gray-100">
-                            <PublicationItem
-                                title="Deep Edge Filter †"
-                                authors={["Dongkwan Lee†", "Junhoo Lee†", "Nojun Kwak"]}
-                                venue="NeurIPS 2025"
-                                year="2025"
-                                link="https://arxiv.org/abs/2510.13865"
-                                category="Learning Theory"
-                                subTag="Representation Analysis"
-                                tldr="Just as humans perceive edges (high-frequency) as core components, deep features in neural networks exhibit the same tendency."
-                            />
-                            <PublicationItem
-                                title="What's Making That Sound Right Now?"
-                                authors={["Hahyeon Choi", "Junhoo Lee", "Nojun Kwak"]}
-                                venue="ICCV 2025"
-                                year="2025"
-                                link="https://arxiv.org/abs/2507.04667"
-                                category="Generative Models"
-                                subTag="Audio-Visual Localization"
-                                tldr="Video-centric audio-visual localization benchmark (AVATAR) with temporal dynamics."
-                            />
-                            <PublicationItem
-                                title="Deep Support Vectors"
-                                authors={["Junhoo Lee", "Hyunho Lee", "Kyomin Hwang", "Nojun Kwak"]}
-                                venue="NeurIPS 2024"
-                                year="2024"
-                                link="https://arxiv.org/abs/2403.17329"
-                                category="Learning Theory"
-                                subTag="Isometry"
-                                tldr="Deep learning has support vectors just like SVMs."
-                            />
-                            <PublicationItem
-                                title="Any-Way Meta Learning"
-                                authors={["Junhoo Lee", "Yearim Kim", "Hyunho Lee", "Nojun Kwak"]}
-                                venue="AAAI 2024"
-                                year="2024"
-                                link="https://arxiv.org/abs/2401.05097"
-                                category="Meta-Learning"
-                                subTag="Few-Shot Learning"
-                                tldr="Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling."
-                            />
-                            <PublicationItem
-                                title="SHOT: Suppressing the Hessian along the Optimization Trajectory"
-                                authors={["Junhoo Lee", "Jayeon Yoo", "Nojun Kwak"]}
-                                venue="NeurIPS 2023"
-                                year="2023"
-                                link="https://arxiv.org/abs/2310.02751"
-                                category="Meta-Learning"
-                                subTag="Optimization"
-                                tldr="The key to meta-learning adaptation is flattening the learning trajectory."
-                            />
-                        </div>
-                    </div>
-
-                    {/* Workshop */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                            Workshop
-                        </h3>
-                        <div className="space-y-8 pl-4 border-l-2 border-gray-100">
-                            <PublicationItem
-                                title="Do Not Think About Pink Elephant! †"
-                                authors={["Kyomin Hwang†", "Suyoung Kim†", "Junhoo Lee†", "Nojun Kwak"]}
-                                venue="CVPR 2024 Workshop (Responsible Generative AI)"
-                                year="2024"
-                                link="https://arxiv.org/abs/2404.15154"
-                                category="Generative Models"
-                                subTag="Safety"
-                                tldr="First discovery that negation doesn't work in large models — telling them not to generate something makes them generate it."
-                            />
-                            <PublicationItem
-                                title="Coreset Selection for Object Detection"
-                                authors={["Hojun Lee", "Suyoung Kim", "Junhoo Lee", "Jaeyoung Yoo", "Nojun Kwak"]}
-                                venue="CVPR 2024 Workshop (Dataset Distillation)"
-                                year="2024"
-                                link="https://openaccess.thecvf.com/content/CVPR2024W/"
-                                category="Data Efficiency"
-                                subTag="Dataset Pruning"
-                                tldr="Efficient coreset selection method specifically designed for object detection tasks."
-                            />
-                            <PublicationItem
-                                title="Practical Dataset Distillation Based on Deep Support Vectors"
-                                authors={["Hyunho Lee", "Junhoo Lee", "Nojun Kwak"]}
-                                venue="ECCV 2024 Workshop (Dataset Distillation Challenge)"
-                                year="2024"
-                                link="https://arxiv.org/abs/2405.00348"
-                                category="Data Efficiency"
-                                subTag="Dataset Distillation"
-                                tldr="Applying DeepKKT loss for dataset distillation when only partial data is accessible."
-                            />
-                        </div>
-                    </div>
-
-                    {/* Journal */}
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                            Journal
-                        </h3>
-                        <div className="space-y-8 pl-4 border-l-2 border-gray-100">
-                            <PublicationItem
-                                title="The Role of Teacher Calibration in Knowledge Distillation"
-                                authors={["Suyoung Kim", "Seonguk Park", "Junhoo Lee", "Nojun Kwak"]}
-                                venue="IEEE Access"
-                                year="2025"
-                                link="https://arxiv.org/abs/2508.20224"
-                                category="Knowledge Distillation"
-                                subTag="Calibration"
-                                tldr="Teacher's calibration error strongly correlates with student accuracy — well-calibrated teachers transfer knowledge better."
-                            />
-                        </div>
-                    </div>
-
+                        return (
+                            <div key={i}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${colorClass}`}></span>
+                                    {section.section}
+                                </h3>
+                                <div className="space-y-8 pl-4 border-l-2 border-gray-100">
+                                    {section.items.map((pub, j) => (
+                                        <PublicationItem key={j} {...pub} />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </motion.section>
 
@@ -292,12 +163,9 @@ export default function Home() {
             <motion.section id="awards" className="scroll-mt-20" variants={fadeInUp}>
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Awards & Honors</h2>
                 <div className="space-y-4">
-                    <AwardsItem year="2023" title="BK21 Future Innovation Talent Bronze Prize" amount="KRW 1,000,000" />
-                    <AwardsItem year="2023" title="BK21 Outstanding Research Talent Fellowship" amount="KRW 3,500,000" />
-                    <AwardsItem year="2022" title="Yulchon AI Star Scholarship" amount="KRW 8,000,000" />
-                    <AwardsItem year="2021" title="3rd Place, SNU FastMRI Challenge (out of 107 teams)" amount="KRW 3,000,000" />
-                    <AwardsItem year="2021" title="Kwanak Scholarship" amount="KRW 4,000,000" />
-                    <AwardsItem year="2017" title="National Science and Engineering Scholarship" amount="KRW 3,000,000 per semester" />
+                    {AWARDS.map((award, i) => (
+                        <AwardsItem key={i} {...award} />
+                    ))}
                 </div>
             </motion.section>
 
@@ -381,3 +249,4 @@ function AwardsItem({ year, title, amount }: { year: string, title: string, amou
         </div>
     )
 }
+
