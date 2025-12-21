@@ -5,11 +5,10 @@ import { ArrowUpRight, FileText, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { PROFILE, EDUCATION, NEWS, PUBLICATIONS, AWARDS } from "@/app/lib/data";
 import dynamic from "next/dynamic";
-import CVDocument from "@/app/components/CVDocument";
 
-// Dynamically import PDFDownloadLink to avoid SSR issues
-const PDFDownloadLink = dynamic(
-    () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+// Dynamically import CVDownloadButton with ssr: false
+const CVDownloadButton = dynamic(
+    () => import("@/app/components/CVDownloadButton"),
     {
         ssr: false,
         loading: () => <button className="text-sm font-medium text-gray-500 cursor-wait">Loading PDF...</button>,
@@ -46,19 +45,7 @@ export default function Home() {
 
                     {/* CV Download Button */}
                     <div className="flex items-center gap-2">
-                        <PDFDownloadLink
-                            document={<CVDocument />}
-                            fileName="Junhoo_Lee_CV.pdf"
-                            className="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-md border border-stone-200 hover:border-stone-400 bg-white"
-                        >
-                            {({ blob, url, loading, error }) =>
-                                loading ? "Generating..." : (
-                                    <>
-                                        <Download size={14} /> Download CV
-                                    </>
-                                )
-                            }
-                        </PDFDownloadLink>
+                        <CVDownloadButton />
                     </div>
                 </div>
 

@@ -181,13 +181,6 @@ const CVDocument = () => (
                 ))}
             </View>
 
-            {/* Footer / References */}
-            <View style={{ marginTop: 20, borderTop: 1, borderTopColor: '#eee', paddingTop: 10 }}>
-                <Text style={{ textAlign: 'center', color: '#6b7280', fontSize: 8 }}>
-                    References available upon request
-                </Text>
-            </View>
-
         </Page>
     </Document>
 );
