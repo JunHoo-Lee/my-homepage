@@ -4,16 +4,8 @@ import Link from "next/link";
 import { ArrowUpRight, FileText, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { PROFILE, EDUCATION, NEWS, PUBLICATIONS, AWARDS } from "@/app/lib/data";
-import dynamic from "next/dynamic";
-
-// Dynamically import CVDownloadButton with ssr: false
-const CVDownloadButton = dynamic(
-    () => import("@/app/components/CVDownloadButton"),
-    {
-        ssr: false,
-        loading: () => <button className="text-sm font-medium text-gray-500 cursor-wait">Loading PDF...</button>,
-    }
-);
+// Dynamically import PDFDownloadLink is no longer needed
+// import dynamic from "next/dynamic";
 
 export default function Home() {
     const fadeInUp = {
@@ -45,7 +37,13 @@ export default function Home() {
 
                     {/* CV Download Button */}
                     <div className="flex items-center gap-2">
-                        <CVDownloadButton />
+                        <a
+                            href="/cv.pdf"
+                            download="Junhoo_Lee_CV.pdf"
+                            className="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-md border border-stone-200 hover:border-stone-400 bg-white"
+                        >
+                            <Download size={14} /> Download CV
+                        </a>
                     </div>
                 </div>
 
