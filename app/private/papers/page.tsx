@@ -15,7 +15,7 @@ export default function PapersPage() {
     const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
     // HuggingFace State
-    const [hfSubTab, setHfSubTab] = useState<'trending' | 'daily' | 'weekly' | 'monthly'>('trending');
+    const [hfSubTab, setHfSubTab] = useState<'trending' | 'daily' | 'weekly' | 'monthly' | 'youtube' | 'bytedance' | 'bair' | 'google_research'>('trending');
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     // Data States
@@ -82,7 +82,8 @@ export default function PapersPage() {
         // weekly -> map to trending for now or not implemented
         // monthly -> map to trending for now or not implemented
 
-        let source = 'trending';
+        // Pass the subTab directly as source for the new feeds
+        let source = hfSubTab;
         if (hfSubTab === 'daily') source = 'daily';
 
         try {
@@ -407,40 +408,61 @@ export default function PapersPage() {
                 {/* HUGGINGFACE TAB */}
                 {activeTab === 'huggingface' && (
                     <div className="space-y-6">
-                        <div className="flex flex-wrap items-center justify-between gap-4 p-1 bg-stone-900 border border-stone-800 rounded-lg">
+                        <div className="flex flex-wrap items-center gap-2 p-1 bg-stone-900 border border-stone-800 rounded-lg">
                             <div className="flex gap-1 p-1">
                                 {['trending', 'daily', 'weekly', 'monthly'].map((s) => (
                                     <button
                                         key={s}
                                         onClick={() => setHfSubTab(s as any)}
-                                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${hfSubTab === s ? 'bg-white text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
+                                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${hfSubTab === s ? 'bg-white text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
                                     >
                                         {s.charAt(0).toUpperCase() + s.slice(1)}
                                     </button>
                                 ))}
                             </div>
 
-                            {/* Date Picker (Only for Daily/Weekly?) */}
-                            <div className="flex items-center gap-2 px-2">
-                                <button onClick={() => {
-                                    const d = new Date(selectedDate);
-                                    d.setDate(d.getDate() - 1);
-                                    setSelectedDate(d.toISOString().split('T')[0]);
-                                }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronLeft size={20} /></button>
+                            <div className="w-px h-6 bg-stone-800 mx-1"></div>
 
-                                <input
-                                    type="date"
-                                    value={selectedDate}
-                                    onChange={(e) => setSelectedDate(e.target.value)}
-                                    className="bg-stone-950 border border-stone-800 rounded px-2 py-1 text-stone-200 text-sm focus:outline-none focus:border-stone-600"
-                                />
-
-                                <button onClick={() => {
-                                    const d = new Date(selectedDate);
-                                    d.setDate(d.getDate() + 1);
-                                    setSelectedDate(d.toISOString().split('T')[0]);
-                                }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronRight size={20} /></button>
+                            <div className="flex gap-1 p-1 overflow-x-auto">
+                                {[
+                                    { id: 'youtube', label: 'YouTube' },
+                                    { id: 'bytedance', label: 'ByteDance' },
+                                    { id: 'bair', label: 'BAIR' },
+                                    { id: 'google_research', label: 'Google' }
+                                ].map((s) => (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => setHfSubTab(s.id as any)}
+                                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${hfSubTab === s.id ? 'bg-blue-900/30 text-blue-300 border border-blue-800/50' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
+                                    >
+                                        {s.label}
+                                    </button>
+                                ))}
                             </div>
+
+                            {/* Date Picker (Only for Daily) */}
+                            {hfSubTab === 'daily' && (
+                                <div className="flex items-center gap-2 px-2 ml-auto border-l border-stone-800">
+                                    <button onClick={() => {
+                                        const d = new Date(selectedDate);
+                                        d.setDate(d.getDate() - 1);
+                                        setSelectedDate(d.toISOString().split('T')[0]);
+                                    }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronLeft size={16} /></button>
+
+                                    <input
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        className="bg-stone-950 border border-stone-800 rounded px-2 py-1 text-stone-200 text-xs focus:outline-none focus:border-stone-600"
+                                    />
+
+                                    <button onClick={() => {
+                                        const d = new Date(selectedDate);
+                                        d.setDate(d.getDate() + 1);
+                                        setSelectedDate(d.toISOString().split('T')[0]);
+                                    }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronRight size={16} /></button>
+                                </div>
+                            )}
                         </div>
 
                         {loadingTrending ? (

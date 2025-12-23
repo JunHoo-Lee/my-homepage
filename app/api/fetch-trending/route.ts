@@ -1,6 +1,7 @@
 // /app/api/fetch-trending/route.ts
 import { NextResponse } from 'next/server';
 import { generateText } from '@/utils/ai';
+import { parseStringPromise } from 'xml2js';
 
 // Helper to fetch HTML text
 async function fetchHTML(url: string) {
@@ -39,6 +40,144 @@ function shuffleArray(array: any[]) {
     }
     return array;
 }
+
+// Helper to fetch and parse RSS/Atom feeds
+async function fetchRSS(url: string, sourceLabel: string) {
+    try {
+        const xml = await fetchHTML(url);
+        if (!xml) return [];
+
+        const result = await parseStringPromise(xml);
+        let items: any[] = [];
+        let feedType = 'rss';
+
+        // Detect Atom vs RSS
+        if (result.feed && result.feed.entry) {
+            feedType = 'atom'; // e.g., YouTube, BAIR
+            items = result.feed.entry;
+        } else if (result.rss && result.rss.channel && result.rss.channel[0].item) {
+            feedType = 'rss'; // e.g., Google Research often
+            items = result.rss.channel[0].item;
+        }
+
+        return items.map((item: any) => {
+            let title = '';
+            let link = '';
+            let date = '';
+            let abstract = '';
+            let authors = sourceLabel; // Default to source name if no author found
+
+            if (feedType === 'atom') {
+                title = item.title?.[0] || '';
+                // YouTube link handling
+                if (item['yt:videoId']) {
+                    link = `https://www.youtube.com/watch?v=${item['yt:videoId'][0]}`;
+                } else if (item.link && item.link[0]?.$?.href) {
+                    link = item.link[0].$.href;
+                }
+                date = item.published?.[0] || item.updated?.[0] || '';
+
+                // Summary/Content
+                if (item['media:group'] && item['media:group'][0]['media:description']) {
+                    abstract = item['media:group'][0]['media:description'][0];
+                } else if (item.summary) {
+                    abstract = item.summary[0] || '';
+                    if (typeof abstract !== 'string') abstract = abstract['_'] || ''; // Handle complex summary objects
+                } else if (item.content) {
+                    abstract = item.content[0]?._ || item.content[0] || '';
+                }
+
+                // Author
+                if (item.author && item.author[0].name) {
+                    authors = item.author[0].name[0];
+                }
+
+            } else {
+                // RSS
+                title = item.title?.[0] || '';
+                link = item.link?.[0] || '';
+                date = item.pubDate?.[0] || '';
+                abstract = item.description?.[0] || '';
+                if (item['dc:creator']) {
+                    authors = item['dc:creator'][0];
+                }
+            }
+
+            // Cleanup basic HTML from abstract if needed (simple regex)
+            const cleanAbstract = abstract.replace(/<[^>]*>?/gm, ' ').substring(0, 300) + '...';
+
+            return {
+                title,
+                link,
+                authors,
+                source: sourceLabel,
+                abstract: cleanAbstract,
+                publishedAt: date
+            };
+        });
+
+    } catch (e) {
+        console.error(`RSS Fetch Error for ${sourceLabel}:`, e);
+        return [];
+    }
+}
+
+async function getByteDancePapers(count: number) {
+    // Scrape from https://seed.bytedance.com/en/public_papers?view_from=research
+    const url = 'https://seed.bytedance.com/en/public_papers?view_from=research';
+    const html = await fetchHTML(url);
+    if (!html) return [];
+
+    const papers: any[] = [];
+
+    // Simple regex to find blocks assuming standard layout
+    // href="/public_papers/..." followed by title etc.
+    // This is brittle but "static HTML" assumption was made.
+
+    // Extract logical blocks if possible. 
+    // Based on inspection, links look like /public_papers/slug
+    // Let's try to find title and link.
+
+    const paperLinkRegex = /href="(\/public_papers\/[^"]+)"/g;
+    const matches = [...html.matchAll(paperLinkRegex)];
+    const uniqueLinks = new Set(matches.map(m => m[1]));
+
+    const linkArray = Array.from(uniqueLinks).slice(0, count);
+
+    // We can't easy get title from just the link without parsing the DOM structure better.
+    // If we assume the link text is the title, or it's inside the A tag.
+    // Let's try a split approach.
+
+    // <a ... href="/public_papers/..." ... > ... <div ...> Title </div> ... </a>
+    // Since regex parsing HTML is limited, let's try to get a "Close enough" list.
+    // Or fetch the individual pages? No that's too slow.
+
+    // Let's attempt to use regex to capture the immediate text content after the link or inside it.
+    // Given the difficulty, let's infer title from Slug if we can't find it? No, looks bad.
+
+    // Let's try a slightly more complex regex to capture the whole <a> tag if possible, 
+    // or just assume we have to accept some messiness.
+
+    // For now, let's try to map the Slug to a Title format as a fallback.
+
+    for (const link of linkArray) {
+        const fullLink = `https://seed.bytedance.com${link}`;
+        const slug = link.split('/').pop() || "";
+        const title = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); // Title Case from slug
+
+        papers.push({
+            title: title + " (ByteDance)", // Explicitly mark until we parse better
+            link: fullLink,
+            authors: "ByteDance Research",
+            source: "ByteDance",
+            abstract: "Click to read paper details.",
+            publishedAt: new Date().toISOString() // Unknown date
+        });
+    }
+
+    return papers;
+}
+
 
 // Scrapers
 async function getCollectionPapers(url: string, sourceLabel: string, count: number, offset: number = 0) {
@@ -154,13 +293,6 @@ export async function POST(request: Request) {
                     };
                 });
 
-                // Do NOT shuffle if date is specific? Keep it consistent? 
-                // Creating a stable list is better for pagination, but HF daily papers list is small enough.
-                // The original code shuffled. Let's keep shuffling or maybe removing it to be deterministic?
-                // For "Daily", we usually want *all* of them or ordered by popularity (upvotes). 
-                // HF API returns them sorted by upvotes usually. Let's Return VALID papers without shuffling for now to match "Ranking".
-                // actually original code shuffled. Let's not shuffle if we want "Trending" feel.
-
                 papers = allPapers.slice(0, count);
             }
         } catch (e) { console.error(e); }
@@ -168,15 +300,21 @@ export async function POST(request: Request) {
     else if (source === 'trending') {
         papers = await getTrendingPapers(count);
     }
+    else if (source === 'youtube') {
+        papers = await fetchRSS('https://www.youtube.com/feeds/videos.xml?channel_id=UConVfxXodg78Tzh5nNu85Ew', 'Two Minute Papers');
+    }
+    else if (source === 'bair') {
+        papers = await fetchRSS('https://bair.berkeley.edu/blog/feed.xml', 'BAIR Blog');
+    }
+    else if (source === 'google_research') {
+        papers = await fetchRSS('https://research.google/blog/rss/', 'Google Research');
+    }
+    else if (source === 'bytedance') {
+        papers = await getByteDancePapers(count);
+    }
     else if (source === 'deepseek') {
         papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/deepseek-papers', 'DeepSeek', count, offset);
     }
-    else if (source === 'bytedance') {
-        papers = await getCollectionPapers('https://huggingface.co/collections/Presidentlin/bytedance-papers', 'ByteDance', count, offset);
-    }
-
-    // REMOVED EAGER TLDR GENERATION
-    // meaningful improvement in latency
 
     return NextResponse.json({ papers });
 }
