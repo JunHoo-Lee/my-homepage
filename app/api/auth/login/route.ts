@@ -11,7 +11,7 @@ export async function POST(request: Request) {
         (await cookies()).set('auth_session', 'true', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24 * 7, // 1 week
+            maxAge: 60 * 60, // 1 hour
             path: '/',
         });
         return NextResponse.json({ success: true });
