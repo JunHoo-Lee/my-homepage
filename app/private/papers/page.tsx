@@ -348,15 +348,15 @@ export default function PapersPage() {
 
     return (
         <div className="space-y-6 relative">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-stone-100">Papers</h1>
+            <div className="flex justify-between items-center mb-2 lg:mb-4">
+                <h1 className="text-2xl lg:text-3xl font-bold text-stone-100">Papers</h1>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-4 border-b border-stone-800">
-                <button onClick={() => setActiveTab('my_papers')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>My Papers</button>
-                <button onClick={() => setActiveTab('huggingface')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'huggingface' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>HuggingFace</button>
-                <button onClick={() => setActiveTab('ai_search')} className={`pb-3 px-2 font-medium transition-colors ${activeTab === 'ai_search' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>AI Discovery</button>
+            {/* Tabs - Scrollable on Mobile */}
+            <div className="flex gap-4 border-b border-stone-800 overflow-x-auto no-scrollbar whitespace-nowrap -mx-4 px-4 lg:mx-0 lg:px-0">
+                <button onClick={() => setActiveTab('my_papers')} className={`pb-3 px-2 text-sm lg:text-base font-medium transition-colors shrink-0 ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>My Papers</button>
+                <button onClick={() => setActiveTab('huggingface')} className={`pb-3 px-2 text-sm lg:text-base font-medium transition-colors shrink-0 ${activeTab === 'huggingface' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>HuggingFace</button>
+                <button onClick={() => setActiveTab('ai_search')} className={`pb-3 px-2 text-sm lg:text-base font-medium transition-colors shrink-0 ${activeTab === 'ai_search' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>AI Discovery</button>
             </div>
 
             {/* Content */}
@@ -364,39 +364,41 @@ export default function PapersPage() {
 
                 {/* MY PAPERS TAB */}
                 {activeTab === 'my_papers' && (
-                    <div className="space-y-6">
-                        <div className="flex gap-2">
+                    <div className="space-y-4 lg:space-y-6">
+                        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4">
                             <form onSubmit={handleQuickAdd} className="flex gap-2 flex-1">
-                                <input value={input} onChange={e => setInput(e.target.value)} placeholder="Paste link or citation (AI Auto-fill)..." className="flex-1 p-3 bg-stone-900 border border-stone-800 rounded-lg text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50" disabled={adding} />
-                                <button type="submit" disabled={adding} className="bg-stone-100 text-stone-950 px-6 py-3 rounded-lg hover:bg-white disabled:opacity-50 whitespace-nowrap font-medium">{adding ? <Loader2 className="animate-spin" /> : 'AI Add'}</button>
+                                <input value={input} onChange={e => setInput(e.target.value)} placeholder="Paste link or citation..." className="flex-1 p-3 bg-stone-900 border border-stone-800 rounded-xl text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50 text-sm" disabled={adding} />
+                                <button type="submit" disabled={adding} className="bg-stone-100 text-stone-950 px-4 lg:px-6 py-3 rounded-xl hover:bg-white disabled:opacity-50 whitespace-nowrap font-bold text-sm">{adding ? <Loader2 className="animate-spin" size={18} /> : 'AI Add'}</button>
                             </form>
-                            <button onClick={() => setManualAddModal(true)} className="px-4 py-3 border border-stone-700 rounded-lg hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors">Manual Add</button>
-                            <div className="ml-auto"><ViewToggle view={viewMode} onChange={setViewMode} /></div>
+                            <div className="flex gap-2">
+                                <button onClick={() => setManualAddModal(true)} className="flex-1 lg:flex-none px-4 py-3 border border-stone-700 rounded-xl hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors text-sm font-medium">Manual Add</button>
+                                <div className="lg:ml-auto"><ViewToggle view={viewMode} onChange={setViewMode} /></div>
+                            </div>
                         </div>
 
                         {loadingMyParams ? <p className="text-stone-500">Loading...</p> : (
                             <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
                                 {myPapers.filter(p => !p.tags?.includes('Scholar Inbox') && !p.tags?.includes('X')).map(p => (
-                                    <div key={p.id} onClick={() => setEditingPaper(p)} className={`bg-stone-900 p-4 rounded-lg border border-stone-800 shadow-sm hover:shadow-md hover:border-amber-900/40 transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex-1 min-w-0 pr-4">
-                                                <h3 className="font-semibold text-base text-stone-200 group-hover:text-amber-500 transition-colors line-clamp-2">{p.title}</h3>
-                                                <p className="text-stone-500 text-sm mt-1">{formatAuthors(p.authors)}</p>
-                                                {viewMode === 'list' && p.memo && <div className="flex items-start gap-2 mt-2 text-sm text-stone-500"><BookOpen size={14} className="mt-0.5 text-blue-400 shrink-0" /><span className="line-clamp-1">{getPreviewText(p.memo)}</span></div>}
+                                    <div key={p.id} onClick={() => setEditingPaper(p)} className={`bg-stone-900 p-4 lg:p-5 rounded-2xl border border-stone-800 shadow-sm hover:shadow-md hover:border-amber-900/40 transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}>
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex-1 min-w-0 pr-2">
+                                                <h3 className="font-bold text-sm lg:text-base text-stone-100 group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{p.title}</h3>
+                                                <p className="text-stone-500 text-[12px] lg:text-sm mt-1">{formatAuthors(p.authors)}</p>
+                                                {viewMode === 'list' && p.memo && <div className="flex items-start gap-2 mt-2 text-[12px] text-stone-500 bg-stone-950/40 p-2 rounded-lg border border-stone-800/50"><BookOpen size={13} className="mt-0.5 text-blue-400 shrink-0" /><span className="line-clamp-1 italic">{getPreviewText(p.memo)}</span></div>}
                                             </div>
-                                            <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`} target="_blank" className="p-2 text-stone-500 hover:text-blue-400 hover:bg-stone-800 rounded-full transition-colors"><GraduationCap size={20} /></a>
-                                                {p.link && <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors"><ExternalLink size={20} /></a>}
+                                            <div className="flex flex-col lg:flex-row gap-1 lg:gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`} target="_blank" className="p-2 text-stone-500 hover:text-blue-400 hover:bg-stone-800 rounded-full transition-colors flex items-center justify-center"><GraduationCap size={18} /></a>
+                                                {p.link && <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors flex items-center justify-center"><ExternalLink size={18} /></a>}
                                             </div>
                                         </div>
                                         {viewMode === 'card' && p.memo && (
-                                            <div className="mb-3 p-3 bg-stone-950/50 rounded text-sm text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-[12] prose-img:rounded-md flex-1 border border-stone-800/50">
+                                            <div className="mb-4 p-4 bg-stone-950/50 rounded-xl text-[13px] text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-[10] prose-img:rounded-md flex-1 border border-stone-800/50 overflow-hidden leading-relaxed">
                                                 <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{p.memo}</ReactMarkdown>
                                             </div>
                                         )}
-                                        <div className="flex gap-2 mt-auto items-center">
-                                            <span className={`px-2 py-0.5 rounded text-xs border ${p.status === 'read' ? 'bg-green-900/20 text-green-400 border-green-500/20' : p.status === 'reading' ? 'bg-blue-900/20 text-blue-400 border-blue-500/20' : 'bg-stone-800 text-stone-400 border-stone-700'}`}>{(p.status || 'unread').toUpperCase()}</span>
-                                            {p.tags?.map((t: string) => <span key={t} className="px-2 py-0.5 rounded text-xs bg-stone-800 text-stone-500 border border-stone-700">#{t}</span>)}
+                                        <div className="flex flex-wrap gap-2 mt-auto items-center">
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border tracking-wider ${p.status === 'read' ? 'bg-green-950/30 text-green-400 border-green-900/40' : p.status === 'reading' ? 'bg-blue-950/30 text-blue-400 border-blue-900/40' : 'bg-stone-800/50 text-stone-500 border-stone-700'}`}>{p.status || 'unread'}</span>
+                                            {p.tags?.map((t: string) => <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-stone-800/30 text-stone-500 border border-stone-800">#{t}</span>)}
                                         </div>
                                     </div>
                                 ))}
@@ -407,23 +409,23 @@ export default function PapersPage() {
 
                 {/* HUGGINGFACE TAB */}
                 {activeTab === 'huggingface' && (
-                    <div className="space-y-6">
-                        <div className="flex flex-wrap items-center gap-2 p-1 bg-stone-900 border border-stone-800 rounded-lg">
-                            <div className="flex gap-1 p-1">
+                    <div className="space-y-4 lg:space-y-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center gap-2 p-1 lg:p-1.5 bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
+                            <div className="flex gap-1 p-1 overflow-x-auto no-scrollbar whitespace-nowrap">
                                 {['trending', 'daily', 'weekly', 'monthly'].map((s) => (
                                     <button
                                         key={s}
                                         onClick={() => setHfSubTab(s as any)}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${hfSubTab === s ? 'bg-white text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
+                                        className={`px-3 py-1.5 rounded-xl text-[11px] lg:text-xs font-bold uppercase tracking-wider transition-all ${hfSubTab === s ? 'bg-amber-500 text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200'}`}
                                     >
-                                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                                        {s}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="w-px h-6 bg-stone-800 mx-1"></div>
+                            <div className="hidden lg:block w-px h-6 bg-stone-800 mx-1"></div>
 
-                            <div className="flex gap-1 p-1 overflow-x-auto">
+                            <div className="flex gap-1 p-1 overflow-x-auto no-scrollbar whitespace-nowrap border-t lg:border-t-0 border-stone-800 pt-2 lg:pt-1">
                                 {[
                                     { id: 'youtube', label: 'YouTube' },
                                     { id: 'bytedance', label: 'ByteDance' },
@@ -433,7 +435,7 @@ export default function PapersPage() {
                                     <button
                                         key={s.id}
                                         onClick={() => setHfSubTab(s.id as any)}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${hfSubTab === s.id ? 'bg-blue-900/30 text-blue-300 border border-blue-800/50' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
+                                        className={`px-3 py-1.5 rounded-xl text-[11px] lg:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${hfSubTab === s.id ? 'bg-blue-600 text-white shadow-sm' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}
                                     >
                                         {s.label}
                                     </button>
@@ -442,25 +444,27 @@ export default function PapersPage() {
 
                             {/* Date Picker (Only for Daily) */}
                             {hfSubTab === 'daily' && (
-                                <div className="flex items-center gap-2 px-2 ml-auto border-l border-stone-800">
-                                    <button onClick={() => {
-                                        const d = new Date(selectedDate);
-                                        d.setDate(d.getDate() - 1);
-                                        setSelectedDate(d.toISOString().split('T')[0]);
-                                    }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronLeft size={16} /></button>
+                                <div className="flex items-center justify-between lg:justify-end gap-2 px-2 py-2 lg:py-0 lg:ml-auto border-t lg:border-t-0 lg:border-l border-stone-800">
+                                    <div className="flex items-center gap-1">
+                                        <button onClick={() => {
+                                            const d = new Date(selectedDate);
+                                            d.setDate(d.getDate() - 1);
+                                            setSelectedDate(d.toISOString().split('T')[0]);
+                                        }} className="p-1.5 hover:bg-stone-800 rounded-lg text-stone-400"><ChevronLeft size={16} /></button>
 
-                                    <input
-                                        type="date"
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="bg-stone-950 border border-stone-800 rounded px-2 py-1 text-stone-200 text-xs focus:outline-none focus:border-stone-600"
-                                    />
+                                        <input
+                                            type="date"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            className="bg-stone-950 border border-stone-800 rounded-lg px-2 py-1 text-stone-200 text-[11px] font-bold focus:outline-none focus:border-stone-600 appearance-none"
+                                        />
 
-                                    <button onClick={() => {
-                                        const d = new Date(selectedDate);
-                                        d.setDate(d.getDate() + 1);
-                                        setSelectedDate(d.toISOString().split('T')[0]);
-                                    }} className="p-1 hover:bg-stone-800 rounded text-stone-400"><ChevronRight size={16} /></button>
+                                        <button onClick={() => {
+                                            const d = new Date(selectedDate);
+                                            d.setDate(d.getDate() + 1);
+                                            setSelectedDate(d.toISOString().split('T')[0]);
+                                        }} className="p-1.5 hover:bg-stone-800 rounded-lg text-stone-400"><ChevronRight size={16} /></button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -540,18 +544,18 @@ export default function PapersPage() {
 
                 {/* AI SEARCH TAB */}
                 {activeTab === 'ai_search' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 lg:space-y-6">
                         {/* Sub Tabs */}
-                        <div className="flex gap-2 p-1 bg-stone-900 border border-stone-800 rounded-lg w-fit">
+                        <div className="flex gap-1 p-1 bg-stone-900 border border-stone-800 rounded-2xl w-full lg:w-fit overflow-x-auto no-scrollbar">
                             {[
                                 { id: 'conference', label: 'Conference' },
-                                { id: 'keyword', label: 'Topic Search' },
-                                { id: 'arxiv', label: 'Arxiv Basic' }
+                                { id: 'keyword', label: 'Topic' },
+                                { id: 'arxiv', label: 'Arxiv' }
                             ].map((mode) => (
                                 <button
                                     key={mode.id}
                                     onClick={() => { setAiSearchMode(mode.id as any); setAiResults([]); }}
-                                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${aiSearchMode === mode.id ? 'bg-stone-100 text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200'}`}
+                                    className={`flex-1 lg:flex-none px-4 py-2 rounded-xl text-[11px] lg:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${aiSearchMode === mode.id ? 'bg-amber-500 text-stone-950 shadow-sm' : 'text-stone-400 hover:text-stone-200'}`}
                                 >
                                     {mode.label}
                                 </button>
@@ -559,56 +563,56 @@ export default function PapersPage() {
                         </div>
 
                         {/* Controls */}
-                        <div className="flex flex-col md:flex-row gap-4 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
+                        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 bg-stone-900/50 p-2 lg:p-4 rounded-2xl border border-stone-800">
                             {aiSearchMode === 'conference' && (
-                                <div className="flex-1 flex gap-4">
+                                <div className="flex flex-col lg:flex-row gap-2 flex-1">
                                     <input
                                         value={aiConferenceName}
                                         onChange={e => setAiConferenceName(e.target.value)}
-                                        placeholder="Conference Name (e.g. ACL 2025, CVPR 2024)..."
-                                        className="flex-1 bg-stone-950 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                                        placeholder="Conference (e.g. ACL 2025)..."
+                                        className="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm"
                                     />
-                                    <button onClick={handleAiSearch} disabled={!aiConferenceName} className="bg-amber-600 text-white px-6 rounded-lg font-bold hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <button onClick={handleAiSearch} disabled={!aiConferenceName} className="bg-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-500 disabled:opacity-50 text-sm shadow-lg shadow-amber-900/20 active:scale-95 transition-all">
                                         Scrape Top Papers
                                     </button>
                                 </div>
                             )}
 
                             {aiSearchMode === 'keyword' && (
-                                <div className="flex-1 flex flex-col md:flex-row gap-4">
+                                <div className="flex flex-col lg:flex-row gap-2 flex-1">
                                     <input
                                         value={aiQuery}
                                         onChange={e => setAiQuery(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleAiSearch()}
-                                        placeholder="Topic (e.g. Diffusion Language Models)..."
-                                        className="flex-[2] bg-stone-950 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                                        placeholder="Topic (e.g. LLM Reasoning)..."
+                                        className="flex-[2] bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm"
                                     />
-                                    <div className="flex items-center gap-2 bg-stone-950 border border-stone-800 rounded-lg px-3">
-                                        <span className="text-stone-500 text-xs font-bold uppercase whitespace-nowrap">Since</span>
+                                    <div className="flex items-center gap-2 bg-stone-950 border border-stone-800 rounded-xl px-3 group focus-within:ring-2 focus-within:ring-amber-500/50">
+                                        <span className="text-stone-600 text-[10px] font-black uppercase tracking-tighter whitespace-nowrap">Since</span>
                                         <input
                                             type="date"
                                             value={aiDateMargin}
                                             onChange={e => setAiDateMargin(e.target.value)}
-                                            className="bg-transparent text-stone-300 text-sm focus:outline-none py-3"
+                                            className="bg-transparent text-stone-300 text-[12px] focus:outline-none py-3 font-bold"
                                         />
                                     </div>
-                                    <button onClick={handleAiSearch} disabled={!aiQuery} className="bg-amber-600 text-white px-6 rounded-lg font-bold hover:bg-amber-500 disabled:opacity-50 whitespace-nowrap">
+                                    <button onClick={handleAiSearch} disabled={!aiQuery} className="bg-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-500 disabled:opacity-50 text-sm shadow-lg shadow-amber-900/20 active:scale-95 transition-all">
                                         Find Papers
                                     </button>
                                 </div>
                             )}
 
                             {aiSearchMode === 'arxiv' && (
-                                <div className="flex-1 flex gap-4">
+                                <div className="flex flex-col lg:flex-row gap-2 flex-1">
                                     <input
                                         value={aiQuery}
                                         onChange={e => setAiQuery(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleAiSearch()}
-                                        placeholder="Search Arxiv (Title, Abstract)..."
-                                        className="flex-1 bg-stone-950 border border-stone-800 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-900/50"
+                                        placeholder="Search Arxiv..."
+                                        className="flex-1 bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm"
                                     />
-                                    <button onClick={handleAiSearch} className="bg-stone-100 text-stone-950 px-6 rounded-lg font-bold hover:bg-white flex items-center gap-2">
-                                        <Search size={18} /> Search
+                                    <button onClick={handleAiSearch} className="bg-stone-100 text-stone-950 px-6 py-3 rounded-xl font-bold hover:bg-white flex items-center justify-center gap-2 text-sm active:scale-95 transition-all">
+                                        <Search size={16} /> Search
                                     </button>
                                 </div>
                             )}

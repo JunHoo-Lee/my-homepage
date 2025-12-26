@@ -99,19 +99,19 @@ export default function TasksPage() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-10">
+        <div className="max-w-5xl mx-auto space-y-6 lg:space-y-10 pb-20 lg:pb-0">
             {/* Header */}
-            <div className="flex flex-col gap-2 border-b border-stone-800 pb-8">
-                <h1 className="text-4xl font-extrabold tracking-tight text-stone-100 font-sans">
+            <div className="flex flex-col gap-1 lg:gap-2 border-b border-stone-800 pb-6 lg:pb-8">
+                <h1 className="text-2xl lg:text-4xl font-extrabold tracking-tight text-stone-100 font-sans">
                     Tasks
                 </h1>
-                <p className="text-lg text-stone-400 font-light">
+                <p className="text-base lg:text-lg text-stone-400 font-light line-clamp-1 lg:line-clamp-none">
                     Manage your priorities and deadlines effectively.
                 </p>
             </div>
 
-            {/* Input Hero */}
-            <div className="bg-stone-900 p-2 rounded-2xl shadow-lg shadow-stone-900/50 border border-stone-800">
+            {/* Input Hero - Hidden on very small mobile for the sticky bar, or integrated */}
+            <div className="hidden lg:block bg-stone-900 p-2 rounded-2xl shadow-lg shadow-stone-900/50 border border-stone-800">
                 <form onSubmit={handleAdd} className="flex gap-2">
                     <input
                         value={input}
@@ -132,11 +132,11 @@ export default function TasksPage() {
             </div>
 
             {/* Task List */}
-            <div className="space-y-6">
+            <div className="space-y-4 lg:space-y-6">
                 <div className="flex items-center justify-between px-2">
-                    <h2 className="text-xl font-bold text-stone-200">Task List</h2>
+                    <h2 className="text-lg lg:text-xl font-bold text-stone-200">Task List</h2>
                     {tasks.some(t => t.completed) && (
-                        <button onClick={deleteCompleted} className="text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 px-3 py-1.5 rounded-lg transition-colors">
+                        <button onClick={deleteCompleted} className="text-xs lg:text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 px-3 py-1.5 rounded-lg transition-colors">
                             Clear Completed
                         </button>
                     )}
@@ -153,31 +153,31 @@ export default function TasksPage() {
                                 key={task.id}
                                 onClick={() => setEditingTask(task)}
                                 className={`
-                                    group flex items-start gap-4 p-5 rounded-xl border transition-all cursor-pointer 
+                                    group flex items-start gap-3 lg:gap-4 p-4 lg:p-5 rounded-xl border transition-all cursor-pointer 
                                     ${task.completed
-                                        ? 'bg-stone-900/30 border-stone-800/50 opacity-50'
+                                        ? 'bg-stone-900/30 border-stone-800/50 opacity-60'
                                         : 'bg-stone-900 border-stone-800 hover:border-amber-900/50 hover:shadow-md'
                                     }
                                 `}
                             >
                                 <div
                                     className={`
-                                        mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
+                                        mt-1 w-5 h-5 lg:w-6 lg:h-6 rounded-full border-2 flex items-center justify-center transition-colors shrink-0
                                         ${task.completed ? 'bg-stone-700 border-stone-700' : 'border-stone-600 group-hover:border-amber-500'}
                                     `}
                                     onClick={(e) => { e.stopPropagation(); toggleComplete(task.id, task.completed); }}
                                 >
-                                    {task.completed && <Check size={14} className="text-stone-300" />}
+                                    {task.completed && <Check size={12} className="text-stone-300" />}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                                        <h3 className={`font-medium text-lg leading-snug ${task.completed ? 'line-through text-stone-500' : 'text-stone-200'}`}>
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 lg:gap-2">
+                                        <h3 className={`font-medium text-base lg:text-lg leading-snug ${task.completed ? 'line-through text-stone-500' : 'text-stone-200'}`}>
                                             {task.title}
                                         </h3>
                                         <div className="flex items-center gap-2 shrink-0">
                                             {task.priority && (
-                                                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${getPriorityColor(task.priority)}`}>
+                                                <span className={`text-[10px] lg:text-xs px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-full font-bold border uppercase tracking-wider ${getPriorityColor(task.priority)}`}>
                                                     {task.priority}
                                                 </span>
                                             )}
@@ -185,21 +185,21 @@ export default function TasksPage() {
                                     </div>
 
                                     {(task.memo || task.due_date || (task.tags && task.tags.length > 0)) && (
-                                        <div className="mt-3 flex flex-wrap gap-4 text-sm text-stone-500">
+                                        <div className="mt-2 lg:mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] lg:text-sm text-stone-500">
                                             {task.due_date && (
                                                 <div className="flex items-center gap-1.5 text-stone-500">
-                                                    <Calendar size={14} />
+                                                    <Calendar size={13} />
                                                     <span>{new Date(task.due_date).toLocaleDateString()}</span>
                                                 </div>
                                             )}
                                             {task.tags?.map((t: string) => (
                                                 <div key={t} className="flex items-center gap-1 text-stone-500">
-                                                    <Tag size={14} />
+                                                    <Tag size={13} />
                                                     <span>{t}</span>
                                                 </div>
                                             ))}
                                             {task.memo && (
-                                                <p className="w-full text-stone-500 mt-1 line-clamp-1">{task.memo}</p>
+                                                <p className="w-full text-stone-500 mt-1 line-clamp-1 font-light italic">{task.memo}</p>
                                             )}
                                         </div>
                                     )}
@@ -301,6 +301,31 @@ export default function TasksPage() {
                     </div>
                 </div>
             )}
+
+            {/* Mobile Sticky Input Bar */}
+            <div className="lg:hidden fixed bottom-[72px] left-0 right-0 p-3 bg-stone-950/80 backdrop-blur-md border-t border-stone-800 z-40 transition-all duration-300">
+                <form onSubmit={handleAdd} className="flex gap-2 max-w-lg mx-auto">
+                    <div className="flex-1 relative">
+                        <input
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            placeholder="Add a task..."
+                            className="w-full pl-4 pr-10 py-3 bg-stone-900 border border-stone-800 rounded-2xl text-stone-200 placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 shadow-inner"
+                            disabled={processing}
+                        />
+                        <div className="absolute right-3 top-3.5 text-stone-600">
+                            <Sparkles size={16} />
+                        </div>
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={processing || !input.trim()}
+                        className="bg-amber-500 text-stone-950 w-12 h-12 rounded-2xl font-bold hover:bg-amber-400 disabled:bg-stone-800 disabled:text-stone-600 transition-all flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10 active:scale-90"
+                    >
+                        {processing ? <Loader2 className="animate-spin" size={20} /> : <Plus size={24} />}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

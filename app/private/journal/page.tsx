@@ -51,36 +51,35 @@ export default function JournalPage() {
     const sortedDates = Object.keys(groupedEntries).sort((a, b) => b.localeCompare(a));
 
     return (
-        <div className="max-w-3xl mx-auto min-h-screen pb-32">
+        <div className="max-w-3xl mx-auto min-h-screen pb-32 lg:pb-12">
 
             {/* Header Area */}
-            <div className="pt-8 pb-6 px-4">
-                <h1 className="text-2xl font-bold text-stone-100 mb-1">Stream</h1>
-                <p className="text-stone-500 text-sm">Dump your thoughts, rolling notes, and ideas.</p>
+            <div className="pt-4 lg:pt-8 pb-4 lg:pb-6 px-1 lg:px-4">
+                <h1 className="text-xl lg:text-2xl font-bold text-stone-100 mb-1">Stream</h1>
+                <p className="text-stone-500 text-xs lg:text-sm">Dump your thoughts, rolling notes, and ideas.</p>
             </div>
 
-            {/* Input Wrapper - Not strictly sticky to avoid eating too much space on mobile, 
-                but distinct enough to feel like a "Input Console" */}
-            <div className="mb-12 px-4">
+            {/* Input Wrapper */}
+            <div className="mb-8 lg:mb-12 px-1 lg:px-4">
                 <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/10 to-orange-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition duration-500 blur-lg"></div>
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/10 to-orange-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500 blur-lg"></div>
                     <div className="relative z-10">
                         <RichTextEditor
                             value={content}
                             onChange={setContent}
                             onSubmit={handleSubmit}
-                            placeholder="What's on your mind? (⌘+Enter to post)"
-                            minHeight="120px"
-                            className="border-stone-800/80 bg-stone-900/80 backdrop-blur"
+                            placeholder="What's on your mind?..."
+                            minHeight="100px"
+                            className="border-stone-800/80 bg-stone-900/80 backdrop-blur-md rounded-2xl"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Timeline Stream */}
-            <div className="relative px-4">
+            <div className="relative px-1 lg:px-4">
                 {/* Continuous Vertical Line */}
-                <div className="absolute left-[27px] top-0 bottom-0 w-px bg-stone-800/50 hidden sm:block"></div>
+                <div className="absolute left-[15px] sm:left-[27px] top-0 bottom-0 w-px bg-stone-800/50"></div>
 
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -95,17 +94,17 @@ export default function JournalPage() {
                         {sortedDates.map(dateKey => (
                             <div key={dateKey} className="relative z-10">
                                 {/* Date Header */}
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="hidden sm:flex items-center justify-center w-6 h-6 rounded-full bg-stone-900 border border-stone-700 text-stone-500 shadow-sm shrink-0 -ml-[3px]">
-                                        <div className="w-2 h-2 rounded-full bg-stone-600"></div>
+                                <div className="flex items-center gap-3 lg:gap-4 mb-4 lg:mb-6">
+                                    <div className="flex items-center justify-center w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-stone-900 border border-stone-800 text-stone-500 shadow-sm shrink-0 -ml-[2.5px] lg:-ml-[3px] relative z-20">
+                                        <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-stone-700"></div>
                                     </div>
-                                    <h2 className="text-stone-400 font-medium text-sm tracking-wide bg-stone-950/90 px-2 py-1 rounded sticky top-0 backdrop-blur z-20 inline-block border border-stone-900">
+                                    <h2 className="text-stone-4300 font-bold text-[11px] lg:text-sm tracking-widest bg-stone-950/90 px-2 lg:px-3 py-1 rounded-lg sticky top-0 backdrop-blur-md z-20 inline-block border border-stone-900/50 text-stone-500 uppercase">
                                         {formatHeaderDate(dateKey)}
                                     </h2>
                                 </div>
 
                                 {/* Entries List for this Date */}
-                                <div className="space-y-2 sm:pl-8">
+                                <div className="space-y-4 lg:space-y-6 pl-6 lg:pl-8">
                                     {groupedEntries[dateKey].map(entry => (
                                         <JournalEntry
                                             key={entry.id}

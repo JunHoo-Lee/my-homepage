@@ -19,10 +19,10 @@ export default function JournalEntry({ content, createdAt }: JournalEntryProps) 
     });
 
     return (
-        <div className="group relative pl-8 py-2 hover:bg-stone-900/40 rounded-lg transition-colors -ml-4 px-4">
-            {/* Timestamp - visible on hover or simplified */}
-            <div className="absolute left-0 top-3 text-[10px] font-mono text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity select-none">
-                {timeString}
+        <div className="group relative pl-6 lg:pl-8 py-2 hover:bg-stone-900/40 rounded-lg transition-colors -ml-4 px-4 overflow-hidden">
+            {/* Timestamp - adjusted for mobile */}
+            <div className="absolute left-0 lg:left-0 top-3 text-[9px] lg:text-[10px] font-bold font-sans text-stone-700 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity select-none lg:rotate-0 -rotate-90 origin-left mt-2 lg:mt-0">
+                {timeString.split(' ')[0]}
             </div>
 
             {/* Timeline connectors */}
