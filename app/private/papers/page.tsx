@@ -348,12 +348,12 @@ export default function PapersPage() {
 
     return (
         <div className="space-y-6 relative pb-8">
-            <div className="flex justify-between items-center px-4 lg:px-0">
+            <div className="flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold text-stone-100">Papers</h1>
             </div>
 
             {/* Tabs - Scrollable on Mobile */}
-            <div className="flex gap-4 border-b border-stone-800 overflow-x-auto no-scrollbar whitespace-nowrap px-4 lg:px-0">
+            <div className="flex gap-4 border-b border-stone-800 overflow-x-auto no-scrollbar whitespace-nowrap">
                 <button onClick={() => setActiveTab('my_papers')} className={`pb-3 px-2 text-sm lg:text-base font-medium transition-colors shrink-0 ${activeTab === 'my_papers' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>My Papers</button>
                 <button onClick={() => setActiveTab('huggingface')} className={`pb-3 px-2 text-sm lg:text-base font-medium transition-colors shrink-0 ${activeTab === 'huggingface' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>HuggingFace</button>
                 <button onClick={() => setActiveTab('ai_search')} className={`pb-3 px-2 text-sm lg:text-base font-medium transition-colors shrink-0 ${activeTab === 'ai_search' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}>AI Discovery</button>
@@ -365,7 +365,7 @@ export default function PapersPage() {
                 {/* MY PAPERS TAB */}
                 {activeTab === 'my_papers' && (
                     <div className="space-y-4 lg:space-y-6">
-                        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 px-4 lg:px-0">
+                        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
                             <form onSubmit={handleQuickAdd} className="flex gap-2 flex-1 min-w-0">
                                 <input value={input} onChange={e => setInput(e.target.value)} placeholder="Paste link or citation..." className="flex-1 min-w-0 p-3 bg-stone-900 border border-stone-800 rounded-xl text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50 text-sm" disabled={adding} />
                                 <button type="submit" disabled={adding} className="bg-stone-100 text-stone-950 px-4 lg:px-6 py-3 rounded-xl hover:bg-white disabled:opacity-50 whitespace-nowrap font-bold text-sm h-[46px] flex items-center justify-center min-w-[80px]">{adding ? <Loader2 className="animate-spin" size={18} /> : 'AI Add'}</button>
@@ -383,12 +383,19 @@ export default function PapersPage() {
                                         <div key={p.id} onClick={() => setEditingPaper(p)} className={`bg-stone-900 p-4 lg:p-6 rounded-2xl border border-stone-800 shadow-sm hover:shadow-xl hover:border-amber-900/40 transition-all cursor-pointer group flex flex-col ${viewMode === 'card' ? 'h-full' : ''}`}>
                                             <div className="flex justify-between items-start mb-4 gap-3">
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-sm lg:text-lg text-stone-100 group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight tracking-tight">{p.title}</h3>
-                                                    <p className="text-stone-500 text-[11px] lg:text-sm mt-1.5 font-medium truncate">{formatAuthors(p.authors)}</p>
+                                                    <h3 className="font-bold text-base lg:text-lg text-stone-100 group-hover:text-amber-500 transition-colors leading-tight tracking-tight">{p.title}</h3>
+                                                    <p className="text-stone-500 text-[11px] lg:text-sm mt-1.5 font-medium">{formatAuthors(p.authors)}</p>
                                                     {viewMode === 'list' && p.memo && (
-                                                        <div className="flex items-start gap-2 mt-3 text-[12px] text-stone-400 bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/50">
-                                                            <BookOpen size={13} className="mt-0.5 text-blue-400 shrink-0" />
-                                                            <span className="line-clamp-1 italic">{getPreviewText(p.memo)}</span>
+                                                        <div className="mt-4 p-4 bg-stone-950/60 rounded-xl border border-stone-800/50 text-[13px] text-stone-300 prose prose-sm prose-invert max-w-none">
+                                                            <ReactMarkdown
+                                                                remarkPlugins={[remarkMath]}
+                                                                rehypePlugins={[rehypeKatex]}
+                                                                components={{
+                                                                    img: ({ node, ...props }) => <img {...props} className="max-w-full h-auto rounded-xl my-4 mx-auto border border-stone-800 shadow-lg" />
+                                                                }}
+                                                            >
+                                                                {p.memo}
+                                                            </ReactMarkdown>
                                                         </div>
                                                     )}
                                                 </div>
@@ -398,19 +405,19 @@ export default function PapersPage() {
                                                 </div>
                                             </div>
                                             {viewMode === 'card' && p.memo && (
-                                                <div className="mb-4 p-4 bg-stone-950/50 rounded-xl text-[13px] text-stone-300 prose prose-sm prose-invert max-w-none prose-img:rounded-xl prose-img:mx-auto prose-img:border prose-img:border-stone-800 flex-1 border border-stone-800/50 overflow-hidden leading-relaxed custom-scrollbar">
+                                                <div className="mb-4 p-4 bg-stone-950/50 rounded-xl text-[13px] text-stone-300 prose prose-sm prose-invert max-w-none prose-img:rounded-xl prose-img:mx-auto prose-img:border prose-img:border-stone-800 flex-1 border border-stone-800/50 leading-relaxed custom-scrollbar">
                                                     <ReactMarkdown
                                                         remarkPlugins={[remarkMath]}
                                                         rehypePlugins={[rehypeKatex]}
                                                         components={{
-                                                            img: ({ node, ...props }) => <img {...props} className="max-w-full h-auto rounded-xl my-4" />
+                                                            img: ({ node, ...props }) => <img {...props} className="max-w-full h-auto rounded-xl my-4 mx-auto border border-stone-800 shadow-lg" />
                                                         }}
                                                     >
                                                         {p.memo}
                                                     </ReactMarkdown>
                                                 </div>
                                             )}
-                                            <div className="flex flex-wrap gap-2 mt-auto items-center pt-2 border-t border-stone-800/30">
+                                            <div className="flex flex-wrap gap-2 mt-auto items-center pt-4 border-t border-stone-800/30">
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black border tracking-tighter ${p.status === 'read' ? 'bg-green-950/30 text-green-400 border-green-900/40' : p.status === 'reading' ? 'bg-blue-950/30 text-blue-400 border-blue-900/40' : 'bg-stone-800/50 text-stone-500 border-stone-700'}`}>{p.status || 'unread'}</span>
                                                 {p.tags?.filter((t: string) => t !== 'X' && t !== 'Scholar Inbox').map((t: string) => <span key={t} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-stone-950/50 text-stone-500 border border-stone-800 transition-colors group-hover:border-stone-700">#{t}</span>)}
                                             </div>
