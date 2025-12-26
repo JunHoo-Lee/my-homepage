@@ -22,7 +22,7 @@ export default function PrivateShell({
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-                <main className="flex-1 overflow-auto custom-scrollbar p-5 lg:p-8 pb-24 lg:pb-8 w-full max-w-7xl mx-auto">
+                <main className="flex-1 overflow-auto custom-scrollbar p-0 lg:p-8 pb-32 lg:pb-8 w-full max-w-7xl mx-auto">
                     {children}
                 </main>
 
