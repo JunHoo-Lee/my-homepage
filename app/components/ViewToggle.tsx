@@ -9,20 +9,20 @@ interface ViewToggleProps {
 
 export default function ViewToggle({ view, onChange }: ViewToggleProps) {
     return (
-        <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+        <div className="flex bg-stone-900 p-1 rounded-xl border border-stone-800 shadow-inner">
             <button
                 onClick={() => onChange('list')}
-                className={`p-1.5 rounded-md transition-all ${view === 'list' ? 'bg-white shadow text-gray-800' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-2 rounded-lg transition-all ${view === 'list' ? 'bg-stone-800 text-amber-500 shadow-lg ring-1 ring-stone-700' : 'text-stone-500 hover:text-stone-300'}`}
                 title="List View"
             >
-                <LayoutList size={18} />
+                <LayoutList size={20} />
             </button>
             <button
                 onClick={() => onChange('card')}
-                className={`p-1.5 rounded-md transition-all ${view === 'card' ? 'bg-white shadow text-gray-800' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-2 rounded-lg transition-all ${view === 'card' ? 'bg-stone-800 text-amber-500 shadow-lg ring-1 ring-stone-700' : 'text-stone-500 hover:text-stone-300'}`}
                 title="Card View"
             >
-                <LayoutGrid size={18} />
+                <LayoutGrid size={20} />
             </button>
         </div>
     );

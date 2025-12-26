@@ -348,7 +348,7 @@ export default function PapersPage() {
 
     return (
         <div className="space-y-6 relative pb-8">
-            <div className="flex justify-between items-center px-4 lg:px-0 mt-4 lg:mt-0">
+            <div className="flex justify-between items-center px-4 lg:px-0">
                 <h1 className="text-2xl lg:text-3xl font-bold text-stone-100">Papers</h1>
             </div>
 
@@ -365,14 +365,14 @@ export default function PapersPage() {
                 {/* MY PAPERS TAB */}
                 {activeTab === 'my_papers' && (
                     <div className="space-y-4 lg:space-y-6">
-                        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 px-4 lg:px-0">
-                            <form onSubmit={handleQuickAdd} className="flex gap-2 flex-1">
-                                <input value={input} onChange={e => setInput(e.target.value)} placeholder="Paste link or citation..." className="flex-1 p-3 bg-stone-900 border border-stone-800 rounded-xl text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50 text-sm" disabled={adding} />
-                                <button type="submit" disabled={adding} className="bg-stone-100 text-stone-950 px-4 lg:px-6 py-3 rounded-xl hover:bg-white disabled:opacity-50 whitespace-nowrap font-bold text-sm">{adding ? <Loader2 className="animate-spin" size={18} /> : 'AI Add'}</button>
+                        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 px-4 lg:px-0">
+                            <form onSubmit={handleQuickAdd} className="flex gap-2 flex-1 min-w-0">
+                                <input value={input} onChange={e => setInput(e.target.value)} placeholder="Paste link or citation..." className="flex-1 min-w-0 p-3 bg-stone-900 border border-stone-800 rounded-xl text-stone-200 placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-900/50 text-sm" disabled={adding} />
+                                <button type="submit" disabled={adding} className="bg-stone-100 text-stone-950 px-4 lg:px-6 py-3 rounded-xl hover:bg-white disabled:opacity-50 whitespace-nowrap font-bold text-sm h-[46px] flex items-center justify-center min-w-[80px]">{adding ? <Loader2 className="animate-spin" size={18} /> : 'AI Add'}</button>
                             </form>
-                            <div className="flex gap-2">
-                                <button onClick={() => setManualAddModal(true)} className="flex-1 lg:flex-none px-4 py-3 border border-stone-700 rounded-xl hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors text-sm font-medium">Manual Add</button>
-                                <div className="lg:ml-auto"><ViewToggle view={viewMode} onChange={setViewMode} /></div>
+                            <div className="flex gap-2 w-full lg:w-auto">
+                                <button onClick={() => setManualAddModal(true)} className="flex-1 lg:flex-none px-4 py-3 border border-stone-800 bg-stone-900/50 rounded-xl hover:bg-stone-800 text-stone-300 whitespace-nowrap transition-colors text-sm font-medium h-[46px]">Manual Add</button>
+                                <div className="shrink-0"><ViewToggle view={viewMode} onChange={setViewMode} /></div>
                             </div>
                         </div>
 
@@ -380,26 +380,39 @@ export default function PapersPage() {
                             <div className="px-2 lg:px-0">
                                 <div className={viewMode === 'card' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "grid gap-4"}>
                                     {myPapers.filter(p => !p.tags?.includes('Scholar Inbox') && !p.tags?.includes('X')).map(p => (
-                                        <div key={p.id} onClick={() => setEditingPaper(p)} className={`bg-stone-900 p-4 lg:p-5 rounded-2xl border border-stone-800 shadow-sm hover:shadow-md hover:border-amber-900/40 transition-all cursor-pointer group ${viewMode === 'card' ? 'flex flex-col h-full' : ''}`}>
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex-1 min-w-0 pr-2">
-                                                    <h3 className="font-bold text-sm lg:text-base text-stone-100 group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">{p.title}</h3>
-                                                    <p className="text-stone-500 text-[12px] lg:text-sm mt-1">{formatAuthors(p.authors)}</p>
-                                                    {viewMode === 'list' && p.memo && <div className="flex items-start gap-2 mt-2 text-[12px] text-stone-500 bg-stone-950/40 p-2 rounded-lg border border-stone-800/50"><BookOpen size={13} className="mt-0.5 text-blue-400 shrink-0" /><span className="line-clamp-1 italic">{getPreviewText(p.memo)}</span></div>}
+                                        <div key={p.id} onClick={() => setEditingPaper(p)} className={`bg-stone-900 p-4 lg:p-6 rounded-2xl border border-stone-800 shadow-sm hover:shadow-xl hover:border-amber-900/40 transition-all cursor-pointer group flex flex-col ${viewMode === 'card' ? 'h-full' : ''}`}>
+                                            <div className="flex justify-between items-start mb-4 gap-3">
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-sm lg:text-lg text-stone-100 group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight tracking-tight">{p.title}</h3>
+                                                    <p className="text-stone-500 text-[11px] lg:text-sm mt-1.5 font-medium truncate">{formatAuthors(p.authors)}</p>
+                                                    {viewMode === 'list' && p.memo && (
+                                                        <div className="flex items-start gap-2 mt-3 text-[12px] text-stone-400 bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/50">
+                                                            <BookOpen size={13} className="mt-0.5 text-blue-400 shrink-0" />
+                                                            <span className="line-clamp-1 italic">{getPreviewText(p.memo)}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="flex flex-col lg:flex-row gap-1 lg:gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                                    <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`} target="_blank" className="p-2 text-stone-500 hover:text-blue-400 hover:bg-stone-800 rounded-full transition-colors flex items-center justify-center"><GraduationCap size={18} /></a>
-                                                    {p.link && <a href={p.link} target="_blank" className="p-2 text-stone-500 hover:text-amber-500 hover:bg-stone-800 rounded-full transition-colors flex items-center justify-center"><ExternalLink size={18} /></a>}
+                                                <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`} target="_blank" className="p-2 text-stone-600 hover:text-blue-400 hover:bg-stone-800/50 rounded-xl transition-all"><GraduationCap size={18} /></a>
+                                                    {p.link && <a href={p.link} target="_blank" className="p-2 text-stone-600 hover:text-amber-500 hover:bg-stone-800/50 rounded-xl transition-all"><ExternalLink size={18} /></a>}
                                                 </div>
                                             </div>
                                             {viewMode === 'card' && p.memo && (
-                                                <div className="mb-4 p-4 bg-stone-950/50 rounded-xl text-[13px] text-stone-400 prose prose-sm prose-invert max-w-none line-clamp-[10] prose-img:rounded-md flex-1 border border-stone-800/50 overflow-hidden leading-relaxed">
-                                                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{p.memo}</ReactMarkdown>
+                                                <div className="mb-4 p-4 bg-stone-950/50 rounded-xl text-[13px] text-stone-300 prose prose-sm prose-invert max-w-none prose-img:rounded-xl prose-img:mx-auto prose-img:border prose-img:border-stone-800 flex-1 border border-stone-800/50 overflow-hidden leading-relaxed custom-scrollbar">
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[remarkMath]}
+                                                        rehypePlugins={[rehypeKatex]}
+                                                        components={{
+                                                            img: ({ node, ...props }) => <img {...props} className="max-w-full h-auto rounded-xl my-4" />
+                                                        }}
+                                                    >
+                                                        {p.memo}
+                                                    </ReactMarkdown>
                                                 </div>
                                             )}
-                                            <div className="flex flex-wrap gap-2 mt-auto items-center">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border tracking-wider ${p.status === 'read' ? 'bg-green-950/30 text-green-400 border-green-900/40' : p.status === 'reading' ? 'bg-blue-950/30 text-blue-400 border-blue-900/40' : 'bg-stone-800/50 text-stone-500 border-stone-700'}`}>{p.status || 'unread'}</span>
-                                                {p.tags?.map((t: string) => <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-stone-800/30 text-stone-500 border border-stone-800">#{t}</span>)}
+                                            <div className="flex flex-wrap gap-2 mt-auto items-center pt-2 border-t border-stone-800/30">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black border tracking-tighter ${p.status === 'read' ? 'bg-green-950/30 text-green-400 border-green-900/40' : p.status === 'reading' ? 'bg-blue-950/30 text-blue-400 border-blue-900/40' : 'bg-stone-800/50 text-stone-500 border-stone-700'}`}>{p.status || 'unread'}</span>
+                                                {p.tags?.filter((t: string) => t !== 'X' && t !== 'Scholar Inbox').map((t: string) => <span key={t} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-stone-950/50 text-stone-500 border border-stone-800 transition-colors group-hover:border-stone-700">#{t}</span>)}
                                             </div>
                                         </div>
                                     ))}
@@ -637,8 +650,14 @@ export default function PapersPage() {
                                             {p.source && <span className="text-xs bg-stone-800 px-2 py-1 rounded text-stone-400 border border-stone-700">{p.source}</span>}
                                         </div>
 
-                                        <div className="bg-stone-950/50 p-4 rounded-lg text-stone-300 text-sm leading-relaxed border border-stone-800/50 prose prose-invert prose-sm max-w-none">
-                                            <ReactMarkdown>{p.summary || p.abstract}</ReactMarkdown>
+                                        <div className="bg-stone-950/50 p-4 rounded-xl text-stone-300 text-sm leading-relaxed border border-stone-800/50 prose prose-invert prose-sm max-w-none prose-img:rounded-xl">
+                                            <ReactMarkdown
+                                                components={{
+                                                    img: ({ node, ...props }) => <img {...props} className="max-w-full h-auto rounded-xl my-4 mx-auto" />
+                                                }}
+                                            >
+                                                {p.summary || p.abstract}
+                                            </ReactMarkdown>
                                         </div>
 
                                         <div className="flex items-center gap-3 pt-2">
