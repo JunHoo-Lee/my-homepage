@@ -40,6 +40,7 @@ export default function PapersPage() {
 
     // Analysis State
     const [analyzing, setAnalyzing] = useState<Record<string, boolean>>({});
+    const [analyzingFull, setAnalyzingFull] = useState<Record<string, boolean>>({});
     const [analysisResults, setAnalysisResults] = useState<Record<string, string>>({}); // id -> tldr
 
     // Input State (Local Add)
@@ -228,6 +229,61 @@ export default function PapersPage() {
             alert('Analysis failed');
         } finally {
             setAnalyzing(prev => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const handleFullAnalyze = async (paper: any) => {
+        const id = paper.id || paper.link;
+        if (analysisResults[id] && analysisResults[id].includes('**Detailed Analysis**')) return;
+
+        setAnalyzingFull(prev => ({ ...prev, [id]: true }));
+        try {
+            const res = await fetch('/api/analyze-full', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: paper.title,
+                    link: paper.link || paper.pdf
+                })
+            });
+            const data = await res.json();
+            if (data.analysis) {
+                setAnalysisResults(prev => ({ ...prev, [id]: data.analysis }));
+            } else if (data.error) {
+                alert(data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Full analysis failed');
+        } finally {
+            setAnalyzingFull(prev => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const handleAutoFill = async () => {
+        if (!newPaper.title) return;
+        setAdding(true);
+        try {
+            const res = await fetch('/api/ai/fetch-paper-info', {
+                method: 'POST',
+                body: JSON.stringify({ title: newPaper.title })
+            });
+            const data = await res.json();
+            if (data.paper) {
+                setNewPaper({
+                    ...newPaper,
+                    title: data.paper.title,
+                    authors: data.paper.authors,
+                    link: data.paper.link,
+                    memo: data.paper.memo
+                });
+            } else if (data.error) {
+                alert(data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Auto-fill failed');
+        } finally {
+            setAdding(false);
         }
     };
 
@@ -504,11 +560,16 @@ export default function PapersPage() {
                                             <p className="text-stone-500 text-sm mb-4 line-clamp-1">{p.authors}</p>
 
                                             {/* Abstract / TLDR Area */}
-                                            <div className="flex-1 mb-4">
+                                            <div className="flex-1 mb-4 overflow-y-auto max-h-[300px] custom-scrollbar">
                                                 {analysisResults[p.id || p.link] ? (
-                                                    <div className="bg-amber-900/10 border border-amber-900/20 p-3 rounded-lg text-sm text-stone-300 animate-in fade-in zoom-in-95 duration-300">
-                                                        <span className="text-amber-500 font-bold block mb-1 flex items-center gap-1"><Sparkles size={12} /> TLDR</span>
-                                                        {analysisResults[p.id || p.link]}
+                                                    <div className="bg-amber-900/10 border border-amber-900/20 p-3 rounded-lg text-sm text-stone-300 animate-in fade-in zoom-in-95 duration-300 prose prose-invert prose-sm max-w-none">
+                                                        <span className="text-amber-500 font-bold block mb-1 flex items-center gap-1"><Sparkles size={12} /> {analysisResults[p.id || p.link].includes('**Detailed Analysis**') ? 'Full Analysis' : 'TLDR'}</span>
+                                                        <ReactMarkdown
+                                                            remarkPlugins={[remarkMath]}
+                                                            rehypePlugins={[rehypeKatex]}
+                                                        >
+                                                            {analysisResults[p.id || p.link]}
+                                                        </ReactMarkdown>
                                                     </div>
                                                 ) : (
                                                     <p className="text-stone-400 text-sm line-clamp-4 leading-relaxed">{p.abstract}</p>
@@ -525,14 +586,24 @@ export default function PapersPage() {
 
                                                 <div className="ml-auto flex gap-2">
                                                     {!analysisResults[p.id || p.link] && (
-                                                        <button
-                                                            onClick={() => handleAnalyze(p)}
-                                                            disabled={analyzing[p.id || p.link]}
-                                                            className="bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors"
-                                                        >
-                                                            {analyzing[p.id || p.link] ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                                            Analyze
-                                                        </button>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleAnalyze(p)}
+                                                                disabled={analyzing[p.id || p.link] || analyzingFull[p.id || p.link]}
+                                                                className="bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors"
+                                                            >
+                                                                {analyzing[p.id || p.link] ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                                                Analyze
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleFullAnalyze(p)}
+                                                                disabled={analyzing[p.id || p.link] || analyzingFull[p.id || p.link]}
+                                                                className="bg-amber-900/20 hover:bg-amber-900/40 text-amber-500 text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors border border-amber-900/30"
+                                                            >
+                                                                {analyzingFull[p.id || p.link] ? <Loader2 size={12} className="animate-spin" /> : <BookOpen size={12} />}
+                                                                Analyze Full
+                                                            </button>
+                                                        </div>
                                                     )}
 
                                                     <button
@@ -657,13 +728,15 @@ export default function PapersPage() {
                                             {p.source && <span className="text-xs bg-stone-800 px-2 py-1 rounded text-stone-400 border border-stone-700">{p.source}</span>}
                                         </div>
 
-                                        <div className="bg-stone-950/50 p-4 rounded-xl text-stone-300 text-sm leading-relaxed border border-stone-800/50 prose prose-invert prose-sm max-w-none prose-img:rounded-xl">
+                                        <div className="bg-stone-950/50 p-4 rounded-xl text-stone-300 text-sm leading-relaxed border border-stone-800/50 prose prose-invert prose-sm max-w-none prose-img:rounded-xl overflow-y-auto max-h-[400px] custom-scrollbar">
                                             <ReactMarkdown
+                                                remarkPlugins={[remarkMath]}
+                                                rehypePlugins={[rehypeKatex]}
                                                 components={{
                                                     img: ({ node, ...props }) => <img {...props} className="max-w-full h-auto rounded-xl my-4 mx-auto" />
                                                 }}
                                             >
-                                                {p.summary || p.abstract}
+                                                {analysisResults[p.id || p.link] || p.summary || p.abstract}
                                             </ReactMarkdown>
                                         </div>
 
@@ -676,6 +749,14 @@ export default function PapersPage() {
                                             >
                                                 {actionStates[p.id || p.link] === 'loading' ? <Loader2 size={14} className="animate-spin" /> : <Plus size={16} />}
                                                 {actionStates[p.id || p.link] === 'success' ? 'Added to Library' : 'Add to Library'}
+                                            </button>
+                                            <button
+                                                onClick={() => handleFullAnalyze(p)}
+                                                disabled={analyzingFull[p.id || p.link]}
+                                                className="px-4 py-2 rounded-lg text-sm font-medium bg-amber-900/20 text-amber-500 hover:bg-amber-900/40 border border-amber-900/30 transition-colors flex items-center gap-2"
+                                            >
+                                                {analyzingFull[p.id || p.link] ? <Loader2 size={14} className="animate-spin" /> : <BookOpen size={16} />}
+                                                Analyze Full
                                             </button>
                                             <button onClick={() => handleRelatedSearch(p)} className="px-4 py-2 rounded-lg text-sm font-medium bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white transition-colors flex items-center gap-2">
                                                 <Search size={14} /> Find Related
@@ -704,7 +785,18 @@ export default function PapersPage() {
                         <form onSubmit={handleManualSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-stone-400 mb-1">Title</label>
-                                <input required className="w-full p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                                <div className="flex gap-2">
+                                    <input required className="flex-1 p-3 bg-stone-950 border border-stone-800 rounded-lg text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-900/50" value={newPaper.title} onChange={e => setNewPaper({ ...newPaper, title: e.target.value })} />
+                                    <button
+                                        type="button"
+                                        onClick={handleAutoFill}
+                                        disabled={adding || !newPaper.title}
+                                        className="bg-amber-600 text-white px-4 py-3 rounded-lg font-bold hover:bg-amber-500 disabled:opacity-50 text-xs transition-colors flex items-center gap-2"
+                                    >
+                                        {adding ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                        Auto-fill
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-stone-400 mb-1">Authors</label>

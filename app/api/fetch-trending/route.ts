@@ -232,9 +232,11 @@ async function getCollectionPapers(url: string, sourceLabel: string, count: numb
     return validPapers.slice(offset, offset + count);
 }
 
-async function getTrendingPapers(count: number) {
-    // https://huggingface.co/papers/trending
-    const url = 'https://huggingface.co/papers/trending';
+async function getTrendingPapers(count: number, period?: string) {
+    let url = 'https://huggingface.co/papers/trending';
+    if (period === 'weekly') url = 'https://huggingface.co/papers?period=weekly';
+    if (period === 'monthly') url = 'https://huggingface.co/papers?period=monthly';
+
     const html = await fetchHTML(url);
     if (!html) return [];
 
@@ -247,10 +249,12 @@ async function getTrendingPapers(count: number) {
             const apiRes = await fetch(`https://huggingface.co/api/papers/${id}`);
             const data = await apiRes.json();
             return {
+                id: data.id,
                 title: data.title,
                 authors: data.authors?.map((a: any) => a.name).join(', ') || "Unknown",
                 link: `https://arxiv.org/abs/${id}`,
-                source: 'HF Trending',
+                pdf: `https://arxiv.org/pdf/${id}.pdf`,
+                source: period ? `HF ${period.charAt(0).toUpperCase() + period.slice(1)}` : 'HF Trending',
                 abstract: data.summary || "No abstract available"
             };
         } catch {
@@ -282,7 +286,7 @@ export async function POST(request: Request) {
                 let allPapers = hfData.map((p: any) => {
                     const paper = p.paper;
                     return {
-                        id: paper.id, // Keep ID for Arxiv link construction if needed
+                        id: paper.id,
                         title: paper.title || p.title,
                         authors: paper.authors ? paper.authors.map((a: any) => a.name).join(', ') : "Unknown",
                         link: `https://arxiv.org/abs/${paper.id}`,
@@ -293,12 +297,12 @@ export async function POST(request: Request) {
                     };
                 });
 
-                papers = allPapers.slice(0, count);
+                papers = allPapers.slice(offset, offset + count);
             }
         } catch (e) { console.error(e); }
     }
-    else if (source === 'trending') {
-        papers = await getTrendingPapers(count);
+    else if (source === 'trending' || source === 'weekly' || source === 'monthly') {
+        papers = await getTrendingPapers(count, source === 'trending' ? undefined : source);
     }
     else if (source === 'youtube') {
         papers = await fetchRSS('https://www.youtube.com/feeds/videos.xml?channel_id=UConVfxXodg78Tzh5nNu85Ew', 'Two Minute Papers');
