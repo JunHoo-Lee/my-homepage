@@ -3,11 +3,24 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FileText, Github, Youtube, Database, Copy, Check } from 'lucide-react';
+import { FileText, Github, Youtube, Database, Copy, Check, Lock } from 'lucide-react';
 import { useState } from 'react';
 
 export default function DROPage() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [inputPassword, setInputPassword] = useState('');
+    const [error, setError] = useState(false);
     const [copied, setCopied] = useState(false);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (inputPassword === 'upstage') {
+            setIsAuthenticated(true);
+            setError(false);
+        } else {
+            setError(true);
+        }
+    };
 
     const handleCopy = () => {
         navigator.clipboard.writeText(bibtex);
@@ -20,6 +33,39 @@ export default function DROPage() {
   author={Lee, Junhoo},
   year={2026}
 }`;
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full border border-gray-100 text-center space-y-6">
+                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600">
+                        <Lock size={24} />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Protected Page</h1>
+                        <p className="text-gray-500 mt-2">Please enter the password to view this content.</p>
+                    </div>
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <input
+                            type="password"
+                            value={inputPassword}
+                            onChange={(e) => setInputPassword(e.target.value)}
+                            placeholder="Password"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            autoFocus
+                        />
+                        {error && <p className="text-red-500 text-sm font-medium">Incorrect password. Please try again.</p>}
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                        >
+                            Access Content
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-900">
