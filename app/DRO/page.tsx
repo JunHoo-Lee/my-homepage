@@ -15,11 +15,10 @@ export default function DROPage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const bibtex = `@article{dro2025neurips,
+    const bibtex = `@article{dro2026project,
   title={Discriminative Ranking Optimization is all you need in Multiple-Choice Question Answering},
   author={Lee, Junhoo},
-  journal={NeurIPS 2025},
-  year={2025}
+  year={2026}
 }`;
 
     return (
@@ -51,7 +50,12 @@ export default function DROPage() {
                 {/* Teaser Section */}
                 <section className="space-y-6">
                     <div className="relative w-full aspect-video bg-gray-50 rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center">
-                        <p className="text-gray-400 font-medium">Teaser Figure (Figure 1: Objective Mismatch)</p>
+                        <Image
+                            src="/DRO/image.png"
+                            alt="Illustration of the Objective Mismatch"
+                            fill
+                            className="object-contain"
+                        />
                     </div>
                     <p className="text-gray-600 text-center max-w-2xl mx-auto italic">
                         Figure 1: Illustration of the Objective Mismatch. Standard SFT (left) inefficiently optimizes for global vocabulary suppression, while the ARC protocol (right) only requires local ranking between candidates.
@@ -87,8 +91,13 @@ export default function DROPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="w-full h-64 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center">
-                            <span className="text-gray-400">Algorithm/Method Diagram Placeholder</span>
+                        <div className="relative w-full aspect-[2/1] bg-gray-50 rounded-xl overflow-hidden border border-gray-200 flex items-center justify-center">
+                            <Image
+                                src="/DRO/algorithm.png"
+                                alt="Our Algorithm. Discriminative Ranking Optimization (DRO)"
+                                fill
+                                className="object-contain"
+                            />
                         </div>
                     </div>
                 </section>

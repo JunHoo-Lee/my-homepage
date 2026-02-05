@@ -1,0 +1,85 @@
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{algorithm.png}
+    \caption{Our Algorithm. Discriminative Ranking Optimization (DRO)}
+    \label{fig:placeholder}
+\end{figure}
+\section{Results}
+
+\subsection{Experimental Setup}
+We utilized the standard {ARC-Challenge} and {ARC-Easy} training splits provided by the AI2 dataset. The evaluation was conducted using the \texttt{lm-evaluation-harness} framework, reporting \texttt{acc\_norm} (normalized accuracy) to ensure consistency with public leaderboards.
+We compare three distinct settings:
+\begin{itemize}
+    \item \textbf{Base Model:} The pre-trained Mistral-7B model evaluated in a zero-shot setting.
+    \item \textbf{Baseline (SFT):} The base model fine-tuned using standard SFT with the "Syntactic Constraint" (template alignment) applied.
+    \item \textbf{Ours (DRO):} The proposed method trained on the ARC dataset.
+\end{itemize}
+
+\subsection{Main Results: ARC-Challenge}
+Table \ref{tab:main_results} presents the comparative performance on the ARC-Challenge benchmark. We use the Base Model's zero-shot performance as the reference point.
+
+\begin{table}[h]
+    \centering
+    \caption{{Main Results on ARC-Challenge.} Our Local-Ranking Optimization achieves a significant performance boost. The \textcolor{green}{{Green}} values denote the absolute improvement ($\Delta$) over the Base Model.}
+    \vspace{0.2cm}
+    \begin{tabular}{l|c|c|c}
+        \toprule
+        \textbf{Method} & \textbf{Training Data} & \textbf{Acc (Norm)} & \textbf{$\Delta$ Gain} \\
+        \midrule
+        Base Model (Zero-shot) & None & 61.43\% & - \\
+        Baseline (SFT + Template Align) & ARC-Challenge & 64.85\% & \textcolor{green}{+3.42} \\
+        \textbf{Ours (DRO)} & \textbf{ARC-Challenge} & \textbf{74.40\%} & \textcolor{green}{\textbf{+12.97}} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:main_results}
+\end{table}
+
+The standard SFT baseline reached \textbf{64.85\%}, showing a marginal improvement of +3.42\%p over the base model. In contrast, our Local-Ranking Optimization strategy achieved \textbf{74.40\%}, a substantial improvement of \textbf{+12.97\%p}. This empirical evidence strongly supports our hypothesis: given the same data and model capacity, optimizing for the \textit{discriminative margin} is significantly more sample-efficient than optimizing for \textit{generative likelihood}.
+
+\subsection{Analysis of Generalization and Mechanism Transfer}
+Beyond the main task performance, we conducted cross-domain evaluations to verify whether the model learned domain-specific "knowledge" or a task-agnostic "ranking mechanism."
+
+\paragraph{Zero-Shot Generalization (ARC $\rightarrow$ CQA)}
+We evaluated the model trained on ARC-Challenge against the \textbf{CommonsenseQA (CQA)} benchmark to measure zero-shot generalization. As shown in Table \ref{tab:cqa_results}, our method demonstrates remarkable transfer capabilities.
+
+\begin{table}[h]
+    \centering
+    \caption{\textbf{Zero-Shot Generalization on CommonsenseQA.} Despite being trained exclusively on ARC (Scientific QA), the model exhibits a significant performance leap on CommonsenseQA (General QA), indicating robust transfer of the discriminative mechanism.}
+    \vspace{0.2cm}
+    \begin{tabular}{l|c|c}
+        \toprule
+        \textbf{Method} & \textbf{Training Data} & \textbf{CommonsenseQA Score} \\
+        \midrule
+        Base Model (Zero-shot) & None & 59.30\% \\
+        \textbf{Ours (DRO)} & \textbf{ARC-Challenge (Only)} & \textbf{73.46\%} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:cqa_results}
+\end{table}
+
+The performance improved from the base level of 59.30\% to \textbf{73.46\%}. This result confirms that the discriminative capability learned from scientific questions transfers seamlessly to general commonsense reasoning, suggesting that the model has internalized a generalized ranking skill rather than overfitting to scientific facts.
+
+\paragraph{Mechanism Transfer (CQA $\rightarrow$ ARC)}
+To rigorously test this "ranking skill" hypothesis, we trained a model exclusively on {CommonsenseQA (CQA)}—a dataset logically distinct from ARC—and evaluated it on ARC-Challenge.
+
+\begin{table}[h]
+    \centering
+    \caption{{Mechanism Transfer Analysis.} Notably, our method trained on unrelated data (CQA) matches the performance of SFT trained on the target data (ARC).}
+    \vspace{0.2cm}
+    \begin{tabular}{l|c|c}
+        \toprule
+        \textbf{Method} & \textbf{Training Data} & \textbf{ARC-Challenge Score} \\
+        \midrule
+        Baseline (SFT) & ARC (Target Domain) & 64.85\% \\
+        \textbf{Ours (Cross-Domain)} & \textbf{CommonsenseQA (Unrelated)} & \textbf{64.25\%} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:mechanism_transfer}
+\end{table}
+
+As shown in Table \ref{tab:mechanism_transfer}, the model trained on CQA achieved \textbf{64.25\%} on ARC-Challenge. Despite being trained on {unrelated data} (general commonsense vs. scientific facts), the model matched the performance of the SFT baseline trained on the target domain (64.85\%).
+This confirms that the {Local-Ranking Optimization} effectively sharpens the model's intrinsic ability to distinguish between plausible options, regardless of the specific subject matter. It suggests that the performance gain stems not merely from memorizing domain facts, but from mastering the {structural mechanism of multiple-choice discrimination}.
+
+
+\section{Conclusion}
+In this work, we identified the structural inefficiency of standard Supervised Fine-Tuning (SFT) for multiple-choice reasoning tasks and proposed a {Local-Ranking Optimization} strategy to address the misalignment between the generative training objective and the discriminative evaluation protocol. By constraining the syntactic search space via template alignment and directly optimizing the relative margin between candidates, we achieved a substantial performance improvement on the ARC-Challenge, elevating accuracy from 61.43\% to {74.40\%} under strict PEFT constraints. Beyond task-specific gains, our cross-domain experiments demonstrated that this approach enables the model to acquire a generalized {discriminative mechanism} rather than merely memorizing domain knowledge, as evidenced by the robust zero-shot transfer to CommonsenseQA. These findings underscore that unlocking the intrinsic reasoning capabilities of foundation models depends less on massive data injection and more on the precise alignment of the optimization objective with the downstream task structure.
