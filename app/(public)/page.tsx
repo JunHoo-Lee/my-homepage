@@ -158,7 +158,7 @@ export default function Home() {
     );
 }
 
-function PublicationItem({ title, authors, venue, year, link, tldr, category, subTag }: { title: string, authors: string[], venue: string, year: string, link: string, tldr: string, category: string, subTag: string }) {
+function PublicationItem({ title, authors, venue, year, link, tldr, category, subTag }: { title: string, authors: string[], venue: string, year: string, link?: string, tldr: string, category: string, subTag: string }) {
 
     const getCategoryColor = (cat: string) => {
         switch (cat) {
@@ -175,9 +175,13 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
     return (
         <div className="group relative">
             <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 flex items-start justify-between gap-4">
-                <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
-                    {title}
-                </a>
+                {link ? (
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                        {title}
+                    </a>
+                ) : (
+                    <span>{title}</span>
+                )}
             </h4>
 
             <div className="flex flex-wrap gap-2 mb-3">
@@ -214,11 +218,13 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
                 {tldr}
             </p>
 
-            <div className="mt-3 flex gap-3 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                    <FileText size={14} /> View Paper
-                </a>
-            </div>
+            {link && (
+                <div className="mt-3 flex gap-3 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
+                        <FileText size={14} /> View Paper
+                    </a>
+                </div>
+            )}
         </div>
     )
 }
@@ -234,4 +240,3 @@ function AwardsItem({ year, title, amount }: { year: string, title: string, amou
         </div>
     )
 }
-

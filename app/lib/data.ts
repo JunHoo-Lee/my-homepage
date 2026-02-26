@@ -65,9 +65,19 @@ export const PUBLICATIONS = [
         note: "(First Author / Co-first †)",
         items: [
             {
+                title: "Fingerprinting Diffusion Models in the Wild",
+                authors: ["Junhoo Lee", "Mijin Koo", "Nojun Kwak"],
+                venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2026)",
+                year: "2026",
+                link: "",
+                category: "Generative Models",
+                subTag: "Model Attribution",
+                tldr: "Fingerprints diffusion models in real-world settings for robust model-level attribution."
+            },
+            {
                 title: "Deep Edge Filter †",
                 authors: ["Dongkwan Lee†", "Junhoo Lee†", "Nojun Kwak"],
-                venue: "NeurIPS 2025",
+                venue: "The Conference on Neural Information Processing Systems (NeurIPS 2025)",
                 year: "2025",
                 link: "https://arxiv.org/abs/2510.13865",
                 category: "Learning Theory",
@@ -77,7 +87,7 @@ export const PUBLICATIONS = [
             {
                 title: "What's Making That Sound Right Now?",
                 authors: ["Hahyeon Choi", "Junhoo Lee", "Nojun Kwak"],
-                venue: "ICCV 2025",
+                venue: "The IEEE/CVF International Conference on Computer Vision (ICCV 2025)",
                 year: "2025",
                 link: "https://arxiv.org/abs/2507.04667",
                 category: "Generative Models",
@@ -87,7 +97,7 @@ export const PUBLICATIONS = [
             {
                 title: "Deep Support Vectors",
                 authors: ["Junhoo Lee", "Hyunho Lee", "Kyomin Hwang", "Nojun Kwak"],
-                venue: "NeurIPS 2024",
+                venue: "The Conference on Neural Information Processing Systems (NeurIPS 2024)",
                 year: "2024",
                 link: "https://arxiv.org/abs/2403.17329",
                 category: "Learning Theory",
@@ -97,7 +107,7 @@ export const PUBLICATIONS = [
             {
                 title: "Any-Way Meta Learning",
                 authors: ["Junhoo Lee", "Yearim Kim", "Hyunho Lee", "Nojun Kwak"],
-                venue: "AAAI 2024",
+                venue: "The AAAI Conference on Artificial Intelligence (AAAI 2024)",
                 year: "2024",
                 link: "https://arxiv.org/abs/2401.05097",
                 category: "Meta-Learning",
@@ -107,7 +117,7 @@ export const PUBLICATIONS = [
             {
                 title: "SHOT: Suppressing the Hessian along the Optimization Trajectory",
                 authors: ["Junhoo Lee", "Jayeon Yoo", "Nojun Kwak"],
-                venue: "NeurIPS 2023",
+                venue: "The Conference on Neural Information Processing Systems (NeurIPS 2023)",
                 year: "2023",
                 link: "https://arxiv.org/abs/2310.02751",
                 category: "Meta-Learning",
@@ -123,7 +133,7 @@ export const PUBLICATIONS = [
             {
                 title: "Do Not Think About Pink Elephant! †",
                 authors: ["Kyomin Hwang†", "Suyoung Kim†", "Junhoo Lee†", "Nojun Kwak"],
-                venue: "CVPR 2024 Workshop (Responsible Generative AI)",
+                venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops 2024, Responsible Generative AI)",
                 year: "2024",
                 link: "https://arxiv.org/abs/2404.15154",
                 category: "Generative Models",
@@ -133,7 +143,7 @@ export const PUBLICATIONS = [
             {
                 title: "Coreset Selection for Object Detection",
                 authors: ["Hojun Lee", "Suyoung Kim", "Junhoo Lee", "Jaeyoung Yoo", "Nojun Kwak"],
-                venue: "CVPR 2024 Workshop (Dataset Distillation)",
+                venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops 2024, Dataset Distillation)",
                 year: "2024",
                 link: "https://openaccess.thecvf.com/content/CVPR2024W/",
                 category: "Data Efficiency",
@@ -143,7 +153,7 @@ export const PUBLICATIONS = [
             {
                 title: "Practical Dataset Distillation Based on Deep Support Vectors",
                 authors: ["Hyunho Lee", "Junhoo Lee", "Nojun Kwak"],
-                venue: "ECCV 2024 Workshop (Dataset Distillation Challenge)",
+                venue: "The European Conference on Computer Vision Workshops (ECCV Workshops 2024, Dataset Distillation Challenge)",
                 year: "2024",
                 link: "https://arxiv.org/abs/2405.00348",
                 category: "Data Efficiency",
