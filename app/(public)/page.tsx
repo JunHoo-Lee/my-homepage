@@ -172,9 +172,13 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
         }
     };
 
+    const venueMatch = venue.match(/^(.*)\(([^()]+)\)\s*$/);
+    const venueFull = venueMatch ? venueMatch[1].trim() : venue;
+    const venueShort = venueMatch ? venueMatch[2].trim() : venue;
+
     return (
-        <div className="group relative">
-            <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 flex items-start justify-between gap-4">
+        <div className="group relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
+            <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 leading-snug">
                 {link ? (
                     <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
                         {title}
@@ -184,9 +188,12 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
                 )}
             </h4>
 
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-2 mb-2">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded border ${getCategoryColor(category)}`}>
-                    {venue}
+                    {venueShort}
+                </span>
+                <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded border border-gray-200">
+                    {year}
                 </span>
                 <span className="text-xs font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
                     {category}
@@ -196,7 +203,13 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
                 </span>
             </div>
 
-            <div className="text-gray-600 mb-2 font-medium">
+            {venueFull !== venueShort && (
+                <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                    {venueFull}
+                </p>
+            )}
+
+            <div className="text-gray-600 mb-3 font-medium">
                 {authors.map((author, i) => {
                     const isJunhoo = author.includes("Junhoo Lee");
                     return (
@@ -208,10 +221,6 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
                         </span>
                     );
                 })}
-            </div>
-
-            <div className="hidden">
-                {/* Leftover for backward compat layout if needed but cleaner to remove */}
             </div>
 
             <p className="text-sm text-gray-600 leading-relaxed italic border-l-2 border-gray-200 pl-3">
