@@ -1,8 +1,30 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const sourceSans = localFont({
+    src: [
+        {
+            path: "./fonts/SourceSans3-Variable.ttf",
+            weight: "200 900",
+            style: "normal",
+        },
+    ],
+    variable: "--font-source-sans",
+    display: "swap",
+});
+
+const sourceSerif = localFont({
+    src: [
+        {
+            path: "./fonts/SourceSerif4-Variable.ttf",
+            weight: "200 900",
+            style: "normal",
+        },
+    ],
+    variable: "--font-source-serif",
+    display: "swap",
+});
 
 export const metadata: Metadata = {
     title: "Junhoo Lee | SNU MIPAL",
@@ -16,7 +38,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="scroll-smooth">
-            <body className={`${inter.className} bg-white text-gray-900 antialiased min-h-screen`}>
+            <body className={`${sourceSans.variable} ${sourceSerif.variable} min-h-screen antialiased`}>
                 {children}
             </body>
         </html>

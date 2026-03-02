@@ -2,20 +2,64 @@
 @import "katex/dist/katex.min.css";
 
 @theme {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-source-serif);
+}
+
+:root {
+  --research-primary: #1f4e79;
+  --research-primary-strong: #163958;
+  --research-primary-soft: #e8eff6;
+  --research-ink: #162133;
+  --research-muted: #506176;
+  --research-paper: #f7f9fc;
+  --research-border: #d5deea;
 }
 
 @layer base {
   body {
-    @apply antialiased text-stone-200 bg-stone-950;
+    @apply antialiased;
+    color: var(--research-ink);
+    background:
+      radial-gradient(circle at 10% 10%, rgba(31, 78, 121, 0.12), transparent 38%),
+      radial-gradient(circle at 90% 0%, rgba(31, 78, 121, 0.08), transparent 32%),
+      linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
   }
 
   ::selection {
-    @apply bg-amber-500/30 text-amber-200;
+    background: rgba(31, 78, 121, 0.24);
+    color: #0f2f4d;
+  }
+
+  a {
+    color: var(--research-primary);
+  }
+
+  a:hover {
+    color: var(--research-primary-strong);
   }
 }
 
 @layer utilities {
+  .research-card {
+    @apply rounded-xl border bg-white;
+    border-color: var(--research-border);
+  }
+
+  .research-chip {
+    @apply rounded-full border px-2 py-0.5 text-[11px] font-medium;
+    border-color: color-mix(in srgb, var(--research-primary) 24%, #ffffff);
+    background: color-mix(in srgb, var(--research-primary) 8%, #ffffff);
+    color: var(--research-primary-strong);
+  }
+
+  .research-section-title {
+    @apply border-b pb-3 text-2xl font-semibold tracking-tight md:pb-4 md:text-3xl;
+    font-family: var(--font-source-serif), serif;
+    border-color: var(--research-border);
+    color: var(--research-ink);
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -26,10 +70,11 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-stone-800 rounded-full;
+    @apply rounded-full;
+    background: color-mix(in srgb, var(--research-primary) 40%, #bcc8d7);
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-stone-700;
+    background: color-mix(in srgb, var(--research-primary) 60%, #bcc8d7);
   }
 }
