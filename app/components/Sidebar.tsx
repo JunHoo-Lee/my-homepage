@@ -13,7 +13,7 @@ export default function Sidebar() {
     checkUser();
 
     // Subscribe to auth changes to update sidebar immediately on login/logout
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
     });
 
@@ -26,9 +26,9 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="z-10 flex w-full flex-col items-center overflow-y-auto border-b border-[color:var(--research-border)] bg-white/90 p-5 text-center backdrop-blur-sm md:fixed md:left-0 md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r md:p-8">
-      <div className="mb-4 md:mb-6">
-        <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-white shadow-[0_20px_45px_-25px_rgba(22,57,88,0.7)] md:h-40 md:w-40">
+    <aside className="w-full md:w-64 md:h-screen md:fixed left-0 top-0 bg-gray-50 border-r border-gray-200 p-6 flex flex-col items-center text-center overflow-y-auto z-10">
+      <div className="mb-6">
+        <div className="w-40 h-40 relative rounded-full overflow-hidden border-4 border-white shadow-lg mx-auto">
           <Image
             src="/myface.jpeg"
             alt="Junhoo Lee"
@@ -39,55 +39,47 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <h1 className="mb-1 text-2xl font-semibold text-[var(--research-ink)] [font-family:var(--font-source-serif),serif] md:mb-2 md:text-3xl">Junhoo Lee</h1>
-      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--research-primary)] md:text-sm md:tracking-[0.14em]">PhD Student</p>
-      <p className="mb-3 text-xs text-[color:var(--research-muted)] md:mb-4 md:text-sm">Seoul National University (MIPAL)</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Junhoo Lee</h1>
+      <p className="text-gray-600 font-medium mb-1">PhD Student</p>
+      <p className="text-sm text-gray-500 mb-4">Seoul National University (MIPAL)</p>
 
-      <div className="mb-6 flex w-full flex-col gap-2 text-xs md:mb-8 md:text-sm">
-        <a href="mailto:mrjunoo@snu.ac.kr" className="flex items-center justify-center gap-2 text-[color:var(--research-muted)] transition-colors hover:text-[color:var(--research-primary)]">
+      <div className="flex flex-col gap-2 w-full mb-8 text-sm">
+        <a href="mailto:mrjunoo@snu.ac.kr" className="flex items-center justify-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
           <Mail size={16} /> mrjunoo@snu.ac.kr
         </a>
-        <a
-          href="/cv.pdf"
-          download="Junhoo_Lee_CV.pdf"
-          className="mx-auto mt-1 inline-flex items-center justify-center rounded-lg border border-[color:var(--research-border)] bg-[color:var(--research-paper)] px-3 py-1 text-xs font-semibold text-[color:var(--research-primary)] transition-colors hover:border-[color:var(--research-primary)]"
-        >
-          Download CV
-        </a>
         <div className="flex justify-center gap-4 mt-2">
-          <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noopener noreferrer" className="text-[color:var(--research-muted)] transition-all hover:scale-110 hover:text-[color:var(--research-primary)]">
+          <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 transition-transform hover:scale-110">
             <Github size={20} />
           </a>
-          <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ&hl=ko&authuser=3" target="_blank" rel="noopener noreferrer" className="text-[color:var(--research-muted)] transition-all hover:scale-110 hover:text-[color:var(--research-primary)]">
+          <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ&hl=ko&authuser=3" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-600 transition-transform hover:scale-110">
             <GraduationCap size={20} />
           </a>
-          <a href="https://www.linkedin.com/in/junhoo-lee-8483b62a5/" target="_blank" rel="noopener noreferrer" className="text-[color:var(--research-muted)] transition-all hover:scale-110 hover:text-[color:var(--research-primary)]">
+          <a href="https://www.linkedin.com/in/junhoo-lee-8483b62a5/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-700 transition-transform hover:scale-110">
             <Linkedin size={20} />
           </a>
         </div>
       </div>
 
       <nav className="w-full flex-1">
-        <ul className="space-y-1.5 text-sm font-medium text-[color:var(--research-muted)]">
-          <li><Link href="/#about" className="block rounded-xl border border-transparent py-2 transition-colors hover:border-[color:var(--research-border)] hover:bg-[color:var(--research-paper)] hover:text-[color:var(--research-primary)]">About Me</Link></li>
-          <li><Link href="/#news" className="block rounded-xl border border-transparent py-2 transition-colors hover:border-[color:var(--research-border)] hover:bg-[color:var(--research-paper)] hover:text-[color:var(--research-primary)]">News</Link></li>
-          <li><Link href="/#publications" className="block rounded-xl border border-transparent py-2 transition-colors hover:border-[color:var(--research-border)] hover:bg-[color:var(--research-paper)] hover:text-[color:var(--research-primary)]">Publications</Link></li>
-          <li><Link href="/#awards" className="block rounded-xl border border-transparent py-2 transition-colors hover:border-[color:var(--research-border)] hover:bg-[color:var(--research-paper)] hover:text-[color:var(--research-primary)]">Awards</Link></li>
+        <ul className="space-y-2 text-sm font-medium text-gray-600">
+          <li><Link href="/#about" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">About Me</Link></li>
+          <li><Link href="/#news" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">News</Link></li>
+          <li><Link href="/#publications" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Publications</Link></li>
         </ul>
 
         {/* Private Links - Only visible when authenticated */}
         {isAuthenticated && (
-          <div className="mt-8 border-t border-[color:var(--research-border)] pt-4">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--research-muted)]">Personal</p>
-            <ul className="space-y-2 text-sm font-medium text-[color:var(--research-muted)]">
-              <li><Link href="/tasks" className="block rounded-xl border border-transparent py-2 transition-colors hover:border-[color:var(--research-border)] hover:bg-[color:var(--research-paper)] hover:text-[color:var(--research-primary)]">Tasks</Link></li>
-              <li><Link href="/papers" className="block rounded-xl border border-transparent py-2 transition-colors hover:border-[color:var(--research-border)] hover:bg-[color:var(--research-paper)] hover:text-[color:var(--research-primary)]">Papers</Link></li>
+          <div className="mt-8 pt-4 border-t border-gray-100">
+            <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Personal</p>
+            <ul className="space-y-2 text-sm font-medium text-gray-600">
+              <li><Link href="/tasks" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Tasks</Link></li>
+              <li><Link href="/papers" className="block py-2 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">Papers</Link></li>
             </ul>
           </div>
         )}
       </nav>
 
-      <div className="mt-8 text-xs text-[color:var(--research-muted)]">
+      <div className="mt-8 text-xs text-gray-400">
         © {new Date().getFullYear()} Junhoo Lee
       </div>
     </aside>
