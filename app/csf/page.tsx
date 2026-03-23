@@ -428,7 +428,7 @@ export default function CSFPage() {
         <main className="relative mx-auto max-w-6xl px-6 py-10 sm:px-8 sm:py-16">
           <Link
             href="/#publications"
-            className="inline-flex items-center gap-2 rounded-full border border-stone-300/80 bg-white/80 px-4 py-2 text-sm font-medium text-stone-700 shadow-sm backdrop-blur transition hover:border-stone-400 hover:text-stone-950"
+            className="inline-flex items-center gap-2 rounded-lg border border-stone-300/80 bg-white/80 px-4 py-2 text-sm font-medium text-stone-700 shadow-sm backdrop-blur transition hover:border-stone-400 hover:text-stone-950"
           >
             <ArrowLeft size={16} />
             Back to homepage
@@ -436,7 +436,7 @@ export default function CSFPage() {
 
           <section className="mt-10 grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
             <div className="space-y-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">
+              <div className="inline-flex items-center gap-2 rounded-md border border-amber-200 bg-amber-100/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">
                 CVPR 2026
                 <span className="h-1 w-1 rounded-full bg-amber-700" />
                 Project Page
@@ -487,16 +487,16 @@ export default function CSFPage() {
               </p>
             </div>
 
-            <div className="rounded-[28px] border border-stone-200/80 bg-white/[0.85] p-4 shadow-[0_24px_70px_rgba(28,25,23,0.08)] backdrop-blur">
+            <div className="rounded-2xl border border-stone-200/80 bg-white/[0.85] p-4 shadow-[0_24px_70px_rgba(28,25,23,0.08)] backdrop-blur">
               <Image
                 src="/csf/comparison.png"
                 alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
                 width={1064}
                 height={744}
-                className="h-auto w-full rounded-2xl border border-stone-200 bg-stone-50"
+                className="h-auto w-full rounded-xl border border-stone-200 bg-stone-50"
                 priority
               />
-              <div className="mt-4 rounded-2xl bg-stone-100/80 p-4">
+              <div className="mt-4 rounded-xl bg-stone-100/80 p-4">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                   Why This Matters
                 </p>
@@ -510,8 +510,8 @@ export default function CSFPage() {
             </div>
           </section>
 
-          <div className="sticky top-4 z-20 mt-10 hidden md:block">
-            <div className="inline-flex flex-wrap gap-2 rounded-full border border-stone-200/80 bg-white/80 p-2 shadow-lg backdrop-blur">
+          <div className="sticky top-4 z-20 mt-10 hidden md:flex justify-center">
+            <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-stone-200/90 bg-white/88 px-2 py-2 shadow-[0_12px_30px_rgba(28,25,23,0.08)] backdrop-blur">
               <NavChip href="#problem" label="Problem" />
               <NavChip href="#challenge" label="Challenge" />
               <NavChip href="#method" label="Method" />
@@ -568,7 +568,7 @@ export default function CSFPage() {
               direct output matching and instead asks what kinds of semantic
               interpretations the model tends to produce.
             </p>
-            <div className="rounded-[28px] border border-stone-200 bg-stone-100/75 p-6">
+            <div className="rounded-xl border border-stone-200 bg-stone-100/75 p-6">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Problem Framing
               </p>
@@ -580,13 +580,13 @@ export default function CSFPage() {
             </div>
           </div>
 
-          <div className="rounded-[30px] border border-stone-200 bg-white p-4 shadow-[0_24px_70px_rgba(28,25,23,0.06)]">
+          <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-[0_24px_70px_rgba(28,25,23,0.06)]">
             <Image
               src="/csf/family-game.png"
               alt="Illustration that naive prompts make base-model identification difficult under strong style shifts"
               width={2250}
               height={1124}
-              className="h-auto w-full rounded-2xl border border-stone-200"
+              className="h-auto w-full rounded-xl border border-stone-200"
             />
             <p className="mt-4 text-sm leading-6 text-stone-600">
               A qualitative example of the challenge: when prompts are naive,
@@ -619,7 +619,7 @@ export default function CSFPage() {
           </div>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-            <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Example Prompt Families
               </p>
@@ -627,7 +627,7 @@ export default function CSFPage() {
                 {promptExamples.map((prompt) => (
                   <span
                     key={prompt}
-                    className="rounded-full border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-700"
+                    className="rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-700"
                   >
                     {prompt}
                   </span>
@@ -641,7 +641,7 @@ export default function CSFPage() {
               </p>
             </div>
 
-            <div className="rounded-[28px] bg-stone-900 p-6 text-stone-50 shadow-[0_24px_70px_rgba(28,25,23,0.18)]">
+            <div className="rounded-xl bg-stone-900 p-6 text-stone-50 shadow-[0_24px_70px_rgba(28,25,23,0.18)]">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-300">
                 Defender-Favorable Asymmetry
               </p>
@@ -688,7 +688,7 @@ export default function CSFPage() {
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Metric Comparison
               </p>
@@ -733,7 +733,7 @@ export default function CSFPage() {
               </p>
             </div>
 
-            <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Human Perceptual Study
               </p>
@@ -747,7 +747,7 @@ export default function CSFPage() {
                 alt="Human study showing stronger base-model identification with CSF prompts"
                 width={563}
                 height={337}
-                className="mt-5 h-auto w-full rounded-2xl border border-stone-200"
+                className="mt-5 h-auto w-full rounded-xl border border-stone-200"
               />
               <p className="mt-4 text-base leading-7 text-stone-700">
                 The same signal is not just machine-readable. When humans are
@@ -775,7 +775,7 @@ export default function CSFPage() {
               footnote="The highlighted cell marks the strongest posterior mean for each suspect model after concept erasure."
             />
 
-            <div className="rounded-[28px] border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
+            <div className="rounded-xl border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Prompt Design Validation
               </p>
@@ -789,7 +789,7 @@ export default function CSFPage() {
                 alt="Prompt ablation showing category distributions changing across scene contexts"
                 width={828}
                 height={316}
-                className="mt-5 h-auto w-full rounded-2xl border border-stone-200"
+                className="mt-5 h-auto w-full rounded-xl border border-stone-200"
               />
               <p className="mt-4 text-base leading-7 text-stone-700">
                 This is the behavior CSF exploits. Underspecified prompts force
@@ -818,7 +818,7 @@ export default function CSFPage() {
 
         <section
           id="bibtex"
-          className="scroll-mt-24 mt-20 rounded-[32px] border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+          className="scroll-mt-24 mt-20 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -835,13 +835,13 @@ export default function CSFPage() {
               href="/csf/csf-paper.pdf"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-stone-50 px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:text-stone-950"
+              className="inline-flex items-center gap-2 rounded-lg border border-stone-300 bg-stone-50 px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:text-stone-950"
             >
               Read the paper
               <ArrowUpRight size={16} />
             </a>
           </div>
-          <pre className="mt-6 overflow-x-auto rounded-[24px] bg-stone-950 p-5 text-sm leading-7 text-stone-100">
+          <pre className="mt-6 overflow-x-auto rounded-xl bg-stone-950 p-5 text-sm leading-7 text-stone-100">
             {bibtex}
           </pre>
         </section>
@@ -881,7 +881,7 @@ function ActionLink({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
-      className="inline-flex items-center gap-2 rounded-full border border-stone-300/80 bg-white/[0.85] px-5 py-3 text-sm font-semibold text-stone-800 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-stone-400 hover:text-stone-950"
+      className="inline-flex items-center gap-2 rounded-lg border border-stone-300/80 bg-white/[0.85] px-5 py-3 text-sm font-semibold text-stone-800 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-stone-400 hover:text-stone-950"
     >
       {icon}
       {label}
@@ -893,7 +893,8 @@ function NavChip({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}
-      className="rounded-full px-4 py-2 text-sm font-medium text-stone-600 transition hover:bg-stone-100 hover:text-stone-950"
+      className="rounded-md border border-transparent px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-200 hover:bg-stone-100 hover:text-stone-950"
+      title={`Jump to ${label}`}
     >
       {label}
     </a>
@@ -926,7 +927,7 @@ function SectionIntro({
 
 function FeatureCard({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-stone-950">{title}</h3>
       <p className="mt-3 text-base leading-7 text-stone-700">{body}</p>
     </div>
@@ -935,7 +936,7 @@ function FeatureCard({ title, body }: { title: string; body: string }) {
 
 function StatTile({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-[26px] border border-stone-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <p className={`${displayClass} text-4xl font-semibold text-stone-950`}>
         {value}
       </p>
@@ -964,7 +965,7 @@ function PosteriorTable({
   showLegend?: boolean;
 }) {
   return (
-    <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
         {eyebrow}
       </p>
@@ -982,7 +983,7 @@ function PosteriorTable({
           <LegendPill label="Significant match" tone="match" />
           <LegendPill label="Inconclusive" tone="uncertain" />
           <LegendPill label="Below chance" tone="below" />
-          <span className="inline-flex items-center rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5">
+          <span className="inline-flex items-center rounded-md border border-stone-200 bg-stone-50 px-3 py-1.5">
             * Dominance test
           </span>
         </div>
@@ -992,14 +993,14 @@ function PosteriorTable({
         <table className="min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.16em] text-stone-500">
             <tr>
-              <th className="sticky left-0 z-10 rounded-l-2xl bg-stone-100 px-4 py-3 font-medium">
+              <th className="sticky left-0 z-10 rounded-l-lg bg-stone-100 px-4 py-3 font-medium">
                 Suspect Model
               </th>
               {columns.map((column, index) => (
                 <th
                   key={column}
                   className={`bg-stone-100 px-4 py-3 text-center font-medium ${
-                    index === columns.length - 1 ? "rounded-r-2xl" : ""
+                    index === columns.length - 1 ? "rounded-r-lg" : ""
                   }`}
                 >
                   {column}
@@ -1020,18 +1021,18 @@ function PosteriorTable({
                 </tr>
                 {section.rows.map((row) => (
                   <tr key={row.label}>
-                    <td className="sticky left-0 rounded-l-2xl border border-r-0 border-stone-200 bg-white px-4 py-3 font-semibold text-stone-900 shadow-sm">
+                    <td className="sticky left-0 rounded-l-lg border border-r-0 border-stone-200 bg-white px-4 py-3 font-semibold text-stone-900 shadow-sm">
                       {row.label}
                     </td>
                     {row.cells.map((cell, index) => (
                       <td
                         key={`${row.label}-${columns[index]}`}
                         className={`border border-l-0 border-stone-200 bg-white px-3 py-3 text-center shadow-sm ${
-                          index === row.cells.length - 1 ? "rounded-r-2xl" : ""
+                          index === row.cells.length - 1 ? "rounded-r-lg" : ""
                         }`}
                       >
                         <span
-                          className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full border px-2.5 py-1 font-semibold ${scoreToneClasses[cell.tone]}`}
+                          className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-md border px-2.5 py-1 font-semibold ${scoreToneClasses[cell.tone]}`}
                         >
                           {cell.value}
                           {cell.dominant ? "*" : ""}
@@ -1054,7 +1055,7 @@ function PosteriorTable({
 function LegendPill({ label, tone }: { label: string; tone: ScoreTone }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1.5 ${scoreToneClasses[tone]}`}
+      className={`inline-flex items-center rounded-md border px-3 py-1.5 ${scoreToneClasses[tone]}`}
     >
       {label}
     </span>
