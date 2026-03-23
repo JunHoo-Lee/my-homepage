@@ -480,11 +480,6 @@ export default function CSFPage() {
                   label="Homepage"
                 />
               </div>
-
-              <p className="max-w-2xl text-sm leading-6 text-stone-500">
-                This first draft focuses on the problem setting, the core
-                intuition behind CSF, and the most important empirical signals.
-              </p>
             </div>
 
             <div className="rounded-2xl border border-stone-200/80 bg-white/[0.85] p-4 shadow-[0_24px_70px_rgba(28,25,23,0.08)] backdrop-blur">
@@ -510,19 +505,20 @@ export default function CSFPage() {
             </div>
           </section>
 
-          <div className="sticky top-4 z-20 mt-10 hidden md:flex justify-center">
-            <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-stone-200/90 bg-white/88 px-2 py-2 shadow-[0_12px_30px_rgba(28,25,23,0.08)] backdrop-blur">
-              <NavChip href="#problem" label="Problem" />
-              <NavChip href="#challenge" label="Challenge" />
-              <NavChip href="#method" label="Method" />
-              <NavChip href="#results" label="Results" />
-              <NavChip href="#bibtex" label="BibTeX" />
-            </div>
-          </div>
         </main>
       </div>
 
       <main className="mx-auto max-w-6xl px-6 pb-16 sm:px-8 sm:pb-24">
+        <div className="sticky top-4 z-30 -mt-5 mb-8 hidden md:flex justify-center">
+          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-stone-200/90 bg-white/92 px-2 py-2 shadow-[0_14px_34px_rgba(28,25,23,0.10)] backdrop-blur">
+            <NavChip href="#problem" label="Problem" />
+            <NavChip href="#challenge" label="Challenge" />
+            <NavChip href="#method" label="Method" />
+            <NavChip href="#results" label="Results" />
+            <NavChip href="#bibtex" label="BibTeX" />
+          </div>
+        </div>
+
         <section id="problem" className="scroll-mt-24 pt-6 sm:pt-10">
           <SectionIntro
             eyebrow="The Problem"
@@ -664,8 +660,8 @@ export default function CSFPage() {
         <section id="results" className="scroll-mt-24 mt-20">
           <SectionIntro
             eyebrow="Results"
-            title="The page now includes the actual result tables from the paper."
-            body="These rendered tables make the empirical story much more concrete: CSF stays decisive in the strict query-only setting, improves over a JSD baseline on hard variants, and remains robust even after adversarial concept removal."
+            title="CSF remains identifiable under severe downstream modification."
+            body="Across 13 derived models from 6 base families, CSF maintains dominant support for the correct lineage in the strict query-only setting, including hard fine-tuned variants and concept-removal stress tests."
           />
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -726,10 +722,9 @@ export default function CSFPage() {
                 </table>
               </div>
               <p className="mt-4 text-base leading-7 text-stone-700">
-                This small table is useful on the page because it translates the
-                full attribution matrix into a very simple message: the proposed
-                distance is not just workable, it consistently gives a wider
-                confidence gap on hard examples.
+                Across hard variants such as Kandinsky-Naruto, SD3-Reality-Mix,
+                and SDXL-DPO, Wasserstein keeps a wider attribution margin than
+                the JSD baseline.
               </p>
             </div>
 
@@ -758,7 +753,7 @@ export default function CSFPage() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="mt-6">
             <PosteriorTable
               eyebrow="Robustness Ablation"
               title="Attribution remains intact after adversarial concept removal."
@@ -774,44 +769,57 @@ export default function CSFPage() {
               sections={ablationSections}
               footnote="The highlighted cell marks the strongest posterior mean for each suspect model after concept erasure."
             />
+          </div>
 
-            <div className="rounded-xl border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Prompt Design Validation
-              </p>
-              <h3
-                className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
-              >
-                Context alone can shift the generated semantic distribution.
-              </h3>
-              <Image
-                src="/csf/prompt-ablation.png"
-                alt="Prompt ablation showing category distributions changing across scene contexts"
-                width={828}
-                height={316}
-                className="mt-5 h-auto w-full rounded-xl border border-stone-200"
-              />
-              <p className="mt-4 text-base leading-7 text-stone-700">
-                This is the behavior CSF exploits. Underspecified prompts force
-                the model to resolve ambiguity using learned priors, and the
-                resulting semantic mixture becomes a fingerprint.
-              </p>
-              <ul className="mt-5 space-y-4 text-base leading-7 text-stone-700">
-                <li>
-                  CSF is training-free and does not require modifying the base
-                  model before deployment.
-                </li>
-                <li>
-                  The method is designed for the API-only black-box scenario,
-                  which is exactly where commercial infringement disputes are
-                  hardest.
-                </li>
-                <li>
-                  The rendered tables now make that forensic claim concrete
-                  instead of leaving the results at the level of qualitative
-                  takeaways.
-                </li>
-              </ul>
+          <div className="mt-6 rounded-xl border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
+            <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
+                  Prompt Design Validation
+                </p>
+                <h3
+                  className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
+                >
+                  Scene context shifts the semantic mixture that each model
+                  resolves.
+                </h3>
+                <p className="mt-4 text-base leading-7 text-stone-700">
+                  This is the behavior CSF exploits. Underspecified prompts
+                  force the model to resolve ambiguity using learned priors, and
+                  the resulting semantic mixture becomes a fingerprint.
+                </p>
+                <ul className="mt-5 space-y-4 text-base leading-7 text-stone-700">
+                  <li>
+                    CSF is training-free and does not require modifying the base
+                    model before deployment.
+                  </li>
+                  <li>
+                    The method is designed for the API-only black-box scenario,
+                    which is exactly where commercial infringement disputes are
+                    hardest.
+                  </li>
+                  <li>
+                    The prompt families are intentionally compositional and
+                    rare, so inherited semantic priors survive fine-tuning more
+                    often than surface style does.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <Image
+                  src="/csf/prompt-ablation.png"
+                  alt="Prompt ablation showing category distributions changing across scene contexts"
+                  width={828}
+                  height={316}
+                  className="h-auto w-full rounded-xl border border-stone-200"
+                />
+                <p className="mt-4 text-sm leading-6 text-stone-600">
+                  Changing only the surrounding context changes the category
+                  distribution that a model settles on, which is exactly the
+                  semantic signal CSF measures.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -846,20 +854,6 @@ export default function CSFPage() {
           </pre>
         </section>
 
-        <footer className="mt-10 pb-4 text-sm leading-6 text-stone-500">
-          <p>
-            This page borrows the clean academic section rhythm of{" "}
-            <a
-              href="https://github.com/edit-by-track/edit-by-track.github.io"
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-stone-700 underline decoration-stone-300 underline-offset-4 hover:text-stone-950"
-            >
-              Edit-by-Track
-            </a>{" "}
-            and adapts it for a problem-first CSF presentation.
-          </p>
-        </footer>
       </main>
     </div>
   );
@@ -894,7 +888,6 @@ function NavChip({ href, label }: { href: string; label: string }) {
     <a
       href={href}
       className="rounded-md border border-transparent px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-200 hover:bg-stone-100 hover:text-stone-950"
-      title={`Jump to ${label}`}
     >
       {label}
     </a>
