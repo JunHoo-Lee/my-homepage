@@ -65,14 +65,14 @@ export const PUBLICATIONS = [
         note: "(First Author / Co-first †)",
         items: [
             {
-                title: "Fingerprinting Diffusion Models in the Wild",
+                title: "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
                 authors: ["Junhoo Lee", "Mijin Koo", "Nojun Kwak"],
                 venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
                 year: "2026",
-                link: "",
+                link: "/csf",
                 category: "Generative Models",
-                subTag: "Model Attribution",
-                tldr: "Fingerprints diffusion models in real-world settings for robust model-level attribution."
+                subTag: "Query-Only Attribution",
+                tldr: "A problem-first project page for black-box lineage attribution of fine-tuned text-to-image APIs using compositional semantic fingerprints."
             },
             {
                 title: "Deep Edge Filter †",

@@ -2,10 +2,13 @@
   "name": "my-homepage",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0 <23"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs dev --disable-source-maps",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs build",
+    "start": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs start",
     "lint": "eslint"
   },
   "dependencies": {

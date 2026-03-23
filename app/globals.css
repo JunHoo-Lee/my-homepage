@@ -2,16 +2,16 @@
 @import "katex/dist/katex.min.css";
 
 @theme {
-  --font-sans: var(--font-inter);
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @layer base {
   body {
-    @apply antialiased text-stone-200 bg-stone-950;
+    @apply antialiased text-gray-900 bg-white;
   }
 
   ::selection {
-    @apply bg-amber-500/30 text-amber-200;
+    @apply bg-amber-500/30 text-stone-950;
   }
 }
 

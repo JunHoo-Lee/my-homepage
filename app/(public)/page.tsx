@@ -159,6 +159,7 @@ export default function Home() {
 }
 
 function PublicationItem({ title, authors, venue, year, link, tldr, category, subTag }: { title: string, authors: string[], venue: string, year: string, link?: string, tldr: string, category: string, subTag: string }) {
+    const isExternalLink = Boolean(link && !link.startsWith("/"));
 
     const getCategoryColor = (cat: string) => {
         switch (cat) {
@@ -180,9 +181,15 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
         <div className="group relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
             <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 leading-snug">
                 {link ? (
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
-                        {title}
-                    </a>
+                    isExternalLink ? (
+                        <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                            {title}
+                        </a>
+                    ) : (
+                        <Link href={link} className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                            {title}
+                        </Link>
+                    )
                 ) : (
                     <span>{title}</span>
                 )}
@@ -229,9 +236,15 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
 
             {link && (
                 <div className="mt-3 flex gap-3 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                        <FileText size={14} /> View Paper
-                    </a>
+                    {isExternalLink ? (
+                        <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
+                            <FileText size={14} /> View Paper
+                        </a>
+                    ) : (
+                        <Link href={link} className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
+                            <FileText size={14} /> View Project
+                        </Link>
+                    )}
                 </div>
             )}
         </div>

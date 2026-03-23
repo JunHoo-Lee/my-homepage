@@ -30,13 +30,22 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "utils/**/*.ts",
+    "utils/**/*.tsx",
+    "middleware.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next",
+    "src",
+    "app_setup",
+    "output",
+    "public",
+    "DRO",
+    "supabase"
   ]
 }
