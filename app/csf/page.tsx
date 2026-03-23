@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowUpRight, FileText, Home, Quote } from "lucide-react";
 import Image from "next/image";
@@ -12,26 +13,368 @@ export const metadata: Metadata = {
 
 const displayClass = "font-serif";
 
-const exemplarRows = [
+type ScoreTone = "match" | "uncertain" | "below" | "plain";
+
+type ScoreCell = {
+  value: string;
+  tone: ScoreTone;
+  dominant?: boolean;
+};
+
+type ScoreRow = {
+  label: string;
+  cells: ScoreCell[];
+};
+
+type ScoreSection = {
+  family: string;
+  rows: ScoreRow[];
+};
+
+const baseModelColumns = [
+  "Flux-Base",
+  "Kandinsky-Base",
+  "SD1.5-Base",
+  "SD2.1-Base",
+  "SD3-Medium-Base",
+  "SDXL-Base",
+];
+
+const mainPosteriorSections: ScoreSection[] = [
   {
-    variant: "Flux-LoRA",
-    confidence: "93.2%",
-    note: "Parameter-efficient adaptation",
+    family: "Flux Family",
+    rows: [
+      {
+        label: "Flux-LoRA",
+        cells: [
+          { value: "0.932", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.068", tone: "uncertain" },
+        ],
+      },
+      {
+        label: "Flux-Turbo-Alpha",
+        cells: [
+          { value: "0.977", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+        ],
+      },
+    ],
   },
   {
-    variant: "Kandinsky-Naruto",
-    confidence: "97.7%",
-    note: "Heavy anime-style domain shift",
+    family: "Kandinsky Family",
+    rows: [
+      {
+        label: "Kandinsky-Naruto",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.977", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+        ],
+      },
+      {
+        label: "Kandinsky-Pokemon-LoRA",
+        cells: [
+          { value: "0.049", tone: "uncertain" },
+          { value: "0.829", tone: "match", dominant: true },
+          { value: "0.049", tone: "uncertain" },
+          { value: "0.098", tone: "uncertain" },
+          { value: "0.024", tone: "uncertain" },
+          { value: "0.049", tone: "uncertain" },
+        ],
+      },
+    ],
   },
   {
-    variant: "SD3-Reality-Mix",
-    confidence: "70.5%",
-    note: "Aggressive model remixing",
+    family: "SD1.5 Family",
+    rows: [
+      {
+        label: "SD1.5-1.2-Base",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.841", tone: "match", dominant: true },
+          { value: "0.114", tone: "uncertain" },
+          { value: "0.023", tone: "below" },
+          { value: "0.068", tone: "uncertain" },
+        ],
+      },
+      {
+        label: "SD1.5-1.4-Base",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.977", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+        ],
+      },
+      {
+        label: "SD1.5-DreamShaper",
+        cells: [
+          { value: "0.091", tone: "uncertain" },
+          { value: "0.068", tone: "uncertain" },
+          { value: "0.659", tone: "match", dominant: true },
+          { value: "0.045", tone: "uncertain" },
+          { value: "0.068", tone: "uncertain" },
+          { value: "0.159", tone: "uncertain" },
+        ],
+      },
+    ],
   },
   {
-    variant: "SDXL-DPO",
-    confidence: "97.7%",
-    note: "Preference-aligned variant",
+    family: "SD2.1 Family",
+    rows: [
+      {
+        label: "SD2.1-DPO",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.977", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+        ],
+      },
+      {
+        label: "SD2.1-LAION-Art",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.977", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+        ],
+      },
+    ],
+  },
+  {
+    family: "SD3 Family",
+    rows: [
+      {
+        label: "SD3-Reality-Mix",
+        cells: [
+          { value: "0.136", tone: "uncertain" },
+          { value: "0.091", tone: "uncertain" },
+          { value: "0.023", tone: "below" },
+          { value: "0.045", tone: "uncertain" },
+          { value: "0.705", tone: "match", dominant: true },
+          { value: "0.091", tone: "uncertain" },
+        ],
+      },
+      {
+        label: "SD3-VAE-Anime",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.977", tone: "match", dominant: true },
+          { value: "0.023", tone: "below" },
+        ],
+      },
+    ],
+  },
+  {
+    family: "SDXL Family",
+    rows: [
+      {
+        label: "SDXL-DPO",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.023", tone: "below" },
+          { value: "0.977", tone: "match", dominant: true },
+        ],
+      },
+      {
+        label: "SDXL-Lightning-4Step",
+        cells: [
+          { value: "0.023", tone: "below" },
+          { value: "0.091", tone: "uncertain" },
+          { value: "0.023", tone: "below" },
+          { value: "0.068", tone: "uncertain" },
+          { value: "0.023", tone: "below" },
+          { value: "0.864", tone: "match", dominant: true },
+        ],
+      },
+    ],
+  },
+];
+
+const ablationSections: ScoreSection[] = [
+  {
+    family: "Adversarial Concept Removal (9 animal probes)",
+    rows: [
+      {
+        label: "Flux-LoRA",
+        cells: [
+          { value: "0.714", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.286", tone: "plain" },
+        ],
+      },
+      {
+        label: "Flux-Turbo-Alpha",
+        cells: [
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "Kandinsky-Naruto",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "Kandinsky-Pokemon-LoRA",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD1.5-1.2-Base",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD1.5-1.4-Base",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD1.5-Animal-Erase",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD1.5-DreamShaper",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.714", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.286", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD2.1-DPO",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD2.1-LAION-Art",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD3-Reality-Mix",
+        cells: [
+          { value: "0.286", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.714", tone: "match" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SD3-VAE-Anime",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+          { value: "0.143", tone: "plain" },
+        ],
+      },
+      {
+        label: "SDXL-DPO",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.857", tone: "match" },
+        ],
+      },
+      {
+        label: "SDXL-Lightning-4Step",
+        cells: [
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.286", tone: "plain" },
+          { value: "0.143", tone: "plain" },
+          { value: "0.714", tone: "match" },
+        ],
+      },
+    ],
   },
 ];
 
@@ -40,6 +383,33 @@ const promptExamples = [
   "a tropical single flower on a vase",
   "a sweet fruit on a dish",
   "a peaceful bird on a savana",
+];
+
+const metricComparisonRows = [
+  {
+    variant: "Flux-LoRA",
+    wasserstein: "93.2%",
+    jsd: "77.3%",
+    gap: "+15.9%",
+  },
+  {
+    variant: "Kandinsky-Naruto",
+    wasserstein: "97.7%",
+    jsd: "43.2%",
+    gap: "+54.5%",
+  },
+  {
+    variant: "SD3-Reality-Mix",
+    wasserstein: "70.5%",
+    jsd: "56.8%",
+    gap: "+13.7%",
+  },
+  {
+    variant: "SDXL-DPO",
+    wasserstein: "97.7%",
+    jsd: "70.5%",
+    gap: "+27.2%",
+  },
 ];
 
 const bibtex = `@inproceedings{lee2026csf,
@@ -294,8 +664,8 @@ export default function CSFPage() {
         <section id="results" className="scroll-mt-24 mt-20">
           <SectionIntro
             eyebrow="Results"
-            title="The draft page emphasizes the headline empirical takeaway."
-            body="CSF operates in the strict query-only setting and still attributes fine-tuned text-to-image models back to their source families across substantial downstream modifications."
+            title="The page now includes the actual result tables from the paper."
+            body="These rendered tables make the empirical story much more concrete: CSF stays decisive in the strict query-only setting, improves over a JSD baseline on hard variants, and remains robust even after adversarial concept removal."
           />
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -305,46 +675,62 @@ export default function CSFPage() {
             <StatTile value="All pass" label="dominance criterion" />
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                    Example Attribution Confidence
-                  </p>
-                  <h3
-                    className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
-                  >
-                    Wasserstein-based confidence stays strong across diverse
-                    adaptation types.
-                  </h3>
-                </div>
-              </div>
+          <div className="mt-8">
+            <PosteriorTable
+              eyebrow="Main Attribution Matrix"
+              title="Posterior mean over the full benchmark."
+              description="Each row is a fine-tuned suspect model, and each column is a candidate base family. Red cells indicate significant support for that lineage, amber cells are inconclusive, green cells are significantly below chance, and * marks rows that satisfy the dominance test."
+              columns={baseModelColumns}
+              sections={mainPosteriorSections}
+              footnote="Chance level is 0.167. All 13 suspect models pass the dominance test on their true source family."
+              showLegend
+            />
+          </div>
 
-              <div className="mt-6 overflow-x-auto">
-                <table className="min-w-full text-left">
-                  <thead className="border-b border-stone-200 text-sm uppercase tracking-[0.14em] text-stone-500">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
+                Metric Comparison
+              </p>
+              <h3
+                className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
+              >
+                Wasserstein produces a clearer margin than the JSD baseline.
+              </h3>
+              <div className="mt-6 overflow-x-auto custom-scrollbar">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="border-b border-stone-200 text-xs uppercase tracking-[0.16em] text-stone-500">
                     <tr>
                       <th className="pb-3 pr-4 font-medium">Variant</th>
-                      <th className="pb-3 pr-4 font-medium">Confidence</th>
-                      <th className="pb-3 font-medium">Why it matters</th>
+                      <th className="pb-3 pr-4 font-medium">Wasserstein</th>
+                      <th className="pb-3 pr-4 font-medium">JSD</th>
+                      <th className="pb-3 font-medium">Gap</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100 text-sm text-stone-700">
-                    {exemplarRows.map((row) => (
+                  <tbody className="divide-y divide-stone-100 text-stone-700">
+                    {metricComparisonRows.map((row) => (
                       <tr key={row.variant}>
                         <td className="py-4 pr-4 font-semibold text-stone-900">
                           {row.variant}
                         </td>
-                        <td className="py-4 pr-4 font-semibold text-emerald-700">
-                          {row.confidence}
+                        <td className="py-4 pr-4 font-semibold text-rose-700">
+                          {row.wasserstein}
                         </td>
-                        <td className="py-4">{row.note}</td>
+                        <td className="py-4 pr-4">{row.jsd}</td>
+                        <td className="py-4 font-semibold text-emerald-700">
+                          {row.gap}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              <p className="mt-4 text-base leading-7 text-stone-700">
+                This small table is useful on the page because it translates the
+                full attribution matrix into a very simple message: the proposed
+                distance is not just workable, it consistently gives a wider
+                confidence gap on hard examples.
+              </p>
             </div>
 
             <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
@@ -373,7 +759,23 @@ export default function CSFPage() {
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-            <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+            <PosteriorTable
+              eyebrow="Robustness Ablation"
+              title="Attribution remains intact after adversarial concept removal."
+              description="This table comes from the UCE removal experiment with 9 animal-specific probes. Even after animal concepts are actively erased, the highest attribution score still lands on the correct base family."
+              columns={[
+                "Flux",
+                "Kandinsky",
+                "SD1.5",
+                "SD2.1",
+                "SD3-Med",
+                "SDXL",
+              ]}
+              sections={ablationSections}
+              footnote="The highlighted cell marks the strongest posterior mean for each suspect model after concept erasure."
+            />
+
+            <div className="rounded-[28px] border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Prompt Design Validation
               </p>
@@ -394,13 +796,7 @@ export default function CSFPage() {
                 the model to resolve ambiguity using learned priors, and the
                 resulting semantic mixture becomes a fingerprint.
               </p>
-            </div>
-
-            <div className="rounded-[28px] border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Practical Summary
-              </p>
-              <ul className="mt-4 space-y-4 text-base leading-7 text-stone-700">
+              <ul className="mt-5 space-y-4 text-base leading-7 text-stone-700">
                 <li>
                   CSF is training-free and does not require modifying the base
                   model before deployment.
@@ -411,9 +807,9 @@ export default function CSFPage() {
                   hardest.
                 </li>
                 <li>
-                  The project page is intentionally problem-first: the main
-                  value of CSF is that it finally matches the forensic setting
-                  practitioners actually face.
+                  The rendered tables now make that forensic claim concrete
+                  instead of leaving the results at the level of qualitative
+                  takeaways.
                 </li>
               </ul>
             </div>
@@ -549,3 +945,125 @@ function StatTile({ value, label }: { value: string; label: string }) {
     </div>
   );
 }
+
+function PosteriorTable({
+  eyebrow,
+  title,
+  description,
+  columns,
+  sections,
+  footnote,
+  showLegend = false,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  columns: string[];
+  sections: ScoreSection[];
+  footnote: string;
+  showLegend?: boolean;
+}) {
+  return (
+    <div className="rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm">
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
+        {eyebrow}
+      </p>
+      <h3
+        className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
+      >
+        {title}
+      </h3>
+      <p className="mt-3 max-w-4xl text-base leading-7 text-stone-700">
+        {description}
+      </p>
+
+      {showLegend ? (
+        <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium uppercase tracking-[0.14em] text-stone-600">
+          <LegendPill label="Significant match" tone="match" />
+          <LegendPill label="Inconclusive" tone="uncertain" />
+          <LegendPill label="Below chance" tone="below" />
+          <span className="inline-flex items-center rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5">
+            * Dominance test
+          </span>
+        </div>
+      ) : null}
+
+      <div className="mt-6 overflow-x-auto custom-scrollbar">
+        <table className="min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
+          <thead className="text-xs uppercase tracking-[0.16em] text-stone-500">
+            <tr>
+              <th className="sticky left-0 z-10 rounded-l-2xl bg-stone-100 px-4 py-3 font-medium">
+                Suspect Model
+              </th>
+              {columns.map((column, index) => (
+                <th
+                  key={column}
+                  className={`bg-stone-100 px-4 py-3 text-center font-medium ${
+                    index === columns.length - 1 ? "rounded-r-2xl" : ""
+                  }`}
+                >
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sections.map((section) => (
+              <Fragment key={section.family}>
+                <tr key={`${section.family}-header`}>
+                  <td
+                    colSpan={columns.length + 1}
+                    className="pt-4 pb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500"
+                  >
+                    {section.family}
+                  </td>
+                </tr>
+                {section.rows.map((row) => (
+                  <tr key={row.label}>
+                    <td className="sticky left-0 rounded-l-2xl border border-r-0 border-stone-200 bg-white px-4 py-3 font-semibold text-stone-900 shadow-sm">
+                      {row.label}
+                    </td>
+                    {row.cells.map((cell, index) => (
+                      <td
+                        key={`${row.label}-${columns[index]}`}
+                        className={`border border-l-0 border-stone-200 bg-white px-3 py-3 text-center shadow-sm ${
+                          index === row.cells.length - 1 ? "rounded-r-2xl" : ""
+                        }`}
+                      >
+                        <span
+                          className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full border px-2.5 py-1 font-semibold ${scoreToneClasses[cell.tone]}`}
+                        >
+                          {cell.value}
+                          {cell.dominant ? "*" : ""}
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-4 text-sm leading-6 text-stone-500">{footnote}</p>
+    </div>
+  );
+}
+
+function LegendPill({ label, tone }: { label: string; tone: ScoreTone }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-3 py-1.5 ${scoreToneClasses[tone]}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+const scoreToneClasses: Record<ScoreTone, string> = {
+  match: "border-rose-200 bg-rose-100 text-rose-900",
+  uncertain: "border-amber-200 bg-amber-100 text-amber-900",
+  below: "border-emerald-200 bg-emerald-100 text-emerald-900",
+  plain: "border-stone-200 bg-stone-50 text-stone-700",
+};
