@@ -23,7 +23,6 @@
 % Font:
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Times New Roman}
-\setsansfont{Helvetica}
 
 % Formatting:
 \pagestyle{fancy}
@@ -39,15 +38,14 @@
 }
 
 \newcommand{\myname}{\textbf{\textup{Junhoo Lee}}}
-\newcommand{\coauthors}[1]{\textit{\textcolor{gray}{#1}}}
+\newcommand{\coauthors}[1]{\textit{#1}}
 
 \newcommand{\selpub}[5]{
-    \noindent{\fontsize{10.4}{11.2}\selectfont\sffamily\bfseries #1\par}
-    {\scriptsize\sffamily\itshape\textcolor{gray}{#2}\par}
-    {\scriptsize\textbf{Venue:} #3\par}
-    {\scriptsize\textbf{Authors:} #4\par}
-    {\scriptsize\hangindent=1.35em \hangafter=1 \textcolor{gray}{Summary:} #5\par}
-    \vspace{0.9mm}
+    \item \textbf{#1} \\
+    {\scriptsize\itshape\textcolor{gray}{#2}} \\
+    #4 \\
+    \textit{#3} \\
+    {\scriptsize\hangindent=1.4em \hangafter=0 #5}
 }
 
 \titleformat{\section}
@@ -94,7 +92,8 @@ but also what structure makes those gains possible and reliable.
 
 % Selected Publications
 \section{Selected Publications}
-{\footnotesize
+{\small
+\begin{itemize}[leftmargin=*, itemsep=1.2mm, topsep=0.8mm]
 \selpub
     {Fingerprinting Diffusion Models in the Wild}
     {\#Diffusion Model \#Fingerprinting}
@@ -129,6 +128,7 @@ but also what structure makes those gains possible and reliable.
     {CVPR Workshops 2024}
     {\coauthors{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$}, \myname$^\dagger$, \coauthors{Nojun Kwak}}
     {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
+\end{itemize}
 }
 
 % Awards
