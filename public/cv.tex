@@ -35,12 +35,11 @@
     \textit{#3} \hfill \textit{#4}
 }
 
-\newcommand{\pubEntry}[5]{
-    \textbf{#1} \\
-    #2 \\
-    \textit{#3}, #4. \\
+\newcommand{\selectedPub}[5]{
+    \item \textbf{#1} \textit{#2} \\
+    \textit{#3} \\
+    #4 \\
     #5
-    \vspace{1mm}
 }
 
 \titleformat{\section}
@@ -72,18 +71,88 @@
 \textbf{Seoul National University} \hfill Seoul, South Korea \\
 \textit{B.Sc. in Electrical and Computer Engineering} \hfill Mar 2017 -- Sep 2021
 
+% Research Interests
+\section{Research Interests}
+{\small
+I am interested in foundation models, especially in the scaling behavior of
+learned representations: what internal structure emerges as pretraining scales,
+what remains stable across model and data scale, and how these structures shape
+downstream behavior, adaptation, and controllability. My work connects model
+design, pretraining, representation learning, evaluation, and inference-time
+control across language, vision, generative, and multimodal settings. More
+broadly, I aim to understand not only how models become stronger with scale,
+but also what structure makes those gains possible and reliable.
+}
+
+% Selected Publications
+\section{Selected Publications}
+{\footnotesize
+\begin{itemize}[leftmargin=*, itemsep=0.4mm, topsep=0.8mm]
+    \selectedPub
+        {Fingerprinting Diffusion Models in the Wild}
+        {\#Diffusion Model \#Fingerprinting}
+        {The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR}), June 2026.}
+        {Junhoo Lee, Mijin Koo, Nojun Kwak}
+        {Developed a query-only black-box attribution framework for fine-tuned text-to-image models, combining compositional semantic probing with Bayesian lineage inference to identify model family and origin across diverse fine-tuned variants.}
+
+    \selectedPub
+        {Unlocking the Potential of Diffusion Language Models through Template Infilling}
+        {\#Large Diffusion Language Model}
+        {Submitted to ACL (Long), 2026.}
+        {Junhoo Lee, Seungyeon Kim, Nojun Kwak}
+        {Introduced Template Infilling and Dynamic Segment Allocation, an inference-time scaffolding framework for diffusion language models that improves reasoning, code generation, and planning.}
+
+    \selectedPub
+        {What's Making That Sound Right Now?}
+        {\#Multi-Modal Training}
+        {The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV}), 2025.}
+        {Hahyeon Choi, Junhoo Lee, Nojun Kwak}
+        {Presented AVATAR, a video-centric audio-visual localization benchmark, together with TAVLO, a temporally aware model designed for realistic grounding scenarios involving mixed sounds, multiple entities, off-screen sources, and cross-event mismatches.}
+
+    \selectedPub
+        {Deep Support Vectors}
+        {\#Deep Learning Theory}
+        {The Conference on Neural Information Processing Systems (\textbf{NeurIPS}), 2024.}
+        {Junhoo Lee, Hyunho Lee, Kyomin Hwang, Nojun Kwak}
+        {Introduced DeepKKT, a method for recovering support-like learned structures from pretrained classifiers, enabling explanation, practical dataset distillation, model inversion, and latent-space generative editing without access to the original training data.}
+
+    \selectedPub
+        {Do Not Think About Pink Elephant! (Co-first)}
+        {\#Diffusion Model \#Safety}
+        {The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Responsible Generative AI, 2024.}
+        {Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, Junhoo Lee$^\dagger$, Nojun Kwak}
+        {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
+\end{itemize}
+}
+
+% Awards
+\section{Awards \& Honors}
+{\small
+\begin{tabu} to 0.97\textwidth { X[0.8,l] X[0.2,r] }
+    BK21 Future Innovation Talent Bronze Prize (KRW 1,000,000) & 2023 \\
+    BK21 Outstanding Research Talent Fellowship (KRW 3,500,000) & 2023 \\
+    Yulchon AI Star Scholarship (KRW 8,000,000) & 2022 \\
+    3rd Place, SNU FastMRI Challenge (KRW 3,000,000) & 2021 \\
+    Kwanak Scholarship (KRW 4,000,000) & 2021 \\
+    National Science and Engineering Scholarship & 2017
+\end{tabu}
+}
+
+% Academic Service
+\section{Academic Service}
+{\small
+\textbf{Conference Reviewer}: CVPR (2025, 2026), ICLR (2025, 2026), NeurIPS (2024, 2025), ICCV (2025)
+}
+
 % Publications
+\newpage
 \section{Publications}
 
-\subsection*{Preprint}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Unlocking the Potential of Diffusion Language Models through Template Infilling} \\
     Junhoo Lee, Seungyeon Kim, Nojun Kwak \\
-    \textit{Preprint}, 2025.
-\end{itemize}
+    \textit{Submitted to ACL (long)}, 2026.
 
-\subsection*{Main Conference}
-\begin{itemize}[leftmargin=*]
     \item \textbf{Fingerprinting Diffusion Models in the Wild} \\
     Junhoo Lee, Mijin Koo, Nojun Kwak \\
     \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR})}, June 2026.
@@ -107,10 +176,7 @@
     \item \textbf{SHOT: Suppressing the Hessian along the Optimization Trajectory} \\
     Junhoo Lee, Jayeon Yoo, Nojun Kwak \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2023.
-\end{itemize}
 
-\subsection*{Workshop \& Journal}
-\begin{itemize}[leftmargin=*]
     \item \textbf{Do Not Think About Pink Elephant!} (Co-first) \\
     Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, Junhoo Lee$^\dagger$, Nojun Kwak \\
     \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Responsible Generative AI}, 2024.
@@ -127,20 +193,5 @@
     Suyoung Kim, Seonguk Park, Junhoo Lee, Nojun Kwak \\
     \textit{IEEE Access}, 2025.
 \end{itemize}
-
-% Awards
-\section{Awards \& Honors}
-\begin{tabu} to \textwidth { X[0.7,l] X[0.3,r] }
-    BK21 Future Innovation Talent Bronze Prize (KRW 1,000,000) & 2023 \\
-    BK21 Outstanding Research Talent Fellowship (KRW 3,500,000) & 2023 \\
-    Yulchon AI Star Scholarship (KRW 8,000,000) & 2022 \\
-    3rd Place, SNU FastMRI Challenge (KRW 3,000,000) & 2021 \\
-    Kwanak Scholarship (KRW 4,000,000) & 2021 \\
-    National Science and Engineering Scholarship & 2017
-\end{tabu}
-
-% Academic Service
-\section{Academic Service}
-\textbf{Conference Reviewer}: CVPR (2025, 2026), ICLR (2025, 2026), NeurIPS (2024, 2025), ICCV (2025)
 
 \end{document}
