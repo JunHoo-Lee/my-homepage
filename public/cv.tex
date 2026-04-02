@@ -35,12 +35,15 @@
     \textit{#3} \hfill \textit{#4}
 }
 
+\newcommand{\myname}{\textbf{\textup{Junhoo Lee}}}
+
 \newcommand{\selectedPub}[5]{
-    \item \textbf{#1} \\
-    {\textit{\textcolor{gray}{#2}}} \\
-    \textit{#3} \\
-    #4 \\
-    #5
+    \item
+    {\small\sffamily\bfseries #1\par}
+    {\scriptsize\sffamily\itshape\textcolor{gray}{#2}\par}
+    {\scriptsize\textsc{#3}\par}
+    {\scriptsize\itshape #4\par}
+    {\scriptsize\hspace*{1.2em}\parbox[t]{0.9\linewidth}{\textcolor{gray}{Summary.} #5}\par}
 }
 
 \titleformat{\section}
@@ -49,7 +52,7 @@
   {}
   [\titlerule]
 
-\titlespacing{\section}{0pt}{10pt}{5pt}
+\titlespacing{\section}{0pt}{8pt}{4pt}
 
 \begin{document}
 
@@ -74,7 +77,7 @@
 
 % Research Interests
 \section{Research Interests}
-{\small
+{\footnotesize
 I am interested in foundation models, especially in the scaling behavior of
 learned representations: what internal structure emerges as pretraining scales,
 what remains stable across model and data scale, and how these structures shape
@@ -88,47 +91,47 @@ but also what structure makes those gains possible and reliable.
 % Selected Publications
 \section{Selected Publications}
 {\footnotesize
-\begin{itemize}[leftmargin=*, itemsep=0.4mm, topsep=0.8mm]
+\begin{itemize}[leftmargin=0pt, label={}, itemsep=0.9mm, topsep=0.8mm]
     \selectedPub
         {Fingerprinting Diffusion Models in the Wild}
         {\#Diffusion Model \#Fingerprinting}
-        {The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR}), June 2026.}
-        {Junhoo Lee, Mijin Koo, Nojun Kwak}
+        {CVPR 2026}
+        {\myname, Mijin Koo, Nojun Kwak}
         {Developed a query-only black-box attribution framework for fine-tuned text-to-image models, combining compositional semantic probing with Bayesian lineage inference to identify model family and origin across diverse fine-tuned variants.}
 
     \selectedPub
         {Unlocking the Potential of Diffusion Language Models through Template Infilling}
         {\#Large Diffusion Language Model}
-        {Submitted to ACL (Long), 2026.}
-        {Junhoo Lee, Seungyeon Kim, Nojun Kwak}
+        {ACL (Long) Submission, 2026}
+        {\myname, Seungyeon Kim, Nojun Kwak}
         {Introduced Template Infilling and Dynamic Segment Allocation, an inference-time scaffolding framework for diffusion language models that improves reasoning, code generation, and planning.}
 
     \selectedPub
         {What's Making That Sound Right Now?}
         {\#Multi-Modal Training}
-        {The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV}), 2025.}
-        {Hahyeon Choi, Junhoo Lee, Nojun Kwak}
+        {ICCV 2025}
+        {Hahyeon Choi, \myname, Nojun Kwak}
         {Presented AVATAR, a video-centric audio-visual localization benchmark, together with TAVLO, a temporally aware model designed for realistic grounding scenarios involving mixed sounds, multiple entities, off-screen sources, and cross-event mismatches.}
 
     \selectedPub
         {Deep Support Vectors}
         {\#Deep Learning Theory}
-        {The Conference on Neural Information Processing Systems (\textbf{NeurIPS}), 2024.}
-        {Junhoo Lee, Hyunho Lee, Kyomin Hwang, Nojun Kwak}
+        {NeurIPS 2024}
+        {\myname, Hyunho Lee, Kyomin Hwang, Nojun Kwak}
         {Introduced DeepKKT, a method for recovering support-like learned structures from pretrained classifiers, enabling explanation, practical dataset distillation, model inversion, and latent-space generative editing without access to the original training data.}
 
     \selectedPub
         {Do Not Think About Pink Elephant! (Co-first)}
         {\#Diffusion Model \#Safety}
-        {The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Responsible Generative AI, 2024.}
-        {Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, Junhoo Lee$^\dagger$, Nojun Kwak}
+        {CVPR Workshops 2024}
+        {Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak}
         {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
 \end{itemize}
 }
 
 % Awards
 \section{Awards \& Honors}
-{\small
+{\footnotesize
 \begin{tabu} to 0.97\textwidth { X[0.8,l] X[0.2,r] }
     BK21 Future Innovation Talent Bronze Prize (KRW 1,000,000) & 2023 \\
     BK21 Outstanding Research Talent Fellowship (KRW 3,500,000) & 2023 \\
@@ -141,7 +144,7 @@ but also what structure makes those gains possible and reliable.
 
 % Academic Service
 \section{Academic Service}
-{\small
+{\footnotesize
 \textbf{Conference Reviewer}: CVPR (2025, 2026), ICLR (2025, 2026), NeurIPS (2024, 2025), ICCV (2025)
 }
 
@@ -151,47 +154,47 @@ but also what structure makes those gains possible and reliable.
 
 \begin{itemize}[leftmargin=*]
     \item \textbf{Unlocking the Potential of Diffusion Language Models through Template Infilling} \\
-    Junhoo Lee, Seungyeon Kim, Nojun Kwak \\
+    \textit{\myname, Seungyeon Kim, Nojun Kwak} \\
     \textit{Submitted to ACL (long)}, 2026.
 
     \item \textbf{Fingerprinting Diffusion Models in the Wild} \\
-    Junhoo Lee, Mijin Koo, Nojun Kwak \\
+    \textit{\myname, Mijin Koo, Nojun Kwak} \\
     \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR})}, June 2026.
 
     \item \textbf{Deep Edge Filter} (Co-first) \\
-    Dongkwan Lee$^\dagger$, Junhoo Lee$^\dagger$, Nojun Kwak \\
+    \textit{Dongkwan Lee$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2025.
 
     \item \textbf{What's Making That Sound Right Now?} \\
-    Hahyeon Choi, Junhoo Lee, Nojun Kwak \\
+    \textit{Hahyeon Choi, \myname, Nojun Kwak} \\
     \textit{The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV})}, 2025.
 
     \item \textbf{Deep Support Vectors} \\
-    Junhoo Lee, Hyunho Lee, Kyomin Hwang, Nojun Kwak \\
+    \textit{\myname, Hyunho Lee, Kyomin Hwang, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2024.
 
     \item \textbf{Any-Way Meta Learning} \\
-    Junhoo Lee, Yearim Kim, Hyunho Lee, Nojun Kwak \\
+    \textit{\myname, Yearim Kim, Hyunho Lee, Nojun Kwak} \\
     \textit{The AAAI Conference on Artificial Intelligence (\textbf{AAAI})}, 2024.
 
     \item \textbf{SHOT: Suppressing the Hessian along the Optimization Trajectory} \\
-    Junhoo Lee, Jayeon Yoo, Nojun Kwak \\
+    \textit{\myname, Jayeon Yoo, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2023.
 
     \item \textbf{Do Not Think About Pink Elephant!} (Co-first) \\
-    Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, Junhoo Lee$^\dagger$, Nojun Kwak \\
+    \textit{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
     \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Responsible Generative AI}, 2024.
 
     \item \textbf{Coreset Selection for Object Detection} \\
-    Hojun Lee, Suyoung Kim, Junhoo Lee, Jaeyoung Yoo, Nojun Kwak \\
+    \textit{Hojun Lee, Suyoung Kim, \myname, Jaeyoung Yoo, Nojun Kwak} \\
     \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Dataset Distillation}, 2024.
 
     \item \textbf{Practical Dataset Distillation Based on Deep Support Vectors} \\
-    Hyunho Lee, Junhoo Lee, Nojun Kwak \\
+    \textit{Hyunho Lee, \myname, Nojun Kwak} \\
     \textit{The European Conference on Computer Vision Workshops (\textbf{ECCV Workshops}) -- Dataset Distillation Challenge}, 2024.
 
     \item \textbf{The Role of Teacher Calibration in Knowledge Distillation} \\
-    Suyoung Kim, Seonguk Park, Junhoo Lee, Nojun Kwak \\
+    \textit{Suyoung Kim, Seonguk Park, \myname, Nojun Kwak} \\
     \textit{IEEE Access}, 2025.
 \end{itemize}
 
