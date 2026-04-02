@@ -18,9 +18,12 @@
 \usepackage[english]{babel}
 \usepackage{bookmark}
 \usepackage{xcolor}
+\usepackage{fontspec}
 
 % Font:
-\usepackage{times}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Times New Roman}
+\setsansfont{Helvetica}
 
 % Formatting:
 \pagestyle{fancy}
@@ -36,14 +39,15 @@
 }
 
 \newcommand{\myname}{\textbf{\textup{Junhoo Lee}}}
+\newcommand{\coauthors}[1]{\textit{\textcolor{gray}{#1}}}
 
-\newcommand{\selectedPub}[5]{
-    \item
-    {\small\sffamily\bfseries #1\par}
+\newcommand{\selpub}[5]{
+    \noindent{\fontsize{10.4}{11.2}\selectfont\sffamily\bfseries #1\par}
     {\scriptsize\sffamily\itshape\textcolor{gray}{#2}\par}
-    {\scriptsize\textsc{#3}\par}
-    {\scriptsize\itshape #4\par}
-    {\scriptsize\hspace*{1.2em}\parbox[t]{0.9\linewidth}{\textcolor{gray}{Summary.} #5}\par}
+    {\scriptsize\textbf{Venue:} #3\par}
+    {\scriptsize\textbf{Authors:} #4\par}
+    {\scriptsize\hangindent=1.35em \hangafter=1 \textcolor{gray}{Summary:} #5\par}
+    \vspace{0.9mm}
 }
 
 \titleformat{\section}
@@ -91,42 +95,40 @@ but also what structure makes those gains possible and reliable.
 % Selected Publications
 \section{Selected Publications}
 {\footnotesize
-\begin{itemize}[leftmargin=0pt, label={}, itemsep=0.9mm, topsep=0.8mm]
-    \selectedPub
-        {Fingerprinting Diffusion Models in the Wild}
-        {\#Diffusion Model \#Fingerprinting}
-        {CVPR 2026}
-        {\myname, Mijin Koo, Nojun Kwak}
-        {Developed a query-only black-box attribution framework for fine-tuned text-to-image models, combining compositional semantic probing with Bayesian lineage inference to identify model family and origin across diverse fine-tuned variants.}
+\selpub
+    {Fingerprinting Diffusion Models in the Wild}
+    {\#Diffusion Model \#Fingerprinting}
+    {CVPR 2026}
+    {\myname, \coauthors{Mijin Koo, Nojun Kwak}}
+    {Developed a query-only black-box attribution framework for fine-tuned text-to-image models, combining compositional semantic probing with Bayesian lineage inference to identify model family and origin across diverse fine-tuned variants.}
 
-    \selectedPub
-        {Unlocking the Potential of Diffusion Language Models through Template Infilling}
-        {\#Large Diffusion Language Model}
-        {ACL (Long) Submission, 2026}
-        {\myname, Seungyeon Kim, Nojun Kwak}
-        {Introduced Template Infilling and Dynamic Segment Allocation, an inference-time scaffolding framework for diffusion language models that improves reasoning, code generation, and planning.}
+\selpub
+    {Unlocking the Potential of Diffusion Language Models through Template Infilling}
+    {\#Large Diffusion Language Model}
+    {ACL (Long) Submission, 2026}
+    {\myname, \coauthors{Seungyeon Kim, Nojun Kwak}}
+    {Introduced Template Infilling and Dynamic Segment Allocation, an inference-time scaffolding framework for diffusion language models that improves reasoning, code generation, and planning.}
 
-    \selectedPub
-        {What's Making That Sound Right Now?}
-        {\#Multi-Modal Training}
-        {ICCV 2025}
-        {Hahyeon Choi, \myname, Nojun Kwak}
-        {Presented AVATAR, a video-centric audio-visual localization benchmark, together with TAVLO, a temporally aware model designed for realistic grounding scenarios involving mixed sounds, multiple entities, off-screen sources, and cross-event mismatches.}
+\selpub
+    {What's Making That Sound Right Now?}
+    {\#Multi-Modal Training}
+    {ICCV 2025}
+    {\coauthors{Hahyeon Choi}, \myname, \coauthors{Nojun Kwak}}
+    {Presented AVATAR, a video-centric audio-visual localization benchmark, together with TAVLO, a temporally aware model designed for realistic grounding scenarios involving mixed sounds, multiple entities, off-screen sources, and cross-event mismatches.}
 
-    \selectedPub
-        {Deep Support Vectors}
-        {\#Deep Learning Theory}
-        {NeurIPS 2024}
-        {\myname, Hyunho Lee, Kyomin Hwang, Nojun Kwak}
-        {Introduced DeepKKT, a method for recovering support-like learned structures from pretrained classifiers, enabling explanation, practical dataset distillation, model inversion, and latent-space generative editing without access to the original training data.}
+\selpub
+    {Deep Support Vectors}
+    {\#Deep Learning Theory}
+    {NeurIPS 2024}
+    {\myname, \coauthors{Hyunho Lee, Kyomin Hwang, Nojun Kwak}}
+    {Introduced DeepKKT, a method for recovering support-like learned structures from pretrained classifiers, enabling explanation, practical dataset distillation, model inversion, and latent-space generative editing without access to the original training data.}
 
-    \selectedPub
-        {Do Not Think About Pink Elephant! (Co-first)}
-        {\#Diffusion Model \#Safety}
-        {CVPR Workshops 2024}
-        {Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak}
-        {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
-\end{itemize}
+\selpub
+    {Do Not Think About Pink Elephant! (Co-first)}
+    {\#Diffusion Model \#Safety}
+    {CVPR Workshops 2024}
+    {\coauthors{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$}, \myname$^\dagger$, \coauthors{Nojun Kwak}}
+    {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
 }
 
 % Awards
