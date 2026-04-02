@@ -3,7 +3,7 @@ export const PROFILE = {
     role: "Ph.D. Candidate",
     affiliation: "Seoul National University",
     email: "mrjunoo@snu.ac.kr",
-    website: "https://junhoo-lee.github.io", // Assuming this, or current URL
+    website: "https://junhoo.me",
     phone: "+82-10-4042-6255",
     address: "Room 311, Building 18, Seoul National University, Gwanak-ro 1, Gwanak-gu, Seoul, Republic of Korea",
     bio: [
