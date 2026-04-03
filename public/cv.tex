@@ -30,6 +30,7 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 \urlstyle{same}
+\setlength{\parindent}{0pt}
 
 % Custom commands
 \newcommand{\entry}[4]{
@@ -40,12 +41,24 @@
 \newcommand{\myname}{\textbf{\textup{Junhoo Lee}}}
 \newcommand{\coauthors}[1]{\textit{#1}}
 
-\newcommand{\selpub}[5]{
-    \item \textbf{#1} \\
-    {\scriptsize\itshape\textcolor{gray}{#2}} \\
-    #4 \\
-    \textit{#3} \\
-    {\scriptsize\hangindent=1.4em \hangafter=0 #5}
+\newcommand{\selpub}[4]{
+    \item \textbf{#1}, {\scriptsize\itshape\textcolor{gray}{#2}} \\
+    #3 \\
+    {\scriptsize #4}
+}
+
+\newcommand{\projectentry}[5]{
+    \textbf{#1} \hfill {\scriptsize #2} \\
+    {\scriptsize\textit{#3}} \\
+    {\scriptsize $\bullet$ #4} \\
+    {\scriptsize $\bullet$ #5}
+    \vspace{0.4mm}
+}
+
+\newcommand{\talkentry}[4]{
+    \textbf{\href{#1}{\textcolor{blue}{#2}}} \hfill {\scriptsize #3} \\
+    {\scriptsize\textit{#4}}
+    \vspace{0.4mm}
 }
 
 \titleformat{\section}
@@ -54,7 +67,7 @@
   {}
   [\titlerule]
 
-\titlespacing{\section}{0pt}{8pt}{4pt}
+\titlespacing{\section}{0pt}{6pt}{3pt}
 
 \begin{document}
 
@@ -92,42 +105,49 @@ but also what structure makes those gains possible and reliable.
 
 % Selected Publications
 \section{Selected Publications}
-{\small
-\begin{itemize}[leftmargin=*, itemsep=1.2mm, topsep=0.8mm]
+{\footnotesize
+\begin{itemize}[leftmargin=*, itemsep=0.15mm, topsep=0.2mm]
 \selpub
     {Fingerprinting Diffusion Models in the Wild}
-    {\#Diffusion Model \#Fingerprinting}
-    {CVPR 2026}
+    {CVPR 2026 \#Diffusion Model \#Fingerprinting}
     {\myname, \coauthors{Mijin Koo, Nojun Kwak}}
     {Developed a query-only black-box attribution framework for fine-tuned text-to-image models, combining compositional semantic probing with Bayesian lineage inference to identify model family and origin across diverse fine-tuned variants.}
 
 \selpub
     {Unlocking the Potential of Diffusion Language Models through Template Infilling}
-    {\#Large Diffusion Language Model}
-    {ACL (Long) Submission, 2026}
+    {ACL (Long) Submission, 2026 \#Large Diffusion Language Model}
     {\myname, \coauthors{Seungyeon Kim, Nojun Kwak}}
     {Introduced Template Infilling and Dynamic Segment Allocation, an inference-time scaffolding framework for diffusion language models that improves reasoning, code generation, and planning.}
 
 \selpub
-    {What's Making That Sound Right Now?}
-    {\#Multi-Modal Training}
-    {ICCV 2025}
+    {What's Making That Sound Right Now? Video-centric Audio-Visual Localization}
+    {ICCV 2025 \#Multi-Modal Training}
     {\coauthors{Hahyeon Choi}, \myname, \coauthors{Nojun Kwak}}
     {Presented AVATAR, a video-centric audio-visual localization benchmark, together with TAVLO, a temporally aware model designed for realistic grounding scenarios involving mixed sounds, multiple entities, off-screen sources, and cross-event mismatches.}
 
 \selpub
     {Deep Support Vectors}
-    {\#Deep Learning Theory}
-    {NeurIPS 2024}
+    {NeurIPS 2024 \#Deep Learning Theory}
     {\myname, \coauthors{Hyunho Lee, Kyomin Hwang, Nojun Kwak}}
     {Introduced DeepKKT, a method for recovering support-like learned structures from pretrained classifiers, enabling explanation, practical dataset distillation, model inversion, and latent-space generative editing without access to the original training data.}
 
 \selpub
     {Do Not Think About Pink Elephant! (Co-first)}
-    {\#Diffusion Model \#Safety}
-    {CVPR Workshops 2024}
+    {CVPR Workshops 2024 \#Diffusion Model \#Safety}
     {\coauthors{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$}, \myname$^\dagger$, \coauthors{Nojun Kwak}}
     {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
+
+\selpub
+    {Any-Way Meta Learning}
+    {AAAI 2024 \#Meta Learning}
+    {\myname, \coauthors{Yearim Kim, Hyunho Lee, Nojun Kwak}}
+    {Improved episodic meta-learning by relaxing the fixed N-way setting and exploiting label equivalence across tasks.}
+
+\selpub
+    {SHOT: Suppressing the Hessian along the Optimization Trajectory}
+    {NeurIPS 2023 \#Meta Learning}
+    {\myname, \coauthors{Jayeon Yoo, Nojun Kwak}}
+    {Studied how flattening the optimization trajectory improves adaptation behavior in gradient-descent-based meta-learning.}
 \end{itemize}
 }
 
@@ -144,17 +164,21 @@ but also what structure makes those gains possible and reliable.
 \end{tabu}
 }
 
-% Academic Service
-\section{Academic Service}
+% Patents
+\section{Patents}
 {\footnotesize
-\textbf{Conference Reviewer}: CVPR (2025, 2026), ICLR (2025, 2026), NeurIPS (2024, 2025), ICCV (2025)
+\begin{itemize}[leftmargin=*, itemsep=0.3mm, topsep=0.3mm]
+    \item \textbf{Method and Apparatus for Edge Filtering to Improve the Robustness of Deep Learning Models}, Korean Patent, 10-2025-0215458
+    \item \textbf{Method and Apparatus for Controlling Unintended Object Generation in Image Generation Models through Prompt Reconfiguration}, Korean Patent, 10-2025-0063788
+\end{itemize}
 }
 
 % Publications
 \newpage
 \section{Publications}
 
-\begin{itemize}[leftmargin=*]
+{\footnotesize
+\begin{itemize}[leftmargin=*, itemsep=0.4mm, topsep=0.4mm]
     \item \textbf{Unlocking the Potential of Diffusion Language Models through Template Infilling} \\
     \textit{\myname, Seungyeon Kim, Nojun Kwak} \\
     \textit{Submitted to ACL (long)}, 2026.
@@ -167,7 +191,7 @@ but also what structure makes those gains possible and reliable.
     \textit{Dongkwan Lee$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2025.
 
-    \item \textbf{What's Making That Sound Right Now?} \\
+    \item \textbf{What's Making That Sound Right Now? Video-centric Audio-Visual Localization} \\
     \textit{Hahyeon Choi, \myname, Nojun Kwak} \\
     \textit{The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV})}, 2025.
 
@@ -199,5 +223,60 @@ but also what structure makes those gains possible and reliable.
     \textit{Suyoung Kim, Seonguk Park, \myname, Nojun Kwak} \\
     \textit{IEEE Access}, 2025.
 \end{itemize}
+}
+
+% Research Projects
+\section{Research Projects}
+{\footnotesize
+\projectentry
+    {Research on Gradient-Descent-Based Meta-Learning Algorithms}
+    {Sep. 2022 -- Sep. 2023}
+    {Funded by Samsung Electronics | Main Researcher}
+    {Meta-learning, Few-shot learning, Optimization}
+    {Conducted research to uncover the mechanism behind the success of gradient-descent-based meta-learning algorithms and developed an improved method, resulting in a publication at a top-tier machine learning conference.}
+
+\projectentry
+    {Development of Self-Directed Visual Object Detection for Shopping Assistance}
+    {Mar. 2022 -- Nov. 2024}
+    {Supported by IITP (Institute of Information \& Communications Technology Planning \& Evaluation) | Project Manager}
+    {Object Detection, Continual Learning, Visual Recognition}
+    {Conducted research on a shopping-oriented visual assistant that detects objects in user-submitted images, extracts product attributes, and continually acquires new object categories through OCR-based labeling and incremental learning.}
+
+\projectentry
+    {Development of AI Video Generation for Korean Traditional Media Art}
+    {Jul. 2024 -- Mar. 2026}
+    {Supported by MCST (Ministry of Culture, Sports and Tourism), in collaboration with EASYWITH | Main Engineer}
+    {Video Generation, Multimodal Learning, Visual Content Creation}
+    {Led the development of a Korean-style AI video generation system using curated domain-specific datasets of traditional media art; designed a data-centric pipeline for high-resolution (up to 8K) video generation, including dataset construction, content similarity evaluation, and automated production workflows.}
+
+\projectentry
+    {Physically Plausible Video Diffusion Modeling}
+    {Mar. 2025 -- Nov. 2025}
+    {Project under AI Star Fellowship Program (MSIT, Korea) | Project Manager}
+    {Video Diffusion, Generative Models, Physical AI}
+    {Led the development of video diffusion models that generate physically consistent dynamics and designed physics-aware modeling strategies to improve temporal coherence and realism in generated videos.}
+}
+
+% Talks
+\section{Talks}
+{\footnotesize
+\talkentry
+    {https://junhoo.me/csf}
+    {Compositional Semantic Fingerprinting (CSF) for Black-box Attribution of Text-to-Image Models}
+    {Apr. 2026}
+    {SWCS 2026 (Software Convergence Symposium), KIISE}
+
+\talkentry
+    {https://arxiv.org/abs/2403.17329}
+    {Deep Support Vectors: Interpreting Deep Models via Support Vector Extraction}
+    {Jun. 26, 2024}
+    {Korea Computer Congress (KCC 2024)}
+}
+
+% Academic Service
+\section{Academic Service}
+{\footnotesize
+\textbf{Conference Reviewer}: CVPR (2025, 2026), ICCV (2025), ECCV (2026), ICLR (2025, 2026), ICML (2026), NeurIPS (2024, 2025, 2026)
+}
 
 \end{document}
