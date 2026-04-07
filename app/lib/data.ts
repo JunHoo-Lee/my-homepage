@@ -27,7 +27,10 @@ export const EDUCATION = [
 ];
 
 export const NEWS = [
-    { date: "Apr 2026", content: "Our paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is accepted to ACL 2026!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
+    { date: "Jul 5, 2026", content: "I will be at ACL 2026 in San Diego, presenting our \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" paper!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
+    { date: "Jun 5, 2026", content: "I will be at CVPR 2026 in Denver, presenting our \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" paper!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
+    { date: "Apr 4, 2026", content: "Our paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is accepted to ACL 2026!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
+    { date: "Feb 20, 2026", content: "Our paper \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" is accepted to CVPR 2026!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
     { date: "Dec 2025", content: "I will be at NeurIPS 2025 in San Diego, presenting our \"Deep Edge Filter\" paper!", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
     { date: "Oct 2025", content: "New preprint \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is now on arXiv!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Sep 2025", content: "Our paper \"Deep Edge Filter\" is accepted to NeurIPS 2025! (co-first author)", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
