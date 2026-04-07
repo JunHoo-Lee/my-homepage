@@ -158,8 +158,34 @@ export default function Home() {
     );
 }
 
-function PublicationItem({ title, authors, venue, year, link, tldr, category, subTag }: { title: string, authors: string[], venue: string, year: string, link?: string, tldr: string, category: string, subTag: string }) {
-    const isExternalLink = Boolean(link && !link.startsWith("/"));
+function PublicationItem({
+    title,
+    authors,
+    venue,
+    year,
+    link,
+    paperLink,
+    projectLink,
+    tldr,
+    category,
+    subTag
+}: {
+    title: string,
+    authors: string[],
+    venue: string,
+    year: string,
+    link?: string,
+    paperLink?: string,
+    projectLink?: string,
+    tldr: string,
+    category: string,
+    subTag: string
+}) {
+    const resolvedProjectLink = projectLink ?? (link && link.startsWith("/") ? link : undefined);
+    const resolvedPaperLink = paperLink ?? (link && !link.startsWith("/") ? link : undefined);
+    const primaryLink = resolvedProjectLink ?? resolvedPaperLink;
+    const isPrimaryExternalLink = Boolean(primaryLink && !primaryLink.startsWith("/"));
+    const paperLabel = resolvedPaperLink?.includes("arxiv.org") ? "arXiv" : "Paper";
 
     const getCategoryColor = (cat: string) => {
         switch (cat) {
@@ -180,13 +206,13 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
     return (
         <div className="group relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
             <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 leading-snug">
-                {link ? (
-                    isExternalLink ? (
-                        <a href={link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                {primaryLink ? (
+                    isPrimaryExternalLink ? (
+                        <a href={primaryLink} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
                             {title}
                         </a>
                     ) : (
-                        <Link href={link} className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                        <Link href={primaryLink!} className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
                             {title}
                         </Link>
                     )
@@ -234,16 +260,25 @@ function PublicationItem({ title, authors, venue, year, link, tldr, category, su
                 {tldr}
             </p>
 
-            {link && (
-                <div className="mt-3 flex gap-3 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    {isExternalLink ? (
-                        <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                            <FileText size={14} /> View Paper
-                        </a>
-                    ) : (
-                        <Link href={link} className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                            <FileText size={14} /> View Project
+            {(resolvedProjectLink || resolvedPaperLink) && (
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium">
+                    {resolvedProjectLink && (
+                        <Link
+                            href={resolvedProjectLink}
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
+                        >
+                            <ArrowUpRight size={14} /> Project Page
                         </Link>
+                    )}
+                    {resolvedPaperLink && (
+                        <a
+                            href={resolvedPaperLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-stone-50 px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
+                        >
+                            <FileText size={14} /> {paperLabel}
+                        </a>
                     )}
                 </div>
             )}

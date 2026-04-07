@@ -34,7 +34,7 @@ export const NEWS = [
     { date: "Dec 2025", content: "I will be at NeurIPS 2025 in San Diego, presenting our \"Deep Edge Filter\" paper!", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
     { date: "Oct 2025", content: "New preprint \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is now on arXiv!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Sep 2025", content: "Our paper \"Deep Edge Filter\" is accepted to NeurIPS 2025! (co-first author)", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
-    { date: "Jul 2025", content: "Our paper \"What's Making That Sound Right Now?\" is accepted to ICCV 2025!", link: "https://arxiv.org/abs/2507.04667", linkText: "\"What's Making That Sound Right Now?\"" },
+    { date: "Jul 2025", content: "Our paper \"What's Making That Sound Right Now? Video-centric Audio-Visual Localization\" is accepted to ICCV 2025!", link: "https://arxiv.org/abs/2507.04667", linkText: "\"What's Making That Sound Right Now? Video-centric Audio-Visual Localization\"" },
     { date: "Jun 2025", content: "Our paper \"The Role of Teacher Calibration in Knowledge Distillation\" is published in IEEE Access!", link: "https://arxiv.org/abs/2508.20224", linkText: "\"The Role of Teacher Calibration in Knowledge Distillation\"" },
     { date: "Dec 2024", content: "I will be at NeurIPS 2024 in Vancouver, presenting our \"Deep Support Vectors\" paper!", link: "https://arxiv.org/abs/2403.17329", linkText: "\"Deep Support Vectors\"" },
     { date: "Sep 2024", content: "Our paper \"Deep Support Vectors\" is accepted to NeurIPS 2024!", link: "https://arxiv.org/abs/2403.17329", linkText: "\"Deep Support Vectors\"" },
@@ -68,6 +68,7 @@ export const PUBLICATIONS = [
                 venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
                 year: "2026",
                 link: "/csf",
+                paperLink: "/csf/csf-paper.pdf",
                 category: "Generative Models",
                 subTag: "Query-Only Attribution",
                 tldr: "A problem-first project page for black-box lineage attribution of fine-tuned text-to-image APIs using compositional semantic fingerprints."
@@ -83,7 +84,7 @@ export const PUBLICATIONS = [
                 tldr: "Just as humans perceive edges (high-frequency) as core components, deep features in neural networks exhibit the same tendency."
             },
             {
-                title: "What's Making That Sound Right Now?",
+                title: "What's Making That Sound Right Now? Video-centric Audio-Visual Localization",
                 authors: ["Hahyeon Choi", "Junhoo Lee", "Nojun Kwak"],
                 venue: "The IEEE/CVF International Conference on Computer Vision (ICCV)",
                 year: "2025",
