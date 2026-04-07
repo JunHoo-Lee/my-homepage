@@ -573,32 +573,34 @@ export default function CSFPage() {
             </div>
 
             <div className="table-stack">
-              <PosteriorTable
+              <TableImageCard
                 eyebrow="Main Attribution Matrix"
                 title="Posterior mean over the full benchmark."
-                description="Each row is a fine-tuned suspect model, and each column is a candidate base family. The dominant posterior mass consistently lands on the true lineage."
-                columns={baseModelColumns}
-                sections={mainPosteriorSections}
-                footnote="Chance level is 0.167. All 13 suspect models satisfy the dominance criterion on their true source family."
-                showLegend
+                description="Posterior means across all 13 fine-tuned suspects and 6 candidate base families."
+                src="/csf/results-main-table.png"
+                alt="Main posterior mean attribution table across fine-tuned models and candidate base families"
+                width={2330}
+                height={920}
               />
 
-              <MetricComparisonPanel />
+              <TableImageCard
+                eyebrow="Metric Comparison"
+                title="Wasserstein vs. JSD."
+                description="Confidence margins on hard variants remain wider with Wasserstein than with the JSD baseline."
+                src="/csf/results-metric-table.png"
+                alt="Wasserstein versus JSD attribution confidence comparison table"
+                width={1200}
+                height={325}
+              />
 
-              <PosteriorTable
+              <TableImageCard
                 eyebrow="Robustness Ablation"
-                title="Attribution remains intact after adversarial concept removal."
-                description="This table comes from the UCE removal experiment with 9 animal-specific probes. Even after animal concepts are actively erased, the strongest posterior mean still lands on the correct base family."
-                columns={[
-                  "Flux",
-                  "Kandinsky",
-                  "SD1.5",
-                  "SD2.1",
-                  "SD3-Med",
-                  "SDXL",
-                ]}
-                sections={ablationSections}
-                footnote="The highlighted cell marks the strongest posterior mean for each suspect model after concept erasure."
+                title="Adversarial concept removal."
+                description="Even after removing animal-related concepts with UCE, the strongest attribution score still lands on the correct base family."
+                src="/csf/results-ablation-table.png"
+                alt="Attribution results under adversarial concept removal across candidate base models"
+                width={1090}
+                height={480}
               />
             </div>
           </div>
@@ -905,6 +907,11 @@ export default function CSFPage() {
           border-radius: 0.85rem;
           border: 1px solid #e2e8f0;
           background: #f8fafc;
+        }
+
+        .csf-page .table-image-frame {
+          margin-top: 1.25rem;
+          background: #ffffff;
         }
 
         .csf-page .result-figure img {
@@ -1327,6 +1334,36 @@ function FigureCard({
       <h3 className="result-title">{title}</h3>
       <p className="result-caption">{caption}</p>
     </article>
+  );
+}
+
+function TableImageCard({
+  eyebrow,
+  title,
+  description,
+  src,
+  alt,
+  width,
+  height,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}) {
+  return (
+    <div className="table-panel">
+      <p className="table-eyebrow">{eyebrow}</p>
+      <h3 className="table-title">{title}</h3>
+      <p className="table-description">{description}</p>
+
+      <div className="result-figure table-image-frame">
+        <Image src={src} alt={alt} width={width} height={height} />
+      </div>
+    </div>
   );
 }
 
