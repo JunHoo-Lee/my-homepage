@@ -27,6 +27,7 @@ export const EDUCATION = [
 ];
 
 export const NEWS = [
+    { date: "Apr 2026", content: "Our paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is accepted to ACL 2026!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Dec 2025", content: "I will be at NeurIPS 2025 in San Diego, presenting our \"Deep Edge Filter\" paper!", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
     { date: "Oct 2025", content: "New preprint \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is now on arXiv!", link: "https://arxiv.org/abs/2510.13870", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Sep 2025", content: "Our paper \"Deep Edge Filter\" is accepted to NeurIPS 2025! (co-first author)", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
@@ -44,26 +45,20 @@ export const NEWS = [
 
 export const PUBLICATIONS = [
     {
-        section: "Preprint",
-        color: "gray",
-        items: [
-            {
-                title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
-                authors: ["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"],
-                venue: "Preprint",
-                year: "2025",
-                link: "https://arxiv.org/abs/2510.13870",
-                category: "Large Language Models",
-                subTag: "Diffusion Language Models",
-                tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
-            }
-        ]
-    },
-    {
         section: "Main Conference",
         color: "blue",
         note: "(First Author / Co-first †)",
         items: [
+            {
+                title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
+                authors: ["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"],
+                venue: "Annual Meeting of the Association for Computational Linguistics (ACL)",
+                year: "2026",
+                link: "https://arxiv.org/abs/2510.13870",
+                category: "Large Language Models",
+                subTag: "Diffusion Language Models",
+                tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
+            },
             {
                 title: "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
                 authors: ["Junhoo Lee", "Mijin Koo", "Nojun Kwak"],
