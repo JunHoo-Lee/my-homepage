@@ -510,7 +510,7 @@ export default function CSFPage() {
         <section className="hero teaser">
           <div className="container is-max-desktop">
             <div className="hero-body">
-              <div className="teaser-media">
+              <figure className="teaser-media">
                 <Image
                   src="/csf/comparison.png"
                   alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
@@ -518,7 +518,7 @@ export default function CSFPage() {
                   height={744}
                   priority
                 />
-              </div>
+              </figure>
               <h2 className="subtitle has-text-centered teaser-caption">
                 CSF is designed for the most restrictive query-only black-box
                 setting, where the defender only has access to the final
@@ -819,11 +819,7 @@ export default function CSFPage() {
         }
 
         .csf-page .teaser-media {
-          overflow: hidden;
-          border-radius: 1rem;
-          border: 1px solid #e2e8f0;
-          background: #ffffff;
-          box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09);
+          margin: 0;
         }
 
         .csf-page .teaser-media img {
@@ -840,7 +836,7 @@ export default function CSFPage() {
 
         .csf-page .teaser-caption {
           max-width: 860px;
-          margin: 1.5rem auto 0;
+          margin: 0.9rem auto 0;
         }
 
         .csf-page .content {
@@ -910,8 +906,11 @@ export default function CSFPage() {
         }
 
         .csf-page .table-image-frame {
-          margin-top: 1.25rem;
-          background: #ffffff;
+          margin-top: 1rem;
+          overflow: visible;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
         }
 
         .csf-page .result-figure img {
@@ -937,15 +936,11 @@ export default function CSFPage() {
         .csf-page .table-stack {
           margin-top: 2rem;
           display: grid;
-          gap: 1.5rem;
+          gap: 2.4rem;
         }
 
         .csf-page .table-panel {
-          border-radius: 1rem;
-          border: 1px solid #dbe4ee;
-          background: #ffffff;
-          padding: 1.5rem;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+          padding: 0;
         }
 
         .csf-page .table-eyebrow {
