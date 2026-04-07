@@ -545,12 +545,88 @@ export default function CSFPage() {
 
         <section className="section">
           <div className="container is-max-desktop">
-            <h2 className="title is-3 has-text-centered">Visual Results</h2>
-            <div className="results-grid">
-              {visualCards.map((card) => (
-                <FigureCard key={card.title} {...card} />
-              ))}
+            <div className="narrative-block">
+              <p className="section-label">Challenges</p>
+              <h2 className="title is-3 has-text-centered">
+                Why naive visual matching fails.
+              </h2>
+              <p className="section-copy has-text-centered">
+                Fine-tuning often changes texture, palette, composition, and
+                rendering style so aggressively that side-by-side visual
+                inspection becomes unreliable. Two models can share the same
+                lineage while looking very different at the pixel level, which
+                is exactly why CSF avoids direct visual matching and instead
+                measures how a model resolves ambiguous semantic prompts.
+              </p>
+              <figure className="narrative-figure challenge-figure">
+                <Image
+                  src="/csf/family-game.png"
+                  alt="Style drift across related model families makes direct visual matching unreliable"
+                  width={2250}
+                  height={1124}
+                />
+              </figure>
+              <p className="figure-caption has-text-centered">
+                This challenge figure shows why lineage attribution is hard in
+                practice: downstream variants can move far away in style while
+                still inheriting the same semantic prior from the protected base
+                model. A robust black-box method therefore has to focus on the
+                semantic distribution a model produces, not on superficial style
+                similarity.
+              </p>
             </div>
+          </div>
+        </section>
+
+        <section className="section hero is-light">
+          <div className="container is-max-desktop">
+            <div className="narrative-block">
+              <p className="section-label">Methods</p>
+              <h2 className="title is-3 has-text-centered">
+                Method overview.
+              </h2>
+            </div>
+
+            <div className="methods-grid">
+              <article className="method-card">
+                <h3 className="method-title">Problem formulation</h3>
+                <p className="method-copy">
+                  We are given a set of protected base models and a deployed
+                  suspect API that may have been fine-tuned from one of them.
+                  The defender does not see weights, activations, or training
+                  logs; only text queries and generated images are available.
+                  The goal is to assign a posterior over candidate lineages and
+                  make an attribution decision with controlled confidence.
+                </p>
+              </article>
+
+              <article className="method-card">
+                <h3 className="method-title">CSF pipeline</h3>
+                <p className="method-copy">
+                  CSF probes each model with compositional, underspecified
+                  prompts that force it to resolve ambiguity using learned
+                  semantic priors. The resulting category distributions are then
+                  compared against base-model references using Wasserstein
+                  distance, and a Bayesian attribution rule produces the final
+                  lineage posterior and dominance test.
+                </p>
+              </article>
+            </div>
+
+            <figure className="narrative-figure method-figure">
+              <Image
+                src="/csf/prompt-ablation.png"
+                alt="Prompt ablation showing that context changes the semantic mixture produced by the model"
+                width={828}
+                height={316}
+              />
+            </figure>
+            <p className="figure-caption has-text-centered">
+              CSF relies on the fact that changing only the surrounding context
+              can shift the semantic mixture a model generates. That latent
+              mixture is much harder to wash away than style, which makes it a
+              useful fingerprint in the strict query-only setting.
+            </p>
           </div>
         </section>
 
@@ -564,7 +640,7 @@ export default function CSFPage() {
               <TableImageCard
                 eyebrow="Table 1"
                 title="Posterior attribution across all 13 fine-tuned suspects."
-                description="The main benchmark spans 6 protected base families and 13 downstream variants. In the query-only setting, the posterior mass still concentrates on the correct lineage for every suspect."
+                description="This is the main result of the paper. Each row is a deployed suspect model, each column is a candidate protected base lineage, and every cell reports the posterior mean attribution score under CSF. Despite strong downstream style drift, the correct family remains dominant for all 13 suspects, showing that CSF can recover lineage using only black-box queries rather than internal access or watermark injection."
                 src="/csf/results-main-table-v2.png"
                 alt="Main posterior mean attribution table across fine-tuned models and candidate base families"
                 width={1770}
@@ -575,7 +651,7 @@ export default function CSFPage() {
               <TableImageCard
                 eyebrow="Table 2"
                 title="Wasserstein keeps a clearer attribution margin than the JSD baseline."
-                description="On hard variants such as Kandinsky-Naruto and SDXL-DPO, the confidence gap remains visibly wider with Wasserstein, which makes the final lineage decision more decisive."
+                description="This comparison isolates the metric choice. On visually difficult variants, Wasserstein produces a consistently larger confidence gap than the JSD baseline, which means the correct lineage is separated more decisively from competing bases at decision time."
                 src="/csf/results-metric-table-v4.png"
                 alt="Wasserstein versus JSD attribution confidence comparison table"
                 width={1306}
@@ -586,7 +662,7 @@ export default function CSFPage() {
               <TableImageCard
                 eyebrow="Table 3"
                 title="Attribution survives adversarial concept removal."
-                description="Even after removing animal-related concepts with UCE, the strongest attribution score still lands on the correct base family, showing that the signal is not tied to a single trigger concept."
+                description="This ablation asks whether CSF collapses once a seemingly relevant concept family is deliberately erased. Even after UCE removes animal-related concepts, attribution still peaks on the correct source family, indicating that the fingerprint is distributed across broader semantic structure rather than a single trigger token."
                 src="/csf/results-ablation-table-v2.png"
                 alt="Attribution results under adversarial concept removal across candidate base models"
                 width={928}
@@ -677,7 +753,7 @@ export default function CSFPage() {
         }
 
         .csf-page .container.is-max-figure {
-          max-width: 920px;
+          max-width: 780px;
         }
 
         .csf-page .container.is-max-quant {
@@ -704,7 +780,7 @@ export default function CSFPage() {
 
         .csf-page .teaser .hero-body {
           padding-top: 1rem;
-          padding-bottom: 3.5rem;
+          padding-bottom: 3rem;
         }
 
         .csf-page .section {
@@ -818,7 +894,7 @@ export default function CSFPage() {
         }
 
         .csf-page .teaser-media {
-          max-width: 840px;
+          max-width: 700px;
           margin: 0 auto;
         }
 
@@ -835,8 +911,87 @@ export default function CSFPage() {
         }
 
         .csf-page .teaser-caption {
-          max-width: 720px;
+          max-width: 640px;
           margin: 1.15rem auto 0;
+        }
+
+        .csf-page .section-label {
+          margin: 0 0 0.75rem;
+          color: #64748b;
+          font-size: 0.78rem;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          text-align: center;
+        }
+
+        .csf-page .section-copy {
+          max-width: 760px;
+          margin: 1rem auto 0;
+          color: #475569;
+          font-size: 1.02rem;
+          line-height: 1.8;
+        }
+
+        .csf-page .narrative-block {
+          display: grid;
+          gap: 1.15rem;
+        }
+
+        .csf-page .narrative-figure {
+          margin: 0 auto;
+          width: 100%;
+        }
+
+        .csf-page .challenge-figure {
+          max-width: 980px;
+        }
+
+        .csf-page .method-figure {
+          max-width: 860px;
+        }
+
+        .csf-page .narrative-figure img {
+          display: block;
+          width: 100%;
+          height: auto;
+        }
+
+        .csf-page .figure-caption {
+          max-width: 860px;
+          margin: 0 auto;
+          color: #475569;
+          font-size: 0.98rem;
+          line-height: 1.8;
+        }
+
+        .csf-page .methods-grid {
+          margin-top: 1.4rem;
+          display: grid;
+          gap: 1.25rem;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .csf-page .method-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 0.95rem;
+          background: #ffffff;
+          padding: 1.4rem 1.5rem;
+        }
+
+        .csf-page .method-title {
+          margin: 0;
+          color: #111827;
+          font-size: 1.1rem;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .csf-page .method-copy {
+          margin: 0.85rem 0 0;
+          color: #475569;
+          font-size: 0.98rem;
+          line-height: 1.8;
         }
 
         .csf-page .content {
@@ -1242,6 +1397,7 @@ export default function CSFPage() {
             width: 100%;
           }
 
+          .csf-page .methods-grid,
           .csf-page .results-grid {
             grid-template-columns: 1fr;
           }
