@@ -117,7 +117,7 @@ export default function Home() {
                     </a>
                 </div>
 
-                <div className="space-y-12">
+                <div className="space-y-8">
                     {PUBLICATIONS.map((section, i) => {
                         const sectionColorMap: Record<string, string> = {
                             blue: 'bg-blue-600',
@@ -129,11 +129,11 @@ export default function Home() {
 
                         return (
                             <div key={i}>
-                                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center justify-center gap-2 text-center">
                                     <span className={`w-2 h-2 rounded-full ${colorClass}`}></span>
                                     {section.section}
                                 </h3>
-                                <div className="space-y-8 pl-4 border-l-2 border-gray-100">
+                                <div className="mx-auto max-w-5xl space-y-5">
                                     {section.items.map((pub, j) => (
                                         <PublicationItem key={j} {...pub} />
                                     ))}
@@ -204,8 +204,8 @@ function PublicationItem({
     const venueShort = venueMatch ? venueMatch[2].trim() : venue;
 
     return (
-        <div className="group relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
-            <h4 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-200 leading-snug">
+        <div className="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
+            <h4 className="text-lg font-bold text-gray-900 mb-1.5 transition-colors duration-200 leading-snug">
                 {primaryLink ? (
                     isPrimaryExternalLink ? (
                         <a href={primaryLink} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
@@ -221,7 +221,7 @@ function PublicationItem({
                 )}
             </h4>
 
-            <div className="flex flex-wrap gap-2 mb-2">
+            <div className="flex flex-wrap gap-2 mb-1.5">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded border ${getCategoryColor(category)}`}>
                     {venueShort}
                 </span>
@@ -237,12 +237,12 @@ function PublicationItem({
             </div>
 
             {venueFull !== venueShort && (
-                <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                <p className="text-xs text-gray-500 mb-2 leading-relaxed">
                     {venueFull}
                 </p>
             )}
 
-            <div className="text-gray-600 mb-3 font-medium">
+            <div className="text-gray-600 mb-2 font-medium leading-snug">
                 {authors.map((author, i) => {
                     const isJunhoo = author.includes("Junhoo Lee");
                     return (
@@ -256,12 +256,12 @@ function PublicationItem({
                 })}
             </div>
 
-            <p className="text-sm text-gray-600 leading-relaxed italic border-l-2 border-gray-200 pl-3">
+            <p className="text-sm text-gray-600 leading-relaxed italic border-l-2 border-gray-200 pl-2.5">
                 {tldr}
             </p>
 
             {(resolvedProjectLink || resolvedPaperLink) && (
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium">
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
                     {resolvedProjectLink && (
                         <Link
                             href={resolvedProjectLink}
