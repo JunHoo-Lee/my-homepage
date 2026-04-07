@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
 import { Fragment } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, ArrowUpRight, FileText, Home, Quote } from "lucide-react";
+import { ChevronUp, FileText, Home, Quote } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Inter } from "next/font/google";
+
+import BibtexCopyButton from "./BibtexCopyButton";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "CSF | Junhoo Lee",
   description:
     "Project page for CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models.",
 };
-
-const displayClass = "font-serif";
 
 type ScoreTone = "match" | "uncertain" | "below" | "plain";
 
@@ -30,6 +35,11 @@ type ScoreSection = {
   family: string;
   rows: ScoreRow[];
 };
+
+const abstractParagraphs = [
+  "Text-to-image models are commercially valuable assets often distributed under restrictive licenses, but such licenses are enforceable only when violations can be detected. Existing methods require pre-deployment watermarking or internal model access, which are unavailable in commercial API deployments.",
+  "We present Compositional Semantic Fingerprinting (CSF), the first black-box method for attributing fine-tuned text-to-image models to protected lineages using only query access. CSF treats models as semantic category generators and probes them with compositional underspecified prompts that remain rare under fine-tuning. Across 6 model families and 13 fine-tuned variants, the Bayesian attribution framework supports controlled-risk lineage decisions, with all variants satisfying the dominance criterion.",
+];
 
 const baseModelColumns = [
   "Flux-Base",
@@ -378,11 +388,34 @@ const ablationSections: ScoreSection[] = [
   },
 ];
 
-const promptExamples = [
-  "a dangerous animal in a grassland",
-  "a tropical single flower on a vase",
-  "a sweet fruit on a dish",
-  "a peaceful bird on a savana",
+const visualCards = [
+  {
+    src: "/csf/family-game.png",
+    alt: "Illustration that strong style shifts make naive visual matching unreliable",
+    width: 2250,
+    height: 1124,
+    title: "Why naive visual matching fails",
+    caption:
+      "Strong downstream style changes can hide the shared lineage signal even when the inherited semantic prior remains intact.",
+  },
+  {
+    src: "/csf/userstudy.png",
+    alt: "Human study showing stronger lineage identification under CSF prompts",
+    width: 563,
+    height: 337,
+    title: "Human perceptual study",
+    caption:
+      "When observers are asked to ignore style and focus on semantic distributions, CSF prompts make the correct lineage easier to identify.",
+  },
+  {
+    src: "/csf/prompt-ablation.png",
+    alt: "Prompt ablation showing category distributions changing across scene contexts",
+    width: 828,
+    height: 316,
+    title: "Prompt design validation",
+    caption:
+      "Changing only the surrounding context shifts the semantic mixture a model resolves, which is the fingerprint CSF measures.",
+  },
 ];
 
 const metricComparisonRows = [
@@ -421,521 +454,920 @@ const bibtex = `@inproceedings{lee2026csf,
 
 export default function CSFPage() {
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
-      <div className="relative overflow-hidden bg-[linear-gradient(180deg,#fbf8f2_0%,#f6f1e8_48%,#ffffff_100%)]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(191,117,49,0.18),_transparent_32%),radial-gradient(circle_at_82%_12%,_rgba(71,85,105,0.12),_transparent_26%)]" />
+    <div id="top" className={`${inter.className} csf-page`}>
+      <a className="scroll-to-top" href="#top" aria-label="Scroll to top">
+        <ChevronUp size={18} />
+      </a>
 
-        <main className="relative mx-auto max-w-6xl px-6 py-10 sm:px-8 sm:py-16">
-          <Link
-            href="/#publications"
-            className="inline-flex items-center gap-2 rounded-lg border border-stone-300/80 bg-white/80 px-4 py-2 text-sm font-medium text-stone-700 shadow-sm backdrop-blur transition hover:border-stone-400 hover:text-stone-950"
-          >
-            <ArrowLeft size={16} />
-            Back to homepage
-          </Link>
+      <main id="main-content">
+        <section className="hero publication-header">
+          <div className="hero-body">
+            <div className="container is-max-desktop">
+              <div className="columns is-centered">
+                <div className="column has-text-centered">
+                  <h1 className="title is-1 publication-title">
+                    CSF: Black-box Fingerprinting via Compositional Semantics
+                    for Text-to-Image Models
+                  </h1>
 
-          <section className="mt-10 grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
-            <div className="space-y-7">
-              <div className="inline-flex items-center gap-2 rounded-md border border-amber-200 bg-amber-100/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">
-                CVPR 2026
-                <span className="h-1 w-1 rounded-full bg-amber-700" />
-                Project Page
+                  <div className="is-size-5 publication-authors">
+                    <span className="author-block">
+                      <a href="https://junhoo.me" target="_blank" rel="noreferrer">
+                        Junhoo Lee
+                      </a>
+                      ,
+                    </span>
+                    <span className="author-block">Mijin Koo,</span>
+                    <span className="author-block">Nojun Kwak</span>
+                  </div>
+
+                  <div className="is-size-5 publication-authors">
+                    <span className="author-block">
+                      Seoul National University
+                    </span>
+                    <span className="publication-venue">CVPR 2026</span>
+                  </div>
+
+                  <div className="publication-links">
+                    <PublicationLink
+                      href="/csf/csf-paper.pdf"
+                      label="Paper"
+                      external
+                      icon={<FileText size={18} />}
+                    />
+                    <PublicationLink
+                      href="#bibtex"
+                      label="BibTeX"
+                      icon={<Quote size={18} />}
+                    />
+                    <PublicationLink
+                      href="/#publications"
+                      label="Homepage"
+                      icon={<Home size={18} />}
+                    />
+                  </div>
+                </div>
               </div>
-
-              <div className="space-y-5">
-                <h1
-                  className={`${displayClass} max-w-4xl text-4xl font-semibold leading-tight text-stone-950 sm:text-5xl lg:text-6xl`}
-                >
-                  CSF: Black-box Fingerprinting via Compositional
-                  Semantics for Text-to-Image Models
-                </h1>
-                <p className="max-w-3xl text-lg leading-8 text-stone-700 sm:text-xl">
-                  Can we attribute a deployed text-to-image API back to a
-                  protected base model after fine-tuning, even when the
-                  infringer exposes only query access? CSF answers this by
-                  moving the problem from visual matching to compositional
-                  semantics and then making lineage decisions with controlled
-                  statistical risk.
-                </p>
-              </div>
-
-              <div className="space-y-2 text-base text-stone-700">
-                <p className="font-medium text-stone-900">
-                  Junhoo Lee, Mijin Koo, Nojun Kwak
-                </p>
-                <p>Seoul National University</p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <ActionLink
-                  href="/csf/csf-paper.pdf"
-                  icon={<FileText size={17} />}
-                  label="Paper"
-                  external
-                />
-                <ActionLink href="#bibtex" icon={<Quote size={17} />} label="BibTeX" />
-                <ActionLink
-                  href="/#publications"
-                  icon={<Home size={17} />}
-                  label="Homepage"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-stone-200/80 bg-white/[0.85] p-4 shadow-[0_24px_70px_rgba(28,25,23,0.08)] backdrop-blur">
-              <Image
-                src="/csf/comparison.png"
-                alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
-                width={1064}
-                height={744}
-                className="h-auto w-full rounded-xl border border-stone-200 bg-stone-50"
-                priority
-              />
-              <div className="mt-4 rounded-xl bg-stone-100/80 p-4">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                  Why This Matters
-                </p>
-                <p className="mt-2 text-base leading-7 text-stone-700">
-                  Watermarking needs pre-deployment intervention. Traditional
-                  fingerprinting often needs weights or activations. CSF is
-                  designed for the real forensic case: only a queryable API is
-                  available after the suspected model has already been deployed.
-                </p>
-              </div>
-            </div>
-          </section>
-
-        </main>
-      </div>
-
-      <main className="mx-auto max-w-6xl px-6 pb-16 sm:px-8 sm:pb-24">
-        <div className="sticky top-4 z-30 -mt-5 mb-8 hidden md:flex justify-center">
-          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-stone-200/90 bg-white/92 px-2 py-2 shadow-[0_14px_34px_rgba(28,25,23,0.10)] backdrop-blur">
-            <NavChip href="#problem" label="Problem" />
-            <NavChip href="#challenge" label="Challenge" />
-            <NavChip href="#method" label="Method" />
-            <NavChip href="#results" label="Results" />
-            <NavChip href="#bibtex" label="BibTeX" />
-          </div>
-        </div>
-
-        <section id="problem" className="scroll-mt-24 pt-6 sm:pt-10">
-          <SectionIntro
-            eyebrow="The Problem"
-            title="Restrictive licenses only matter if lineage violations can actually be detected."
-            body="The hardest real-world case is not a public checkpoint. It is a suspect text-to-image service that serves images through an API while hiding its weights, activations, and training history. Existing tools either assume access that commercial APIs never provide, or they rely on pre-deployment watermarking that may not exist in the first place."
-          />
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <FeatureCard
-              title="Query-only deployment"
-              body="The suspect model may expose only a text prompt in and an image out. No checkpoints, no gradients, no activations."
-            />
-            <FeatureCard
-              title="Fine-tuning rewrites surface appearance"
-              body="Style, palette, and composition can shift dramatically, making pixel-level matching unreliable even when the underlying lineage stays the same."
-            />
-            <FeatureCard
-              title="Existing assumptions break"
-              body="Watermarks require prior preparation, while many fingerprinting approaches depend on internal access or fragile visual cues."
-            />
-          </div>
-        </section>
-
-        <section
-          id="challenge"
-          className="scroll-mt-24 mt-20 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center"
-        >
-          <div className="space-y-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-              Why Naive Matching Fails
-            </p>
-            <h2
-              className={`${displayClass} text-3xl font-semibold leading-tight text-stone-950 sm:text-4xl`}
-            >
-              Fine-tuning can dominate style so strongly that visual similarity
-              becomes a distraction.
-            </h2>
-            <p className="text-lg leading-8 text-stone-700">
-              That is the central obstacle for black-box attribution in
-              text-to-image models. A fine-tuned model can look visually far
-              away from its source lineage even when the deeper semantic priors
-              are still inherited from the base model. CSF therefore avoids
-              direct output matching and instead asks what kinds of semantic
-              interpretations the model tends to produce.
-            </p>
-            <div className="rounded-xl border border-stone-200 bg-stone-100/75 p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Problem Framing
-              </p>
-              <p className="mt-2 text-base leading-7 text-stone-700">
-                In other words, the question is not whether two models generate
-                the same style, but whether they resolve semantic ambiguity in a
-                lineage-consistent way.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-[0_24px_70px_rgba(28,25,23,0.06)]">
-            <Image
-              src="/csf/family-game.png"
-              alt="Illustration that naive prompts make base-model identification difficult under strong style shifts"
-              width={2250}
-              height={1124}
-              className="h-auto w-full rounded-xl border border-stone-200"
-            />
-            <p className="mt-4 text-sm leading-6 text-stone-600">
-              A qualitative example of the challenge: when prompts are naive,
-              style differences can overwhelm the forensic signal and obscure
-              the base lineage.
-            </p>
-          </div>
-        </section>
-
-        <section id="method" className="scroll-mt-24 mt-20">
-          <SectionIntro
-            eyebrow="Core Idea"
-            title="CSF turns image attribution into semantic fingerprinting."
-            body="Instead of asking which pixels look similar, we probe how a model interprets underspecified semantic conditions. The key is to use prompt compositions that remain rare under fine-tuning, so the inherited semantic bias of the base model is more likely to survive."
-          />
-
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            <FeatureCard
-              title="1. Semantic fingerprinting"
-              body="Treat the model as a semantic category generator. For each prompt, generate multiple images and convert them into category distributions with zero-shot CLIP classification."
-            />
-            <FeatureCard
-              title="2. Compositional underspecification"
-              body="Use prompts such as dangerous animal in a forest or sweet fruit on a dish. They are interpretable, but rare enough in fine-tuning data to preserve lineage-specific priors."
-            />
-            <FeatureCard
-              title="3. Bayesian attribution"
-              body="Compare suspect and reference fingerprints with Wasserstein distance, then aggregate evidence across prompts into controlled-risk lineage decisions."
-            />
-          </div>
-
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-            <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Example Prompt Families
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {promptExamples.map((prompt) => (
-                  <span
-                    key={prompt}
-                    className="rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-700"
-                  >
-                    {prompt}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-5 text-base leading-7 text-stone-700">
-                In the paper, these prompt families span 42 compositions over
-                categories such as animals, birds, flowers, fruits, and baked
-                goods, with contextual variation used to reveal how each model
-                resolves semantic ambiguity.
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-stone-900 p-6 text-stone-50 shadow-[0_24px_70px_rgba(28,25,23,0.18)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-300">
-                Defender-Favorable Asymmetry
-              </p>
-              <h3
-                className={`${displayClass} mt-3 text-2xl font-semibold leading-tight`}
-              >
-                IP owners can generate new prompt compositions after deployment.
-              </h3>
-              <p className="mt-4 text-base leading-7 text-stone-200">
-                This is one of the most important parts of the story. With
-                watermarking, once the trigger is known, attackers can try to
-                remove it. With CSF, defenders choose from a much larger
-                combinatorial space of rare semantic probes at verification
-                time, which makes exhaustive suppression far harder.
-              </p>
             </div>
           </div>
         </section>
 
-        <section id="results" className="scroll-mt-24 mt-20">
-          <SectionIntro
-            eyebrow="Results"
-            title="CSF remains identifiable under severe downstream modification."
-            body="Across 13 derived models from 6 base families, CSF maintains dominant support for the correct lineage in the strict query-only setting, including hard fine-tuned variants and concept-removal stress tests."
-          />
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatTile value="6" label="base model families" />
-            <StatTile value="13" label="fine-tuned variants" />
-            <StatTile value="42" label="compositional prompts" />
-            <StatTile value="All pass" label="dominance criterion" />
-          </div>
-
-          <div className="mt-8">
-            <PosteriorTable
-              eyebrow="Main Attribution Matrix"
-              title="Posterior mean over the full benchmark."
-              description="Each row is a fine-tuned suspect model, and each column is a candidate base family. Red cells indicate significant support for that lineage, amber cells are inconclusive, green cells are significantly below chance, and * marks rows that satisfy the dominance test."
-              columns={baseModelColumns}
-              sections={mainPosteriorSections}
-              footnote="Chance level is 0.167. All 13 suspect models pass the dominance test on their true source family."
-              showLegend
-            />
-          </div>
-
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Metric Comparison
-              </p>
-              <h3
-                className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
-              >
-                Wasserstein produces a clearer margin than the JSD baseline.
-              </h3>
-              <div className="mt-6 overflow-x-auto custom-scrollbar">
-                <table className="min-w-full text-left text-sm">
-                  <thead className="border-b border-stone-200 text-xs uppercase tracking-[0.16em] text-stone-500">
-                    <tr>
-                      <th className="pb-3 pr-4 font-medium">Variant</th>
-                      <th className="pb-3 pr-4 font-medium">Wasserstein</th>
-                      <th className="pb-3 pr-4 font-medium">JSD</th>
-                      <th className="pb-3 font-medium">Gap</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-100 text-stone-700">
-                    {metricComparisonRows.map((row) => (
-                      <tr key={row.variant}>
-                        <td className="py-4 pr-4 font-semibold text-stone-900">
-                          {row.variant}
-                        </td>
-                        <td className="py-4 pr-4 font-semibold text-rose-700">
-                          {row.wasserstein}
-                        </td>
-                        <td className="py-4 pr-4">{row.jsd}</td>
-                        <td className="py-4 font-semibold text-emerald-700">
-                          {row.gap}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p className="mt-4 text-base leading-7 text-stone-700">
-                Across hard variants such as Kandinsky-Naruto, SD3-Reality-Mix,
-                and SDXL-DPO, Wasserstein keeps a wider attribution margin than
-                the JSD baseline.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Human Perceptual Study
-              </p>
-              <h3
-                className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
-              >
-                CSF prompts also make the lineage signal more legible to people.
-              </h3>
-              <Image
-                src="/csf/userstudy.png"
-                alt="Human study showing stronger base-model identification with CSF prompts"
-                width={563}
-                height={337}
-                className="mt-5 h-auto w-full rounded-xl border border-stone-200"
-              />
-              <p className="mt-4 text-base leading-7 text-stone-700">
-                The same signal is not just machine-readable. When humans are
-                asked to ignore style and match only content-distribution
-                patterns, CSF prompts make the true lineage much easier to
-                identify than naive prompt choices.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <PosteriorTable
-              eyebrow="Robustness Ablation"
-              title="Attribution remains intact after adversarial concept removal."
-              description="This table comes from the UCE removal experiment with 9 animal-specific probes. Even after animal concepts are actively erased, the highest attribution score still lands on the correct base family."
-              columns={[
-                "Flux",
-                "Kandinsky",
-                "SD1.5",
-                "SD2.1",
-                "SD3-Med",
-                "SDXL",
-              ]}
-              sections={ablationSections}
-              footnote="The highlighted cell marks the strongest posterior mean for each suspect model after concept erasure."
-            />
-          </div>
-
-          <div className="mt-6 rounded-xl border border-stone-200 bg-stone-100/80 p-6 shadow-sm">
-            <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                  Prompt Design Validation
-                </p>
-                <h3
-                  className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
-                >
-                  Scene context shifts the semantic mixture that each model
-                  resolves.
-                </h3>
-                <p className="mt-4 text-base leading-7 text-stone-700">
-                  This is the behavior CSF exploits. Underspecified prompts
-                  force the model to resolve ambiguity using learned priors, and
-                  the resulting semantic mixture becomes a fingerprint.
-                </p>
-                <ul className="mt-5 space-y-4 text-base leading-7 text-stone-700">
-                  <li>
-                    CSF is training-free and does not require modifying the base
-                    model before deployment.
-                  </li>
-                  <li>
-                    The method is designed for the API-only black-box scenario,
-                    which is exactly where commercial infringement disputes are
-                    hardest.
-                  </li>
-                  <li>
-                    The prompt families are intentionally compositional and
-                    rare, so inherited semantic priors survive fine-tuning more
-                    often than surface style does.
-                  </li>
-                </ul>
-              </div>
-
-              <div>
+        <section className="hero teaser">
+          <div className="container is-max-desktop">
+            <div className="hero-body">
+              <div className="teaser-media">
                 <Image
-                  src="/csf/prompt-ablation.png"
-                  alt="Prompt ablation showing category distributions changing across scene contexts"
-                  width={828}
-                  height={316}
-                  className="h-auto w-full rounded-xl border border-stone-200"
+                  src="/csf/comparison.png"
+                  alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
+                  width={1064}
+                  height={744}
+                  priority
                 />
-                <p className="mt-4 text-sm leading-6 text-stone-600">
-                  Changing only the surrounding context changes the category
-                  distribution that a model settles on, which is exactly the
-                  semantic signal CSF measures.
-                </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="bibtex"
-          className="scroll-mt-24 mt-20 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Citation
-              </p>
-              <h2
-                className={`${displayClass} mt-2 text-3xl font-semibold text-stone-950`}
-              >
-                BibTeX
+              <h2 className="subtitle has-text-centered teaser-caption">
+                CSF is designed for the most restrictive query-only black-box
+                setting, where the defender only has access to the final
+                text-to-image API.
               </h2>
             </div>
-            <a
-              href="/csf/csf-paper.pdf"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-stone-300 bg-stone-50 px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:text-stone-950"
-            >
-              Read the paper
-              <ArrowUpRight size={16} />
-            </a>
           </div>
-          <pre className="mt-6 overflow-x-auto rounded-xl bg-stone-950 p-5 text-sm leading-7 text-stone-100">
-            {bibtex}
-          </pre>
         </section>
 
+        <section className="section hero is-light">
+          <div className="container is-max-desktop">
+            <div className="columns is-centered">
+              <div className="column is-four-fifths">
+                <h2 className="title is-3 has-text-centered">Abstract</h2>
+                <div className="content has-text-justified">
+                  {abstractParagraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="container is-max-desktop">
+            <h2 className="title is-3 has-text-centered">Visual Results</h2>
+            <div className="results-grid">
+              {visualCards.map((card) => (
+                <FigureCard key={card.title} {...card} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section hero is-light">
+          <div className="container is-max-desktop">
+            <h2 className="title is-3 has-text-centered">
+              Quantitative Results
+            </h2>
+            <p className="section-copy has-text-centered">
+              CSF attributes 13 fine-tuned variants across 6 protected base
+              families using only query access, and the reported posterior
+              means remain stable even under adversarial concept removal.
+            </p>
+
+            <div className="summary-strip" aria-label="Benchmark summary">
+              <span className="summary-chip">6 model families</span>
+              <span className="summary-chip">13 fine-tuned variants</span>
+              <span className="summary-chip">42 compositional prompts</span>
+              <span className="summary-chip">query-only attribution</span>
+            </div>
+
+            <div className="table-stack">
+              <PosteriorTable
+                eyebrow="Main Attribution Matrix"
+                title="Posterior mean over the full benchmark."
+                description="Each row is a fine-tuned suspect model, and each column is a candidate base family. The dominant posterior mass consistently lands on the true lineage."
+                columns={baseModelColumns}
+                sections={mainPosteriorSections}
+                footnote="Chance level is 0.167. All 13 suspect models satisfy the dominance criterion on their true source family."
+                showLegend
+              />
+
+              <MetricComparisonPanel />
+
+              <PosteriorTable
+                eyebrow="Robustness Ablation"
+                title="Attribution remains intact after adversarial concept removal."
+                description="This table comes from the UCE removal experiment with 9 animal-specific probes. Even after animal concepts are actively erased, the strongest posterior mean still lands on the correct base family."
+                columns={[
+                  "Flux",
+                  "Kandinsky",
+                  "SD1.5",
+                  "SD2.1",
+                  "SD3-Med",
+                  "SDXL",
+                ]}
+                sections={ablationSections}
+                footnote="The highlighted cell marks the strongest posterior mean for each suspect model after concept erasure."
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="container is-max-desktop">
+            <h2 className="title is-3 has-text-centered">Paper PDF</h2>
+            <div className="pdf-shell">
+              <iframe
+                src="/csf/csf-paper.pdf#view=FitH"
+                title="CSF paper PDF"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="section hero is-light" id="bibtex">
+          <div className="container is-max-desktop content">
+            <div className="bibtex-header">
+              <h2 className="title is-3">BibTeX</h2>
+              <BibtexCopyButton text={bibtex} />
+            </div>
+            <pre className="bibtex-code">
+              <code>{bibtex}</code>
+            </pre>
+          </div>
+        </section>
       </main>
+
+      <footer className="footer">
+        <div className="container is-max-desktop">
+          <div className="content has-text-centered">
+            <p>
+              This page follows the{" "}
+              <a
+                href="https://github.com/eliahuhorwitz/Academic-project-page-template"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Academic Project Page Template
+              </a>{" "}
+              and keeps its overall section rhythm and publication-page
+              structure. The original template was adapted from{" "}
+              <a href="https://nerfies.github.io" target="_blank" rel="noreferrer">
+                Nerfies
+              </a>
+              .
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx global>{`
+        .csf-page {
+          min-height: 100vh;
+          background: #ffffff;
+          color: #1e293b;
+        }
+
+        .csf-page * {
+          box-sizing: border-box;
+        }
+
+        .csf-page a {
+          color: #2563eb;
+          text-decoration: none;
+        }
+
+        .csf-page a:hover {
+          color: #1d4ed8;
+        }
+
+        .csf-page .container {
+          width: 100%;
+          margin: 0 auto;
+          padding: 0 1.5rem;
+        }
+
+        .csf-page .container.is-max-desktop {
+          max-width: 960px;
+        }
+
+        .csf-page .hero {
+          position: relative;
+        }
+
+        .csf-page .hero.is-light {
+          background: #f8fafc;
+          border-top: 1px solid #e2e8f0;
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        .csf-page .hero-body {
+          padding: 4rem 0;
+        }
+
+        .csf-page .publication-header .hero-body {
+          padding: 5.5rem 0 3.5rem;
+        }
+
+        .csf-page .teaser .hero-body {
+          padding-top: 1.5rem;
+          padding-bottom: 4rem;
+        }
+
+        .csf-page .section {
+          padding: 4rem 0;
+        }
+
+        .csf-page .columns {
+          display: flex;
+          flex-wrap: wrap;
+          margin: 0 -0.75rem;
+        }
+
+        .csf-page .columns.is-centered {
+          justify-content: center;
+        }
+
+        .csf-page .column {
+          width: 100%;
+          padding: 0 0.75rem;
+        }
+
+        .csf-page .column.is-four-fifths {
+          width: 80%;
+        }
+
+        .csf-page .has-text-centered {
+          text-align: center;
+        }
+
+        .csf-page .has-text-justified {
+          text-align: justify;
+        }
+
+        .csf-page .title {
+          margin: 0;
+          color: #1e293b;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+        }
+
+        .csf-page .title.is-1 {
+          font-size: clamp(2.5rem, 5vw, 4.2rem);
+          line-height: 1.06;
+        }
+
+        .csf-page .title.is-3 {
+          font-size: clamp(1.8rem, 2.8vw, 2.2rem);
+          line-height: 1.18;
+        }
+
+        .csf-page .publication-title {
+          margin-bottom: 1.75rem;
+        }
+
+        .csf-page .publication-authors {
+          margin-top: 1rem;
+          font-size: 1.125rem;
+          color: #334155;
+        }
+
+        .csf-page .author-block {
+          display: inline-block;
+          margin-right: 0.35rem;
+        }
+
+        .csf-page .publication-venue {
+          display: inline-block;
+          margin-left: 0.5rem;
+          border-radius: 999px;
+          background: #e2e8f0;
+          color: #334155;
+          padding: 0.4rem 0.85rem;
+          font-size: 0.95rem;
+          font-weight: 700;
+        }
+
+        .csf-page .publication-links {
+          margin-top: 2rem;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.75rem;
+        }
+
+        .csf-page .link-block {
+          display: inline-flex;
+        }
+
+        .csf-page .template-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.65rem;
+          border-radius: 999px;
+          background: #111827;
+          color: #ffffff;
+          padding: 0.82rem 1.15rem;
+          font-size: 0.98rem;
+          font-weight: 700;
+          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+          transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            background 0.2s ease;
+        }
+
+        .csf-page .template-button:hover {
+          color: #ffffff;
+          background: #1f2937;
+          transform: translateY(-1px);
+          box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+        }
+
+        .csf-page .teaser-media {
+          overflow: hidden;
+          border-radius: 1rem;
+          border: 1px solid #e2e8f0;
+          background: #ffffff;
+          box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09);
+        }
+
+        .csf-page .teaser-media img {
+          display: block;
+          width: 100%;
+          height: auto;
+        }
+
+        .csf-page .subtitle {
+          color: #475569;
+          font-size: 1.05rem;
+          line-height: 1.85;
+        }
+
+        .csf-page .teaser-caption {
+          max-width: 860px;
+          margin: 1.5rem auto 0;
+        }
+
+        .csf-page .content {
+          color: #334155;
+          font-size: 1.05rem;
+          line-height: 1.95;
+        }
+
+        .csf-page .content p {
+          margin: 1rem 0 0;
+        }
+
+        .csf-page .content p:first-child {
+          margin-top: 1.25rem;
+        }
+
+        .csf-page .section-copy {
+          max-width: 760px;
+          margin: 1rem auto 0;
+          color: #475569;
+          font-size: 1.02rem;
+          line-height: 1.8;
+        }
+
+        .csf-page .summary-strip {
+          margin-top: 1.5rem;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.75rem;
+        }
+
+        .csf-page .summary-chip {
+          display: inline-flex;
+          align-items: center;
+          border-radius: 999px;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          padding: 0.55rem 0.95rem;
+          font-size: 0.86rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #475569;
+        }
+
+        .csf-page .results-grid {
+          margin-top: 2rem;
+          display: grid;
+          gap: 1.5rem;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .csf-page .result-card {
+          border-radius: 1rem;
+          border: 1px solid #e2e8f0;
+          background: #ffffff;
+          padding: 1rem;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .csf-page .result-figure {
+          overflow: hidden;
+          border-radius: 0.85rem;
+          border: 1px solid #e2e8f0;
+          background: #f8fafc;
+        }
+
+        .csf-page .result-figure img {
+          display: block;
+          width: 100%;
+          height: auto;
+        }
+
+        .csf-page .result-title {
+          margin: 1rem 0 0;
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #111827;
+        }
+
+        .csf-page .result-caption {
+          margin: 0.6rem 0 0;
+          color: #475569;
+          font-size: 0.97rem;
+          line-height: 1.75;
+        }
+
+        .csf-page .table-stack {
+          margin-top: 2rem;
+          display: grid;
+          gap: 1.5rem;
+        }
+
+        .csf-page .table-panel {
+          border-radius: 1rem;
+          border: 1px solid #dbe4ee;
+          background: #ffffff;
+          padding: 1.5rem;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+        }
+
+        .csf-page .table-eyebrow {
+          margin: 0;
+          font-size: 0.78rem;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #64748b;
+        }
+
+        .csf-page .table-title {
+          margin: 0.55rem 0 0;
+          font-size: 1.55rem;
+          font-weight: 800;
+          line-height: 1.28;
+          color: #111827;
+        }
+
+        .csf-page .table-description {
+          margin: 0.8rem 0 0;
+          max-width: 820px;
+          color: #475569;
+          font-size: 0.98rem;
+          line-height: 1.75;
+        }
+
+        .csf-page .legend-row {
+          margin-top: 1rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+        }
+
+        .csf-page .legend-pill,
+        .csf-page .score-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #cbd5e1;
+          border-radius: 0.65rem;
+          font-weight: 700;
+        }
+
+        .csf-page .legend-pill {
+          padding: 0.5rem 0.8rem;
+          font-size: 0.76rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .csf-page .table-shell {
+          margin-top: 1.25rem;
+          overflow-x: auto;
+          padding-bottom: 0.35rem;
+        }
+
+        .csf-page .posterior-table {
+          min-width: 900px;
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0 0.55rem;
+          color: #334155;
+          font-size: 0.94rem;
+        }
+
+        .csf-page .posterior-table thead th {
+          background: #eff4f8;
+          padding: 0.95rem 1rem;
+          text-align: center;
+          font-size: 0.74rem;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #64748b;
+        }
+
+        .csf-page .posterior-table thead th:first-child {
+          position: sticky;
+          left: 0;
+          z-index: 1;
+          border-top-left-radius: 0.85rem;
+          border-bottom-left-radius: 0.85rem;
+          text-align: left;
+        }
+
+        .csf-page .posterior-table thead th:last-child {
+          border-top-right-radius: 0.85rem;
+          border-bottom-right-radius: 0.85rem;
+        }
+
+        .csf-page .section-row td {
+          padding: 0.7rem 0 0.2rem;
+          font-size: 0.78rem;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #64748b;
+        }
+
+        .csf-page .row-label {
+          position: sticky;
+          left: 0;
+          z-index: 1;
+          min-width: 210px;
+          border: 1px solid #dde5ee;
+          border-right: 0;
+          border-top-left-radius: 0.85rem;
+          border-bottom-left-radius: 0.85rem;
+          background: #ffffff;
+          padding: 1rem;
+          font-weight: 800;
+          color: #111827;
+          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .csf-page .score-cell {
+          border: 1px solid #dde5ee;
+          border-left: 0;
+          background: #ffffff;
+          padding: 0.95rem 0.75rem;
+          text-align: center;
+          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .csf-page .score-cell:last-child {
+          border-top-right-radius: 0.85rem;
+          border-bottom-right-radius: 0.85rem;
+        }
+
+        .csf-page .score-badge {
+          min-width: 4.7rem;
+          padding: 0.45rem 0.7rem;
+          font-size: 0.95rem;
+        }
+
+        .csf-page .score-tone--match {
+          border-color: #f1c1cf;
+          background: #fff2f5;
+          color: #9f1f45;
+        }
+
+        .csf-page .score-tone--uncertain {
+          border-color: #ecd8a2;
+          background: #fff8e1;
+          color: #8a6510;
+        }
+
+        .csf-page .score-tone--below {
+          border-color: #c9e6d3;
+          background: #effaf3;
+          color: #1f6b46;
+        }
+
+        .csf-page .score-tone--plain {
+          border-color: #d5deea;
+          background: #f8fafc;
+          color: #475569;
+        }
+
+        .csf-page .table-footnote {
+          margin: 1rem 0 0;
+          color: #64748b;
+          font-size: 0.9rem;
+          line-height: 1.7;
+        }
+
+        .csf-page .metric-table {
+          margin-top: 1.2rem;
+          width: 100%;
+          border-collapse: collapse;
+          color: #334155;
+          font-size: 0.95rem;
+        }
+
+        .csf-page .metric-table th,
+        .csf-page .metric-table td {
+          padding: 0.95rem 0.75rem;
+          border-bottom: 1px solid #e2e8f0;
+          text-align: left;
+        }
+
+        .csf-page .metric-table th {
+          font-size: 0.74rem;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #64748b;
+        }
+
+        .csf-page .metric-strong {
+          font-weight: 800;
+          color: #9f1f45;
+        }
+
+        .csf-page .metric-gap {
+          font-weight: 800;
+          color: #1f6b46;
+        }
+
+        .csf-page .pdf-shell {
+          margin-top: 2rem;
+          overflow: hidden;
+          border-radius: 1rem;
+          border: 1px solid #dbe4ee;
+          background: #ffffff;
+          box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
+        }
+
+        .csf-page .pdf-shell iframe {
+          display: block;
+          width: 100%;
+          height: 720px;
+          border: 0;
+        }
+
+        .csf-page .bibtex-header {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
+        .csf-page .bibtex-code {
+          margin: 1.5rem 0 0;
+          overflow-x: auto;
+          border-radius: 1rem;
+          background: #0f172a;
+          padding: 1.35rem 1.4rem;
+          color: #e2e8f0;
+          font-size: 0.92rem;
+          line-height: 1.8;
+        }
+
+        .csf-page .copy-bibtex-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 999px;
+          background: #ffffff;
+          color: #334155;
+          padding: 0.72rem 1rem;
+          font-size: 0.92rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition:
+            transform 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease;
+        }
+
+        .csf-page .copy-bibtex-button:hover {
+          border-color: #94a3b8;
+          color: #0f172a;
+          transform: translateY(-1px);
+        }
+
+        .csf-page .footer {
+          padding: 2.5rem 0 3rem;
+          border-top: 1px solid #e2e8f0;
+          background: #ffffff;
+        }
+
+        .csf-page .footer .content {
+          font-size: 0.96rem;
+          line-height: 1.8;
+          color: #64748b;
+        }
+
+        .csf-page .scroll-to-top {
+          position: fixed;
+          right: 1.35rem;
+          bottom: 1.35rem;
+          z-index: 50;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.8rem;
+          height: 2.8rem;
+          border-radius: 999px;
+          border: 1px solid #cbd5e1;
+          background: rgba(255, 255, 255, 0.92);
+          color: #334155;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+          backdrop-filter: blur(8px);
+        }
+
+        .csf-page .scroll-to-top:hover {
+          color: #0f172a;
+          border-color: #94a3b8;
+        }
+
+        @media (max-width: 900px) {
+          .csf-page .column.is-four-fifths {
+            width: 100%;
+          }
+
+          .csf-page .results-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .csf-page .container {
+            padding: 0 1rem;
+          }
+
+          .csf-page .hero-body,
+          .csf-page .section {
+            padding: 3rem 0;
+          }
+
+          .csf-page .publication-header .hero-body {
+            padding-top: 4rem;
+          }
+
+          .csf-page .publication-authors {
+            font-size: 1rem;
+          }
+
+          .csf-page .publication-venue {
+            margin: 0.75rem 0 0;
+          }
+
+          .csf-page .table-panel {
+            padding: 1.1rem;
+          }
+
+          .csf-page .pdf-shell iframe {
+            height: 560px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
-function ActionLink({
+function PublicationLink({
   href,
-  icon,
   label,
+  icon,
   external = false,
 }: {
   href: string;
-  icon: ReactNode;
   label: string;
+  icon: ReactNode;
   external?: boolean;
 }) {
   return (
-    <a
-      href={href}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noreferrer" : undefined}
-      className="inline-flex items-center gap-2 rounded-lg border border-stone-300/80 bg-white/[0.85] px-5 py-3 text-sm font-semibold text-stone-800 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-stone-400 hover:text-stone-950"
-    >
-      {icon}
-      {label}
-    </a>
+    <span className="link-block">
+      <a
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noreferrer" : undefined}
+        className="template-button"
+      >
+        {icon}
+        <span>{label}</span>
+      </a>
+    </span>
   );
 }
 
-function NavChip({ href, label }: { href: string; label: string }) {
-  return (
-    <a
-      href={href}
-      className="rounded-md border border-transparent px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-200 hover:bg-stone-100 hover:text-stone-950"
-    >
-      {label}
-    </a>
-  );
-}
-
-function SectionIntro({
-  eyebrow,
+function FigureCard({
+  src,
+  alt,
+  width,
+  height,
   title,
-  body,
+  caption,
 }: {
-  eyebrow: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
   title: string;
-  body: string;
+  caption: string;
 }) {
   return (
-    <div className="max-w-4xl space-y-4">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-        {eyebrow}
-      </p>
-      <h2
-        className={`${displayClass} text-3xl font-semibold leading-tight text-stone-950 sm:text-4xl`}
-      >
-        {title}
-      </h2>
-      <p className="text-lg leading-8 text-stone-700">{body}</p>
-    </div>
+    <article className="result-card">
+      <div className="result-figure">
+        <Image src={src} alt={alt} width={width} height={height} />
+      </div>
+      <h3 className="result-title">{title}</h3>
+      <p className="result-caption">{caption}</p>
+    </article>
   );
 }
 
-function FeatureCard({ title, body }: { title: string; body: string }) {
+function MetricComparisonPanel() {
   return (
-    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-stone-950">{title}</h3>
-      <p className="mt-3 text-base leading-7 text-stone-700">{body}</p>
-    </div>
-  );
-}
+    <div className="table-panel">
+      <p className="table-eyebrow">Metric Comparison</p>
+      <h3 className="table-title">
+        Wasserstein produces a clearer attribution margin than JSD.
+      </h3>
+      <p className="table-description">
+        Across hard variants such as Kandinsky-Naruto, SD3-Reality-Mix, and
+        SDXL-DPO, Wasserstein preserves a wider separation between the correct
+        lineage and competing bases.
+      </p>
 
-function StatTile({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-      <p className={`${displayClass} text-4xl font-semibold text-stone-950`}>
-        {value}
-      </p>
-      <p className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-stone-500">
-        {label}
-      </p>
+      <table className="metric-table">
+        <thead>
+          <tr>
+            <th>Variant</th>
+            <th>Wasserstein</th>
+            <th>JSD</th>
+            <th>Gap</th>
+          </tr>
+        </thead>
+        <tbody>
+          {metricComparisonRows.map((row) => (
+            <tr key={row.variant}>
+              <td>{row.variant}</td>
+              <td className="metric-strong">{row.wasserstein}</td>
+              <td>{row.jsd}</td>
+              <td className="metric-gap">{row.gap}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -958,74 +1390,46 @@ function PosteriorTable({
   showLegend?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
-        {eyebrow}
-      </p>
-      <h3
-        className={`${displayClass} mt-2 text-2xl font-semibold text-stone-950`}
-      >
-        {title}
-      </h3>
-      <p className="mt-3 max-w-4xl text-base leading-7 text-stone-700">
-        {description}
-      </p>
+    <div className="table-panel">
+      <p className="table-eyebrow">{eyebrow}</p>
+      <h3 className="table-title">{title}</h3>
+      <p className="table-description">{description}</p>
 
       {showLegend ? (
-        <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium uppercase tracking-[0.14em] text-stone-600">
+        <div className="legend-row">
           <LegendPill label="Significant match" tone="match" />
           <LegendPill label="Inconclusive" tone="uncertain" />
           <LegendPill label="Below chance" tone="below" />
-          <span className="inline-flex items-center rounded-md border border-stone-200 bg-stone-50 px-3 py-1.5">
-            * Dominance test
-          </span>
+          <span className="legend-pill score-tone--plain">Dominance test *</span>
         </div>
       ) : null}
 
-      <div className="mt-6 overflow-x-auto custom-scrollbar">
-        <table className="min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
-          <thead className="text-xs uppercase tracking-[0.16em] text-stone-500">
+      <div className="table-shell">
+        <table className="posterior-table">
+          <thead>
             <tr>
-              <th className="sticky left-0 z-10 rounded-l-lg bg-stone-100 px-4 py-3 font-medium">
-                Suspect Model
-              </th>
-              {columns.map((column, index) => (
-                <th
-                  key={column}
-                  className={`bg-stone-100 px-4 py-3 text-center font-medium ${
-                    index === columns.length - 1 ? "rounded-r-lg" : ""
-                  }`}
-                >
-                  {column}
-                </th>
+              <th>Suspect Model</th>
+              {columns.map((column) => (
+                <th key={column}>{column}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {sections.map((section) => (
               <Fragment key={section.family}>
-                <tr key={`${section.family}-header`}>
-                  <td
-                    colSpan={columns.length + 1}
-                    className="pt-4 pb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500"
-                  >
-                    {section.family}
-                  </td>
+                <tr className="section-row">
+                  <td colSpan={columns.length + 1}>{section.family}</td>
                 </tr>
                 {section.rows.map((row) => (
                   <tr key={row.label}>
-                    <td className="sticky left-0 rounded-l-lg border border-r-0 border-stone-200 bg-white px-4 py-3 font-semibold text-stone-900 shadow-sm">
-                      {row.label}
-                    </td>
+                    <td className="row-label">{row.label}</td>
                     {row.cells.map((cell, index) => (
                       <td
                         key={`${row.label}-${columns[index]}`}
-                        className={`border border-l-0 border-stone-200 bg-white px-3 py-3 text-center shadow-sm ${
-                          index === row.cells.length - 1 ? "rounded-r-lg" : ""
-                        }`}
+                        className="score-cell"
                       >
                         <span
-                          className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-md border px-2.5 py-1 font-semibold ${scoreToneClasses[cell.tone]}`}
+                          className={`score-badge ${scoreToneClasses[cell.tone]}`}
                         >
                           {cell.value}
                           {cell.dominant ? "*" : ""}
@@ -1040,24 +1444,18 @@ function PosteriorTable({
         </table>
       </div>
 
-      <p className="mt-4 text-sm leading-6 text-stone-500">{footnote}</p>
+      <p className="table-footnote">{footnote}</p>
     </div>
   );
 }
 
 function LegendPill({ label, tone }: { label: string; tone: ScoreTone }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-md border px-3 py-1.5 ${scoreToneClasses[tone]}`}
-    >
-      {label}
-    </span>
-  );
+  return <span className={`legend-pill ${scoreToneClasses[tone]}`}>{label}</span>;
 }
 
 const scoreToneClasses: Record<ScoreTone, string> = {
-  match: "border-rose-200 bg-rose-100 text-rose-900",
-  uncertain: "border-amber-200 bg-amber-100 text-amber-900",
-  below: "border-emerald-200 bg-emerald-100 text-emerald-900",
-  plain: "border-stone-200 bg-stone-50 text-stone-700",
+  match: "score-tone--match",
+  uncertain: "score-tone--uncertain",
+  below: "score-tone--below",
+  plain: "score-tone--plain",
 };
