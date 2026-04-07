@@ -512,7 +512,7 @@ export default function CSFPage() {
             <div className="hero-body">
               <figure className="teaser-media">
                 <Image
-                  src="/csf/comparison.png"
+                  src="/csf/comparison-v2.png"
                   alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
                   width={1120}
                   height={780}
@@ -562,21 +562,21 @@ export default function CSFPage() {
 
             <div className="table-stack">
               <TableImageCard
-                src="/csf/results-main-table.png"
+                src="/csf/results-main-table-v2.png"
                 alt="Main posterior mean attribution table across fine-tuned models and candidate base families"
                 width={1770}
                 height={863}
               />
 
               <TableImageCard
-                src="/csf/results-metric-table.png"
+                src="/csf/results-metric-table-v2.png"
                 alt="Wasserstein versus JSD attribution confidence comparison table"
                 width={1250}
                 height={530}
               />
 
               <TableImageCard
-                src="/csf/results-ablation-table.png"
+                src="/csf/results-ablation-table-v2.png"
                 alt="Attribution results under adversarial concept removal across candidate base models"
                 width={928}
                 height={402}
