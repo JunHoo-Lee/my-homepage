@@ -562,24 +562,36 @@ export default function CSFPage() {
 
             <div className="table-stack">
               <TableImageCard
+                eyebrow="Table 1"
+                title="Posterior attribution across all 13 fine-tuned suspects."
+                description="The main benchmark spans 6 protected base families and 13 downstream variants. In the query-only setting, the posterior mass still concentrates on the correct lineage for every suspect."
                 src="/csf/results-main-table-v2.png"
                 alt="Main posterior mean attribution table across fine-tuned models and candidate base families"
                 width={1770}
                 height={863}
+                figureClassName="table-figure--main"
               />
 
               <TableImageCard
-                src="/csf/results-metric-table-v2.png"
+                eyebrow="Table 2"
+                title="Wasserstein keeps a clearer attribution margin than the JSD baseline."
+                description="On hard variants such as Kandinsky-Naruto and SDXL-DPO, the confidence gap remains visibly wider with Wasserstein, which makes the final lineage decision more decisive."
+                src="/csf/results-metric-table-v4.png"
                 alt="Wasserstein versus JSD attribution confidence comparison table"
-                width={1250}
-                height={530}
+                width={1306}
+                height={566}
+                figureClassName="table-figure--metric"
               />
 
               <TableImageCard
+                eyebrow="Table 3"
+                title="Attribution survives adversarial concept removal."
+                description="Even after removing animal-related concepts with UCE, the strongest attribution score still lands on the correct base family, showing that the signal is not tied to a single trigger concept."
                 src="/csf/results-ablation-table-v2.png"
                 alt="Attribution results under adversarial concept removal across candidate base models"
                 width={928}
                 height={402}
+                figureClassName="table-figure--ablation"
               />
             </div>
           </div>
@@ -665,11 +677,11 @@ export default function CSFPage() {
         }
 
         .csf-page .container.is-max-figure {
-          max-width: 1180px;
+          max-width: 920px;
         }
 
         .csf-page .container.is-max-quant {
-          max-width: 1360px;
+          max-width: 1280px;
         }
 
         .csf-page .hero {
@@ -691,8 +703,8 @@ export default function CSFPage() {
         }
 
         .csf-page .teaser .hero-body {
-          padding-top: 1.5rem;
-          padding-bottom: 4rem;
+          padding-top: 1rem;
+          padding-bottom: 3.5rem;
         }
 
         .csf-page .section {
@@ -806,7 +818,8 @@ export default function CSFPage() {
         }
 
         .csf-page .teaser-media {
-          margin: 0;
+          max-width: 840px;
+          margin: 0 auto;
         }
 
         .csf-page .teaser-media img {
@@ -822,8 +835,8 @@ export default function CSFPage() {
         }
 
         .csf-page .teaser-caption {
-          max-width: 860px;
-          margin: 0.9rem auto 0;
+          max-width: 720px;
+          margin: 1.15rem auto 0;
         }
 
         .csf-page .content {
@@ -893,11 +906,68 @@ export default function CSFPage() {
         .csf-page .table-stack {
           margin-top: 2.25rem;
           display: grid;
-          gap: 1.8rem;
+          gap: 2.8rem;
         }
 
         .csf-page .table-panel {
-          padding: 0;
+          display: grid;
+          gap: 1rem;
+        }
+
+        .csf-page .table-copy {
+          max-width: 760px;
+          margin: 0 auto;
+          text-align: center;
+        }
+
+        .csf-page .table-eyebrow {
+          margin: 0;
+          color: #64748b;
+          font-size: 0.78rem;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .csf-page .table-title {
+          margin: 0.55rem 0 0;
+          color: #111827;
+          font-size: clamp(1.3rem, 2.1vw, 1.8rem);
+          font-weight: 800;
+          line-height: 1.3;
+        }
+
+        .csf-page .table-description {
+          margin: 0.8rem auto 0;
+          max-width: 720px;
+          color: #475569;
+          font-size: 1rem;
+          line-height: 1.8;
+        }
+
+        .csf-page .table-frame {
+          width: 100%;
+          padding: 1.6rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.9rem;
+          background: #ffffff;
+        }
+
+        .csf-page .table-figure {
+          margin: 0 auto;
+          width: 100%;
+        }
+
+        .csf-page .table-figure--main {
+          max-width: 1180px;
+        }
+
+        .csf-page .table-figure--metric {
+          max-width: 1080px;
+        }
+
+        .csf-page .table-figure--ablation {
+          max-width: 1080px;
         }
 
         .csf-page .legend-row {
@@ -1261,22 +1331,40 @@ function FigureCard({
 }
 
 function TableImageCard({
+  eyebrow,
+  title,
+  description,
   src,
   alt,
   width,
   height,
+  figureClassName,
 }: {
+  eyebrow: string;
+  title: string;
+  description: string;
   src: string;
   alt: string;
   width: number;
   height: number;
+  figureClassName: string;
 }) {
   return (
-    <figure className="table-panel">
-      <div className="result-figure table-image-frame">
-        <Image src={src} alt={alt} width={width} height={height} />
+    <section className="table-panel">
+      <div className="table-copy">
+        <p className="table-eyebrow">{eyebrow}</p>
+        <h3 className="table-title">{title}</h3>
+        <p className="table-description">{description}</p>
       </div>
-    </figure>
+
+      <div className="table-frame">
+        <figure className={`table-figure ${figureClassName}`}>
+          <div className="result-figure table-image-frame">
+            <Image src={src} alt={alt} width={width} height={height} />
+          </div>
+        </figure>
+      </div>
+    </section>
   );
 }
 
