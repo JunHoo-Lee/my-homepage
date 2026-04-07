@@ -508,14 +508,14 @@ export default function CSFPage() {
         </section>
 
         <section className="hero teaser">
-          <div className="container is-max-desktop">
+          <div className="container is-max-figure">
             <div className="hero-body">
               <figure className="teaser-media">
                 <Image
                   src="/csf/comparison.png"
                   alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
-                  width={1064}
-                  height={744}
+                  width={1120}
+                  height={780}
                   priority
                 />
               </figure>
@@ -555,52 +555,31 @@ export default function CSFPage() {
         </section>
 
         <section className="section hero is-light">
-          <div className="container is-max-desktop">
+          <div className="container is-max-quant">
             <h2 className="title is-3 has-text-centered">
               Quantitative Results
             </h2>
-            <p className="section-copy has-text-centered">
-              CSF attributes 13 fine-tuned variants across 6 protected base
-              families using only query access, and the reported posterior
-              means remain stable even under adversarial concept removal.
-            </p>
-
-            <div className="summary-strip" aria-label="Benchmark summary">
-              <span className="summary-chip">6 model families</span>
-              <span className="summary-chip">13 fine-tuned variants</span>
-              <span className="summary-chip">42 compositional prompts</span>
-              <span className="summary-chip">query-only attribution</span>
-            </div>
 
             <div className="table-stack">
               <TableImageCard
-                eyebrow="Main Attribution Matrix"
-                title="Posterior mean over the full benchmark."
-                description="Posterior means across all 13 fine-tuned suspects and 6 candidate base families."
                 src="/csf/results-main-table.png"
                 alt="Main posterior mean attribution table across fine-tuned models and candidate base families"
-                width={2330}
-                height={920}
+                width={1770}
+                height={863}
               />
 
               <TableImageCard
-                eyebrow="Metric Comparison"
-                title="Wasserstein vs. JSD."
-                description="Confidence margins on hard variants remain wider with Wasserstein than with the JSD baseline."
                 src="/csf/results-metric-table.png"
                 alt="Wasserstein versus JSD attribution confidence comparison table"
-                width={1200}
-                height={325}
+                width={1250}
+                height={530}
               />
 
               <TableImageCard
-                eyebrow="Robustness Ablation"
-                title="Adversarial concept removal."
-                description="Even after removing animal-related concepts with UCE, the strongest attribution score still lands on the correct base family."
                 src="/csf/results-ablation-table.png"
                 alt="Attribution results under adversarial concept removal across candidate base models"
-                width={1090}
-                height={480}
+                width={928}
+                height={402}
               />
             </div>
           </div>
@@ -683,6 +662,14 @@ export default function CSFPage() {
 
         .csf-page .container.is-max-desktop {
           max-width: 960px;
+        }
+
+        .csf-page .container.is-max-figure {
+          max-width: 1180px;
+        }
+
+        .csf-page .container.is-max-quant {
+          max-width: 1360px;
         }
 
         .csf-page .hero {
@@ -853,36 +840,6 @@ export default function CSFPage() {
           margin-top: 1.25rem;
         }
 
-        .csf-page .section-copy {
-          max-width: 760px;
-          margin: 1rem auto 0;
-          color: #475569;
-          font-size: 1.02rem;
-          line-height: 1.8;
-        }
-
-        .csf-page .summary-strip {
-          margin-top: 1.5rem;
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 0.75rem;
-        }
-
-        .csf-page .summary-chip {
-          display: inline-flex;
-          align-items: center;
-          border-radius: 999px;
-          border: 1px solid #cbd5e1;
-          background: #ffffff;
-          padding: 0.55rem 0.95rem;
-          font-size: 0.86rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: #475569;
-        }
-
         .csf-page .results-grid {
           margin-top: 2rem;
           display: grid;
@@ -906,7 +863,7 @@ export default function CSFPage() {
         }
 
         .csf-page .table-image-frame {
-          margin-top: 1rem;
+          margin-top: 0;
           overflow: visible;
           border: 0;
           border-radius: 0;
@@ -934,38 +891,13 @@ export default function CSFPage() {
         }
 
         .csf-page .table-stack {
-          margin-top: 2rem;
+          margin-top: 2.25rem;
           display: grid;
-          gap: 2.4rem;
+          gap: 1.8rem;
         }
 
         .csf-page .table-panel {
           padding: 0;
-        }
-
-        .csf-page .table-eyebrow {
-          margin: 0;
-          font-size: 0.78rem;
-          font-weight: 800;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: #64748b;
-        }
-
-        .csf-page .table-title {
-          margin: 0.55rem 0 0;
-          font-size: 1.55rem;
-          font-weight: 800;
-          line-height: 1.28;
-          color: #111827;
-        }
-
-        .csf-page .table-description {
-          margin: 0.8rem 0 0;
-          max-width: 820px;
-          color: #475569;
-          font-size: 0.98rem;
-          line-height: 1.75;
         }
 
         .csf-page .legend-row {
@@ -1267,10 +1199,6 @@ export default function CSFPage() {
             margin: 0.75rem 0 0;
           }
 
-          .csf-page .table-panel {
-            padding: 1.1rem;
-          }
-
           .csf-page .pdf-shell iframe {
             height: 560px;
           }
@@ -1333,32 +1261,22 @@ function FigureCard({
 }
 
 function TableImageCard({
-  eyebrow,
-  title,
-  description,
   src,
   alt,
   width,
   height,
 }: {
-  eyebrow: string;
-  title: string;
-  description: string;
   src: string;
   alt: string;
   width: number;
   height: number;
 }) {
   return (
-    <div className="table-panel">
-      <p className="table-eyebrow">{eyebrow}</p>
-      <h3 className="table-title">{title}</h3>
-      <p className="table-description">{description}</p>
-
+    <figure className="table-panel">
       <div className="result-figure table-image-frame">
         <Image src={src} alt={alt} width={width} height={height} />
       </div>
-    </div>
+    </figure>
   );
 }
 
