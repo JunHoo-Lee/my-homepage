@@ -626,7 +626,7 @@ export default function DSVProjectPage() {
                       </tbody>
                     </table>
                   </div>
-                  <p className="table-caption">
+                  <p className="results-caption">
                     Reproduced as HTML from `sec/main_table.tex` in the source,
                     using the CIFAR10 few-shot dataset distillation numbers.
                   </p>
@@ -1262,7 +1262,7 @@ export default function DSVProjectPage() {
           color: #94a3b8;
         }
 
-        .table-caption {
+        .results-caption {
           margin: 0.85rem 0 0;
           font-size: 0.9rem;
           line-height: 1.6;
