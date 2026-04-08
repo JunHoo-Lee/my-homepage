@@ -180,12 +180,12 @@ export const PUBLICATIONS = [
 ];
 
 export const AWARDS = [
-    { year: "2023", title: "BK21 Future Innovation Talent Bronze Prize", amount: "KRW 1,000,000" },
-    { year: "2023", title: "BK21 Outstanding Research Talent Fellowship", amount: "KRW 3,500,000" },
-    { year: "2022", title: "Yulchon AI Star Scholarship", amount: "KRW 8,000,000" },
-    { year: "2021", title: "3rd Place, SNU FastMRI Challenge (out of 107 teams)", amount: "KRW 3,000,000" },
-    { year: "2021", title: "Kwanak Scholarship", amount: "KRW 4,000,000" },
-    { year: "2017", title: "National Science and Engineering Scholarship", amount: "KRW 3,000,000 per semester" }
+    { year: "2023", title: "BK21 Future Innovation Talent Bronze Prize", amount: "USD 1,000" },
+    { year: "2023", title: "BK21 Outstanding Research Talent Fellowship", amount: "USD 3,500" },
+    { year: "2022", title: "Yulchon AI Star Scholarship", amount: "full funded" },
+    { year: "2021", title: "3rd Place, SNU FastMRI Challenge (out of 107 teams)", amount: "USD 3,000" },
+    { year: "2021", title: "Kwanak Scholarship", amount: "full funded" },
+    { year: "2017-2018", title: "National Science and Engineering Scholarship", amount: "full funded" }
 ];
 
 export const ACADEMIC_SERVICE = [
