@@ -23,6 +23,7 @@
 % Font:
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Times New Roman}
+\linespread{1.03}\selectfont
 
 % Formatting:
 \pagestyle{fancy}
@@ -42,21 +43,25 @@
 \newcommand{\coauthors}[1]{\textit{#1}}
 
 \newcommand{\selpub}[5]{
-    \item \textbf{#1}, \textbf{#2} {\footnotesize\textit{\textcolor{gray}{#3}}} \\
-    #4 \\
+    \item \textbf{#1}, \textbf{#2} {\footnotesize\textit{\textcolor{gray}{#3}}} \\[0.2mm]
+    #4 \\[0.15mm]
     {\footnotesize #5}
 }
 
-\newcommand{\projectentry}[5]{
+\newcommand{\projectentry}[4]{
     \textbf{#1} \hfill {\scriptsize #2} \\
     {\scriptsize\textit{#3}} \\
     {\scriptsize $\bullet$ #4} \\
-    {\scriptsize $\bullet$ #5}
+    \vspace{0.9mm}
 }
 
 \newcommand{\talkentry}[4]{
     \textbf{\href{#1}{\textcolor{blue}{#2}}} \hfill {\scriptsize #3} \\
     {\scriptsize\textit{#4}}
+}
+
+\newcommand{\skillentry}[2]{
+    \textbf{#1}: #2\par
 }
 
 \titleformat{\section}
@@ -65,7 +70,7 @@
   {}
   [\titlerule]
 
-\titlespacing{\section}{0pt}{4pt}{2pt}
+\titlespacing{\section}{0pt}{6pt}{3pt}
 
 \begin{document}
 
@@ -104,7 +109,7 @@ but also what structure makes those gains possible and reliable.
 % Selected Publications
 \section{Selected Publications}
 {\small
-\begin{itemize}[leftmargin=*, itemsep=0.15mm, topsep=0.2mm]
+\begin{itemize}[leftmargin=*, itemsep=0.8mm, topsep=0.5mm]
 \selpub
     {\href{https://junhoo.me/csf/csf-paper.pdf}{Fingerprinting Diffusion Models in the Wild}}
     {CVPR 2026}
@@ -167,15 +172,6 @@ but also what structure makes those gains possible and reliable.
     Kwanak Scholarship (KRW 4,000,000) & 2021 \\
     National Science and Engineering Scholarship & 2017
 \end{tabu}
-}
-
-% Patents
-\section{Patents}
-{\small
-\begin{itemize}[leftmargin=*, itemsep=0.3mm, topsep=0.3mm]
-    \item \textbf{Method and Apparatus for Edge Filtering to Improve the Robustness of Deep Learning Models}, Korean Patent, 10-2025-0215458
-    \item \textbf{Method and Apparatus for Controlling Unintended Object Generation in Image Generation Models through Prompt Reconfiguration}, Korean Patent, 10-2025-0063788
-\end{itemize}
 }
 
 % Publications
@@ -241,29 +237,34 @@ but also what structure makes those gains possible and reliable.
     {Research on Gradient-Descent-Based Meta-Learning Algorithms}
     {Sep. 2022 -- Sep. 2023}
     {Funded by Samsung Electronics | Main Researcher}
-    {Meta-learning, Few-shot learning, Optimization}
     {Conducted research to uncover the mechanism behind the success of gradient-descent-based meta-learning algorithms and developed an improved method, resulting in a publication at a top-tier machine learning conference.}
 
 \projectentry
     {Development of Self-Directed Visual Object Detection for Shopping Assistance}
     {Mar. 2022 -- Nov. 2024}
     {Supported by IITP (Institute of Information \& Communications Technology Planning \& Evaluation) | Project Manager}
-    {Object Detection, Continual Learning, Visual Recognition}
     {Conducted research on a shopping-oriented visual assistant that detects objects in user-submitted images, extracts product attributes, and continually acquires new object categories through OCR-based labeling and incremental learning.}
 
 \projectentry
     {Development of AI Video Generation for Korean Traditional Media Art}
     {Jul. 2024 -- Mar. 2026}
     {Supported by MCST (Ministry of Culture, Sports and Tourism), in collaboration with EASYWITH | Main Engineer}
-    {Video Generation, Multimodal Learning, Visual Content Creation}
     {Led the development of a Korean-style AI video generation system using curated domain-specific datasets of traditional media art; designed a data-centric pipeline for high-resolution (up to 8K) video generation, including dataset construction, content similarity evaluation, and automated production workflows.}
 
 \projectentry
     {Physically Plausible Video Diffusion Modeling}
     {Mar. 2025 -- Nov. 2025}
     {Project under AI Star Fellowship Program (MSIT, Korea) | Project Manager}
-    {Video Diffusion, Generative Models, Physical AI}
     {Led the development of video diffusion models that generate physically consistent dynamics and designed physics-aware modeling strategies to improve temporal coherence and realism in generated videos.}
+}
+
+\newpage
+
+% Skills
+\section{Skills}
+{\footnotesize
+\skillentry{Programming Languages}{Python, CUDA, R, C++, Verilog}
+\skillentry{ML Development Stack}{PyTorch, TensorFlow, Slurm, Docker}
 }
 
 % Talks
@@ -286,6 +287,17 @@ but also what structure makes those gains possible and reliable.
 \section{Academic Service}
 {\footnotesize
 \textbf{Conference Reviewer}: CVPR (2025, 2026), ICCV (2025), ECCV (2026), ICLR (2025, 2026), ICML (2026), NeurIPS (2024, 2025, 2026)
+}
+
+\vfill
+
+% Patents
+\section{Patents}
+{\small
+\begin{itemize}[leftmargin=*, itemsep=0.4mm, topsep=0.4mm]
+    \item \textbf{Method and Apparatus for Edge Filtering to Improve the Robustness of Deep Learning Models}, Korean Patent, 10-2025-0215458
+    \item \textbf{Method and Apparatus for Controlling Unintended Object Generation in Image Generation Models through Prompt Reconfiguration}, Korean Patent, 10-2025-0063788
+\end{itemize}
 }
 
 \end{document}
