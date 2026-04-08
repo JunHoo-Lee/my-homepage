@@ -383,33 +383,46 @@ const ablationSections: ScoreSection[] = [
   },
 ];
 
-const visualCards = [
+const analysisCards = [
   {
-    src: "/csf/family-game.png",
-    alt: "Illustration that strong style shifts make naive visual matching unreliable",
-    width: 2250,
-    height: 1124,
-    title: "Why naive visual matching fails",
+    eyebrow: "Table 2",
+    src: "/csf/image.png",
+    alt: "Cropped Table 2 showing Wasserstein versus JSD attribution confidence",
+    width: 1240,
+    height: 315,
+    title: "Wasserstein keeps a clearer attribution margin.",
     caption:
-      "Strong downstream style changes can hide the shared lineage signal even when the inherited semantic prior remains intact.",
+      "Using the saved image.png asset, this metric comparison shows that Wasserstein separates the correct lineage more decisively than the JSD baseline on hard fine-tuned suspects.",
   },
   {
+    eyebrow: "Table 3",
+    src: "/csf/results-ablation-table-v2.png",
+    alt: "Attribution results after adversarial concept removal",
+    width: 928,
+    height: 402,
+    title: "Attribution survives adversarial concept removal.",
+    caption:
+      "Even after UCE removes animal-related concepts, attribution still peaks on the true source family, suggesting that the fingerprint is distributed across semantics rather than tied to one trigger concept.",
+  },
+  {
+    eyebrow: "Prompt Figure",
+    src: "/csf/prompt-ablation.png",
+    alt: "Ring figure showing prompt-conditioned semantic mixtures",
+    width: 828,
+    height: 288,
+    title: "Context rotates the semantic mixture.",
+    caption:
+      "Holding the core subject fixed while changing only the scene context changes the semantic mixture a model resolves, which is the exact signal CSF measures.",
+  },
+  {
+    eyebrow: "Figure 4",
     src: "/csf/userstudy.png",
     alt: "Human study showing stronger lineage identification under CSF prompts",
-    width: 563,
-    height: 337,
-    title: "Human perceptual study",
+    width: 552,
+    height: 249,
+    title: "Human study aligns with the fingerprint.",
     caption:
-      "When observers are asked to ignore style and focus on semantic distributions, CSF prompts make the correct lineage easier to identify.",
-  },
-  {
-    src: "/csf/prompt-ablation.png",
-    alt: "Prompt ablation showing category distributions changing across scene contexts",
-    width: 828,
-    height: 316,
-    title: "Prompt design validation",
-    caption:
-      "Changing only the surrounding context shifts the semantic mixture a model resolves, which is the fingerprint CSF measures.",
+      "The original paper's human study shows that observers identify the protected base model much more accurately under CSF prompts than under naive prompts.",
   },
 ];
 
@@ -585,6 +598,11 @@ export default function CSFPage() {
               <h2 className="title is-3 has-text-centered">
                 Method overview.
               </h2>
+              <p className="section-copy has-text-centered">
+                CSF estimates prompt-conditioned semantic distributions,
+                compares them with Wasserstein distance, and converts the
+                resulting distances into a posterior over candidate lineages.
+              </p>
             </div>
 
             <div className="methods-grid">
@@ -596,7 +614,17 @@ export default function CSFPage() {
                   The defender does not see weights, activations, or training
                   logs; only text queries and generated images are available.
                   The goal is to assign a posterior over candidate lineages and
-                  make an attribution decision with controlled confidence.
+                  make an attribution decision with controlled confidence. For
+                  each prompt <code>p</code> and model <code>m</code>, CSF
+                  samples multiple generations, maps each image to a semantic
+                  label <code>c</code>, and estimates the prompt-conditioned
+                  category distribution.
+                </p>
+                <p className="method-equation">
+                  <code>
+                    hat_pi_m(c | p) = (1 / N) sum_(i=1)^N 1[g(x_i) = c], x_i ~
+                    m(p)
+                  </code>
                 </p>
               </article>
 
@@ -608,7 +636,16 @@ export default function CSFPage() {
                   semantic priors. The resulting category distributions are then
                   compared against base-model references using Wasserstein
                   distance, and a Bayesian attribution rule produces the final
-                  lineage posterior and dominance test.
+                  lineage posterior and dominance test. In other words, the
+                  suspect model is compared against every protected base over a
+                  prompt set <code>P</code>, and smaller transport cost becomes
+                  stronger attribution evidence.
+                </p>
+                <p className="method-equation">
+                  <code>
+                    d_b = sum_(p in P) W_1(hat_pi_s(. | p), hat_pi_b(. | p)),
+                    P(b | s) propto exp(-tau d_b)
+                  </code>
                 </p>
               </article>
             </div>
@@ -618,7 +655,7 @@ export default function CSFPage() {
                 src="/csf/prompt-ablation.png"
                 alt="Prompt ablation showing that context changes the semantic mixture produced by the model"
                 width={828}
-                height={316}
+                height={288}
               />
             </figure>
             <p className="figure-caption has-text-centered">
@@ -627,11 +664,18 @@ export default function CSFPage() {
               mixture is much harder to wash away than style, which makes it a
               useful fingerprint in the strict query-only setting.
             </p>
+
+            <p className="method-note has-text-centered">
+              Accept <code>b*</code> = <code>arg max_b P(b | s)</code> only when
+              the dominance margin stays above a threshold:
+              <code> P(b* | s) - max_(b != b*) P(b | s) &gt; delta</code>.
+            </p>
           </div>
         </section>
 
         <section className="section hero is-light">
           <div className="container is-max-quant">
+            <p className="section-label">Results</p>
             <h2 className="title is-3 has-text-centered">
               Quantitative Results
             </h2>
@@ -647,28 +691,29 @@ export default function CSFPage() {
                 height={863}
                 figureClassName="table-figure--main"
               />
+            </div>
+          </div>
+        </section>
 
-              <TableImageCard
-                eyebrow="Table 2"
-                title="Wasserstein keeps a clearer attribution margin than the JSD baseline."
-                description="This comparison isolates the metric choice. On visually difficult variants, Wasserstein produces a consistently larger confidence gap than the JSD baseline, which means the correct lineage is separated more decisively from competing bases at decision time."
-                src="/csf/results-metric-table-v4.png"
-                alt="Wasserstein versus JSD attribution confidence comparison table"
-                width={1306}
-                height={566}
-                figureClassName="table-figure--metric"
-              />
+        <section className="section">
+          <div className="container is-max-quant">
+            <div className="narrative-block">
+              <p className="section-label">Analysis</p>
+              <h2 className="title is-3 has-text-centered">
+                Secondary analyses support the same fingerprint.
+              </h2>
+              <p className="section-copy has-text-centered">
+                Table 2 tests the metric choice, Table 3 tests adversarial
+                erasure, the ring figure shows prompt-conditioned semantic
+                drift, and Figure 4 confirms that humans can perceive the same
+                lineage cue when asked the right question.
+              </p>
+            </div>
 
-              <TableImageCard
-                eyebrow="Table 3"
-                title="Attribution survives adversarial concept removal."
-                description="This ablation asks whether CSF collapses once a seemingly relevant concept family is deliberately erased. Even after UCE removes animal-related concepts, attribution still peaks on the correct source family, indicating that the fingerprint is distributed across broader semantic structure rather than a single trigger token."
-                src="/csf/results-ablation-table-v2.png"
-                alt="Attribution results under adversarial concept removal across candidate base models"
-                width={928}
-                height={402}
-                figureClassName="table-figure--ablation"
-              />
+            <div className="analysis-grid">
+              {analysisCards.map((card) => (
+                <AnalysisCard key={card.title} {...card} />
+              ))}
             </div>
           </div>
         </section>
@@ -994,6 +1039,30 @@ export default function CSFPage() {
           line-height: 1.8;
         }
 
+        .csf-page .method-equation {
+          margin: 1rem 0 0;
+          border-radius: 0.8rem;
+          background: #f8fafc;
+          padding: 0.9rem 1rem;
+          color: #0f172a;
+          font-size: 0.92rem;
+          line-height: 1.7;
+        }
+
+        .csf-page .method-equation code,
+        .csf-page .method-note code {
+          font-family: "SFMono-Regular", ui-monospace, "Liberation Mono",
+            Menlo, monospace;
+        }
+
+        .csf-page .method-note {
+          max-width: 840px;
+          margin: 1.15rem auto 0;
+          color: #475569;
+          font-size: 0.96rem;
+          line-height: 1.85;
+        }
+
         .csf-page .content {
           color: #334155;
           font-size: 1.05rem;
@@ -1006,13 +1075,6 @@ export default function CSFPage() {
 
         .csf-page .content p:first-child {
           margin-top: 1.25rem;
-        }
-
-        .csf-page .results-grid {
-          margin-top: 2rem;
-          display: grid;
-          gap: 1.5rem;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
         .csf-page .result-card {
@@ -1062,6 +1124,27 @@ export default function CSFPage() {
           margin-top: 2.25rem;
           display: grid;
           gap: 2.8rem;
+        }
+
+        .csf-page .analysis-grid {
+          margin-top: 2.25rem;
+          display: grid;
+          gap: 1.5rem;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .csf-page .analysis-card {
+          display: grid;
+          gap: 0.8rem;
+          align-content: start;
+        }
+
+        .csf-page .analysis-eyebrow {
+          margin: 0;
+        }
+
+        .csf-page .analysis-figure {
+          background: #ffffff;
         }
 
         .csf-page .table-panel {
@@ -1398,7 +1481,7 @@ export default function CSFPage() {
           }
 
           .csf-page .methods-grid,
-          .csf-page .results-grid {
+          .csf-page .analysis-grid {
             grid-template-columns: 1fr;
           }
         }
@@ -1460,7 +1543,8 @@ function PublicationLink({
   );
 }
 
-function FigureCard({
+function AnalysisCard({
+  eyebrow,
   src,
   alt,
   width,
@@ -1468,6 +1552,7 @@ function FigureCard({
   title,
   caption,
 }: {
+  eyebrow: string;
   src: string;
   alt: string;
   width: number;
@@ -1476,8 +1561,9 @@ function FigureCard({
   caption: string;
 }) {
   return (
-    <article className="result-card">
-      <div className="result-figure">
+    <article className="result-card analysis-card">
+      <p className="table-eyebrow analysis-eyebrow">{eyebrow}</p>
+      <div className="result-figure analysis-figure">
         <Image src={src} alt={alt} width={width} height={height} />
       </div>
       <h3 className="result-title">{title}</h3>
