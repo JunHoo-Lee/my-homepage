@@ -40,8 +40,8 @@ export const NEWS = [
     { date: "Sep 2024", content: "Our paper \"Deep Support Vectors\" is accepted to NeurIPS 2024!", link: "/dsv", linkText: "\"Deep Support Vectors\"" },
     { date: "Jul 2024", content: "Our paper \"Practical Dataset Distillation Based on Deep Support Vectors\" is presented at ECCV 2024 Workshop!", link: "https://arxiv.org/abs/2405.00348", linkText: "\"Practical Dataset Distillation Based on Deep Support Vectors\"" },
     { date: "Apr 2024", content: "Two workshop papers accepted to CVPR 2024 — \"Do Not Think About Pink Elephant!\" (co-first) and \"Coreset Selection for Object Detection\"!", link: "https://arxiv.org/abs/2404.15154", linkText: "\"Do Not Think About Pink Elephant!\"" },
-    { date: "Feb 2024", content: "I will be at AAAI 2024 in Vancouver, presenting our \"Any-Way Meta Learning\" paper!", link: "https://arxiv.org/abs/2401.05097", linkText: "\"Any-Way Meta Learning\"" },
-    { date: "Dec 2023", content: "Our paper \"Any-Way Meta Learning\" is accepted to AAAI 2024!", link: "https://arxiv.org/abs/2401.05097", linkText: "\"Any-Way Meta Learning\"" },
+    { date: "Feb 2024", content: "I will be at AAAI 2024 in Vancouver, presenting our \"Any-Way Meta Learning\" paper!", link: "/any-way-meta-learning", linkText: "\"Any-Way Meta Learning\"" },
+    { date: "Dec 2023", content: "Our paper \"Any-Way Meta Learning\" is accepted to AAAI 2024!", link: "/any-way-meta-learning", linkText: "\"Any-Way Meta Learning\"" },
     { date: "Dec 2023", content: "I will be at NeurIPS 2023 in New Orleans, presenting our SHOT paper!", link: "https://arxiv.org/abs/2310.02751", linkText: "SHOT" },
     { date: "Sep 2023", content: "Our paper \"SHOT: Suppressing the Hessian along the Optimization Trajectory\" is accepted to NeurIPS 2023!", link: "https://arxiv.org/abs/2310.02751", linkText: "\"SHOT: Suppressing the Hessian along the Optimization Trajectory\"" },
 ];
@@ -110,7 +110,8 @@ export const PUBLICATIONS = [
                 authors: ["Junhoo Lee", "Yearim Kim", "Hyunho Lee", "Nojun Kwak"],
                 venue: "The AAAI Conference on Artificial Intelligence (AAAI)",
                 year: "2024",
-                link: "https://arxiv.org/abs/2401.05097",
+                link: "/any-way-meta-learning",
+                paperLink: "https://arxiv.org/abs/2401.05097",
                 category: "Meta-Learning",
                 subTag: "Few-Shot Learning",
                 tldr: "Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling."
