@@ -15,6 +15,9 @@ import {
 import { DM_Sans, Noto_Sans } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 
 import BibtexCopyButton from "../csf/BibtexCopyButton";
 
@@ -154,6 +157,58 @@ REF_MODEL_PATH: ./models/imagenet.ckpt
 DATAPATH: "./data"
 MODE: "RECONSTRUCT"
 NUM_WORKERS: 12`;
+
+const primalConstraintEquation = String.raw`$$
+\forall i \in \mathcal{I},\ \operatorname*{arg\,max}_c \Phi_c(x_i; \theta^*) = y_i
+$$`;
+
+const dualConstraintEquation = String.raw`$$
+\forall i \in \mathcal{I},\ \lambda_i \ge 0
+$$`;
+
+const stationarityConstraintEquation = String.raw`$$
+\theta^* = -\sum_{i=1}^{n} \lambda_i \nabla_{\theta}\mathcal{L}(\Phi(x_i; \theta^*), y_i)
+$$`;
+
+const manifoldConstraintEquation = String.raw`$$
+\forall i \in \mathcal{I},\ x_i \in \mathcal{M}
+$$`;
+
+const deepKKTConditionEquation = String.raw`$$
+\begin{aligned}
+&\text{Primal feasibility:} && \forall i \in \mathcal{I},\ \operatorname*{arg\,max}_c \Phi_c(x_i; \theta^*) = y_i \\
+&\text{Dual feasibility:} && \forall i \in \mathcal{I},\ \lambda_i \ge 0 \\
+&\text{Stationarity:} && \theta^* = -\sum_{i=1}^{n} \lambda_i \nabla_{\theta}\mathcal{L}(\Phi(x_i; \theta^*), y_i) \\
+&\text{Manifold:} && \forall i \in \mathcal{I},\ x_i \in \mathcal{M}
+\end{aligned}
+$$`;
+
+const primalLossEquation = String.raw`$$
+L_{\text{primal}} = \frac{1}{n}\sum_{i=1}^{n} L_i,\qquad
+L_i =
+\begin{cases}
+0 & \text{if } \operatorname*{arg\,max}_c \Phi_c(x_i; \theta^*) = y_i, \\
+\mathcal{L}(\Phi(x_i; \theta^*), y_i) & \text{otherwise.}
+\end{cases}
+$$`;
+
+const stationarityLossEquation = String.raw`$$
+L_{\text{stat}} =
+D\!\left(
+\theta^*, -\sum_{i=1}^{n} \lambda_i \nabla_{\theta}\mathcal{L}(\Phi(x_i; \theta^*), y_i)
+\right)
+$$`;
+
+const dsvObjectiveEquation = String.raw`$$
+\operatorname{DSV}
+= \operatorname*{arg\,min}_x \mathbb{E}_{\mathcal{A}}
+\left[
+L_{\text{stationarity}}(\mathcal{A}(x))
++ \beta_1 L_{\text{primal}}(\mathcal{A}(x))
++ \beta_2 L_{\text{tot}}(x)
++ \beta_3 L_{\text{norm}}(x)
+\right]
+$$`;
 
 const codeFiles = [
   {
@@ -316,6 +371,30 @@ function TextBlock({ paragraphs }: { paragraphs: string[] }) {
       {paragraphs.map((paragraph) => (
         <p key={paragraph}>{paragraph}</p>
       ))}
+    </div>
+  );
+}
+
+function MathMarkdown({
+  children,
+  className,
+}: {
+  children: string;
+  className?: string;
+}) {
+  return (
+    <div className={`math-markdown ${className ?? ""}`.trim()}>
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({ children: paragraphChildren }) => (
+            <p className="math-markdown-paragraph">{paragraphChildren}</p>
+          ),
+        }}
+      >
+        {children}
+      </ReactMarkdown>
     </div>
   );
 }
@@ -536,34 +615,95 @@ export default function DSVProjectPage() {
               <div className="constraint-grid">
                 <div className="constraint-card">
                   <span className="constraint-name">Primal</span>
-                  <p className="constraint-formula">arg max Phi_c(x_i; theta*) = y_i</p>
+                  <MathMarkdown className="constraint-formula">
+                    {primalConstraintEquation}
+                  </MathMarkdown>
                   <p className="constraint-copy">
                     Candidate DSVs must still land on the target class.
                   </p>
                 </div>
                 <div className="constraint-card">
                   <span className="constraint-name">Dual</span>
-                  <p className="constraint-formula">lambda_i &gt;= 0</p>
+                  <MathMarkdown className="constraint-formula">
+                    {dualConstraintEquation}
+                  </MathMarkdown>
                   <p className="constraint-copy">
                     The multiplier becomes a natural measure of sample importance.
                   </p>
                 </div>
                 <div className="constraint-card">
                   <span className="constraint-name">Stationarity</span>
-                  <p className="constraint-formula">
-                    theta* ~= sum_i lambda_i grad_theta L(Phi(x_i; theta*), y_i)
-                  </p>
+                  <MathMarkdown className="constraint-formula">
+                    {stationarityConstraintEquation}
+                  </MathMarkdown>
                   <p className="constraint-copy">
                     Support-vector structure is tied back to the trained model.
                   </p>
                 </div>
                 <div className="constraint-card">
                   <span className="constraint-name">Manifold</span>
-                  <p className="constraint-formula">x_i in M</p>
+                  <MathMarkdown className="constraint-formula">
+                    {manifoldConstraintEquation}
+                  </MathMarkdown>
                   <p className="constraint-copy">
                     Synthesized DSVs stay close to plausible data support.
                   </p>
                 </div>
+              </div>
+              <div className="equation-grid">
+                <article className="equation-card equation-card-span">
+                  <div className="equation-copy-block">
+                    <div className="equation-label">From the paper</div>
+                    <h3 className={`equation-title ${displayFont.className}`}>
+                      Relaxed DeepKKT Conditions
+                    </h3>
+                    <p className="equation-copy">
+                      This is the actual TeX-level system from
+                      `sec/4Deep_Support_Vector.tex`, rendered on-page with
+                      KaTeX instead of being approximated as plaintext.
+                    </p>
+                  </div>
+                  <div className="equation-math">
+                    <MathMarkdown>{deepKKTConditionEquation}</MathMarkdown>
+                  </div>
+                </article>
+                <article className="equation-card">
+                  <div className="equation-copy-block">
+                    <div className="equation-label">Optimization</div>
+                    <h3 className={`equation-title ${displayFont.className}`}>
+                      Primal Surrogate Loss
+                    </h3>
+                    <p className="equation-copy">
+                      The paper replaces hard feasibility with a hinge-like
+                      surrogate that only penalizes a DSV when the classifier
+                      fails to predict the target class.
+                    </p>
+                  </div>
+                  <div className="equation-math equation-math-compact">
+                    <MathMarkdown>{primalLossEquation}</MathMarkdown>
+                  </div>
+                </article>
+                <article className="equation-card">
+                  <div className="equation-copy-block">
+                    <div className="equation-label">Optimization</div>
+                    <h3 className={`equation-title ${displayFont.className}`}>
+                      Stationarity and Final DSV Objective
+                    </h3>
+                    <p className="equation-copy">
+                      The stationarity loss links synthesized samples back to
+                      the trained model, and the final objective augments it
+                      with primal, total-variation, and norm priors.
+                    </p>
+                  </div>
+                  <div className="equation-stack">
+                    <div className="equation-math equation-math-compact">
+                      <MathMarkdown>{stationarityLossEquation}</MathMarkdown>
+                    </div>
+                    <div className="equation-math equation-math-compact">
+                      <MathMarkdown>{dsvObjectiveEquation}</MathMarkdown>
+                    </div>
+                  </div>
+                </article>
               </div>
               <div className="single-figure-wrap">
                 <FigureCard
@@ -1142,12 +1282,23 @@ export default function DSVProjectPage() {
 
         .constraint-formula {
           margin: 0.9rem 0 0.45rem;
-          font-family:
-            ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-            "Liberation Mono", "Courier New", monospace;
-          font-size: 0.94rem;
-          line-height: 1.7;
+          overflow-x: auto;
+        }
+
+        .math-markdown-paragraph {
+          margin: 0;
+        }
+
+        .math-markdown :global(.katex-display) {
+          margin: 0;
+        }
+
+        .math-markdown :global(.katex) {
           color: #0f172a;
+        }
+
+        .constraint-formula :global(.katex) {
+          font-size: 1rem;
         }
 
         .constraint-copy {
@@ -1155,6 +1306,72 @@ export default function DSVProjectPage() {
           font-size: 0.95rem;
           line-height: 1.65;
           color: #475569;
+        }
+
+        .equation-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+
+        .equation-card {
+          border-radius: 16px;
+          background: #ffffff;
+          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+          padding: 1rem;
+          text-align: left;
+        }
+
+        .equation-card-span {
+          grid-column: 1 / -1;
+        }
+
+        .equation-copy-block {
+          padding: 0.1rem 0.1rem 0.8rem;
+        }
+
+        .equation-label {
+          display: inline-flex;
+          align-items: center;
+          border-radius: 999px;
+          background: #eff6ff;
+          color: #1d4ed8;
+          padding: 0.35rem 0.7rem;
+          font-size: 0.8rem;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .equation-title {
+          margin: 0.75rem 0 0;
+          font-size: 1.15rem;
+          color: #0f172a;
+        }
+
+        .equation-copy {
+          margin: 0.55rem 0 0;
+          font-size: 0.95rem;
+          line-height: 1.68;
+          color: #475569;
+        }
+
+        .equation-stack {
+          display: grid;
+          gap: 0.8rem;
+        }
+
+        .equation-math {
+          overflow-x: auto;
+          border-radius: 14px;
+          background: #f8fafc;
+          padding: 1rem;
+          box-shadow: inset 0 0 0 1px #e2e8f0;
+        }
+
+        .equation-math-compact :global(.katex) {
+          font-size: 1rem;
         }
 
         .single-figure-wrap {
@@ -1445,6 +1662,7 @@ export default function DSVProjectPage() {
         @media (max-width: 960px) {
           .idea-grid,
           .constraint-grid,
+          .equation-grid,
           .analysis-grid,
           .distillation-layout,
           .code-grid,
