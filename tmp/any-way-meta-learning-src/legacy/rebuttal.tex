@@ -1,0 +1,308 @@
+%File: anonymous-submission-latex-2024.tex
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai24}  % DO NOT CHANGE THIS
+\usepackage{times}  % DO NOT CHANGE THIS
+\usepackage{helvet}  % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage{amsmath}
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\usepackage{kotex}
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in} % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in} % DO NOT CHANGE THIS
+\usepackage{xcolor} % Required for text color
+%\usepackage{graphicx}
+\usepackage{algcompatible}
+\usepackage{algpseudocode}
+\usepackage{amssymb}
+% \newcommand{\nj}[1]{\textcolor{red}{#1}}
+% \newcommand{\hh}[1]{\textcolor{green}{#1}}
+% \newcommand{\jh}[1]{\textcolor{blue}{#1}}
+% \newcommand{\yr}[1]{\textcolor{magenta}{#1}}
+% \newcommand{\nj}[1]{\textcolor{red}{#1}}
+% \newcommand{\jh}[1]{\textcolor{blue}{#1}}
+% \newcommand{\yr}[1]{\textcolor{magenta}{#1}}
+\newcommand{\nj}[1]{\textcolor{black}{#1}}
+\newcommand{\jh}[1]{\textcolor{black}{#1}}
+\newcommand{\yr}[1]{\textcolor{black}{#1}}
+\newcommand{\rrr}[1]{\textcolor{olive}{#1}}
+\newcommand{\rrrr}[1]{\textcolor{purple}{#1}}
+\newcommand{\rrrrr}[1]{\textcolor{brown}{#1}}
+\usepackage{adjustbox}
+\newcommand{\etal}{\textit{et al}., }
+\usepackage{adjustbox}
+\newcommand{\ie}{\textit{i}.\textit{e}., }
+\newcommand{\eg}{\textit{e}.\textit{g}.\ }
+\usepackage{lipsum}
+%
+% These are recommended to typeset algorithms but not required. See the subsubsection on algorithms. Remove them if you don't have algorithms in your paper.
+\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{layouts}
+%
+% These are are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
+\usepackage{newfloat}
+\usepackage{listings}
+\DeclareCaptionStyle{ruled}{labelfont=normalfont,labelsep=colon,strut=off} % DO NOT CHANGE THIS
+\lstset{%
+	basicstyle={\footnotesize\ttfamily},% footnotesize acceptable for monospace
+	numbers=left,numberstyle=\footnotesize,xleftmargin=2em, % show line numbers, remove this entire line if you don't want the numbers.
+	aboveskip=0pt,belowskip=0pt,%
+	showstringspaces=false,tabsize=2,breaklines=true}
+\floatstyle{ruled}
+\newfloat{listing}{tb}{lst}{}
+\floatname{listing}{Listing}
+%
+% Keep the \pdfinfo as shown here. There's no need
+% for you to add the /Title and /Author tags.
+\pdfinfo{
+/TemplateVersion (2024.1)
+}
+
+\usepackage{caption}
+\DeclareCaptionLabelFormat{AppendixTables}{A.#2}
+\captionsetup{labelformat=AppendixTables}
+
+% DISALLOWED PACKAGES
+% \usepackage{authblk} -- This package is specifically forbidden
+% \usepackage{balance} -- This package is specifically forbidden
+% \usepackage{color (if used in text)
+% \usepackage{CJK} -- This package is specifically forbidden
+% \usepackage{float} -- This package is specifically forbidden
+% \usepackage{flushend} -- This package is specifically forbidden
+% \usepackage{fontenc} -- This package is specifically forbidden
+% \usepackage{fullpage} -- This package is specifically forbidden
+% \usepackage{geometry} -- This package is specifically forbidden
+% \usepackage{grffile} -- This package is specifically forbidden
+% \usepackage{hyperref} -- This package is specifically forbidden
+% \usepackage{navigator} -- This package is specifically forbidden
+% (or any other package that embeds links such as navigator or hyperref)
+% \indentfirst} -- This package is specifically forbidden
+% \layout} -- This package is specifically forbidden
+% \multicol} -- This package is specifically forbidden
+% \nameref} -- This package is specifically forbidden
+% \usepackage{savetrees} -- This package is specifically forbidden
+% \usepackage{setspace} -- This package is specifically forbidden
+% \usepackage{stfloats} -- This package is specifically forbidden
+% \usepackage{tabu} -- This package is specifically forbidden
+% \usepackage{titlesec} -- This package is specifically forbidden
+% \usepackage{tocbibind} -- This package is specifically forbidden
+% \usepackage{ulem} -- This package is specifically forbidden
+% \usepackage{wrapfig} -- This package is specifically forbidden
+% DISALLOWED COMMANDS
+% \nocopyright -- Your paper will not be published if you use this command
+% \addtolength -- This command may not be used
+% \balance -- This command may not be used
+% \baselinestretch -- Your paper will not be published if you use this command
+% \clearpage -- No page breaks of any kind may be used for the final version of your paper
+% \columnsep -- This command may not be used
+% \newpage -- No page breaks of any kind may be used for the final version of your paper
+% \pagebreak -- No page breaks of any kind may be used for the final version of your paperr
+% \pagestyle -- This command may not be used
+% \tiny -- This is not an acceptable font size.
+% \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
+% \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+
+\setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
+
+% The file aaai24.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+
+% Title
+
+% Your title must be in mixed case, not sentence case.
+% That means all verbs (including short verbs like be, is, using,and go),
+% nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
+% articles, conjunctions, and prepositions are lower case unless they
+% directly follow a colon or long dash
+\title{Any-Way Meta Learning}
+\author{
+    %Authors
+    % All authors must be in the same font size and format.
+    Written by AAAI Press Staff\textsuperscript{\rm 1}\thanks{With help from the AAAI Publications Committee.}\\
+    AAAI Style Contributions by Pater Patel Schneider,
+    Sunil Issar,\\
+    J. Scott Penberthy,
+    George Ferguson,
+    Hans Guesgen,
+    Francisco Cruz\equalcontrib,
+    Marc Pujol-Gonzalez\equalcontrib
+}
+\affiliations{
+    %Afiliations
+    \textsuperscript{\rm 1}Association for the Advancement of Artificial Intelligence\\
+    % If you have multiple authors and multiple affiliations
+    % use superscripts in text and roman font to identify them.
+    % For example,
+
+    % Sunil Issar\textsuperscript{\rm 2},
+    % J. Scott Penberthy\textsuperscript{\rm 3},
+    % George Ferguson\textsuperscript{\rm 4},
+    % Hans Guesgen\textsuperscript{\rm 5}
+    % Note that the comma should be placed after the superscript
+
+    1900 Embarcadero Road, Suite 101\\
+    Palo Alto, California 94303-3310 USA\\
+    % email address must be in roman text type, not monospace or sans serif
+    proceedings-questions@aaai.org
+%
+% See more examples next
+}
+
+%Example, Single Author, $\rightarrow$> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\iffalse
+\title{Any-Way Meta Learning through node equivalence}
+\author {
+    Author Name
+}
+\affiliations{
+    Affiliation\\
+    Affiliation Line 2\\
+    name@example.com
+}
+\fi
+
+\iffalse
+%Example, Multiple Authors, $\rightarrow$> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\title{Any-Way Meta Learning through node equivalence}
+\author {
+    % Authors
+    First Author Name\textsuperscript{\rm 1},
+    Second Author Name\textsuperscript{\rm 2},
+    Third Author Name\textsuperscript{\rm 1}
+}
+\affiliations {
+    % Affiliations
+    \textsuperscript{\rm 1}Affiliation 1\\
+    \textsuperscript{\rm 2}Affiliation 2\\
+    firstAuthor@affiliation1.com, secondAuthor@affilation2.com, thirdAuthor@affiliation1.com
+}
+\fi
+
+\usepackage{booktabs} % For nicer tables
+
+\begin{document}
+
+
+
+
+
+% semantic classifier (detailed explanation for algorithm 2)
+% deploying semantic information could be problematic, particularly for test tasks that may include unseen classes such as in cross-domain scenarios. (r3)
+% how semantic class information is corporated into metric-based methods is not clear. (r4)
+% semantic classification loss requires a fixed number of classes C, how to determine the number of C? (r5)
+% how to determine the number of output nodes and the semantic classes C in practice?
+% is the proposed approach sensitive to these two hyperparameters?
+% details should be more clear and consistent. (r5)
+% semantic classification and ensemble of multiple output nodes w.r.t. same numeric class should also be in eq(1), the formula of total loss and algorithm 1.
+% balancing weight lambda for semantic classification loss is missing in calculating $L_total$.
+
+% label equivalence
+% the concept should be further explained. (r5)
+
+% [recap - contribution]
+% technical contribution
+% any-way enhancements might be viewed as incremental modules for meta-learning (r4)
+% only applicable to  classification tasks, leading to limited generality. (r5)
+
+% [experiment]
+% experiment setting
+% dataset is small, more validation experiments on large-scale datasets (r4)
+% baseline models (r4) (r5)
+% r5: is it straightforward to extend existing approach such as protonet to a stochastic cardinality version by randomly selecting a cardinality for each task? if so, why not compare with this new baseline?
+
+% additional experiment
+% absence of experiment on important concerns such as impact of the number of output nodes, number of semantic classes C. (r5)
+% clear explanation for why a sufficiently large O and the multiple assignment strategy yield performance gains. (further empirical evidence) (r3)
+
+% episodic task sampling 
+% relationship between the episodic task sampling and the meta-learning. (details of the episodic task sampling) (r4)
+
+
+
+\paragraph{Acknowledgements}
+% 먼저, 우리는 너희들이 우리에게 제공해준 긍정적인 평가와, 자세한 피드백에 대해서 매우 감사하다. 너희의 피드백은 우리 논문에 대해서 다시 생각해보고, 우리의 논문을 더 나은 방향으로 나아가게 하는데 굉장히 좋은 영향을 끼쳤다. 우선 우리의 task cardinality problem formulation에 대해서 공감해주고, 그 novelty를 알아줬다는 점에서 감사하다. \textbf{@\rrr{R3}, \rrrr{R4}, \rrrrr{R5}}
+% 또한, 우리가 작성한 부분들 중 이해가 어려울 수 있는 부분들에 대해서 지적해주어서 우리가 더 well-written된 글을 작성할 기회를 줘서 감사하다.
+%\textbf{@\rrr{R3}, \rrrr{R4}, \rrrrr{R5}}
+Firstly, we would like to express our sincere gratitude for the positive evaluation and detailed feedback you have provided. Your insights have significantly contributed to a deeper reflection on our paper and guided us \nj{toward} a more constructive direction. We are particularly thankful for your recognition of the novelty and importance of our `task cardinality problem formulation', and for agreeing that our algorithm effectively addresses this challenge. 
+Furthermore, we are grateful for pointing out sections of our manuscript that may have been challenging to understand, thus allowing us the opportunity to improve the clarity of our writing.
+
+\paragraph{Recap of our contribution} 
+\nj{We are the first to argue} that true meta-learning capability should be measured \nj{in an} any-way setting, \yr{rather than} \nj{in a fixed-way setting}. 
+\yr{We have discovered an equivalence across various episodic learning scenarios, positing that this enables a seamless transition from a fixed-way to an any-way setting. Our methodology exhibits proficient any-way learning capability, outperforming fixed-way settings.}
+%We discovered that there exists \nj{an} equivalence in \nj{different} episodic learning settings and claimed that this allows for a cost-free adaptation from \nj{a} fixed-way setting to \nj{an} any-way setting. Our methodology has any-way learning ability. Moreover, it has superior performance \nj{to} fixed-way settings. 
+\yr{Furthermore, w}e argued \nj{that the} episodic setting lacks semantic information during training, \yr{\nj{and we have proposed} a solution to solve this issue.} %and we proposed a solution to solve that issue. 
+\textbf{@\rrrrr{R5}} Also, \yr{given that} label equivalence is applicable to the action space in reinforcement learning (RL), we can also extend \nj{our any-way meta learning} to RL, which is \nj{one of the most common benchmarks} in meta-learning in classification. Our algorithm is applicable without any modification when the output space is discrete and greater than 1. 
+
+\paragraph{Recap of our method} \mbox{}\\
+\textbf{@\rrr{R3}, \rrrr{R4}, \rrrrr{R5}} 
+\textbf{Semantic classifier} 
+We apologize for \nj{any difficulties} in understanding \nj{our} semantic class algorithm. As \yr{illustrated} in Figure 2,  $g_s$ is the additional classifier. For example, suppose the output dimension of \nj{the} feature extractor is \yr{denoted as} $F$ and the total number of classes \yr{as} $C$, then the size of \yr{the} \nj{MLP} $g_s$ is $F \times C$. $g_s$ classifies its true (semantic) class during the inner loop \nj{in a supervised manner}. 
+\yr{This approach is motivated by the observation that conventional meta-learning (episodic training) lacks semantic information due to label equivalence, as stated in our introduction.} %The intuition behind this is that the amount of information \nj{as} conventional meta-learning (episodic training) lacks semantic information due to label equivalence as we stated in the introduction.
+
+\noindent
+\textbf{@\rrr{R3}} \yr{Regarding the test dataset, its classes remain completely unseen during training.} % \nj{The classes of the test dataset} remain completely unseen during training. 
+As evidenced by Table 6, there is a noticeable improvement in performance for in-domain cases. While a modest decline in cross-domain performance \yr{is observed}, which might suggest domain-overfitting as you indicated, the application of \nj{the} proposed techniques such as mixup can compensate for this \nj{degradation} to a certain extent.
+
+\noindent
+\textbf{@\rrrrr{R5}} \yr{Concerning the number of semantic classes denoted by $C$, it aligns with the number of classes in supervised learning. And it is \textit{not} a hyperparameter in our model.} % The number of semantic classes $C$ corresponds to the number of classes in supervised learning and is \textit{not} a hyperparameter in our model. 
+However, our use of diverse datasets serves as \nj{an} evidence that our approach works well across various values of $C$, for instance, 196 classes for Cars and 608 for tieredImagenet.
+
+\paragraph{Label equivalence} \textbf{@\rrrrr{R5}} 
+\yr{We agree with your request for a more detailed explanation of label equivalence since it is \nj{first} proposed by us.} %Your point is valid. Since we are the first to propose this phenomenon, a more detailed explanation is warranted. 
+Our label equivalence arises from episodic sampling; for instance, if both episodes 1 and 2 randomly assign `dogs' and `cats' to output nodes, the assignment could be reversed in each episode, fostering a natural equivalence effect as any class must adapt to any output node. \yr{We will include a more detailed explanation with this example to help our readers' understanding.}
+
+
+\paragraph{Experiment}
+\textbf{@\rrrr{R4}} \textbf{Baseline model selection} Referenced in \nj{Sec.}~4.1, MAML and Protonet are foundational \nj{algorithms for} GBML and MBML, \nj{respectively,} making them apt for substantiating our claims. By applying our algorithm to these general frameworks, we expect \nj{similar} performance benefits \nj{would be obtained for} similar methods \nj{of both GBML and MBML}. 
+
+\noindent
+\textbf{@\rrrrr{R5}} \textbf{Any-way on MBML} 
+\jh{MBML does not have classifier. As shown in Fig.2, we applied label equivalence on \nj{the} classifier. \yr{Thus,} we cannot directly apply our method \nj{to} MBML.}
+
+\noindent
+\textbf{@\rrrr{R4}}
+\textbf{Dataset} While the Cars and CUB datasets have fewer classes, \nj{we} used them to demonstrate the efficacy of our algorithm in fine-grained scenarios. The tieredImagenet dataset, however, is not small, comprising 608 classes. As mentioned in Table 2, unlike the baseline, our approach was stable and did not deteriorate with tieredImagenet, suggesting our algorithm's potential is greater with larger, more complex datasets.
+
+
+\paragraph{Additional results}
+\textbf{@ \rrr{R3}, \rrrrr{R5}} As shown in Table.A\ref{table:ablation}, there exists a positive tendency between \nj{the} number of output nodes $O$ and performance. \yr{Thus, this finding reaffirms our hypothesis regarding ensemble.} %\textbf{@\rrrr{R3}} %it reconfirms our hypothesis on ensemble. \nj{불완전 문장}
+\begin{table}[h]
+\centering
+\caption{Ablation experiments on the number of output nodes $O$. A model was trained on the Mini-ImageNet dataset using an any-way training method, excluding the semantic classifier.}
+\label{table:ablation}
+\adjustbox{width=0.45\textwidth}{
+\begin{tabular}{lcccccc} 
+\toprule
+\textbf{Way} & \multicolumn{2}{c}{3} & \multicolumn{2}{c}{5} & \multicolumn{2}{c}{10} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+\textbf{O \textbackslash  Data} & \textbf{Mini}  & \textbf{Cars}  & \textbf{Mini}  & \textbf{Cars}  & \textbf{Mini}  & \textbf{Cars}   \\
+\midrule
+10       & 76.79         & 60.53 & 63.91         & 46.04 & 46.34         & 30.62  \\
+20       & 78.83         & 62.01 & 66.71         & 47.92 & 49.96         & 32.71  \\
+30       & 79.06         & 63.58 & 66.73         & 49.80  & 50.28         & 34.82  \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\noindent
+\textbf{Related works \rrrr{@R4}} 
+\paragraph{Episodic task sampling}
+\yr{Meta learning evolves through episodes, signifying that it operates within an episodic framework.} %Meta learning evolves with episodes. \nj{This} means \nj{that} meta learning is conducted in \nj{an} episodic setting. 
+As we \yr{have} discussed so far, a model should adapt to \nj{an} unseen episode within \nj{a} few or \nj{no} optimization steps. 
+\yr{Additionally}, as demonstrated in Table 1, the performance significantly declines when a model trained on a fixed 10-way is tested on a 3-way \yr{scenario}, indicating that conventional methods fail to address any-way cases. We \nj{are} the first to address and solve this problem, as no existing papers tackle\yr{d} any-way cases \yr{before}. 
+\paragraph{Incremental learning}
+In regards to incremental learning, \yr{its direct application to meta-learning} %applying it directly to meta-learning 
+would necessitate continuous redesigning of the meta-learning loss, \yr{resulting in} increased training time and reduced overall performance. \yr{In contrast, our methodology} maintains speed with feedforward operations \yr{while enhancing} performances across all cases.  
+
+
+% \bibliography{aaai24}
+
+\end{document}

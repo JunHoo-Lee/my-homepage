@@ -1,0 +1,149 @@
+\begin{thebibliography}{29}
+\providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Baxter(2011)}]{DG:wisdom0}
+Baxter, J. 2011.
+\newblock A Model of Inductive Bias Learning.
+\newblock \emph{CoRR}, abs/1106.0245.
+
+\bibitem[{Caruana(1997)}]{DG:wisdom1}
+Caruana, R. 1997.
+\newblock Multitask Learning.
+\newblock \emph{Machine Learning}, 28(1): 41--75.
+
+\bibitem[{Chen et~al.(2019)Chen, Liu, Kira, Wang, and Huang}]{nonepisodic:transferminitocars}
+Chen, W.; Liu, Y.; Kira, Z.; Wang, Y.~F.; and Huang, J. 2019.
+\newblock A Closer Look at Few-shot Classification.
+\newblock \emph{CoRR}, abs/1904.04232.
+
+\bibitem[{Deleu et~al.(2019)Deleu, W\"urfl, Samiei, Cohen, and Bengio}]{coding:torchmeta}
+Deleu, T.; W\"urfl, T.; Samiei, M.; Cohen, J.~P.; and Bengio, Y. 2019.
+\newblock {Torchmeta: A Meta-Learning library for PyTorch}.
+\newblock Available at: https://github.com/tristandeleu/pytorch-meta.
+
+\bibitem[{Doersch, Gupta, and Efros(2015)}]{label_equiv:matchingnetwork}
+Doersch, C.; Gupta, A.; and Efros, A.~A. 2015.
+\newblock Unsupervised Visual Representation Learning by Context Prediction.
+\newblock \emph{CoRR}, abs/1505.05192.
+
+\bibitem[{Finn, Abbeel, and Levine(2017)}]{episodic:GBML:MAML}
+Finn, C.; Abbeel, P.; and Levine, S. 2017.
+\newblock Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks.
+\newblock \emph{CoRR}, abs/1703.03400.
+
+\bibitem[{Flennerhag et~al.(2019)Flennerhag, Rusu, Pascanu, Visin, Yin, and Hadsell}]{episodic:GBML:warpgrad}
+Flennerhag, S.; Rusu, A.~A.; Pascanu, R.; Visin, F.; Yin, H.; and Hadsell, R. 2019.
+\newblock Meta-learning with warped gradient descent.
+\newblock \emph{arXiv preprint arXiv:1909.00025}.
+
+\bibitem[{Ghifary et~al.(2015)Ghifary, Balduzzi, Kleijn, and Zhang}]{DG:Gunbon0}
+Ghifary, M.; Balduzzi, D.; Kleijn, W.~B.; and Zhang, M. 2015.
+\newblock Domain generalization for object recognition with multi-task autoencoders.
+\newblock In \emph{Proceedings of the IEEE international conference on computer vision}, 2551--2559.
+
+\bibitem[{Jian and Torresani(2021)}]{scarcitylabel}
+Jian, Y.; and Torresani, L. 2021.
+\newblock Label Hallucination for Few-Shot Classification.
+\newblock arXiv:2112.03340.
+
+\bibitem[{Khrulkov et~al.(2019)Khrulkov, Mirvakhabova, Ustinova, Oseledets, and Lempitsky}]{episodic:MBML:Hyperbolic}
+Khrulkov, V.; Mirvakhabova, L.; Ustinova, E.; Oseledets, I.~V.; and Lempitsky, V.~S. 2019.
+\newblock Hyperbolic Image Embeddings.
+\newblock \emph{CoRR}, abs/1904.02239.
+
+\bibitem[{Kirkpatrick et~al.(2016)Kirkpatrick, Pascanu, Rabinowitz, Veness, Desjardins, Rusu, Milan, Quan, Ramalho, Grabska{-}Barwinska, Hassabis, Clopath, Kumaran, and Hadsell}]{continual:catastrophic}
+Kirkpatrick, J.; Pascanu, R.; Rabinowitz, N.~C.; Veness, J.; Desjardins, G.; Rusu, A.~A.; Milan, K.; Quan, J.; Ramalho, T.; Grabska{-}Barwinska, A.; Hassabis, D.; Clopath, C.; Kumaran, D.; and Hadsell, R. 2016.
+\newblock Overcoming catastrophic forgetting in neural networks.
+\newblock \emph{CoRR}, abs/1612.00796.
+
+\bibitem[{Krause et~al.(2013)Krause, Stark, Deng, and Fei-Fei}]{dataset:cars}
+Krause, J.; Stark, M.; Deng, J.; and Fei-Fei, L. 2013.
+\newblock 3d object representations for fine-grained categorization.
+\newblock \emph{In Proceedings of the IEEE international conference on computer vision workshops}.
+
+\bibitem[{Lee, Yoo, and Kwak(2023)}]{lee2023shot}
+Lee, J.; Yoo, J.; and Kwak, N. 2023.
+\newblock {SHOT}: Suppressing the Hessian along the Optimization Trajectory for Gradient-Based Meta-Learning.
+\newblock In \emph{Thirty-seventh Conference on Neural Information Processing Systems}.
+
+\bibitem[{Li et~al.(2018)Li, Yang, Yang, and Hospedales}]{DG:Gunbon1}
+Li, D.; Yang, Y.; Yang, Y.; and Hospedales, T.~M. 2018.
+\newblock Learning to generalize: Meta-learning for domain generalization.
+\newblock In \emph{Proceedings of the Thirty-Second AAAI Conference on Artificial Intelligence}.
+
+\bibitem[{Lopez{-}Paz and Ranzato(2017)}]{continual:memoryrehearsal}
+Lopez{-}Paz, D.; and Ranzato, M. 2017.
+\newblock Gradient Episodic Memory for Continuum Learning.
+\newblock \emph{CoRR}, abs/1706.08840.
+
+\bibitem[{Maurer, Pontil, and Romera-Paredes(2016)}]{DG:wisdom2}
+Maurer, A.; Pontil, M.; and Romera-Paredes, B. 2016.
+\newblock The Benefit of Multitask Representation Learning.
+\newblock arXiv:1505.06279.
+
+\bibitem[{Nichol, Achiam, and Schulman(2018)}]{episodic:GBML:Reptile}
+Nichol, A.; Achiam, J.; and Schulman, J. 2018.
+\newblock On first-order meta-learning algorithms.
+\newblock \emph{arXiv preprint arXiv:1803.02999}.
+
+\bibitem[{Oh et~al.(2020)Oh, Yoo, Kim, and Yun}]{episodic:GBML:BOIL}
+Oh, J.; Yoo, H.; Kim, C.; and Yun, S.-Y. 2020.
+\newblock Boil: Towards representation change for few-shot learning.
+\newblock \emph{arXiv preprint arXiv:2008.08882}.
+
+\bibitem[{Raghu et~al.(2019)Raghu, Raghu, Bengio, and Vinyals}]{episodic:GBML:ANIL}
+Raghu, A.; Raghu, M.; Bengio, S.; and Vinyals, O. 2019.
+\newblock Rapid Learning or Feature Reuse? Towards Understanding the Effectiveness of {MAML}.
+\newblock \emph{CoRR}, abs/1909.09157.
+
+\bibitem[{Rajeswaran et~al.(2019)Rajeswaran, Finn, Kakade, and Levine}]{episodic:GBML:imaml}
+Rajeswaran, A.; Finn, C.; Kakade, S.~M.; and Levine, S. 2019.
+\newblock Meta-learning with implicit gradients.
+\newblock \emph{Advances in neural information processing systems}, 32.
+
+\bibitem[{Ren et~al.(2018)Ren, Triantafillou, Ravi, Snell, Swersky, Tenenbaum, Larochelle, and Zemel}]{dataset:Tieredimagenet}
+Ren, M.; Triantafillou, E.; Ravi, S.; Snell, J.; Swersky, K.; Tenenbaum, J.~B.; Larochelle, H.; and Zemel, R.~S. 2018.
+\newblock Meta-learning for semi-supervised few-shot classification.
+\newblock \emph{In the Sixth International Conference on Learning Representations}.
+
+\bibitem[{ROBINS(1995)}]{catastrophygunbon}
+ROBINS, A. 1995.
+\newblock Catastrophic Forgetting, Rehearsal and Pseudorehearsal.
+\newblock \emph{Connection Science}, 7(2): 123--146.
+
+\bibitem[{Russakovsky et~al.(2015)Russakovsky, Deng, Su, Krause, Satheesh, Ma, Huang, Karpathy, Khosla, Bernstein et~al.}]{dataset:imagenet}
+Russakovsky, O.; Deng, J.; Su, H.; Krause, J.; Satheesh, S.; Ma, S.; Huang, Z.; Karpathy, A.; Khosla, A.; Bernstein, M.; et~al. 2015.
+\newblock Imagenet large scale visual recognition challenge.
+\newblock \emph{International journal of computer vision}, 115: 211--252.
+
+\bibitem[{Rusu et~al.(2018)Rusu, Rao, Sygnowski, Vinyals, Pascanu, Osindero, and Hadsell}]{episodic:GBML:LEO}
+Rusu, A.~A.; Rao, D.; Sygnowski, J.; Vinyals, O.; Pascanu, R.; Osindero, S.; and Hadsell, R. 2018.
+\newblock Meta-Learning with Latent Embedding Optimization.
+\newblock \emph{CoRR}, abs/1807.05960.
+
+\bibitem[{Snell, Swersky, and Zemel(2017)}]{episodic:MBML:Protonet}
+Snell, J.; Swersky, K.; and Zemel, R.~S. 2017.
+\newblock Prototypical Networks for Few-shot Learning.
+\newblock \emph{CoRR}, abs/1703.05175.
+
+\bibitem[{Thrun and Pratt(2012)}]{labelequiv:metadefinition}
+Thrun, S.; and Pratt, L. 2012.
+\newblock \emph{Learning to learn}.
+\newblock Springer Science \& Business Media.
+
+\bibitem[{Torralba and Efros(2011)}]{theory:specificdataset}
+Torralba, A.; and Efros, A.~A. 2011.
+\newblock Unbiased look at dataset bias.
+\newblock In \emph{CVPR 2011}, 1521--1528.
+
+\bibitem[{Vinyals et~al.(2016)Vinyals, Blundell, Lillicrap, and Wierstra}]{dataset:MiniImageNet}
+Vinyals, O.; Blundell, C.; Lillicrap, T.; and Wierstra, D. 2016.
+\newblock Matching networks for one shot learning.
+\newblock \emph{Advances in neural information processing systems}, 29.
+
+\bibitem[{Welinder et~al.(2010)Welinder, Branson, Mita, Wah, Schroff, Belongie, and Perona}]{dataset:cub}
+Welinder, P.; Branson, S.; Mita, T.; Wah, C.; Schroff, F.; Belongie, S.; and Perona, P. 2010.
+\newblock Caltech-UCSD Birds 200.
+\newblock \emph{Technical Report CNS-TR-2010-001, California Institute of Technology}.
+
+\end{thebibliography}

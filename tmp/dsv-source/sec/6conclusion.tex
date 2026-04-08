@@ -1,0 +1,44 @@
+% \section{Ablation study}
+
+
+% \paragraph{\jh{Effect of Each Loss}}
+
+
+% % \hh{Fig.\ref{fig:primalstat} presents the results of extracting DSVs using solely either the primal or the stationary condition for the classes bird and automobile. It is observed that using only the primal condition captures no noteworthy semantics, whereas the employment of the stationary condition alone results in the extraction of features resembling actual dataset characteristics, like shape and edge details. Since the stationary condition does not directly reflect class constraints, 
+% %it generates artifacts similar to the dataset but fails to make class-specific adjustments, 
+% % it leads to a notable decrease in model accuracy for those samples. Therefore, it becomes evident that the primal \jh{condition has the role of classifier guidance}. Moreover, akin to typical generative models utilizing classifier guidance, an appropriate interpolation between the two losses can be employed to modulate classifier guidance, enabling sampling in a manner similar to generative models.}
+
+% \jh{In the synthesis of DSVs, the process starts from noise, which is sampled from a Gaussian distribution. While this initial step resembles the diffusion process in diffusion models \cite{diffusion:ddpm, diffusion:scormatching}, there is a fundamental difference in the target of the transition. The only difference is its desired distribution. In diffusion models, the transition aims to capture the entire data manifold. However, for DSV synthesis, the focus is specifically on $\partial \mathcal{M}$, the boundary of the data manifold.}
+
+% \jh{A discretized diffusion model with classifier guidance can be described by the following equation:}
+% \begin{equation}
+% x_{t+1} = x_t + \epsilon_t \cdot \left( \nabla_x \log p(x_t) + \lambda \nabla_x \log p(y | x_t) \right)
+% \end{equation}
+
+% \jh{Our Algorithm~\ref{alg:KKT}, which can be formulated as:}
+% \begin{equation}
+% x_{t+1} = x_{t} + \alpha \cdot \left( \nabla_x L_{\text{stat}}(A(x)) + \beta \nabla_x L_{\text{primal}}(A(x) \right)
+% \end{equation}
+
+% Where $A$ is random augmentation function. In our algorithm, the \textit{stationarity} condition mirrors the \textit{score} in diffusion models, while the \textit{primal condition} aligns with the concept of \textit{guidance}. However, unlike traditional diffusion models that target the whole data manifold, our process is directed towards navigating from the Gaussian distribution to $\partial \mathcal{M}$, the boundary of the data manifold. This focus on the manifold boundary is a distinctive aspect of our approach, emphasizing the generation of DSVs within the crucial decision boundaries. \jh{Fig.~\ref{fig:primalstat} also supports our hypothesis that the primal condition alone does not generate meaningful images.}. 
+% %Primal loss itself does not provide much information.
+% Moreover, while stationarity loss alone can create images with well-structured shapes, it fails to generate accurate samples if the sample labels do not match the targeted label, especially in the absence of primal guidance (classifier guidance). Exploring the intricate relationship between stationarity and diffusion in the context of data manifold navigation presents an exciting avenue for future research.
+
+% \section{Conclusion}
+% \hh{ This paper pioneers the definition of \jh{support vectors} in nonlinear deep learning models, namely DSVs (Deep Support Vectors). \jh{We} demonstrated its feasibility of generating DSVs using only pretrained models without any access to the training dataset. To do so, we extended the KKT conditions, traditionally applicable only to binary SVMs, to the DeepKKT conditions by incorporating manifold conditions for multi-class classification models. \jh{DeepKKT conditions can be utilized to any deep learning models which exploits logistic loss.} These synthesized DSVs encode the decision boundary, which could be used for a visual and intuitive explanation of a model's decision process. Furthermore we have shown that we can actually retrain the model with DSVs like SVM.}
+
+\section{Conclusion}
+\jh{\nj{In this paper, we redefined support vectors} in nonlinear deep learning models through the introduction of Deep Support Vectors (DSVs). We demonstrated the feasibility of generating DSVs using only \nj{a pretrained model}, without \nj{accessing} to the training dataset. To achieve this, we extended the KKT (Karush-Kuhn-Tucker) conditions to DeepKKT conditions \nj{and the proposed} method can be applied to any deep learning models.}
+
+\jh{Akin to SVMs, the DeepKKT condition effectively encodes the decision boundary into DSVs. DSVs can reconstruct the model, making them useful for dataset distillation. Additionally, their visual encoding of the decision criteria can serve as a global explanation, helping to understand the model's overall behavior and decisions. Furthermore, the DeepKKT condition transforms a classification model into a generative model with high fidelity. Not only can it sample data, but it also generalizes well, allowing the use of labels as latent variables.}
+
+
+% This paper pioneers the definition of support vectors in nonlinear deep learning models, specifically through the introduction of DSVs (Deep Support Vectors). We demonstrated the feasibility of generating DSVs using only pretrained models, without requiring access to the training dataset. To achieve this, we extended the KKT (Karush-Kuhn-Tucker) conditions, to DeepKKT conditions. It can be applied to any deep learning models. % utilizing logistic loss. 
+% \jh{Akin to SVMs, DeepKKT condition encodes the decision boundary well to DSVs. DSVs can reconstruct the model, thereby can used in dataset distillation, also, its visual encoding on dicision criterion can serve as global explanation, 모델의 전반적인 동작과 결정을 이해하게 만드는 것..}
+% Furthermore, DeepKKT condition makes classification model to generation model with high fidelity, not only it can sample, but it can also generalizes well so it we can use labels as latent.
+
+
+
+
+
+% 이 논문(paper)은 최초로 비선형적인 딥러닝 모델에서 잘알려진 SVM의 support vector에 대응하는 DSV들을 정의하였으며, training dataset에 접근없이 pretrained된 모델만 이용하여 dsv를 생성할 수 있음을 보여준다. 기존의 binary classification만 가능했던 svm이 만족해야하는 KKT condition을 multiclass classifing model에 manifold condition을 추가한 Deep KKT condition으로 확장하였다. DeepKKT loss 만을 사용하여 pure noise에서 부터 DSV를 만들 수 있는 computational cost가 낮은 알고리즘을 개발하였으며, 이 알고리즘은overparameterized setting에서 뿐만 아니라 practical한 세팅에서도 robust하게 동작함을 보여준다.  We also show that the synthesized DSVs encode the decision boundary  therefore contains rich semantic information which could be used at visual and intuitive explanation of a model’s decision process. 또한 본연구에서는 DeepKKT loss term의 의미를 분석하여 classifier guided diffusion model 표현과 대응하였으며, 이러한 연관성을 이용하여 추후에 DSV가 generative model의 역할도 수행할것으로 기대한다.}

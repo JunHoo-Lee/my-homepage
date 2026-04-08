@@ -5,6 +5,9 @@ import type { ReactNode } from "react";
 import { ChevronUp, FileText, Home, Quote } from "lucide-react";
 import Image from "next/image";
 import { Inter } from "next/font/google";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 
 import BibtexCopyButton from "./BibtexCopyButton";
 
@@ -620,12 +623,12 @@ export default function CSFPage() {
                   label <code>c</code>, and estimates the prompt-conditioned
                   category distribution.
                 </p>
-                <p className="method-equation">
-                  <code>
-                    hat_pi_m(c | p) = (1 / N) sum_(i=1)^N 1[g(x_i) = c], x_i ~
-                    m(p)
-                  </code>
-                </p>
+                <LatexBlock className="method-equation">
+                  {String.raw`$$
+\hat{\pi}_m(c \mid p) = \frac{1}{N} \sum_{i=1}^{N} \mathbf{1}[g(x_i) = c],
+\qquad x_i \sim m(p)
+$$`}
+                </LatexBlock>
               </article>
 
               <article className="method-card">
@@ -641,35 +644,19 @@ export default function CSFPage() {
                   prompt set <code>P</code>, and smaller transport cost becomes
                   stronger attribution evidence.
                 </p>
-                <p className="method-equation">
-                  <code>
-                    d_b = sum_(p in P) W_1(hat_pi_s(. | p), hat_pi_b(. | p)),
-                    P(b | s) propto exp(-tau d_b)
-                  </code>
-                </p>
+                <LatexBlock className="method-equation">
+                  {String.raw`$$
+d_b = \sum_{p \in P} W_1\!\left(\hat{\pi}_s(\cdot \mid p), \hat{\pi}_b(\cdot \mid p)\right),
+\qquad P(b \mid s) \propto \exp(-\tau d_b)
+$$`}
+                </LatexBlock>
               </article>
             </div>
 
-            <figure className="narrative-figure method-figure">
-              <Image
-                src="/csf/prompt-ablation.png"
-                alt="Prompt ablation showing that context changes the semantic mixture produced by the model"
-                width={828}
-                height={288}
-              />
-            </figure>
-            <p className="figure-caption has-text-centered">
-              CSF relies on the fact that changing only the surrounding context
-              can shift the semantic mixture a model generates. That latent
-              mixture is much harder to wash away than style, which makes it a
-              useful fingerprint in the strict query-only setting.
-            </p>
-
-            <p className="method-note has-text-centered">
-              Accept <code>b*</code> = <code>arg max_b P(b | s)</code> only when
-              the dominance margin stays above a threshold:
-              <code> P(b* | s) - max_(b != b*) P(b | s) &gt; delta</code>.
-            </p>
+            <LatexBlock className="method-note has-text-centered">
+              {String.raw`Accept $b^* = \arg\max_b P(b \mid s)$ only when the dominance margin stays above a threshold:
+$P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
+            </LatexBlock>
           </div>
         </section>
 
@@ -1053,6 +1040,16 @@ export default function CSFPage() {
         .csf-page .method-note code {
           font-family: "SFMono-Regular", ui-monospace, "Liberation Mono",
             Menlo, monospace;
+        }
+
+        .csf-page .method-equation p,
+        .csf-page .method-note p {
+          margin: 0;
+        }
+
+        .csf-page .method-equation .katex-display,
+        .csf-page .method-note .katex-display {
+          margin: 0;
         }
 
         .csf-page .method-note {
@@ -1540,6 +1537,25 @@ function PublicationLink({
         <span>{label}</span>
       </a>
     </span>
+  );
+}
+
+function LatexBlock({
+  children,
+  className,
+}: {
+  children: string;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 }
 

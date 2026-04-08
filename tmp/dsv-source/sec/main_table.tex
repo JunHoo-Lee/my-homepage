@@ -1,0 +1,83 @@
+% % Please add the following required packages to your document preamble:
+% % \usepackage{multirow}
+% \begin{table}[ht]
+% % \begin{wraptable}{r}{8cm}
+% \centering
+% \resizebox{8cm}{!}{
+% \begin{tabular}{c|c|c|c|ccc|c}
+% \hline
+% Dataset                    & img/cls             & shot/class & ratio & DC          & DSA & DM & DSV \\ \hline
+% \multirow{12}{*}{CIFAR10}  & \multirow{5}{*}{1}  & 0          & 0     & -           & -   & -  & -   \\
+%                            &                     & 1          &       & 13.34$\pm$0.56 & 13.44$\pm$0.55 & 0.1303$\pm$0.0015 & -   \\
+%                            &                     & 10         & 0.2   & 21.27$\pm$0.57 & 21.15$\pm$0.58 & 0.1368$\pm$0.0066  & -   \\
+%                            &                     & 50         & 1     & 25.90$\pm$0.62 & 26.01$\pm$0.70 & 0.1726$\pm$0.0045  & -   \\
+%                            &                     & 500        & 10    & 28.06$\pm$0.61 & 28.20$\pm$0.63 & 0.1858$\pm$0.0053  & -   \\ \cline{2-8} 
+%                            & \multirow{4}{*}{10} & 0          & 0     & -           & -   & -  & -   \\
+%                            &                     & 10         &       & 28.06$\pm$0.32 & 28.56$\pm$0.51 & 29.77$\pm$0.66  & -   \\
+%                            &                     & 50         &       & 35.93$\pm$0.52 & 36.67$\pm$0.56 & 33.37$\pm$0.48 & -   \\
+%                            &                     & 500        &   10    & 41.35$\pm$0.57 & 49.79$\pm$0.34 & 0.3988$\pm$0.0052  & -   \\ \cline{2-8} 
+%                            & \multirow{3}{*}{50} & 0          & 0     & -           & -   & -  & -   \\
+%                            &                     & 50         &    50   &  - &  39.88$\pm$0.52 & 48.05$\pm$0.32 & -   \\
+%                            &                     & 500        &   10    & -           & 52.45 $\pm$ 0.45   & 56.34 $\pm$ 0.56  & -   \\ \hline
+% \multirow{12}{*}{CIFAR100} & \multirow{5}{*}{1}  & 0          & 0     & -           & -   & -  & 5   \\
+%                            &                     & 1          & 0.02  & 7.01$\pm$0.28 & 3.76$\pm$0.12 & 3.65$\pm$0.12
+%   & 5   \\
+%                            &                     & 10         & 0.2   & 10.66$\pm$0.34 & 7.12$\pm$0.25 & 7.00$\pm$0.23
+%   & -   \\
+%                            &                     & 50         & 1     & 12.56$\pm$0.34 & 10.82$\pm$0.33 & 10.60$\pm$0.43
+%   & -   \\ &                     & 500        & 10    & 21.11$\pm$0.33 & 12.88$\pm$0.36 & 12.79$\pm$0.32 & -   \\ \cline{2-8} 
+%                            & \multirow{4}{*}{10} & 0          & 0     & -           & -   & -  & -   \\
+%                            &                     & 10         &       & -           & -   & -  & -   \\
+%                            &                     & 50         &       & -           & -   & -  & -   \\
+%                            &                     & 500        &       & -           & -   & -  & -   \\ \cline{2-8} 
+%                            & \multirow{3}{*}{50} & 0          & 0     & -           & -   & -  & -   \\
+%                            &                     & 50         &       & -           & -   & -  & -   \\
+%                            &                     & 500        &       & -           & -   & -  & -   
+% \end{tabular}
+% }
+% \caption{Performance of Few-shot learning on CIFAR10 and CIFAR100. \nj{`img/cls' and `shot/class' refer to the per-class number of generated images and the training samples used in generating the distilled dataset, respectively. `ratio' is the ratio of the seen samples among the entire training samples. }}
+% \label{table:fewshot}
+% % \end{wraptable}
+% \end{table}
+
+
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[t]
+\centering
+\resizebox{12cm}{!}{
+\begin{tabular}{c|c|c|ccc|c}
+img/cls             & shot/class & ratio (\%) & DC~\cite{DC}            & DSA~\cite{DSA}              & DM~\cite{DM}                & DSV\jh{s} \\ \hline
+\multirow{5}{*}{1}   
+                    & 0          & 0      & -   & - & - &21.68 $\pm$ 0.80   \\
+                    & 1          & 0.02      & 16.48$\pm$0.81 & 15.41$\pm$1.91   & 13.03$\pm$0.15 & \textbf{22.69} $\pm$ 0.38   \\
+                    & 10         & 0.2   & 19.66$\pm$0.78 & 21.15$\pm$0.58   & 22.42$\pm$0.43 & -   \\
+                    & 50         & 1     & 25.90$\pm$0.62 & 26.01$\pm$0.70   & 24.42$\pm$0.29 & -   \\
+                    & 500        & 10    & 28.06$\pm$0.61 & 28.20$\pm$0.63   & 25.06$\pm$1.20 & -   \\ \hline
+\multirow{4}{*}{10} 
+                    & 0          & 0      & -   & - & - & 30.35 $\pm$ 0.99   \\
+                    & 10         &    0.2   & 25.06$\pm$1.20 & 26.67$\pm$1.04   & 29.77$\pm$0.66    & \textbf{37.90} $\pm$ 1.69   \\
+                    & 50         &   1    & 36.44$\pm$0.52 & 36.63$\pm$0.52   & 36.63$\pm$0.52    & -   \\
+                    & 500        & 10    & 43.55$\pm$0.50 & 44.66$\pm$0.59   & 47.96$\pm$0.95 & -   \\ \hline
+\multirow{3}{*}{50} 
+                    & 0         & 0    & -              & -   & -    & 39.35 $\pm$  0.54   \\
+                    & 50         & 1    & 41.22$\pm$0.90              & 41.29$\pm$0.45   & 48.93$\pm$0.92    & \textbf{53.56} $\pm$  0.73   \\
+                    & 500        & 10    & 52.00$\pm$0.59              & 52.19$\pm$0.53 & 60.59$\pm$0.41  & -   \\ %\hline
+% \multirow{5}{*}{1}  & 0          & 0     & -              & -                & -                 & 5   \\
+%                     & 1          & 0.02  & 7.01$\pm$0.28  & 3.76$\pm$0.12    & 3.65$\pm$0.12     & 5   \\
+%                     & 10         & 0.2   & 10.66$\pm$0.34 & 7.12$\pm$0.25    & 7.00$\pm$0.23     & -   \\
+%                     & 50         & 1     & 12.56$\pm$0.34 & 10.82$\pm$0.33   & 10.60$\pm$0.43    & -   \\
+%                     & 500        & 10    & 21.11$\pm$0.33 & 12.88$\pm$0.36   & 12.79$\pm$0.32    & -   \\ \hline
+% \multirow{4}{*}{10} & 0          & 0     & -              & -                & -                 & -   \\
+%                     & 10         &       & -              & -                & -                 & -   \\
+%                     & 50         &       & -              & -                & -                 & -   \\
+%                     & 500        &       & -              & -                & -                 & -   \\ \hline
+% \multirow{3}{*}{50} & 0          & 0     & -              & -                & -                 & -   \\
+%                     & 50         &       & -              & -                & -                 & -   \\
+%                     & 500        &       & -              & -                & -                 & -  
+\end{tabular}
+}
+\vspace{1mm}
+\caption{Performance of Few-shot learning on CIFAR10. \nj{`img/cls' and `shot/class' refer to the per-class number of generated images and the training samples used in generating the distilled dataset, respectively. `ratio' is the ratio of the seen samples among the entire training samples. } \jh{0 shot refers \hh{to the distillation task performed without any access to the training data.}}}
+\label{table:fewshot}
+\end{table}
