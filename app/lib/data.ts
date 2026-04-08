@@ -53,6 +53,17 @@ export const PUBLICATIONS = [
         note: "(First Author / Co-first †)",
         items: [
             {
+                title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
+                authors: ["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"],
+                venue: "Annual Meeting of the Association for Computational Linguistics (ACL)",
+                year: "2026",
+                projectLink: "/template-infilling",
+                paperLink: "/template-infilling/template-infilling-paper.pdf",
+                category: "Large Language Models",
+                subTag: "Diffusion Language Models",
+                tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
+            },
+            {
                 title: "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
                 authors: ["Junhoo Lee", "Mijin Koo", "Nojun Kwak"],
                 venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
@@ -62,16 +73,6 @@ export const PUBLICATIONS = [
                 category: "Generative Models",
                 subTag: "Query-Only Attribution",
                 tldr: "A problem-first project page for black-box lineage attribution of fine-tuned text-to-image APIs using compositional semantic fingerprints."
-            },
-            {
-                title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
-                authors: ["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"],
-                venue: "Annual Meeting of the Association for Computational Linguistics (ACL)",
-                year: "2026",
-                link: "https://arxiv.org/abs/2510.13870",
-                category: "Large Language Models",
-                subTag: "Diffusion Language Models",
-                tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
             },
             {
                 title: "Deep Edge Filter †",
