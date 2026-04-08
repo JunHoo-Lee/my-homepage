@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 
 const bibtex = `@inproceedings{lee2023shot,
       title={SHOT: Suppressing the Hessian along the Optimization Trajectory for Gradient-Based Meta-Learning},
@@ -196,6 +199,30 @@ export default function SHOTProjectPage() {
                     so the baseline and SHOT share the same inference-time cost.
                   </p>
                 </div>
+                <LatexBlock>
+                  {String.raw`$$
+\theta_\tau^\star = \underset{\theta}{\arg\min}
+\sum_{(x, y) \in \mathcal{X}_{s}^{\tau}} L(x, y \mid \theta; \theta_0),
+\qquad
+\theta^{k+1} = \theta^k - \alpha \nabla_{\theta} L(\theta^k)
+$$`}
+                </LatexBlock>
+                <LatexBlock>
+                  {String.raw`$$
+\theta_0^\star = \underset{\theta_0}{\arg\min}
+\sum_{\tau} \sum_{(x, y) \in \mathcal{X}_{t}^{\tau}}
+L(x, y \mid \theta_\tau^\star; \theta_0)
+$$`}
+                </LatexBlock>
+                <LatexBlock>
+                  {String.raw`$$
+L_{\text{SHOT}} = D(\theta_t^T, \theta_r^R),
+\qquad
+\alpha_r = \frac{T}{R}\alpha_t,
+\qquad
+T < R
+$$`}
+                </LatexBlock>
                 <div className="publication-video">
                   <img
                     src="/shot/close-shot-trim.png"
@@ -300,6 +327,16 @@ export default function SHOTProjectPage() {
                     distortion has been explicitly suppressed.
                   </p>
                 </div>
+                <LatexBlock>
+                  {String.raw`$$
+\int_0^1 \nabla L(\theta(t)) \cdot \nabla L(\theta^k)\, dt
+\approx
+\int_0^1 \left(
+\lVert \nabla L(\theta^k) \rVert_2^2
+- \alpha t \, \nabla L(\theta^k)^\top H(\theta^k)\nabla L(\theta^k)
+\right) dt > 0
+$$`}
+                </LatexBlock>
                 <div className="columns is-variable is-5 analysis-grid">
                   <div className="column">
                     <img
@@ -355,6 +392,33 @@ export default function SHOTProjectPage() {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function LatexBlock({ children }: { children: string }) {
+  return (
+    <div
+      style={{
+        maxWidth: "88%",
+        margin: "1rem auto 0",
+        padding: "0.9rem 1rem",
+        borderRadius: "14px",
+        background: "#ffffff",
+        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
+      }}
+    >
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({ children: paragraphChildren }) => (
+            <p style={{ margin: 0 }}>{paragraphChildren}</p>
+          ),
+        }}
+      >
+        {children}
+      </ReactMarkdown>
     </div>
   );
 }
