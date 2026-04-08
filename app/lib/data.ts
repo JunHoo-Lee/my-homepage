@@ -59,6 +59,8 @@ export const PUBLICATIONS = [
                 year: "2026",
                 projectLink: "/template-infilling",
                 paperLink: "/template-infilling/template-infilling-paper.pdf",
+                codeLink: "https://github.com/JunHoo-Lee/Template-Infilling",
+                codeLabel: "GitHub",
                 category: "Large Language Models",
                 subTag: "Diffusion Language Models",
                 tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."

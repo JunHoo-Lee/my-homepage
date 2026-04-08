@@ -110,6 +110,16 @@ export default function TemplateInfillingProjectPage() {
                         <span>Paper</span>
                       </a>
                     </span>
+                    <span className="link-block">
+                      <a
+                        href="https://github.com/JunHoo-Lee/Template-Infilling"
+                        className="external-link button is-normal is-rounded is-light"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>GitHub</span>
+                      </a>
+                    </span>
                   </div>
                 </div>
               </div>
