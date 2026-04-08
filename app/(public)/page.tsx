@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { ArrowUpRight, FileText, Download } from "lucide-react";
+import { ArrowUpRight, Download, FileText, Github } from "lucide-react";
 import { motion } from "framer-motion";
 import { PROFILE, EDUCATION, NEWS, PUBLICATIONS, AWARDS } from "@/app/lib/data";
 // Dynamically import PDFDownloadLink is no longer needed
@@ -166,6 +166,8 @@ function PublicationItem({
     link,
     paperLink,
     projectLink,
+    codeLink,
+    codeLabel = "Code",
     tldr,
     category,
     subTag
@@ -177,12 +179,15 @@ function PublicationItem({
     link?: string,
     paperLink?: string,
     projectLink?: string,
+    codeLink?: string,
+    codeLabel?: string,
     tldr: string,
     category: string,
     subTag: string
 }) {
     const resolvedProjectLink = projectLink ?? (link && link.startsWith("/") ? link : undefined);
     const resolvedPaperLink = paperLink ?? (link && !link.startsWith("/") ? link : undefined);
+    const resolvedCodeLink = codeLink;
     const primaryLink = resolvedProjectLink ?? resolvedPaperLink;
     const isPrimaryExternalLink = Boolean(primaryLink && !primaryLink.startsWith("/"));
     const paperLabel = resolvedPaperLink?.includes("arxiv.org") ? "arXiv" : "Paper";
@@ -260,7 +265,7 @@ function PublicationItem({
                 {tldr}
             </p>
 
-            {(resolvedProjectLink || resolvedPaperLink) && (
+            {(resolvedProjectLink || resolvedPaperLink || resolvedCodeLink) && (
                 <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
                     {resolvedProjectLink && (
                         <Link
@@ -278,6 +283,16 @@ function PublicationItem({
                             className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-stone-50 px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
                         >
                             <FileText size={14} /> {paperLabel}
+                        </a>
+                    )}
+                    {resolvedCodeLink && (
+                        <a
+                            href={resolvedCodeLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
+                        >
+                            <Github size={14} /> {codeLabel}
                         </a>
                     )}
                 </div>
