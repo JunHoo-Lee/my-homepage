@@ -707,6 +707,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
                 columns={baseModelColumns}
                 sections={ablationSections}
                 footnote="Adversarial concept removal uses 9 animal probes. The correct source family remains dominant across all evaluated suspects."
+                variant="ablation"
               />
             </div>
           </div>
@@ -797,7 +798,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .container.is-max-quant {
-          max-width: 1280px;
+          max-width: 1400px;
         }
 
         .csf-page .hero {
@@ -816,6 +817,10 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
 
         .csf-page .publication-header .hero-body {
           padding: 4.5rem 0 2.4rem;
+        }
+
+        .csf-page .publication-header .container.is-max-desktop {
+          max-width: 1240px;
         }
 
         .csf-page .section {
@@ -855,7 +860,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .has-text-justified {
-          text-align: justify;
+          text-align: left;
         }
 
         .csf-page .title {
@@ -866,8 +871,8 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .title.is-1 {
-          font-size: clamp(2.45rem, 4.8vw, 3.85rem);
-          line-height: 1.08;
+          font-size: clamp(1.95rem, 3.55vw, 3rem);
+          line-height: 1.03;
         }
 
         .csf-page .title.is-3 {
@@ -880,9 +885,10 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .hero-title {
-          max-width: 14ch;
+          max-width: 22ch;
           margin-left: auto;
           margin-right: auto;
+          text-wrap: balance;
         }
 
         .csf-page .publication-authors {
@@ -909,11 +915,12 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .hero-summary {
-          max-width: 42rem;
+          max-width: 58rem;
           margin: 1.2rem auto 0;
           color: #2c2c2c;
-          font-size: 1.03rem;
-          line-height: 1.8;
+          font-size: 0.98rem;
+          line-height: 1.72;
+          text-wrap: pretty;
         }
 
         .csf-page .publication-links {
@@ -974,8 +981,9 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .teaser-caption {
-          max-width: 640px;
+          max-width: 800px;
           margin: 0.85rem auto 0;
+          text-wrap: pretty;
         }
 
         .csf-page .section-label {
@@ -989,11 +997,12 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .section-copy {
-          max-width: 760px;
+          max-width: 860px;
           margin: 1rem auto 0;
           color: #333333;
           font-size: 0.99rem;
           line-height: 1.78;
+          text-wrap: pretty;
         }
 
         .csf-page .narrative-block {
@@ -1021,11 +1030,12 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .figure-caption {
-          max-width: 860px;
+          max-width: 940px;
           margin: 0 auto;
           color: #444444;
           font-size: 0.95rem;
           line-height: 1.72;
+          text-wrap: pretty;
         }
 
         .csf-page .methods-grid {
@@ -1033,7 +1043,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           display: grid;
           gap: 1.25rem;
           grid-template-columns: 1fr;
-          max-width: 860px;
+          max-width: 980px;
           margin-left: auto;
           margin-right: auto;
         }
@@ -1058,6 +1068,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           color: #333333;
           font-size: 0.95rem;
           line-height: 1.7;
+          text-wrap: pretty;
         }
 
         .csf-page .method-equation {
@@ -1115,6 +1126,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           color: #222222;
           font-size: 1.02rem;
           line-height: 1.88;
+          text-wrap: pretty;
         }
 
         .csf-page .content p {
@@ -1157,6 +1169,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           color: #444444;
           font-size: 0.93rem;
           line-height: 1.7;
+          text-wrap: pretty;
         }
 
         .csf-page .table-stack {
@@ -1210,32 +1223,16 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           font-size: clamp(1.18rem, 2vw, 1.45rem);
           font-weight: 700;
           line-height: 1.35;
+          text-wrap: balance;
         }
 
         .csf-page .table-description {
           margin: 0.15rem 0 0;
-          max-width: 880px;
+          max-width: 1120px;
           color: #333333;
           font-size: 0.95rem;
           line-height: 1.68;
-        }
-
-        .csf-page .legend-row {
-          margin-top: 0.35rem;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.6rem;
-        }
-
-        .csf-page .legend-pill {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid #d0d0d0;
-          border-radius: 999px;
-          padding: 0.34rem 0.7rem;
-          font-size: 0.74rem;
-          color: #333333;
+          text-wrap: pretty;
         }
 
         .csf-page .table-shell {
@@ -1247,11 +1244,11 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .posterior-table {
-          min-width: 860px;
+          min-width: 980px;
           width: 100%;
           border-collapse: collapse;
           color: #111111;
-          font-size: 0.83rem;
+          font-size: 0.86rem;
           line-height: 1.35;
           font-variant-numeric: tabular-nums;
         }
@@ -1292,31 +1289,34 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           position: sticky;
           left: 0;
           z-index: 1;
-          min-width: 190px;
+          min-width: 260px;
           background: #ffffff;
-          padding: 0.48rem 0.6rem;
+          padding: 0.5rem 0.9rem;
           border-bottom: 1px solid #dddddd;
           border-right: 1px solid #dddddd;
           font-weight: 600;
           color: #111111;
           text-align: left;
+          white-space: nowrap;
         }
 
         .csf-page .score-cell {
           background: #ffffff;
-          padding: 0.48rem 0.45rem;
+          padding: 0.5rem 0.55rem;
           border-bottom: 1px solid #dddddd;
           border-left: 1px solid #eeeeee;
           text-align: center;
+          transition: background 0.2s ease;
         }
 
         .csf-page .score-cell--dominant {
-          background: #f1f1f1;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
         }
 
         .csf-page .score-value {
           display: inline-block;
           min-width: 3.4rem;
+          color: #111111;
         }
 
         .csf-page .score-tone--match {
@@ -1334,6 +1334,30 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
 
         .csf-page .score-tone--plain {
           color: #333333;
+        }
+
+        .csf-page .posterior-table--main .score-cell-tone--main-match {
+          background: #f9dcdc;
+        }
+
+        .csf-page .posterior-table--main .score-cell-tone--main-uncertain {
+          background: #fff8d9;
+        }
+
+        .csf-page .posterior-table--main .score-cell-tone--main-below {
+          background: #dcf7d8;
+        }
+
+        .csf-page .posterior-table--main .score-cell-tone--main-plain {
+          background: #ffffff;
+        }
+
+        .csf-page .posterior-table--ablation .score-cell-tone--ablation-match {
+          background: #dcf7d8;
+        }
+
+        .csf-page .posterior-table--ablation .score-cell-tone--ablation-plain {
+          background: #ffffff;
         }
 
         .csf-page .score-asterisk {
@@ -1510,6 +1534,13 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
             max-width: none;
           }
 
+          .csf-page .hero-summary,
+          .csf-page .section-copy,
+          .csf-page .figure-caption,
+          .csf-page .table-description {
+            max-width: none;
+          }
+
           .csf-page .publication-authors {
             font-size: 1rem;
           }
@@ -1519,7 +1550,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           }
 
           .csf-page .posterior-table {
-            min-width: 760px;
+            min-width: 900px;
           }
 
           .csf-page .pdf-shell iframe {
@@ -1652,7 +1683,7 @@ function PosteriorTable({
   columns,
   sections,
   footnote,
-  showLegend = false,
+  variant = "main",
 }: {
   eyebrow: string;
   title: string;
@@ -1660,7 +1691,7 @@ function PosteriorTable({
   columns: string[];
   sections: ScoreSection[];
   footnote: string;
-  showLegend?: boolean;
+  variant?: "main" | "ablation";
 }) {
   return (
     <div className="table-panel">
@@ -1668,17 +1699,8 @@ function PosteriorTable({
       <h3 className="table-title">{title}</h3>
       <p className="table-description">{description}</p>
 
-      {showLegend ? (
-        <div className="legend-row">
-          <LegendPill label="Significant match" tone="match" />
-          <LegendPill label="Inconclusive" tone="uncertain" />
-          <LegendPill label="Below chance" tone="below" />
-          <span className="legend-pill score-tone--plain">Dominance test *</span>
-        </div>
-      ) : null}
-
       <div className="table-shell">
-        <table className="posterior-table">
+        <table className={`posterior-table posterior-table--${variant}`}>
           <thead>
             <tr>
               <th>Suspect Model</th>
@@ -1703,7 +1725,7 @@ function PosteriorTable({
                         key={`${row.label}-${columns[index]}`}
                         className={`score-cell ${
                           cell.dominant ? "score-cell--dominant" : ""
-                        }`}
+                        } ${scoreCellToneClasses[variant][cell.tone]}`}
                       >
                         <span className={`score-value ${scoreToneClasses[cell.tone]}`}>
                           {cell.value}
@@ -1726,13 +1748,27 @@ function PosteriorTable({
   );
 }
 
-function LegendPill({ label, tone }: { label: string; tone: ScoreTone }) {
-  return <span className={`legend-pill ${scoreToneClasses[tone]}`}>{label}</span>;
-}
-
 const scoreToneClasses: Record<ScoreTone, string> = {
   match: "score-tone--match",
   uncertain: "score-tone--uncertain",
   below: "score-tone--below",
   plain: "score-tone--plain",
+};
+
+const scoreCellToneClasses: Record<
+  "main" | "ablation",
+  Record<ScoreTone, string>
+> = {
+  main: {
+    match: "score-cell-tone--main-match",
+    uncertain: "score-cell-tone--main-uncertain",
+    below: "score-cell-tone--main-below",
+    plain: "score-cell-tone--main-plain",
+  },
+  ablation: {
+    match: "score-cell-tone--ablation-match",
+    uncertain: "score-cell-tone--ablation-plain",
+    below: "score-cell-tone--ablation-plain",
+    plain: "score-cell-tone--ablation-plain",
+  },
 };
