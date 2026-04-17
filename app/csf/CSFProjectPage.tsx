@@ -3,15 +3,11 @@
 import { Fragment } from "react";
 import type { ReactNode } from "react";
 import {
-  ArrowRight,
-  BarChart3,
   ChevronUp,
   FileText,
   Github,
   Home,
   Quote,
-  Search,
-  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 import { Inter } from "next/font/google";
@@ -21,12 +17,7 @@ import remarkMath from "remark-math";
 
 import BibtexCopyButton from "./BibtexCopyButton";
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
@@ -52,63 +43,6 @@ type ScoreSection = {
 const abstractParagraphs = [
   "Text-to-image models are commercially valuable assets often distributed under restrictive licenses, but such licenses are enforceable only when violations can be detected. Existing methods require pre-deployment watermarking or internal model access, which are unavailable in commercial API deployments.",
   "We present Compositional Semantic Fingerprinting (CSF), the first black-box method for attributing fine-tuned text-to-image models to protected lineages using only query access. CSF treats models as semantic category generators and probes them with compositional underspecified prompts that remain rare under fine-tuning. Across 6 model families and 13 fine-tuned variants, the Bayesian attribution framework supports controlled-risk lineage decisions, with all variants satisfying the dominance criterion.",
-];
-
-const heroStats = [
-  {
-    value: "6",
-    label: "Protected base families",
-    detail: "Flux, Kandinsky, SD1.5, SD2.1, SD3, and SDXL",
-  },
-  {
-    value: "13",
-    label: "Fine-tuned suspects",
-    detail: "Every suspect is queried only through the final API surface",
-  },
-  {
-    value: "13/13",
-    label: "Dominant lineage calls",
-    detail: "All variants satisfy the dominance criterion in the main study",
-  },
-];
-
-const quickNavLinks = [
-  { label: "Abstract", href: "#abstract" },
-  { label: "Challenge", href: "#challenge" },
-  { label: "Method", href: "#method" },
-  { label: "Results", href: "#results" },
-  { label: "Analysis", href: "#analysis" },
-  { label: "Paper", href: "#paper" },
-  { label: "BibTeX", href: "#bibtex" },
-];
-
-const capabilityCards: Array<{
-  eyebrow: string;
-  title: string;
-  copy: string;
-  icon: ReactNode;
-}> = [
-  {
-    eyebrow: "Know",
-    title: "Recover lineage from query-only access.",
-    copy:
-      "CSF estimates prompt-conditioned semantic distributions and turns transport distance into posterior evidence over candidate protected bases.",
-    icon: <Search size={20} />,
-  },
-  {
-    eyebrow: "Show",
-    title: "Make attribution legible in one pass.",
-    copy:
-      "The page foregrounds the exact structured outputs people need first: lineage tables, metric gaps, and compact evidence summaries instead of long lead-in text.",
-    icon: <BarChart3 size={20} />,
-  },
-  {
-    eyebrow: "Verify",
-    title: "Stress-test the fingerprint under adaptation.",
-    copy:
-      "Adversarial concept removal and the human study show that the signal is distributed across semantics rather than tied to one brittle trigger.",
-    icon: <ShieldCheck size={20} />,
-  },
 ];
 
 const baseModelColumns = [
@@ -460,26 +394,6 @@ const ablationSections: ScoreSection[] = [
 
 const analysisCards = [
   {
-    eyebrow: "Table 2",
-    src: "/csf/image.png",
-    alt: "Cropped Table 2 showing Wasserstein versus JSD attribution confidence",
-    width: 1240,
-    height: 315,
-    title: "Wasserstein keeps a clearer attribution margin.",
-    caption:
-      "Using the saved image.png asset, this metric comparison shows that Wasserstein separates the correct lineage more decisively than the JSD baseline on hard fine-tuned suspects.",
-  },
-  {
-    eyebrow: "Table 3",
-    src: "/csf/results-ablation-table-v2.png",
-    alt: "Attribution results after adversarial concept removal",
-    width: 928,
-    height: 402,
-    title: "Attribution survives adversarial concept removal.",
-    caption:
-      "Even after UCE removes animal-related concepts, attribution still peaks on the true source family, suggesting that the fingerprint is distributed across semantics rather than tied to one trigger concept.",
-  },
-  {
     eyebrow: "Prompt Figure",
     src: "/csf/prompt-ablation.png",
     alt: "Ring figure showing prompt-conditioned semantic mixtures",
@@ -537,26 +451,19 @@ const bibtex = `@inproceedings{lee2026csf,
 
 export default function CSFPage() {
   return (
-    <div id="top" className={`${manrope.className} csf-page`}>
+    <div id="top" className={`${inter.className} csf-page`}>
       <a className="scroll-to-top" href="#top" aria-label="Scroll to top">
         <ChevronUp size={18} />
       </a>
 
       <main id="main-content">
         <section className="hero publication-header">
-          <div className="hero-orb hero-orb--left" />
-          <div className="hero-orb hero-orb--right" />
           <div className="hero-body">
-            <div className="container is-max-quant">
-              <div className="hero-shell">
-                <div className="hero-copy-column">
-                  <p className="hero-kicker">
-                    CVPR 2026 · Query-only lineage attribution for text-to-image
-                    APIs
-                  </p>
-                  <h1
-                    className={`title is-1 publication-title hero-title ${spaceGrotesk.className}`}
-                  >
+            <div className="container is-max-desktop">
+              <div className="columns is-centered">
+                <div className="column is-four-fifths has-text-centered">
+                  <p className="hero-kicker">CVPR 2026</p>
+                  <h1 className="title is-1 publication-title hero-title">
                     CSF: Black-box Fingerprinting via Compositional Semantics
                     for Text-to-Image Models
                   </h1>
@@ -572,22 +479,17 @@ export default function CSFPage() {
                     <span className="author-block">Nojun Kwak</span>
                   </div>
 
-                  <p className="hero-role">
-                    A query-only fingerprint that traces fine-tuned text-to-image
-                    models back to protected base families without watermarking
-                    or internal access.
-                  </p>
-
-                  <div className="is-size-5 publication-authors hero-meta-line">
+                  <div className="is-size-5 publication-authors">
                     <span className="author-block">
                       Seoul National University
                     </span>
                     <span className="publication-venue">CVPR 2026</span>
                   </div>
 
-                  <p className="hero-next-step">
-                    Start with the 13/13 dominant attribution result, then drill
-                    into the metric gap and adversarial-erasure evidence.
+                  <p className="hero-summary">
+                    CSF attributes deployed text-to-image APIs back to protected
+                    base families using only black-box query access, with no
+                    watermarking and no visibility into model internals.
                   </p>
 
                   <div className="publication-links">
@@ -604,88 +506,38 @@ export default function CSFPage() {
                       icon={<Github size={18} />}
                     />
                     <PublicationLink
-                      href="#results"
-                      label="Results"
-                      icon={<ArrowRight size={18} />}
-                      tone="accent"
-                    />
-                    <PublicationLink
                       href="#bibtex"
                       label="BibTeX"
                       icon={<Quote size={18} />}
-                      tone="light"
                     />
                     <PublicationLink
                       href="/#publications"
                       label="Homepage"
                       icon={<Home size={18} />}
-                      tone="light"
                     />
                   </div>
-
-                  <p className="hero-helper">
-                    First meaningful response, per the OpenAI ChatGPT app design
-                    guidance: explain the role in one line, show useful output
-                    immediately, and make the next action obvious.
-                  </p>
                 </div>
-
-                <aside className="hero-visual-card">
-                  <p className="hero-panel-eyebrow">What this page shows fast</p>
-                  <h2 className="hero-panel-title">
-                    The value is structured evidence, not a miniature product.
-                  </h2>
-
-                  <div className="hero-stat-grid">
-                    {heroStats.map((stat) => (
-                      <article key={stat.label} className="hero-stat-card">
-                        <p className="hero-stat-value">{stat.value}</p>
-                        <p className="hero-stat-label">{stat.label}</p>
-                        <p className="hero-stat-detail">{stat.detail}</p>
-                      </article>
-                    ))}
-                  </div>
-
-                  <figure className="hero-preview">
-                    <Image
-                      src="/csf/comparison-v2.png"
-                      alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
-                      width={1120}
-                      height={780}
-                      priority
-                    />
-                  </figure>
-                  <p className="hero-preview-caption">
-                    CSF is built for the most restrictive setting: the defender
-                    only sees the final text-to-image API and must still recover
-                    protected lineage evidence.
-                  </p>
-                </aside>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="section hero-primer">
-          <div className="container is-max-quant">
-            <nav className="quick-nav" aria-label="CSF sections">
-              {quickNavLinks.map((item) => (
-                <a key={item.href} href={item.href} className="quick-nav-link">
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-
-            <div className="capability-grid">
-              {capabilityCards.map((card) => (
-                <article key={card.title} className="capability-card">
-                  <div className="capability-icon">{card.icon}</div>
-                  <p className="capability-eyebrow">{card.eyebrow}</p>
-                  <h3 className="capability-title">{card.title}</h3>
-                  <p className="capability-copy">{card.copy}</p>
-                </article>
-              ))}
-            </div>
+        <section className="section section-compact">
+          <div className="container is-max-figure">
+            <figure className="teaser-media">
+              <Image
+                src="/csf/comparison-v2.png"
+                alt="Comparison between watermarking, traditional fingerprinting, and CSF in the query-only setting"
+                width={1120}
+                height={780}
+                priority
+              />
+            </figure>
+            <p className="figure-caption teaser-caption has-text-centered">
+              CSF targets the most restrictive query-only setting, where the
+              defender sees only the final text-to-image API and must still
+              recover lineage evidence.
+            </p>
           </div>
         </section>
 
@@ -820,13 +672,12 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
                 columns={baseModelColumns}
                 sections={mainPosteriorSections}
                 footnote="Posterior mean attribution scores under CSF. Asterisks mark the dominant lineage after applying the dominance test."
-                showLegend
               />
             </div>
           </div>
         </section>
 
-        <section className="section">
+        <section className="section" id="analysis">
           <div className="container is-max-quant">
             <div className="narrative-block">
               <p className="section-label">Analysis</p>
@@ -842,9 +693,21 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
             </div>
 
             <div className="analysis-grid">
+              <MetricComparisonPanel />
               {analysisCards.map((card) => (
                 <AnalysisCard key={card.title} {...card} />
               ))}
+            </div>
+
+            <div className="analysis-stack">
+              <PosteriorTable
+                eyebrow="Table 3"
+                title="Attribution survives adversarial concept removal."
+                description="Even after UCE removes animal-related concepts, the correct lineage remains dominant. This suggests the fingerprint is distributed across semantics rather than tied to one brittle trigger."
+                columns={baseModelColumns}
+                sections={ablationSections}
+                footnote="Adversarial concept removal uses 9 animal probes. The correct source family remains dominant across all evaluated suspects."
+              />
             </div>
           </div>
         </section>
@@ -901,9 +764,8 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
       <style jsx global>{`
         .csf-page {
           min-height: 100vh;
-          background:
-            linear-gradient(180deg, #fffdf8 0%, #ffffff 24%, #ffffff 100%);
-          color: #1e293b;
+          background: #ffffff;
+          color: #111111;
         }
 
         .csf-page * {
@@ -911,12 +773,13 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page a {
-          color: #2563eb;
+          color: #111111;
           text-decoration: none;
         }
 
         .csf-page a:hover {
-          color: #1d4ed8;
+          color: #111111;
+          text-decoration: underline;
         }
 
         .csf-page .container {
@@ -942,69 +805,29 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .hero.is-light {
-          background: #f8fafc;
-          border-top: 1px solid #e2e8f0;
-          border-bottom: 1px solid #e2e8f0;
+          background: #ffffff;
+          border-top: 1px solid #e3e3e3;
+          border-bottom: 1px solid #e3e3e3;
         }
 
         .csf-page .hero-body {
-          padding: 4rem 0;
+          padding: 3.75rem 0;
         }
 
         .csf-page .publication-header .hero-body {
-          padding: 4.9rem 0 3.9rem;
+          padding: 4.5rem 0 2.4rem;
         }
 
         .csf-page .section {
-          padding: 4rem 0;
-        }
-
-        .csf-page .publication-header {
-          overflow: hidden;
-        }
-
-        .csf-page .hero-orb {
-          position: absolute;
-          border-radius: 999px;
-          filter: blur(24px);
-          opacity: 0.8;
-          pointer-events: none;
-        }
-
-        .csf-page .hero-orb--left {
-          top: 1.5rem;
-          left: -3rem;
-          width: 18rem;
-          height: 18rem;
-          background: radial-gradient(circle, rgba(14, 165, 164, 0.16) 0%, rgba(14, 165, 164, 0) 72%);
-        }
-
-        .csf-page .hero-orb--right {
-          top: 2rem;
-          right: -3rem;
-          width: 22rem;
-          height: 22rem;
-          background: radial-gradient(circle, rgba(234, 88, 12, 0.16) 0%, rgba(234, 88, 12, 0) 74%);
-        }
-
-        .csf-page .hero-shell {
-          display: grid;
-          gap: 1.6rem;
-          grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.9fr);
-          align-items: start;
-        }
-
-        .csf-page .hero-copy-column {
-          position: relative;
-          z-index: 1;
+          padding: 3.25rem 0;
         }
 
         .csf-page .hero-kicker {
-          margin: 0 0 1rem;
-          color: #0f766e;
+          margin: 0 0 0.85rem;
+          color: #444444;
           font-size: 0.78rem;
-          font-weight: 800;
-          letter-spacing: 0.16em;
+          font-weight: 700;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
@@ -1037,62 +860,35 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
 
         .csf-page .title {
           margin: 0;
-          color: #1e293b;
+          color: #111111;
           font-weight: 800;
           letter-spacing: -0.03em;
         }
 
         .csf-page .title.is-1 {
-          font-size: clamp(2.5rem, 5vw, 4.2rem);
-          line-height: 1.06;
+          font-size: clamp(2.45rem, 4.8vw, 3.85rem);
+          line-height: 1.08;
         }
 
         .csf-page .title.is-3 {
-          font-size: clamp(1.8rem, 2.8vw, 2.2rem);
-          line-height: 1.18;
+          font-size: clamp(1.65rem, 2.6vw, 2.05rem);
+          line-height: 1.22;
         }
 
         .csf-page .publication-title {
-          margin-bottom: 1.25rem;
+          margin-bottom: 1.15rem;
         }
 
         .csf-page .hero-title {
-          max-width: 12ch;
+          max-width: 14ch;
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .csf-page .publication-authors {
           margin-top: 1rem;
           font-size: 1.125rem;
-          color: #334155;
-        }
-
-        .csf-page .hero-role {
-          max-width: 44rem;
-          margin: 1.35rem 0 0;
-          color: #1f2937;
-          font-size: clamp(1.1rem, 2vw, 1.35rem);
-          font-weight: 700;
-          line-height: 1.55;
-        }
-
-        .csf-page .hero-meta-line {
-          margin-top: 1.1rem;
-        }
-
-        .csf-page .hero-next-step {
-          max-width: 42rem;
-          margin: 1rem 0 0;
-          color: #475569;
-          font-size: 1rem;
-          line-height: 1.8;
-        }
-
-        .csf-page .hero-helper {
-          max-width: 40rem;
-          margin: 1rem 0 0;
-          color: #64748b;
-          font-size: 0.92rem;
-          line-height: 1.7;
+          color: #2b2b2b;
         }
 
         .csf-page .author-block {
@@ -1104,19 +900,28 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           display: inline-block;
           margin-left: 0.5rem;
           border-radius: 999px;
-          background: #e2e8f0;
-          color: #334155;
-          padding: 0.4rem 0.85rem;
-          font-size: 0.95rem;
-          font-weight: 700;
+          border: 1px solid #cfcfcf;
+          background: #ffffff;
+          color: #111111;
+          padding: 0.36rem 0.78rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .csf-page .hero-summary {
+          max-width: 42rem;
+          margin: 1.2rem auto 0;
+          color: #2c2c2c;
+          font-size: 1.03rem;
+          line-height: 1.8;
         }
 
         .csf-page .publication-links {
-          margin-top: 2rem;
+          margin-top: 1.8rem;
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: 0.75rem;
+          gap: 0.65rem;
         }
 
         .csf-page .link-block {
@@ -1128,232 +933,57 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           align-items: center;
           gap: 0.65rem;
           border-radius: 999px;
-          background: #111827;
-          color: #ffffff;
-          padding: 0.82rem 1.15rem;
-          font-size: 0.98rem;
-          font-weight: 700;
-          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-          transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease,
-            background 0.2s ease,
-            border-color 0.2s ease,
-            color 0.2s ease;
+          border: 1px solid #cfcfcf;
+          background: #ffffff;
+          color: #111111;
+          padding: 0.72rem 1rem;
+          font-size: 0.95rem;
+          font-weight: 600;
+          transition: background 0.2s ease, border-color 0.2s ease;
         }
 
         .csf-page .template-button:hover {
-          color: #ffffff;
-          background: #1f2937;
-          transform: translateY(-1px);
-          box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+          color: #111111;
+          background: #f4f4f4;
+          border-color: #111111;
+          text-decoration: none;
         }
 
-        .csf-page .template-button--light {
-          border: 1px solid #d6dde8;
-          background: rgba(255, 255, 255, 0.86);
-          color: #1f2937;
-          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        .csf-page .section-compact {
+          padding-top: 0;
+          padding-bottom: 2.8rem;
         }
 
-        .csf-page .template-button--light:hover {
+        .csf-page .subtitle {
+          color: #444444;
+          font-size: 1rem;
+          line-height: 1.75;
+        }
+
+        .csf-page .teaser-media {
+          margin: 0 auto;
+          border: 1px solid #d7d7d7;
           background: #ffffff;
-          color: #111827;
-          border-color: #b8c4d6;
+          padding: 0.75rem;
         }
 
-        .csf-page .template-button--accent {
-          background: #0f766e;
-          color: #ffffff;
-        }
-
-        .csf-page .template-button--accent:hover {
-          background: #115e59;
-        }
-
-        .csf-page .hero-visual-card {
-          position: relative;
-          z-index: 1;
-          border: 1px solid rgba(203, 213, 225, 0.85);
-          border-radius: 1.3rem;
-          background: rgba(255, 255, 255, 0.88);
-          padding: 1.2rem;
-          box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
-          backdrop-filter: blur(14px);
-        }
-
-        .csf-page .hero-panel-eyebrow {
-          margin: 0;
-          color: #64748b;
-          font-size: 0.78rem;
-          font-weight: 800;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-        }
-
-        .csf-page .hero-panel-title {
-          margin: 0.65rem 0 0;
-          color: #111827;
-          font-size: 1.3rem;
-          font-weight: 800;
-          line-height: 1.35;
-        }
-
-        .csf-page .hero-stat-grid {
-          margin-top: 1rem;
-          display: grid;
-          gap: 0.8rem;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .csf-page .hero-stat-card {
-          border-radius: 1rem;
-          border: 1px solid #e2e8f0;
-          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-          padding: 0.95rem;
-        }
-
-        .csf-page .hero-stat-value {
-          margin: 0;
-          color: #0f172a;
-          font-size: 1.45rem;
-          font-weight: 800;
-          letter-spacing: -0.03em;
-        }
-
-        .csf-page .hero-stat-label {
-          margin: 0.35rem 0 0;
-          color: #111827;
-          font-size: 0.9rem;
-          font-weight: 700;
-          line-height: 1.45;
-        }
-
-        .csf-page .hero-stat-detail {
-          margin: 0.45rem 0 0;
-          color: #64748b;
-          font-size: 0.8rem;
-          line-height: 1.55;
-        }
-
-        .csf-page .hero-preview {
-          margin: 1rem 0 0;
-          overflow: hidden;
-          border-radius: 1rem;
-          border: 1px solid #dbe4ee;
-          background: #ffffff;
-        }
-
-        .csf-page .hero-preview img {
+        .csf-page .teaser-media img {
           display: block;
           width: 100%;
           height: auto;
         }
 
-        .csf-page .hero-preview-caption {
-          margin: 0.85rem 0 0;
-          color: #475569;
-          font-size: 0.92rem;
-          line-height: 1.7;
-        }
-
-        .csf-page .hero-primer {
-          padding-top: 0;
-        }
-
-        .csf-page .quick-nav {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.7rem;
-          justify-content: center;
-        }
-
-        .csf-page .quick-nav-link {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 999px;
-          border: 1px solid #d7e1ec;
-          background: #ffffff;
-          padding: 0.72rem 1rem;
-          color: #334155;
-          font-size: 0.92rem;
-          font-weight: 700;
-          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
-        }
-
-        .csf-page .quick-nav-link:hover {
-          color: #0f172a;
-          border-color: #94a3b8;
-        }
-
-        .csf-page .capability-grid {
-          margin-top: 1.25rem;
-          display: grid;
-          gap: 1rem;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .csf-page .capability-card {
-          border-radius: 1.15rem;
-          border: 1px solid #e2e8f0;
-          background: #ffffff;
-          padding: 1.2rem;
-          box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-        }
-
-        .csf-page .capability-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 2.5rem;
-          height: 2.5rem;
-          border-radius: 999px;
-          background: #ecfeff;
-          color: #0f766e;
-        }
-
-        .csf-page .capability-eyebrow {
-          margin: 0.95rem 0 0;
-          color: #64748b;
-          font-size: 0.76rem;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-        }
-
-        .csf-page .capability-title {
-          margin: 0.55rem 0 0;
-          color: #111827;
-          font-size: 1.06rem;
-          font-weight: 800;
-          line-height: 1.4;
-        }
-
-        .csf-page .capability-copy {
-          margin: 0.7rem 0 0;
-          color: #475569;
-          font-size: 0.96rem;
-          line-height: 1.7;
-        }
-
-        .csf-page .subtitle {
-          color: #475569;
-          font-size: 1.05rem;
-          line-height: 1.85;
-        }
-
         .csf-page .teaser-caption {
           max-width: 640px;
-          margin: 1.15rem auto 0;
+          margin: 0.85rem auto 0;
         }
 
         .csf-page .section-label {
           margin: 0 0 0.75rem;
-          color: #64748b;
+          color: #444444;
           font-size: 0.78rem;
-          font-weight: 800;
-          letter-spacing: 0.16em;
+          font-weight: 700;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
           text-align: center;
         }
@@ -1361,9 +991,9 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         .csf-page .section-copy {
           max-width: 760px;
           margin: 1rem auto 0;
-          color: #475569;
-          font-size: 1.02rem;
-          line-height: 1.8;
+          color: #333333;
+          font-size: 0.99rem;
+          line-height: 1.78;
         }
 
         .csf-page .narrative-block {
@@ -1393,48 +1023,53 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         .csf-page .figure-caption {
           max-width: 860px;
           margin: 0 auto;
-          color: #475569;
-          font-size: 0.98rem;
-          line-height: 1.8;
+          color: #444444;
+          font-size: 0.95rem;
+          line-height: 1.72;
         }
 
         .csf-page .methods-grid {
-          margin-top: 1.4rem;
+          margin-top: 1.35rem;
           display: grid;
           gap: 1.25rem;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: 1fr;
+          max-width: 860px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .csf-page .method-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 0.95rem;
+          border: 1px solid #d8d8d8;
+          border-radius: 0.65rem;
           background: #ffffff;
-          padding: 1.4rem 1.5rem;
+          padding: 1.2rem 1.25rem;
         }
 
         .csf-page .method-title {
           margin: 0;
-          color: #111827;
-          font-size: 1.1rem;
-          font-weight: 800;
+          color: #111111;
+          font-size: 1.02rem;
+          font-weight: 700;
           line-height: 1.35;
         }
 
         .csf-page .method-copy {
           margin: 0.85rem 0 0;
-          color: #475569;
-          font-size: 0.98rem;
-          line-height: 1.8;
+          color: #333333;
+          font-size: 0.95rem;
+          line-height: 1.7;
         }
 
         .csf-page .method-equation {
-          margin: 1rem 0 0;
-          border-radius: 0.8rem;
-          background: #f8fafc;
-          padding: 0.9rem 1rem;
-          color: #0f172a;
+          margin: 0.9rem 0 0;
+          overflow-x: auto;
+          border: 1px solid #dddddd;
+          border-radius: 0.55rem;
+          background: #fafafa;
+          padding: 0.75rem 0.9rem;
+          color: #111111;
           font-size: 0.92rem;
-          line-height: 1.7;
+          line-height: 1.65;
         }
 
         .csf-page .method-equation code,
@@ -1443,28 +1078,43 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
             Menlo, monospace;
         }
 
-        .csf-page .method-equation p,
-        .csf-page .method-note p {
+        .csf-page .latex-paragraph {
           margin: 0;
         }
 
-        .csf-page .method-equation .katex-display,
-        .csf-page .method-note .katex-display {
+        .csf-page .latex-block .katex {
+          color: #111111;
+        }
+
+        .csf-page .latex-block .katex-display {
           margin: 0;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 0.1rem 0;
+        }
+
+        .csf-page .latex-block .katex-display > .katex {
+          display: inline-block;
+          min-width: max-content;
+          white-space: nowrap;
         }
 
         .csf-page .method-note {
           max-width: 840px;
           margin: 1.15rem auto 0;
-          color: #475569;
-          font-size: 0.96rem;
-          line-height: 1.85;
+          border: 1px solid #dddddd;
+          border-radius: 0.55rem;
+          background: #fafafa;
+          padding: 0.8rem 1rem;
+          color: #333333;
+          font-size: 0.94rem;
+          line-height: 1.78;
         }
 
         .csf-page .content {
-          color: #334155;
-          font-size: 1.05rem;
-          line-height: 1.95;
+          color: #222222;
+          font-size: 1.02rem;
+          line-height: 1.88;
         }
 
         .csf-page .content p {
@@ -1476,26 +1126,17 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .result-card {
-          border-radius: 1rem;
-          border: 1px solid #e2e8f0;
+          border-radius: 0.65rem;
+          border: 1px solid #d8d8d8;
           background: #ffffff;
-          padding: 1rem;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+          padding: 0.95rem;
         }
 
         .csf-page .result-figure {
           overflow: hidden;
-          border-radius: 0.85rem;
-          border: 1px solid #e2e8f0;
-          background: #f8fafc;
-        }
-
-        .csf-page .table-image-frame {
-          margin-top: 0;
-          overflow: visible;
-          border: 0;
-          border-radius: 0;
-          background: transparent;
+          border-radius: 0.45rem;
+          border: 1px solid #dddddd;
+          background: #fafafa;
         }
 
         .csf-page .result-figure img {
@@ -1505,30 +1146,34 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         }
 
         .csf-page .result-title {
-          margin: 1rem 0 0;
-          font-size: 1.1rem;
-          font-weight: 800;
-          color: #111827;
+          margin: 0.9rem 0 0;
+          font-size: 1.02rem;
+          font-weight: 700;
+          color: #111111;
         }
 
         .csf-page .result-caption {
-          margin: 0.6rem 0 0;
-          color: #475569;
-          font-size: 0.97rem;
-          line-height: 1.75;
+          margin: 0.55rem 0 0;
+          color: #444444;
+          font-size: 0.93rem;
+          line-height: 1.7;
         }
 
         .csf-page .table-stack {
-          margin-top: 2.25rem;
+          margin-top: 2rem;
           display: grid;
-          gap: 2.8rem;
+          gap: 2.3rem;
         }
 
         .csf-page .analysis-grid {
-          margin-top: 2.25rem;
+          margin-top: 2rem;
           display: grid;
           gap: 1.5rem;
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .csf-page .analysis-stack {
+          margin-top: 1.5rem;
         }
 
         .csf-page .analysis-card {
@@ -1547,245 +1192,210 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
 
         .csf-page .table-panel {
           display: grid;
-          gap: 1rem;
-        }
-
-        .csf-page .table-copy {
-          max-width: 760px;
-          margin: 0 auto;
-          text-align: center;
+          gap: 0.75rem;
         }
 
         .csf-page .table-eyebrow {
           margin: 0;
-          color: #64748b;
-          font-size: 0.78rem;
-          font-weight: 800;
-          letter-spacing: 0.16em;
+          color: #444444;
+          font-size: 0.76rem;
+          font-weight: 700;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
         .csf-page .table-title {
-          margin: 0.55rem 0 0;
-          color: #111827;
-          font-size: clamp(1.3rem, 2.1vw, 1.8rem);
-          font-weight: 800;
-          line-height: 1.3;
+          margin: 0.2rem 0 0;
+          color: #111111;
+          font-size: clamp(1.18rem, 2vw, 1.45rem);
+          font-weight: 700;
+          line-height: 1.35;
         }
 
         .csf-page .table-description {
-          margin: 0.8rem auto 0;
-          max-width: 720px;
-          color: #475569;
-          font-size: 1rem;
-          line-height: 1.8;
-        }
-
-        .csf-page .table-frame {
-          width: 100%;
-          padding: 1.6rem;
-          border: 1px solid #e2e8f0;
-          border-radius: 0.9rem;
-          background: #ffffff;
-        }
-
-        .csf-page .table-figure {
-          margin: 0 auto;
-          width: 100%;
-        }
-
-        .csf-page .table-figure--main {
-          max-width: 1180px;
-        }
-
-        .csf-page .table-figure--metric {
-          max-width: 1080px;
-        }
-
-        .csf-page .table-figure--ablation {
-          max-width: 1080px;
+          margin: 0.15rem 0 0;
+          max-width: 880px;
+          color: #333333;
+          font-size: 0.95rem;
+          line-height: 1.68;
         }
 
         .csf-page .legend-row {
-          margin-top: 1rem;
+          margin-top: 0.35rem;
           display: flex;
           flex-wrap: wrap;
           gap: 0.6rem;
         }
 
-        .csf-page .legend-pill,
-        .csf-page .score-badge {
+        .csf-page .legend-pill {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #cbd5e1;
-          border-radius: 0.65rem;
-          font-weight: 700;
-        }
-
-        .csf-page .legend-pill {
-          padding: 0.5rem 0.8rem;
-          font-size: 0.76rem;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
+          border: 1px solid #d0d0d0;
+          border-radius: 999px;
+          padding: 0.34rem 0.7rem;
+          font-size: 0.74rem;
+          color: #333333;
         }
 
         .csf-page .table-shell {
-          margin-top: 1.25rem;
+          margin-top: 0.75rem;
           overflow-x: auto;
-          padding-bottom: 0.35rem;
+          border: 1px solid #d8d8d8;
+          border-radius: 0.55rem;
+          background: #ffffff;
         }
 
         .csf-page .posterior-table {
-          min-width: 900px;
+          min-width: 860px;
           width: 100%;
-          border-collapse: separate;
-          border-spacing: 0 0.55rem;
-          color: #334155;
-          font-size: 0.94rem;
+          border-collapse: collapse;
+          color: #111111;
+          font-size: 0.83rem;
+          line-height: 1.35;
+          font-variant-numeric: tabular-nums;
         }
 
         .csf-page .posterior-table thead th {
-          background: #eff4f8;
-          padding: 0.95rem 1rem;
+          border-bottom: 1.2px solid #111111;
+          background: #f7f7f7;
+          padding: 0.55rem 0.6rem;
           text-align: center;
-          font-size: 0.74rem;
-          font-weight: 800;
-          letter-spacing: 0.14em;
+          font-size: 0.67rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #64748b;
+          color: #111111;
         }
 
         .csf-page .posterior-table thead th:first-child {
           position: sticky;
           left: 0;
-          z-index: 1;
-          border-top-left-radius: 0.85rem;
-          border-bottom-left-radius: 0.85rem;
+          z-index: 2;
+          background: #f7f7f7;
           text-align: left;
         }
 
-        .csf-page .posterior-table thead th:last-child {
-          border-top-right-radius: 0.85rem;
-          border-bottom-right-radius: 0.85rem;
-        }
-
         .csf-page .section-row td {
-          padding: 0.7rem 0 0.2rem;
-          font-size: 0.78rem;
-          font-weight: 800;
-          letter-spacing: 0.18em;
+          border-top: 1px solid #bdbdbd;
+          border-bottom: 1px solid #bdbdbd;
+          background: #f2f2f2;
+          padding: 0.4rem 0.6rem;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #64748b;
+          color: #222222;
         }
 
         .csf-page .row-label {
           position: sticky;
           left: 0;
           z-index: 1;
-          min-width: 210px;
-          border: 1px solid #dde5ee;
-          border-right: 0;
-          border-top-left-radius: 0.85rem;
-          border-bottom-left-radius: 0.85rem;
+          min-width: 190px;
           background: #ffffff;
-          padding: 1rem;
-          font-weight: 800;
-          color: #111827;
-          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+          padding: 0.48rem 0.6rem;
+          border-bottom: 1px solid #dddddd;
+          border-right: 1px solid #dddddd;
+          font-weight: 600;
+          color: #111111;
+          text-align: left;
         }
 
         .csf-page .score-cell {
-          border: 1px solid #dde5ee;
-          border-left: 0;
           background: #ffffff;
-          padding: 0.95rem 0.75rem;
+          padding: 0.48rem 0.45rem;
+          border-bottom: 1px solid #dddddd;
+          border-left: 1px solid #eeeeee;
           text-align: center;
-          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
         }
 
-        .csf-page .score-cell:last-child {
-          border-top-right-radius: 0.85rem;
-          border-bottom-right-radius: 0.85rem;
+        .csf-page .score-cell--dominant {
+          background: #f1f1f1;
         }
 
-        .csf-page .score-badge {
-          min-width: 4.7rem;
-          padding: 0.45rem 0.7rem;
-          font-size: 0.95rem;
+        .csf-page .score-value {
+          display: inline-block;
+          min-width: 3.4rem;
         }
 
         .csf-page .score-tone--match {
-          border-color: #f1c1cf;
-          background: #fff2f5;
-          color: #9f1f45;
+          color: #111111;
+          font-weight: 700;
         }
 
         .csf-page .score-tone--uncertain {
-          border-color: #ecd8a2;
-          background: #fff8e1;
-          color: #8a6510;
+          color: #222222;
         }
 
         .csf-page .score-tone--below {
-          border-color: #c9e6d3;
-          background: #effaf3;
-          color: #1f6b46;
+          color: #666666;
         }
 
         .csf-page .score-tone--plain {
-          border-color: #d5deea;
-          background: #f8fafc;
-          color: #475569;
+          color: #333333;
+        }
+
+        .csf-page .score-asterisk {
+          margin-left: 0.08rem;
+          font-size: 0.72em;
+          vertical-align: super;
         }
 
         .csf-page .table-footnote {
-          margin: 1rem 0 0;
-          color: #64748b;
-          font-size: 0.9rem;
-          line-height: 1.7;
+          margin: 0.25rem 0 0;
+          color: #444444;
+          font-size: 0.87rem;
+          line-height: 1.65;
         }
 
         .csf-page .metric-table {
-          margin-top: 1.2rem;
+          margin-top: 0.75rem;
           width: 100%;
           border-collapse: collapse;
-          color: #334155;
-          font-size: 0.95rem;
+          color: #111111;
+          font-size: 0.87rem;
+          border-top: 1.2px solid #111111;
+          border-bottom: 1.2px solid #111111;
+          font-variant-numeric: tabular-nums;
         }
 
         .csf-page .metric-table th,
         .csf-page .metric-table td {
-          padding: 0.95rem 0.75rem;
-          border-bottom: 1px solid #e2e8f0;
+          padding: 0.55rem 0.6rem;
+          border-bottom: 1px solid #dddddd;
           text-align: left;
         }
 
         .csf-page .metric-table th {
-          font-size: 0.74rem;
-          font-weight: 800;
-          letter-spacing: 0.14em;
+          background: #f7f7f7;
+          font-size: 0.67rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #64748b;
+          color: #111111;
+        }
+
+        .csf-page .metric-table tbody tr:last-child td {
+          border-bottom: 0;
         }
 
         .csf-page .metric-strong {
-          font-weight: 800;
-          color: #9f1f45;
+          font-weight: 700;
+          color: #111111;
         }
 
         .csf-page .metric-gap {
-          font-weight: 800;
-          color: #1f6b46;
+          font-weight: 700;
+          color: #111111;
         }
 
         .csf-page .pdf-shell {
           margin-top: 2rem;
           overflow: hidden;
-          border-radius: 1rem;
-          border: 1px solid #dbe4ee;
+          border-radius: 0.65rem;
+          border: 1px solid #d8d8d8;
           background: #ffffff;
-          box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
         }
 
         .csf-page .pdf-shell iframe {
@@ -1806,48 +1416,46 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
         .csf-page .bibtex-code {
           margin: 1.5rem 0 0;
           overflow-x: auto;
-          border-radius: 1rem;
-          background: #0f172a;
-          padding: 1.35rem 1.4rem;
-          color: #e2e8f0;
+          border-radius: 0.65rem;
+          border: 1px solid #d8d8d8;
+          background: #fafafa;
+          padding: 1.15rem 1.2rem;
+          color: #111111;
           font-size: 0.92rem;
-          line-height: 1.8;
+          line-height: 1.75;
         }
 
         .csf-page .copy-bibtex-button {
           display: inline-flex;
           align-items: center;
           gap: 0.55rem;
-          border: 1px solid #cbd5e1;
+          border: 1px solid #cfcfcf;
           border-radius: 999px;
           background: #ffffff;
-          color: #334155;
-          padding: 0.72rem 1rem;
-          font-size: 0.92rem;
-          font-weight: 700;
+          color: #111111;
+          padding: 0.68rem 0.95rem;
+          font-size: 0.9rem;
+          font-weight: 600;
           cursor: pointer;
-          transition:
-            transform 0.2s ease,
-            border-color 0.2s ease,
-            color 0.2s ease;
+          transition: background 0.2s ease, border-color 0.2s ease;
         }
 
         .csf-page .copy-bibtex-button:hover {
-          border-color: #94a3b8;
-          color: #0f172a;
-          transform: translateY(-1px);
+          border-color: #111111;
+          color: #111111;
+          background: #f4f4f4;
         }
 
         .csf-page .footer {
           padding: 2.5rem 0 3rem;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid #e3e3e3;
           background: #ffffff;
         }
 
         .csf-page .footer .content {
           font-size: 0.96rem;
           line-height: 1.8;
-          color: #64748b;
+          color: #444444;
         }
 
         .csf-page .scroll-to-top {
@@ -1861,28 +1469,18 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           width: 2.8rem;
           height: 2.8rem;
           border-radius: 999px;
-          border: 1px solid #cbd5e1;
-          background: rgba(255, 255, 255, 0.92);
-          color: #334155;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-          backdrop-filter: blur(8px);
+          border: 1px solid #cfcfcf;
+          background: #ffffff;
+          color: #111111;
         }
 
         .csf-page .scroll-to-top:hover {
-          color: #0f172a;
-          border-color: #94a3b8;
+          color: #111111;
+          border-color: #111111;
+          text-decoration: none;
         }
 
         @media (max-width: 900px) {
-          .csf-page .hero-shell,
-          .csf-page .capability-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .csf-page .hero-stat-grid {
-            grid-template-columns: 1fr;
-          }
-
           .csf-page .column.is-four-fifths {
             width: 100%;
           }
@@ -1905,6 +1503,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
 
           .csf-page .publication-header .hero-body {
             padding-top: 4rem;
+            padding-bottom: 2rem;
           }
 
           .csf-page .hero-title {
@@ -1917,6 +1516,10 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
 
           .csf-page .publication-venue {
             margin: 0.75rem 0 0;
+          }
+
+          .csf-page .posterior-table {
+            min-width: 760px;
           }
 
           .csf-page .pdf-shell iframe {
@@ -1933,13 +1536,11 @@ function PublicationLink({
   label,
   icon,
   external = false,
-  tone = "dark",
 }: {
   href: string;
   label: string;
   icon: ReactNode;
   external?: boolean;
-  tone?: "dark" | "light" | "accent";
 }) {
   return (
     <span className="link-block">
@@ -1947,13 +1548,7 @@ function PublicationLink({
         href={href}
         target={external ? "_blank" : undefined}
         rel={external ? "noreferrer" : undefined}
-        className={`template-button ${
-          tone === "light"
-            ? "template-button--light"
-            : tone === "accent"
-              ? "template-button--accent"
-              : ""
-        }`}
+        className="template-button"
       >
         {icon}
         <span>{label}</span>
@@ -1970,43 +1565,17 @@ function LatexBlock({
   className?: string;
 }) {
   return (
-    <div className={className}>
+    <div className={`latex-block ${className ?? ""}`}>
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({ children }) => <p className="latex-paragraph">{children}</p>,
+        }}
       >
         {children}
       </ReactMarkdown>
     </div>
-  );
-}
-
-function AnalysisCard({
-  eyebrow,
-  src,
-  alt,
-  width,
-  height,
-  title,
-  caption,
-}: {
-  eyebrow: string;
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
-  title: string;
-  caption: string;
-}) {
-  return (
-    <article className="result-card analysis-card">
-      <p className="table-eyebrow analysis-eyebrow">{eyebrow}</p>
-      <div className="result-figure analysis-figure">
-        <Image src={src} alt={alt} width={width} height={height} />
-      </div>
-      <h3 className="result-title">{title}</h3>
-      <p className="result-caption">{caption}</p>
-    </article>
   );
 }
 
@@ -2126,17 +1695,21 @@ function PosteriorTable({
                 </tr>
                 {section.rows.map((row) => (
                   <tr key={row.label}>
-                    <td className="row-label">{row.label}</td>
+                    <th scope="row" className="row-label">
+                      {row.label}
+                    </th>
                     {row.cells.map((cell, index) => (
                       <td
                         key={`${row.label}-${columns[index]}`}
-                        className="score-cell"
+                        className={`score-cell ${
+                          cell.dominant ? "score-cell--dominant" : ""
+                        }`}
                       >
-                        <span
-                          className={`score-badge ${scoreToneClasses[cell.tone]}`}
-                        >
+                        <span className={`score-value ${scoreToneClasses[cell.tone]}`}>
                           {cell.value}
-                          {cell.dominant ? "*" : ""}
+                          {cell.dominant ? (
+                            <span className="score-asterisk">*</span>
+                          ) : null}
                         </span>
                       </td>
                     ))}

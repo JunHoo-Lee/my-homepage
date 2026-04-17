@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
@@ -9,7 +10,6 @@ const preferredNodeCandidates = [
 ];
 
 const preloadPath = path.resolve(__dirname, "disable-next-telemetry.cjs");
-const preloadArg = `--require=${preloadPath}`;
 const compileCacheDir = path.resolve(
   process.cwd(),
   ".next/cache/node-compile-cache",
@@ -28,19 +28,22 @@ function pickNodeExecutable() {
 
 function normalizeNodeOptions(value) {
   if (!value) {
-    return preloadArg;
+    return "";
   }
 
   const cleaned = value
+    .replace(
+      new RegExp(
+        `(^|\\s)--require=${preloadPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=\\s|$)`,
+        "g",
+      ),
+      " ",
+    )
     .replace(/(^|\s)--enable-source-maps(?=\s|$)/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-  if (cleaned.includes(preloadArg)) {
-    return cleaned;
-  }
-
-  return cleaned ? `${preloadArg} ${cleaned}` : preloadArg;
+  return cleaned;
 }
 
 function parseArgs(argv) {
@@ -173,7 +176,12 @@ function parseArgs(argv) {
 async function runLocally() {
   require(preloadPath);
   process.env.NEXT_TELEMETRY_DISABLED = "1";
-  process.env.NODE_OPTIONS = normalizeNodeOptions(process.env.NODE_OPTIONS);
+  const nodeOptions = normalizeNodeOptions(process.env.NODE_OPTIONS);
+  if (nodeOptions) {
+    process.env.NODE_OPTIONS = nodeOptions;
+  } else {
+    delete process.env.NODE_OPTIONS;
+  }
   process.env.NODE_COMPILE_CACHE =
     process.env.NODE_COMPILE_CACHE || compileCacheDir;
 
@@ -203,17 +211,29 @@ async function runLocally() {
 
 if (!process.env.MY_HOMEPAGE_NODE22_REEXEC && nodeMajor >= 23) {
   const nodeExecutable = pickNodeExecutable();
-  const result = spawnSync(nodeExecutable, process.argv.slice(1), {
+  const childEnv = {
+    ...process.env,
+    MY_HOMEPAGE_NODE22_REEXEC: "1",
+    NEXT_TELEMETRY_DISABLED: "1",
+    NODE_COMPILE_CACHE:
+      process.env.NODE_COMPILE_CACHE || compileCacheDir,
+  };
+  const nodeOptions = normalizeNodeOptions(process.env.NODE_OPTIONS);
+
+  if (nodeOptions) {
+    childEnv.NODE_OPTIONS = nodeOptions;
+  } else {
+    delete childEnv.NODE_OPTIONS;
+  }
+
+  const result = spawnSync(
+    nodeExecutable,
+    ["--require", preloadPath, ...process.argv.slice(1)],
+    {
     stdio: "inherit",
-    env: {
-      ...process.env,
-      MY_HOMEPAGE_NODE22_REEXEC: "1",
-      NEXT_TELEMETRY_DISABLED: "1",
-      NODE_OPTIONS: normalizeNodeOptions(process.env.NODE_OPTIONS),
-      NODE_COMPILE_CACHE:
-        process.env.NODE_COMPILE_CACHE || compileCacheDir,
+    env: childEnv,
     },
-  });
+  );
 
   process.exit(result.status ?? 1);
 }
