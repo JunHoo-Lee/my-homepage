@@ -14,7 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
@@ -460,6 +460,26 @@ const ablationSections: ScoreSection[] = [
 
 const analysisCards = [
   {
+    eyebrow: "Table 2",
+    src: "/csf/image.png",
+    alt: "Cropped Table 2 showing Wasserstein versus JSD attribution confidence",
+    width: 1240,
+    height: 315,
+    title: "Wasserstein keeps a clearer attribution margin.",
+    caption:
+      "Using the saved image.png asset, this metric comparison shows that Wasserstein separates the correct lineage more decisively than the JSD baseline on hard fine-tuned suspects.",
+  },
+  {
+    eyebrow: "Table 3",
+    src: "/csf/results-ablation-table-v2.png",
+    alt: "Attribution results after adversarial concept removal",
+    width: 928,
+    height: 402,
+    title: "Attribution survives adversarial concept removal.",
+    caption:
+      "Even after UCE removes animal-related concepts, attribution still peaks on the true source family, suggesting that the fingerprint is distributed across semantics rather than tied to one trigger concept.",
+  },
+  {
     eyebrow: "Prompt Figure",
     src: "/csf/prompt-ablation.png",
     alt: "Ring figure showing prompt-conditioned semantic mixtures",
@@ -806,7 +826,7 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           </div>
         </section>
 
-        <section className="section" id="analysis">
+        <section className="section">
           <div className="container is-max-quant">
             <div className="narrative-block">
               <p className="section-label">Analysis</p>
@@ -822,21 +842,9 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
             </div>
 
             <div className="analysis-grid">
-              <MetricComparisonPanel />
               {analysisCards.map((card) => (
                 <AnalysisCard key={card.title} {...card} />
               ))}
-            </div>
-
-            <div className="analysis-stack">
-              <PosteriorTable
-                eyebrow="Table 3"
-                title="Attribution survives adversarial concept removal."
-                description="Even after UCE removes animal-related concepts, the correct lineage remains dominant. This suggests the fingerprint is distributed across semantics rather than tied to one brittle trigger."
-                columns={baseModelColumns}
-                sections={ablationSections}
-                footnote="Adversarial concept removal uses 9 animal probes. The correct source family remains dominant across all evaluated suspects."
-              />
             </div>
           </div>
         </section>
@@ -1523,10 +1531,6 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .csf-page .analysis-stack {
-          margin-top: 1.5rem;
-        }
-
         .csf-page .analysis-card {
           display: grid;
           gap: 0.8rem;
@@ -1974,6 +1978,35 @@ function LatexBlock({
         {children}
       </ReactMarkdown>
     </div>
+  );
+}
+
+function AnalysisCard({
+  eyebrow,
+  src,
+  alt,
+  width,
+  height,
+  title,
+  caption,
+}: {
+  eyebrow: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  title: string;
+  caption: string;
+}) {
+  return (
+    <article className="result-card analysis-card">
+      <p className="table-eyebrow analysis-eyebrow">{eyebrow}</p>
+      <div className="result-figure analysis-figure">
+        <Image src={src} alt={alt} width={width} height={height} />
+      </div>
+      <h3 className="result-title">{title}</h3>
+      <p className="result-caption">{caption}</p>
+    </article>
   );
 }
 

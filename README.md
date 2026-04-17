@@ -12,13 +12,22 @@ publication list, and dedicated project pages for selected papers.
 
 ## DSV Assets
 
-The `Deep Support Vectors` page uses figures extracted from the official NeurIPS
-2024 paper and supplementary package:
+The `Deep Support Vectors` page is built from the official NeurIPS 2024 source
+release rather than hand-cropped screenshots:
 
 - `public/dsv/deep-support-vectors-paper.pdf`
 - `public/dsv/deep-support-vectors-supplemental.zip`
-- `public/dsv/figure-*.png`
-- `public/dsv/table-distillation.png`
+- `public/dsv/figure-*-tex-1.png` rendered from the paper's original TeX figure
+  files such as `overall_photo.pdf`, `editimages.pdf`, and
+  `interpolation_fig_compressed.pdf`
+- The few-shot CIFAR10 table rebuilt in React from `tmp/dsv-source/sec/main_table.tex`
+
+The page's code section mirrors the supplementary `submit_code/` layout:
+
+- `submit_code/pl_main.py`
+- `submit_code/base_reconstruct_imagenet.yaml`
+- `submit_code/models.py`
+- `submit_code/svm_modules.py`
 
 Reference links:
 
