@@ -70,6 +70,7 @@ export const PUBLICATIONS = [
                 year: "2026",
                 link: "/csf",
                 paperLink: "/csf/csf-paper.pdf",
+                codeLink: "https://github.com/JunHoo-Lee/csf-t2i-fingerprinting",
                 category: "Generative Models",
                 subTag: "Query-Only Attribution",
                 tldr: "A problem-first project page for black-box lineage attribution of fine-tuned text-to-image APIs using compositional semantic fingerprints."
