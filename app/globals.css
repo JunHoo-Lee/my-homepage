@@ -2,28 +2,16 @@
 @import "katex/dist/katex.min.css";
 
 @theme {
-  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @layer base {
-  html {
-    background:
-      radial-gradient(circle at top left, rgba(245, 158, 11, 0.08), transparent 30%),
-      linear-gradient(180deg, #f3ede2 0%, #f8f4ee 38%, #fcfaf6 100%);
-  }
-
   body {
-    @apply antialiased text-stone-950;
-    background: transparent;
+    @apply antialiased text-gray-900 bg-white;
   }
 
   ::selection {
     @apply bg-amber-500/30 text-stone-950;
-  }
-
-  a {
-    @apply transition-colors;
   }
 }
 
