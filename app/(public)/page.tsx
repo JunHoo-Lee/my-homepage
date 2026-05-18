@@ -207,6 +207,7 @@ function PublicationItem({
     const venueMatch = venue.match(/^(.*)\(([^()]+)\)\s*$/);
     const venueFull = venueMatch ? venueMatch[1].trim() : venue;
     const venueShort = venueMatch ? venueMatch[2].trim() : venue;
+    const showYearBadge = Boolean(year && !venueShort.includes(year));
 
     return (
         <div className="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
@@ -230,9 +231,11 @@ function PublicationItem({
                 <span className={`text-xs font-bold px-2 py-0.5 rounded border ${getCategoryColor(category)}`}>
                     {venueShort}
                 </span>
-                <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded border border-gray-200">
-                    {year}
-                </span>
+                {showYearBadge && (
+                    <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded border border-gray-200">
+                        {year}
+                    </span>
+                )}
                 <span className="text-xs font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
                     {category}
                 </span>
