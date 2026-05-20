@@ -82,7 +82,7 @@ export default function TemplateInfillingProjectPage() {
 
                 <div className="is-size-5 publication-authors">
                   <span className="author-block publication-venue">
-                    ACL 2026 Main — Long Paper (Oral)
+                    ACL 2026 · Long Paper, Oral Presentation
                   </span>
                 </div>
 
