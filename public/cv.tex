@@ -1,3 +1,4 @@
+% !TEX program = xelatex
 \documentclass[10pt, letterpaper]{article}
 
 % Packages:
@@ -22,7 +23,9 @@
 
 % Font:
 \defaultfontfeatures{Ligatures=TeX}
-\setmainfont{Times New Roman}
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
 \linespread{1.03}\selectfont
 
 % Formatting:
@@ -41,6 +44,13 @@
 
 \newcommand{\myname}{\textbf{\textup{Junhoo Lee}}}
 \newcommand{\coauthors}[1]{\textit{#1}}
+\newcommand{\pubid}[1]{\textbf{[#1]}}
+\newenvironment{publicationlist}{
+    \begin{description}[leftmargin=4.0em, labelwidth=3.2em, labelsep=0.6em, itemsep=0.85mm, topsep=0.5mm, style=multiline, font=\normalfont]
+}{
+    \end{description}
+}
+\newcommand{\oralpresentation}[1]{{\color{red}\textbf{Oral Presentation (#1)}}}
 
 \newcommand{\selpub}[5]{
     \item \textbf{#1}, \textbf{#2} {\footnotesize\textit{\textcolor{gray}{#3}}} \\[0.2mm]
@@ -87,78 +97,78 @@
 \section{Education}
 \textbf{Seoul National University} \hfill Seoul, South Korea \\
 \textit{Ph.D. Candidate in Intelligence and Information} \hfill Sep 2021 -- Present (Exp. Aug 2026)
+\newline
+{\small Advisor: Prof. Nojun Kwak, Machine Intelligence \& Pattern Analysis Laboratory (MIPAL)}
 
 \vspace{1mm}
 
 \textbf{Seoul National University} \hfill Seoul, South Korea \\
 \textit{B.Sc. in Electrical and Computer Engineering} \hfill Mar 2017 -- Sep 2021
+\newline
+{\small B.S. Thesis: \textit{Improvement of Elevator Control Algorithm Using Reinforcement Learning}. Advisor: Sungroh Yoon}
 
 % Research Interests
 \section{Research Interests}
 {\normalsize
-I am interested in foundation models, especially in the scaling behavior of
-learned representations: what internal structure emerges as pretraining scales,
-what remains stable across model and data scale, and how these structures shape
-downstream behavior, adaptation, and controllability. My work connects model
-design, pretraining, representation learning, evaluation, and inference-time
-control across language, vision, generative, and multimodal settings. More
-broadly, I aim to understand not only how models become stronger with scale,
-but also what structure makes those gains possible and reliable.
+My research studies how foundation models acquire reusable structure, and how
+that structure can be controlled, adapted, and diagnosed across language, vision,
+generative modeling, and embodied interfaces. My work on discrete diffusion
+language models introduces inference-time planning structure for controllable
+generation [C1], while my meta-learning papers study fast adaptation and task
+generalization through optimization-trajectory structure and flexible episodic
+interfaces [C6, C7]. I also work on model diagnosis, semantic robustness, and
+data-efficient transfer, including deep support vectors for pretrained-model
+interpretation [C5], black-box semantic fingerprinting for generative models
+[C2], multimodal temporal grounding [C4], and instruction-following failures in
+text-to-image generation [W1]. Recently, I have been extending this line toward
+vision-language-action and embodied foundation models, where pretrained semantic
+structure must remain reliable under changing instructions, visual observations,
+and action interfaces.
 }
 
-% Selected Publications
-\section{Selected Publications}
+% Publications
+\section{Publications}
+
 {\small
-\begin{itemize}[leftmargin=*, itemsep=0.8mm, topsep=0.5mm]
-\selpub
-    {\href{https://arxiv.org/abs/2510.13870}{Unlocking the Potential of Diffusion Language Models through Template Infilling}}
-    {ACL 2026}
-    {\#Large Diffusion Language Model}
-    {\myname, \coauthors{Seungyeon Kim, Nojun Kwak}}
-    {Introduced Template Infilling and Dynamic Segment Allocation, an inference-time scaffolding framework for diffusion language models that improves reasoning, code generation, and planning.}
-
-\selpub
-    {\href{https://junhoo.me/csf/csf-paper.pdf}{CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models}}
-    {CVPR 2026}
-    {\#Diffusion Model \#Fingerprinting}
-    {\myname, \coauthors{Mijin Koo, Nojun Kwak}}
-    {Developed a query-only black-box attribution framework for fine-tuned text-to-image models, combining compositional semantic probing with Bayesian lineage inference to identify model family and origin across diverse fine-tuned variants.}
-
-\selpub
-    {\href{https://arxiv.org/abs/2507.04667}{What's Making That Sound Right Now? Video-centric Audio-Visual Localization}}
-    {ICCV 2025}
-    {\#Audio-Visual Localization}
-    {\coauthors{Hahyeon Choi}, \myname, \coauthors{Nojun Kwak}}
-    {Presented AVATAR, a video-centric audio-visual localization benchmark, together with TAVLO, a temporally aware model designed for realistic grounding scenarios involving mixed sounds, multiple entities, off-screen sources, and cross-event mismatches.}
-
-\selpub
-    {\href{https://arxiv.org/abs/2403.17329}{Deep Support Vectors}}
-    {NeurIPS 2024}
-    {\#Deep Learning Theory \#Interpretability}
-    {\myname, \coauthors{Hyunho Lee, Kyomin Hwang, Nojun Kwak}}
-    {Introduced DeepKKT, a method for recovering support-like learned structures from pretrained classifiers, enabling explanation, practical dataset distillation, model inversion, and latent-space generative editing without access to the original training data.}
-
-\selpub
-    {\href{https://arxiv.org/abs/2404.15154}{Do Not Think About Pink Elephant! (Co-first)}}
-    {CVPR Workshops 2024}
-    {\#Diffusion Model \#Safety}
-    {\coauthors{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$}, \myname$^\dagger$, \coauthors{Nojun Kwak}}
-    {Studied how large generative models fail to represent negation, revealing a ``white bear phenomenon'' in which suppressed concepts remain active, and proposed prompt-based attack and defense strategies grounded in representation-space analysis.}
-
-\selpub
-    {\href{https://arxiv.org/abs/2401.05097}{Any-Way Meta Learning}}
-    {AAAI 2024}
-    {\#Meta Learning}
-    {\myname, \coauthors{Yearim Kim, Hyunho Lee, Nojun Kwak}}
-    {Improved episodic meta-learning by relaxing the fixed N-way setting and exploiting label equivalence across tasks.}
-
-\selpub
-    {\href{https://arxiv.org/abs/2310.02751}{SHOT: Suppressing the Hessian along the Optimization Trajectory}}
-    {NeurIPS 2023}
-    {\#Meta Learning}
-    {\myname, \coauthors{Jayeon Yoo, Nojun Kwak}}
-    {Studied how flattening the optimization trajectory improves adaptation behavior in gradient-descent-based meta-learning.}
-\end{itemize}
+\begin{publicationlist}
+    \item[\pubid{C1}] \textbf{\href{https://arxiv.org/abs/2510.13870}{Unlocking the Potential of Diffusion Language Models through Template Infilling}} \\
+    \textit{\myname, Seungyeon Kim, Nojun Kwak} \\
+    \textit{Annual Meeting of the Association for Computational Linguistics (\textbf{ACL})}, 2026. \\
+    \oralpresentation{485/10518=4.61\%}
+    \item[\pubid{C2}] \textbf{\href{https://junhoo.me/csf/csf-paper.pdf}{CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models}} \\
+    \textit{\myname, Mijin Koo, Nojun Kwak} \\
+    \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR})}, 2026.
+    \item[\pubid{C3}] \textbf{\href{https://arxiv.org/abs/2510.13865}{Deep Edge Filter}} (Co-first) \\
+    \textit{Dongkwan Lee$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
+    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2025.
+    \item[\pubid{C4}] \textbf{\href{https://arxiv.org/abs/2507.04667}{What's Making That Sound Right Now? Video-centric Audio-Visual Localization}} \\
+    \textit{Hahyeon Choi, \myname, Nojun Kwak} \\
+    \textit{The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV})}, 2025.
+    \item[\pubid{C5}] \textbf{\href{https://arxiv.org/abs/2403.17329}{Deep Support Vectors}} \\
+    \textit{\myname, Hyunho Lee, Kyomin Hwang, Nojun Kwak} \\
+    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2024.
+    \item[\pubid{C6}] \textbf{\href{https://arxiv.org/abs/2401.05097}{Any-Way Meta Learning}} \\
+    \textit{\myname, Yearim Kim, Hyunho Lee, Nojun Kwak} \\
+    \textit{The AAAI Conference on Artificial Intelligence (\textbf{AAAI})}, 2024.
+    \item[\pubid{C7}] \textbf{\href{https://arxiv.org/abs/2310.02751}{SHOT: Suppressing the Hessian along the Optimization Trajectory}} \\
+    \textit{\myname, Jayeon Yoo, Nojun Kwak} \\
+    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2023.
+    \item[\pubid{W1}] \textbf{\href{https://arxiv.org/abs/2404.15154}{Do Not Think About Pink Elephant!}} (Co-first) \\
+    \textit{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
+    \textit{CVPR Workshops -- Responsible Generative AI}, 2024.
+    \item[\pubid{W2}] \textbf{Coreset Selection for Object Detection} \\
+    \textit{Hojun Lee, Suyoung Kim, \myname, Jaeyoung Yoo, Nojun Kwak} \\
+    \textit{CVPR Workshops -- Dataset Distillation}, 2024.
+    \item[\pubid{W3}] \textbf{\href{https://arxiv.org/abs/2405.00348}{Practical Dataset Distillation Based on Deep Support Vectors}} \\
+    \textit{Hyunho Lee, \myname, Nojun Kwak} \\
+    \textit{ECCV Workshops -- Dataset Distillation Challenge}, 2024.
+    \item[\pubid{J1}] \textbf{End-to-End Multi-Entity Customization} \\
+    \textit{Wonhark Park$^*$, Jaehyun Lee$^*$, Wonsik Shin, \myname, Nojun Kwak} \\
+    \textit{IET Image Processing}, Accepted. 2026.
+    \item[\pubid{J2}] \textbf{\href{https://arxiv.org/abs/2508.20224}{The Role of Teacher Calibration in Knowledge Distillation}} \\
+    \textit{Suyoung Kim, Seonguk Park, \myname, Nojun Kwak} \\
+    \textit{IEEE Access}, 2025.
+\end{publicationlist}
 }
 
 % Awards
@@ -174,130 +184,39 @@ but also what structure makes those gains possible and reliable.
 \end{tabu}
 }
 
-% Publications
-\newpage
-\section{Publications}
-
-{\footnotesize
-\begin{itemize}[leftmargin=*, itemsep=0.15mm, topsep=0.2mm]
-    \item \textbf{\href{https://arxiv.org/abs/2510.13870}{Unlocking the Potential of Diffusion Language Models through Template Infilling}} \\
-    \textit{\myname, Seungyeon Kim, Nojun Kwak} \\
-    \textit{Annual Meeting of the Association for Computational Linguistics (\textbf{ACL})}, 2026. (long paper, oral presentation).
-
-    \item \textbf{\href{https://junhoo.me/csf/csf-paper.pdf}{CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models}} \\
-    \textit{\myname, Mijin Koo, Nojun Kwak} \\
-    \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR})}, June 2026.
-
-    \item \textbf{End-to-End Multi-Entity Customization} \\
-    \textit{Wonhark Park$^*$, Jaehyun Lee$^*$, Wonsik Shin, \myname, Nojun Kwak} \\
-    \textit{IET Image Processing}, Accepted. 2026.
-
-    \item \textbf{\href{https://arxiv.org/abs/2510.13865}{Deep Edge Filter}} (Co-first) \\
-    \textit{Dongkwan Lee$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
-    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2025.
-
-    \item \textbf{\href{https://arxiv.org/abs/2507.04667}{What's Making That Sound Right Now? Video-centric Audio-Visual Localization}} \\
-    \textit{Hahyeon Choi, \myname, Nojun Kwak} \\
-    \textit{The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV})}, 2025.
-
-    \item \textbf{\href{https://arxiv.org/abs/2403.17329}{Deep Support Vectors}} \\
-    \textit{\myname, Hyunho Lee, Kyomin Hwang, Nojun Kwak} \\
-    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2024.
-
-    \item \textbf{\href{https://arxiv.org/abs/2401.05097}{Any-Way Meta Learning}} \\
-    \textit{\myname, Yearim Kim, Hyunho Lee, Nojun Kwak} \\
-    \textit{The AAAI Conference on Artificial Intelligence (\textbf{AAAI})}, 2024.
-
-    \item \textbf{\href{https://arxiv.org/abs/2310.02751}{SHOT: Suppressing the Hessian along the Optimization Trajectory}} \\
-    \textit{\myname, Jayeon Yoo, Nojun Kwak} \\
-    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2023.
-
-    \item \textbf{\href{https://arxiv.org/abs/2404.15154}{Do Not Think About Pink Elephant!}} (Co-first) \\
-    \textit{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
-    \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Responsible Generative AI}, 2024.
-
-    \item \textbf{Coreset Selection for Object Detection} \\
-    \textit{Hojun Lee, Suyoung Kim, \myname, Jaeyoung Yoo, Nojun Kwak} \\
-    \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (\textbf{CVPR Workshops}) -- Dataset Distillation}, 2024.
-
-    \item \textbf{\href{https://arxiv.org/abs/2405.00348}{Practical Dataset Distillation Based on Deep Support Vectors}} \\
-    \textit{Hyunho Lee, \myname, Nojun Kwak} \\
-    \textit{The European Conference on Computer Vision Workshops (\textbf{ECCV Workshops}) -- Dataset Distillation Challenge}, 2024.
-
-    \item \textbf{\href{https://arxiv.org/abs/2508.20224}{The Role of Teacher Calibration in Knowledge Distillation}} \\
-    \textit{Suyoung Kim, Seonguk Park, \myname, Nojun Kwak} \\
-    \textit{IEEE Access}, 2025.
-\end{itemize}
-}
-
 % Research Projects
 \section{Research Projects}
-{\footnotesize
-\projectentry
-    {Research on Gradient-Descent-Based Meta-Learning Algorithms}
-    {Sep. 2022 -- Sep. 2023}
-    {Funded by Samsung Electronics | Main Researcher}
-    {Conducted research to uncover the mechanism behind the success of gradient-descent-based meta-learning algorithms and developed an improved method, resulting in a publication at a top-tier machine learning conference.}
-
-\projectentry
-    {Development of Self-Directed Visual Object Detection for Shopping Assistance}
-    {Mar. 2022 -- Nov. 2024}
-    {Supported by IITP (Institute of Information \& Communications Technology Planning \& Evaluation) | Project Manager}
-    {Conducted research on a shopping-oriented visual assistant that detects objects in user-submitted images, extracts product attributes, and continually acquires new object categories through OCR-based labeling and incremental learning.}
-
-\projectentry
-    {Development of AI Video Generation for Korean Traditional Media Art}
-    {Jul. 2024 -- Mar. 2026}
-    {Supported by MCST (Ministry of Culture, Sports and Tourism), in collaboration with EASYWITH | Main Engineer}
-    {Led the development of a Korean-style AI video generation system using curated domain-specific datasets of traditional media art; designed a data-centric pipeline for high-resolution (up to 8K) video generation, including dataset construction, content similarity evaluation, and automated production workflows.}
-
-\projectentry
-    {Physically Plausible Video Diffusion Modeling}
-    {Mar. 2025 -- Nov. 2025}
-    {Project under AI Star Fellowship Program (MSIT, Korea) | Project Manager}
-    {Led the development of video diffusion models that generate physically consistent dynamics and designed physics-aware modeling strategies to improve temporal coherence and realism in generated videos.}
+{\small
+\textbf{Gradient-Descent-Based Meta-Learning Algorithms} (Samsung Electronics, Main Researcher, 2022--2023)\\
+\textbf{Self-Directed Visual Object Detection for Shopping Assistance} (IITP, Project Manager, 2022--2024)\\
+\textbf{AI Video Generation for Korean Traditional Media Art} (MCST/EASYWITH, Main Engineer, 2024--2026)\\
+\textbf{Physically Plausible Video Diffusion Modeling} (AI Star Fellowship/MSIT, Project Manager, 2025).
 }
-
-\newpage
 
 % Skills
 \section{Skills}
-{\footnotesize
-\skillentry{Programming Languages}{Python, CUDA, R, C++, Verilog}
-\skillentry{ML Development Stack}{PyTorch, TensorFlow, Slurm, Docker}
+{\small
+\textbf{Programming Languages}: Python, CUDA, R, C++, Verilog; \textbf{ML Development Stack}: PyTorch, TensorFlow, Slurm, Docker.
 }
 
 % Talks
 \section{Talks}
-{\footnotesize
-\talkentry
-    {https://junhoo.me/csf}
-    {Compositional Semantic Fingerprinting (CSF) for Black-box Attribution of Text-to-Image Models}
-    {Apr. 2026}
-    {SWCS 2026 (Software Convergence Symposium), KIISE}
-
-\talkentry
-    {https://arxiv.org/abs/2403.17329}
-    {Deep Support Vectors: Interpreting Deep Models via Support Vector Extraction}
-    {Jun. 26, 2024}
-    {Korea Computer Congress (KCC 2024)}
+{\small
+\textbf{\href{https://junhoo.me/csf}{Compositional Semantic Fingerprinting (CSF) for Black-box Attribution of Text-to-Image Models}}, SWCS 2026, Apr. 2026\\
+\textbf{\href{https://arxiv.org/abs/2403.17329}{Deep Support Vectors: Interpreting Deep Models via Support Vector Extraction}}, KCC 2024, Jun. 26, 2024.
 }
 
 % Academic Service
 \section{Academic Service}
-{\footnotesize
-\textbf{Conference Reviewer}: CVPR (2025, 2026), ICCV (2025), ECCV (2026), ICLR (2025, 2026), ICML (2026), NeurIPS (2024, 2025, 2026)
+{\small
+\textbf{Conference Reviewer}: CVPR (2025, 2026), ICCV (2025), ECCV (2026), ICLR (2025, 2026), ICML (2026), NeurIPS (2024, 2025, 2026).
 }
-
-\vfill
 
 % Patents
 \section{Patents}
 {\small
-\begin{itemize}[leftmargin=*, itemsep=0.4mm, topsep=0.4mm]
-    \item \textbf{Method and Apparatus for Edge Filtering to Improve the Robustness of Deep Learning Models}, Korean Patent, 10-2025-0215458
-    \item \textbf{Method and Apparatus for Controlling Unintended Object Generation in Image Generation Models through Prompt Reconfiguration}, Korean Patent, 10-2025-0063788
-\end{itemize}
+\textbf{Method and Apparatus for Edge Filtering to Improve the Robustness of Deep Learning Models}, Korean Patent 10-2025-0215458\\
+\textbf{Method and Apparatus for Controlling Unintended Object Generation in Image Generation Models through Prompt Reconfiguration}, Korean Patent 10-2025-0063788.
 }
 
 \end{document}
