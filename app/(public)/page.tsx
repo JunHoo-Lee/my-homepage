@@ -7,6 +7,12 @@ import { PROFILE, EDUCATION, NEWS, PUBLICATIONS, AWARDS } from "@/app/lib/data";
 // Dynamically import PDFDownloadLink is no longer needed
 // import dynamic from "next/dynamic";
 
+const bioHighlightPattern = /Junhoo Lee|discrete diffusion language models|embodied foundation models|foundation models|reusable structure|meta-learning|model diagnosis|vision-language-action/g;
+
+function renderBio(paragraph: string) {
+    return paragraph.replace(bioHighlightPattern, (match) => `<strong>${match}</strong>`);
+}
+
 export default function Home() {
     const fadeInUp = {
         initial: { opacity: 0, y: 20 },
@@ -50,19 +56,7 @@ export default function Home() {
                 <div className="prose prose-lg text-gray-700 leading-relaxed">
                     {PROFILE.bio.map((paragraph, i) => (
                         <p key={i} className="mb-4" dangerouslySetInnerHTML={{
-                            // Simple hack to render HTML in bio strings if needed, 
-                            // or just render text. The current data has plain text mostly.
-                            // For safety/flexibility let's assume simple text for now or simple inner HTML replacers if we want bold.
-                            // Actual data.ts has plain strings but the original had <strong>. 
-                            // Let's re-inject strong tags or handle it. 
-                            // For now, let's just render the text. 
-                            // If we want bolding, we should parse it or keep it simple.
-                            __html: paragraph
-                                .replace("Junhoo Lee", "<strong>Junhoo Lee</strong>")
-                                .replace("optimization theory", "<strong>optimization theory</strong>")
-                                .replace("modern generative AI", "<strong>modern generative AI</strong>")
-                                .replace("Diffusion Models", "<strong>Diffusion Models</strong>")
-                                .replace("LLMs", "<strong>LLMs</strong>")
+                            __html: renderBio(paragraph)
                         }}></p>
                     ))}
                     <p>

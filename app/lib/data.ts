@@ -8,8 +8,8 @@ export const PROFILE = {
     address: "Room 311, Building 18, Seoul National University, Gwanak-ro 1, Gwanak-gu, Seoul, Republic of Korea",
     bio: [
         "Hi, I'm Junhoo Lee. I am a Ph.D. candidate at Seoul National University (MIPAL), advised by Prof. Nojun Kwak.",
-        "My research aims to bridge the gap between optimization theory and modern generative AI. Instead of merely scaling up models, I investigate the training dynamics of overparameterized networks and design inductive biases (such as geometric constraints or explicit filtering) to ensure robust in-distribution learning.",
-        "Currently, I am exploring the fundamental principles of Diffusion Models and LLMs to make them more efficient, explainable, and controllable.",
+        "My research studies how foundation models acquire reusable structure, and how that structure can be controlled, adapted, and diagnosed across language, vision, generative modeling, and embodied interfaces.",
+        "I work on inference-time planning for discrete diffusion language models, fast adaptation and task generalization in meta-learning, and model diagnosis for pretrained deep networks. Recently, I have been extending this line toward vision-language-action and embodied foundation models, where pretrained semantic structure must remain reliable under changing instructions, visual observations, and action interfaces.",
     ]
 };
 
