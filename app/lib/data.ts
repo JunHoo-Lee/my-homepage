@@ -29,6 +29,7 @@ export const EDUCATION = [
 export const NEWS = [
     { date: "Jul 5, 2026", content: "I will be at ACL 2026 in San Diego, presenting our long paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" as an oral presentation!", link: "/template-infilling", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Jun 5, 2026", content: "I will be at CVPR 2026 in Denver, presenting our \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" paper!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
+    { date: "May 2026", content: "I was selected as an ICML 2026 Gold Reviewer, recognizing top reviewers for this year's conference.", link: "https://icml.cc/Conferences/2026", linkText: "ICML 2026" },
     { date: "Apr 4, 2026", content: "Our paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" is accepted to ACL 2026 as a long paper (oral presentation)!", link: "/template-infilling", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Feb 20, 2026", content: "Our paper \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" is accepted to CVPR 2026!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
     { date: "Dec 2025", content: "I will be at NeurIPS 2025 in San Diego, presenting our \"Deep Edge Filter\" paper!", link: "https://arxiv.org/abs/2510.13865", linkText: "\"Deep Edge Filter\"" },
@@ -184,6 +185,7 @@ export const PUBLICATIONS = [
 ];
 
 export const AWARDS = [
+    { year: "2026", title: "ICML Gold Reviewer" },
     { year: "2023", title: "BK21 Future Innovation Talent Bronze Prize", amount: "USD 1,000" },
     { year: "2023", title: "BK21 Outstanding Research Talent Fellowship", amount: "USD 3,500" },
     { year: "2022", title: "Yulchon AI Star Scholarship", amount: "USD 8,000" },
@@ -193,6 +195,7 @@ export const AWARDS = [
 ];
 
 export const ACADEMIC_SERVICE = [
+    { role: "Gold Reviewer", venue: "ICML", year: "2026" },
     { role: "Reviewer", venue: "CVPR", year: "2025, 2026" },
     { role: "Reviewer", venue: "ICLR", year: "2025, 2026" },
     { role: "Reviewer", venue: "NeurIPS", year: "2024, 2025" },
