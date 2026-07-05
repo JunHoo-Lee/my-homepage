@@ -3,17 +3,19 @@ import path from "node:path";
 
 import type { Metadata } from "next";
 
+import PaperAssistantCopyPanel from "./PaperAssistantCopyPanel";
+
 export const metadata: Metadata = {
   title: "Template Infilling Paper Assistant | Junhoo Lee",
   description:
-    "Copyable AI assistant prompt for Unlocking the Potential of Diffusion Language Models through Template Infilling.",
+    "Copyable Markdown assistant prompt for Unlocking the Potential of Diffusion Language Models through Template Infilling.",
 };
 
 export default async function PaperAssistantPage() {
-  const assistantText = await fs.readFile(
+  const assistantMarkdown = await fs.readFile(
     path.join(
       process.cwd(),
-      "public/template-infilling/paper-assistant.txt",
+      "public/template-infilling/paper-assistant.md",
     ),
     "utf8",
   );
@@ -24,8 +26,8 @@ export default async function PaperAssistantPage() {
         <div className="section-box content">
           <h1 className="title is-2">Template Infilling Paper Assistant</h1>
           <p>
-            Copy this page into any AI chat to ask questions about the Template
-            Infilling paper.
+            Copy the Markdown source into any AI chat to ask questions about
+            the Template Infilling paper.
           </p>
           <div className="publication-links paper-assistant-links">
             <span className="link-block">
@@ -57,9 +59,7 @@ export default async function PaperAssistantPage() {
               </a>
             </span>
           </div>
-          <pre className="paper-assistant-copy">
-            <code>{assistantText}</code>
-          </pre>
+          <PaperAssistantCopyPanel markdown={assistantMarkdown} />
         </div>
       </div>
     </main>

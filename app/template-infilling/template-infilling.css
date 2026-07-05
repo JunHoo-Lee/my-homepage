@@ -243,22 +243,64 @@ body {
   margin: 1rem 0 1.35rem;
 }
 
-.paper-assistant-copy {
-  max-height: none;
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-word;
-  border-radius: 8px;
-  background: #ffffff !important;
-  border: 1px solid #dce3ec;
-  padding: 1rem !important;
+.paper-assistant-copy-panel {
+  margin-top: 1.15rem;
   text-align: left;
-  font-size: 0.95rem;
-  line-height: 1.55;
 }
 
-.paper-assistant-copy code {
+.paper-assistant-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.paper-assistant-toolbar .title {
+  margin-bottom: 0;
+}
+
+.paper-assistant-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.paper-assistant-copy-button {
+  gap: 0.4rem;
+}
+
+.paper-assistant-textarea {
+  width: 100%;
+  min-height: min(65vh, 720px);
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid #d2dce8;
+  background: #ffffff;
+  color: #24292f;
+  padding: 1rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.92rem;
+  line-height: 1.55;
   white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.paper-assistant-textarea:focus {
+  outline: 2px solid rgba(54, 119, 204, 0.28);
+  outline-offset: 2px;
+  border-color: #3677cc;
+}
+
+.paper-assistant-status {
+  min-height: 1.2rem;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0 !important;
+  color: #276749;
+  font-size: 0.95rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -268,5 +310,10 @@ body {
 
   .analysis-card-image {
     height: auto;
+  }
+
+  .paper-assistant-textarea {
+    min-height: 520px;
+    font-size: 0.84rem;
   }
 }
