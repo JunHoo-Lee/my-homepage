@@ -224,6 +224,32 @@ body {
   margin-bottom: 1rem;
 }
 
+.paper-assistant-page {
+  background: #fff;
+}
+
+.paper-assistant-links {
+  margin: 1rem 0 1.35rem;
+}
+
+.paper-assistant-copy {
+  max-height: none;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 8px;
+  background: #ffffff !important;
+  border: 1px solid #dce3ec;
+  padding: 1rem !important;
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.paper-assistant-copy code {
+  white-space: pre-wrap;
+}
+
 @media screen and (max-width: 768px) {
   .section-box {
     padding: 1.4rem 1rem;
