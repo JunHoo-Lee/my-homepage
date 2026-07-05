@@ -173,7 +173,7 @@ Safety Critique & Revision: Let's think step by step. Is there any harm or bias?
 Final Safe Response: [MASK]
 ```
 
-## Citation and contact
+## Citation & contact
 
 ```bibtex
 @inproceedings{lee-etal-2026-unlocking,
