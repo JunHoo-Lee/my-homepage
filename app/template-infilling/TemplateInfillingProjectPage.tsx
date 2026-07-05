@@ -112,6 +112,24 @@ export default function TemplateInfillingProjectPage() {
                         <span>Paper</span>
                       </a>
                     </span>
+                    <span className="link-block">
+                      <a
+                        href="https://github.com/JunHoo-Lee/Template-Infilling"
+                        className="external-link button is-normal is-rounded is-dark"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>Code</span>
+                      </a>
+                    </span>
+                    <span className="link-block">
+                      <a
+                        href="/template-infilling/paper-assistant"
+                        className="external-link button is-normal is-rounded is-light"
+                      >
+                        <span>Paper Assistant</span>
+                      </a>
+                    </span>
                   </div>
                 </div>
               </div>
