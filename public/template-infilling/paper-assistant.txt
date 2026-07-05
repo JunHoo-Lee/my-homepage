@@ -225,21 +225,36 @@ Final Safe Response: [MASK]
 
 
 Citation & contact
-@misc{lee2026unlockingpotentialdiffusionlanguage,
+@inproceedings{lee-etal-2026-unlocking,
 
-      title={Unlocking the Potential of Diffusion Language Models through Template Infilling},
+    title = "Unlocking the Potential of Diffusion Language Models through Template Infilling",
 
-      author={Junhoo Lee and Seungyeon Kim and Nojun Kwak},
+    author = "Lee, Junhoo  and
+      Kim, Seungyeon  and
+      Kwak, Nojun",
 
-      year={2026},
+    editor = "Liakata, Maria  and
+      Moreira, Viviane P.  and
+      Zhang, Jiajun  and
+      Jurgens, David",
 
-      eprint={2510.13870},
+    booktitle = "Proceedings of the 64th Annual Meeting of the {A}ssociation for {C}omputational {L}inguistics (Volume 1: Long Papers)",
 
-      archivePrefix={arXiv},
+    month = jul,
 
-      primaryClass={cs.CL},
+    year = "2026",
 
-      url={https://arxiv.org/abs/2510.13870},
+    address = "San Diego, California, United States",
+
+    publisher = "Association for Computational Linguistics",
+
+    url = "https://aclanthology.org/2026.acl-long.284/",
+
+    doi = "10.18653/v1/2026.acl-long.284",
+
+    pages = "6273--6287",
+
+    ISBN = "979-8-89176-390-6",
 
 }
 
@@ -247,4 +262,3 @@ Paper: https://arxiv.org/abs/2510.13870
 Project page: https://junhoo.me/template-infilling
 Code: https://github.com/JunHoo-Lee/Template-Infilling
 Contact: Junhoo Lee — mrjunoo@snu.ac.kr
-

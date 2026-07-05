@@ -200,6 +200,17 @@ body {
   padding: 0;
 }
 
+#bibtex pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+}
+
+#bibtex pre code {
+  white-space: pre-wrap;
+}
+
 .large-results-image {
   max-width: 84%;
 }
