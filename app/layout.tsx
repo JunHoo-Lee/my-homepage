@@ -2,9 +2,38 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Junhoo Lee | SNU MIPAL",
-    description: "Personal homepage of Junhoo Lee, PhD student at Seoul National University.",
+    metadataBase: new URL("https://junhoo.me"),
+    title: "Junhoo Lee | Machine Learning Researcher",
+    description:
+        "Junhoo Lee is a machine learning researcher studying reusable structure in foundation models across language, vision, generative modeling, and embodied systems.",
+    openGraph: {
+        title: "Junhoo Lee | Machine Learning Researcher",
+        description:
+            "Research on controllable, adaptable, and diagnosable foundation models.",
+        url: "https://junhoo.me",
+        siteName: "Junhoo Lee",
+        type: "website",
+        images: [{ url: "/myface.jpeg", alt: "Junhoo Lee" }],
+    },
+    twitter: {
+        card: "summary",
+        title: "Junhoo Lee | Machine Learning Researcher",
+        description:
+            "Research on controllable, adaptable, and diagnosable foundation models.",
+        images: ["/myface.jpeg"],
+    },
 };
+
+const publicThemeScript = `
+(() => {
+  try {
+    const saved = window.localStorage.getItem("junhoo-public-theme");
+    document.documentElement.dataset.publicTheme = saved === "dark" ? "dark" : "light";
+  } catch {
+    document.documentElement.dataset.publicTheme = "light";
+  }
+})();
+`;
 
 export default function RootLayout({
     children,
@@ -12,8 +41,16 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="scroll-smooth">
-            <body className="bg-white text-gray-900 antialiased min-h-screen">
+        <html
+            lang="en"
+            className="scroll-smooth"
+            data-public-theme="light"
+            suppressHydrationWarning
+        >
+            <head>
+                <script dangerouslySetInnerHTML={{ __html: publicThemeScript }} />
+            </head>
+            <body className="antialiased min-h-screen">
                 {children}
             </body>
         </html>
