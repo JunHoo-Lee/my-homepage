@@ -1,11 +1,31 @@
+export type Publication = {
+    title: string;
+    authors: string[];
+    venue: string;
+    year: string;
+    link?: string;
+    paperLink?: string;
+    projectLink?: string;
+    codeLink?: string;
+    codeLabel?: string;
+    category: string;
+    subTag: string;
+    tldr: string;
+};
+
+export type PublicationSection = {
+    section: string;
+    color: string;
+    note?: string;
+    items: Publication[];
+};
+
 export const PROFILE = {
     name: "Junhoo Lee",
     role: "Ph.D. Candidate",
     affiliation: "Seoul National University",
     email: "mrjunoo@snu.ac.kr",
     website: "https://junhoo.me",
-    phone: "+82-10-4042-6255",
-    address: "Room 311, Building 18, Seoul National University, Gwanak-ro 1, Gwanak-gu, Seoul, Republic of Korea",
     bio: [
         "Hi, I'm Junhoo Lee. I am a Ph.D. candidate at Seoul National University (MIPAL), advised by Prof. Nojun Kwak.",
         "My research studies how foundation models acquire reusable structure, and how that structure can be controlled, adapted, and diagnosed across language, vision, generative modeling, and embodied interfaces.",
@@ -24,6 +44,105 @@ export const EDUCATION = [
         institution: "Seoul National University",
         period: "Mar 2017 – Sep 2021",
     }
+];
+
+export const LATEST_UPDATE = {
+    date: "Sep 2026",
+    datetime: "2026-09",
+    prefix: "I will join ",
+    linkText: "ALIN-LAB",
+    link: "https://alinlab.kaist.ac.kr/",
+    suffix: " at KAIST as a postdoctoral researcher in September 2026.",
+};
+
+export const FEATURED_PROJECTS = [
+    {
+        title: "Template Infilling",
+        fullTitle: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
+        venue: "ACL 2026",
+        detail: "Long Paper · Oral",
+        summary: "Inference-time planning for diffusion language models through template-then-fill generation.",
+        image: "/template-infilling/figure-main.png",
+        imageAlt: "Template Infilling method overview",
+        projectLink: "/template-infilling",
+        paperLink: "https://arxiv.org/abs/2510.13870",
+        codeLink: "https://github.com/JunHoo-Lee/Template-Infilling",
+    },
+    {
+        title: "CSF",
+        fullTitle: "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
+        venue: "CVPR 2026",
+        detail: "Black-box attribution",
+        summary: "Query-only attribution of fine-tuned text-to-image APIs via compositional semantic fingerprints.",
+        image: "/csf/image.png",
+        imageAlt: "CSF fingerprinting result table",
+        projectLink: "/csf",
+        paperLink: "/csf/csf-paper.pdf",
+        codeLink: "https://github.com/JunHoo-Lee/csf-t2i-fingerprinting",
+    },
+    {
+        title: "Deep Support Vectors",
+        fullTitle: "Deep Support Vectors",
+        venue: "NeurIPS 2024",
+        detail: "Model diagnosis",
+        summary: "A support-vector perspective for interpreting and editing pretrained deep networks.",
+        image: "/dsv/figure-hero.png",
+        imageAlt: "Deep Support Vectors qualitative overview",
+        projectLink: "/dsv",
+        paperLink: "https://arxiv.org/abs/2403.17329",
+        codeLink: "https://github.com/JunHoo-Lee/Neurips24_DeepSupportVectors",
+    },
+];
+
+export const TALKS = [
+    {
+        year: "2026",
+        title: "Compositional Semantic Fingerprinting for Black-box Attribution",
+        venue: "SWCS 2026",
+        link: "/csf",
+    },
+    {
+        year: "2024",
+        title: "Deep Support Vectors: Interpreting Deep Models via Support Vector Extraction",
+        venue: "KCC 2024",
+        link: "https://arxiv.org/abs/2403.17329",
+    },
+];
+
+export const HOME_NEWS = [
+    LATEST_UPDATE,
+    {
+        date: "Jul 5, 2026",
+        datetime: "2026-07-05",
+        prefix: "Template Infilling will be presented at ",
+        linkText: "ACL 2026",
+        link: "/template-infilling",
+        suffix: " as a long-paper oral presentation.",
+    },
+    {
+        date: "Jun 5, 2026",
+        datetime: "2026-06-05",
+        prefix: "CSF was presented at ",
+        linkText: "CVPR 2026",
+        link: "/csf",
+        suffix: ".",
+    },
+    {
+        date: "May 2026",
+        datetime: "2026-05",
+        prefix: "Selected as an ",
+        linkText: "ICML 2026 Gold Reviewer",
+        link: "https://icml.cc/Conferences/2026",
+        suffix: ".",
+    },
+    {
+        date: "Apr 4, 2026",
+        datetime: "2026-04-04",
+        prefix: "Template Infilling was accepted to ",
+        linkText: "ACL 2026",
+        link: "/template-infilling",
+        suffix: " as a long paper and oral presentation.",
+    },
 ];
 
 export const NEWS = [
@@ -47,7 +166,7 @@ export const NEWS = [
     { date: "Sep 2023", content: "Our paper \"SHOT: Suppressing the Hessian along the Optimization Trajectory\" is accepted to NeurIPS 2023!", link: "https://arxiv.org/abs/2310.02751", linkText: "\"SHOT: Suppressing the Hessian along the Optimization Trajectory\"" },
 ];
 
-export const PUBLICATIONS = [
+export const PUBLICATIONS: PublicationSection[] = [
     {
         section: "Main Conference",
         color: "blue",
@@ -59,7 +178,8 @@ export const PUBLICATIONS = [
                 venue: "Annual Meeting of the Association for Computational Linguistics (ACL 2026)",
                 year: "2026",
                 projectLink: "/template-infilling",
-                paperLink: "/template-infilling/template-infilling-paper.pdf",
+                paperLink: "https://arxiv.org/abs/2510.13870",
+                codeLink: "https://github.com/JunHoo-Lee/Template-Infilling",
                 category: "Large Language Models",
                 subTag: "Long Paper, Oral Presentation",
                 tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
@@ -69,7 +189,7 @@ export const PUBLICATIONS = [
                 authors: ["Junhoo Lee", "Mijin Koo", "Nojun Kwak"],
                 venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
                 year: "2026",
-                link: "/csf",
+                projectLink: "/csf",
                 paperLink: "/csf/csf-paper.pdf",
                 codeLink: "https://github.com/JunHoo-Lee/csf-t2i-fingerprinting",
                 category: "Generative Models",
@@ -101,7 +221,7 @@ export const PUBLICATIONS = [
                 authors: ["Junhoo Lee", "Hyunho Lee", "Kyomin Hwang", "Nojun Kwak"],
                 venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
                 year: "2024",
-                link: "/dsv",
+                projectLink: "/dsv",
                 paperLink: "https://arxiv.org/abs/2403.17329",
                 codeLink: "https://github.com/JunHoo-Lee/Neurips24_DeepSupportVectors",
                 category: "Learning Theory",
@@ -113,7 +233,8 @@ export const PUBLICATIONS = [
                 authors: ["Junhoo Lee", "Yearim Kim", "Hyunho Lee", "Nojun Kwak"],
                 venue: "The AAAI Conference on Artificial Intelligence (AAAI)",
                 year: "2024",
-                link: "https://arxiv.org/abs/2401.05097",
+                projectLink: "/any-way-meta-learning",
+                paperLink: "https://arxiv.org/abs/2401.05097",
                 category: "Meta-Learning",
                 subTag: "Few-Shot Learning",
                 tldr: "Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling."
@@ -123,7 +244,8 @@ export const PUBLICATIONS = [
                 authors: ["Junhoo Lee", "Jayeon Yoo", "Nojun Kwak"],
                 venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
                 year: "2023",
-                link: "https://arxiv.org/abs/2310.02751",
+                projectLink: "/shot",
+                paperLink: "https://arxiv.org/abs/2310.02751",
                 category: "Meta-Learning",
                 subTag: "Optimization",
                 tldr: "The key to meta-learning adaptation is flattening the learning trajectory."
@@ -171,6 +293,15 @@ export const PUBLICATIONS = [
         color: "indigo",
         items: [
             {
+                title: "End-to-End Multi-Entity Customization",
+                authors: ["Wonhark Park*", "Jaehyun Lee*", "Wonsik Shin", "Junhoo Lee", "Nojun Kwak"],
+                venue: "IET Image Processing",
+                year: "2026",
+                category: "Generative Models",
+                subTag: "Accepted",
+                tldr: "Accepted to IET Image Processing in 2026."
+            },
+            {
                 title: "The Role of Teacher Calibration in Knowledge Distillation",
                 authors: ["Suyoung Kim", "Seonguk Park", "Junhoo Lee", "Nojun Kwak"],
                 venue: "IEEE Access",
@@ -183,6 +314,8 @@ export const PUBLICATIONS = [
         ]
     }
 ];
+
+export const SELECTED_PUBLICATIONS = PUBLICATIONS[0].items;
 
 export const AWARDS = [
     { year: "2026", title: "ICML Gold Reviewer" },
@@ -198,6 +331,14 @@ export const ACADEMIC_SERVICE = [
     { role: "Gold Reviewer", venue: "ICML", year: "2026" },
     { role: "Reviewer", venue: "CVPR", year: "2025, 2026" },
     { role: "Reviewer", venue: "ICLR", year: "2025, 2026" },
-    { role: "Reviewer", venue: "NeurIPS", year: "2024, 2025" },
+    { role: "Reviewer", venue: "NeurIPS", year: "2024, 2025, 2026" },
     { role: "Reviewer", venue: "ICCV", year: "2025" },
+    { role: "Reviewer", venue: "ECCV", year: "2026" },
+    { role: "Reviewer", venue: "ICML", year: "2026" },
+];
+
+export const SELECTED_HONORS = [
+    AWARDS[1],
+    AWARDS[2],
+    AWARDS[3],
 ];
