@@ -5,11 +5,11 @@ export const metadata: Metadata = {
     metadataBase: new URL("https://junhoo.me"),
     title: "Junhoo Lee | Machine Learning Researcher",
     description:
-        "Junhoo Lee is a machine learning researcher studying reusable structure in foundation models across language, vision, generative modeling, and embodied systems.",
+        "Junhoo Lee is a machine learning researcher and Ph.D. candidate at Seoul National University.",
     openGraph: {
         title: "Junhoo Lee | Machine Learning Researcher",
         description:
-            "Research on controllable, adaptable, and diagnosable foundation models.",
+            "Junhoo Lee is a machine learning researcher and Ph.D. candidate at Seoul National University.",
         url: "https://junhoo.me",
         siteName: "Junhoo Lee",
         type: "website",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         card: "summary",
         title: "Junhoo Lee | Machine Learning Researcher",
         description:
-            "Research on controllable, adaptable, and diagnosable foundation models.",
+            "Junhoo Lee is a machine learning researcher and Ph.D. candidate at Seoul National University.",
         images: ["/myface.jpeg"],
     },
 };
