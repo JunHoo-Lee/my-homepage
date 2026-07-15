@@ -4,8 +4,6 @@ export const PROFILE = {
     affiliation: "Seoul National University",
     email: "mrjunoo@snu.ac.kr",
     website: "https://junhoo.me",
-    phone: "+82-10-4042-6255",
-    address: "Room 311, Building 18, Seoul National University, Gwanak-ro 1, Gwanak-gu, Seoul, Republic of Korea",
     bio: [
         "Hi, I'm Junhoo Lee. I am a Ph.D. candidate at Seoul National University (MIPAL), advised by Prof. Nojun Kwak.",
         "My research studies how foundation models acquire reusable structure, and how that structure can be controlled, adapted, and diagnosed across language, vision, generative modeling, and embodied interfaces.",

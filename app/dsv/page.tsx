@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-
+import ProjectShell from "@/app/components/public/ProjectShell";
+import { createProjectMetadata } from "@/app/lib/public-content";
 import DSVProjectPage from "./DSVProjectPage";
 
-export const metadata: Metadata = {
-  title: "Deep Support Vectors | Junhoo Lee",
-  description:
-    "Project page for Deep Support Vectors, using TeX-source figures, submit_code reproduction details, and an HTML rebuild of the few-shot distillation table.",
-};
+export const metadata = createProjectMetadata("dsv");
 
 export default function Page() {
-  return <DSVProjectPage />;
+  return (
+    <ProjectShell slug="dsv">
+      <DSVProjectPage />
+    </ProjectShell>
+  );
 }

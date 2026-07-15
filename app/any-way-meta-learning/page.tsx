@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-
+import ProjectShell from "@/app/components/public/ProjectShell";
+import { createProjectMetadata } from "@/app/lib/public-content";
 import AnyWayMetaLearningProjectPage from "./AnyWayMetaLearningProjectPage";
 
-export const metadata: Metadata = {
-    title: "Any-Way Meta Learning | Junhoo Lee",
-    description:
-        "Project page for Any-Way Meta Learning, an AAAI 2024 paper on breaking the fixed N-way constraint in episodic meta-learning.",
-};
+export const metadata = createProjectMetadata("any-way-meta-learning");
 
 export default function Page() {
-    return <AnyWayMetaLearningProjectPage />;
+    return (
+        <ProjectShell slug="any-way-meta-learning">
+            <AnyWayMetaLearningProjectPage />
+        </ProjectShell>
+    );
 }

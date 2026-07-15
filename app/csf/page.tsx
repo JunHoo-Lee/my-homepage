@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-
+import ProjectShell from "@/app/components/public/ProjectShell";
+import { createProjectMetadata } from "@/app/lib/public-content";
 import CSFProjectPage from "./CSFProjectPage";
 
-export const metadata: Metadata = {
-  title: "CSF | Junhoo Lee",
-  description:
-    "Project page for CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models.",
-};
+export const metadata = createProjectMetadata("csf");
 
 export default function Page() {
-  return <CSFProjectPage />;
+  return (
+    <ProjectShell slug="csf">
+      <CSFProjectPage />
+    </ProjectShell>
+  );
 }

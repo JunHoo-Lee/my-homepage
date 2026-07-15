@@ -32,9 +32,9 @@
     "next-env.d.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
-    "utils/**/*.ts",
-    "utils/**/*.tsx",
-    "middleware.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
@@ -44,8 +44,6 @@
     "src",
     "app_setup",
     "output",
-    "public",
-    "DRO",
-    "supabase"
+    "public"
   ]
 }
