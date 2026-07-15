@@ -550,7 +550,7 @@ export default function DSVProjectPage() {
                 The opening figure is rendered directly from
                 `figure/overall_photo.pdf` in the paper source. It shows DSV
                 generations on ImageNet, CIFAR10, and CIFAR100 produced without
-                revisiting the original training data, which frames the paper&apos;s
+                revisiting the original training data, which frames the paper's
                 core claim: modern classifiers really do contain recoverable
                 support-vector-like structure.
               </p>
@@ -782,7 +782,7 @@ export default function DSVProjectPage() {
                     available for initialization.
                   </p>
                   <p>
-                    The table makes the paper&apos;s systems point very clear: a
+                    The table makes the paper's systems point very clear: a
                     pretrained classifier alone can synthesize useful distilled
                     data without replaying the original full dataset.
                   </p>

@@ -9,37 +9,35 @@
     "dev": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs dev --disable-source-maps",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs build",
     "start": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs start",
-    "lint": "eslint app tests playwright.config.ts vitest.config.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "npm run build && playwright test"
+    "lint": "eslint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@react-pdf/renderer": "^4.3.1",
+    "@supabase/supabase-js": "^2.87.1",
+    "@types/xml2js": "^0.4.14",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.26",
     "katex": "^0.16.27",
     "lucide-react": "^0.560.0",
-    "next": "^16.2.10",
+    "next": "16.0.8",
+    "openai": "^6.10.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-markdown": "^10.1.0",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "tailwind-merge": "^3.4.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.12.1",
-    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "^16.2.10",
+    "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^3.2.7"
-  },
-  "overrides": {
-    "postcss": "^8.5.10",
-    "ws": "^8.21.0"
+    "typescript": "^5"
   }
 }

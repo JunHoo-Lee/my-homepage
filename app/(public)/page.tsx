@@ -1,338 +1,311 @@
-import Image from "next/image";
+'use client';
+
 import Link from "next/link";
-import Script from "next/script";
-import type { ReactNode } from "react";
+import { ArrowUpRight, Download, FileText, Github } from "lucide-react";
+import { motion } from "framer-motion";
+import { PROFILE, EDUCATION, NEWS, PUBLICATIONS, AWARDS } from "@/app/lib/data";
+// Dynamically import PDFDownloadLink is no longer needed
+// import dynamic from "next/dynamic";
 
-import {
-  PERSON_JSON_LD,
-  PROJECT_BY_PUBLICATION_TITLE,
-  PUBLIC_SITE_CONTENT,
-  scholarlyArticleJsonLd,
-  type NewsItem,
-  type Publication,
-} from "@/app/lib/public-content";
+const bioHighlightPattern = /Junhoo Lee|discrete diffusion language models|embodied foundation models|foundation models|reusable structure|meta-learning|model diagnosis|vision-language-action/g;
 
-import styles from "./HomePage.module.css";
-
-const {
-  academicService,
-  awards,
-  education,
-  news,
-  profile,
-  projects,
-  publicationSections,
-  researchPillars,
-} = PUBLIC_SITE_CONTENT;
+function renderBio(paragraph: string) {
+    return paragraph.replace(bioHighlightPattern, (match) => `<strong>${match}</strong>`);
+}
 
 export default function Home() {
-  const featuredProjects = projects.filter((project) => project.featured);
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@graph": [
-      { ...PERSON_JSON_LD, "@context": undefined },
-      ...projects.map((project) => ({
-        ...scholarlyArticleJsonLd(project),
-        "@context": undefined,
-      })),
-    ],
-  };
+    const fadeInUp = {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.5 }
+    };
 
-  return (
-    <div className={styles.page}>
-      <Script
-        id="homepage-structured-data"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        type="application/ld+json"
-      />
-
-      <section className={styles.hero} id="about">
-        <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>Research profile · Seoul National University</p>
-          <h1>
-            Foundation models become more useful when their learned structure can be
-            understood and directed.
-          </h1>
-          <p className={styles.lede}>
-            I study how foundation models acquire reusable structure, and how that
-            structure can be controlled, adapted, and diagnosed across language, vision,
-            and embodied systems.
-          </p>
-          <div className={styles.heroActions}>
-            <a className={styles.primaryAction} href={`mailto:${profile.email}`}>
-              Contact
-            </a>
-            <a className={styles.secondaryAction} href="/cv.pdf" target="_blank" rel="noreferrer">
-              Curriculum vitae ↗
-            </a>
-            <a
-              className={styles.textAction}
-              href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Google Scholar ↗
-            </a>
-          </div>
-        </div>
-
-        <aside className={styles.profileCard} aria-label="Profile">
-          <Image
-            alt="Junhoo Lee"
-            className={styles.profileImage}
-            height={168}
-            priority
-            sizes="(max-width: 760px) 92px, 126px"
-            src="/myface.jpeg"
-            width={126}
-          />
-          <div>
-            <p className={styles.profileName}>{profile.name}</p>
-            <p>{profile.role}</p>
-            <p>{profile.affiliation}</p>
-            <p>MIPAL · advised by Prof. Nojun Kwak</p>
-          </div>
-        </aside>
-      </section>
-
-      <SectionHeading
-        id="projects"
-        index="Selected work"
-        title="Representative projects"
-        description="Three projects that show how I move from a research question to a concrete model interface, diagnostic, or decision rule."
-      />
-      <div className={styles.projectList}>
-        {featuredProjects.map((project, index) => (
-          <article className={styles.project} key={project.slug}>
-            <Link className={styles.projectFigure} href={project.projectLink}>
-              <Image
-                alt={project.imageAlt}
-                className={styles.projectImage}
-                height={project.slug === "csf" ? 315 : project.slug === "dsv" ? 540 : 552}
-                priority={index === 0}
-                sizes="(max-width: 760px) calc(100vw - 3rem), 360px"
-                src={project.image}
-                width={project.slug === "csf" ? 1240 : project.slug === "dsv" ? 1330 : 1286}
-              />
-            </Link>
-            <div className={styles.projectBody}>
-              <div className={styles.projectMeta}>
-                <span>{project.venue}</span>
-                <span>{project.year}</span>
-              </div>
-              <h3>
-                <Link href={project.projectLink}>{project.shortTitle}</Link>
-              </h3>
-              <p>{project.summary}</p>
-              <div className={styles.projectLinks}>
-                <Link href={project.projectLink}>Project</Link>
-                <SmartLink href={project.paperLink}>Paper</SmartLink>
-                {project.codeLink ? <SmartLink href={project.codeLink}>Code</SmartLink> : null}
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <SectionHeading
-        id="research"
-        index="Research"
-        title="A connected research agenda"
-        description="My work asks where reusable structure appears, how it can support a changing task, and when it can be trusted."
-      />
-      <div className={styles.pillarGrid}>
-        {researchPillars.map((pillar) => (
-          <article className={styles.pillar} key={pillar.number}>
-            <span className={styles.pillarNumber}>{pillar.number}</span>
-            <h3>{pillar.title}</h3>
-            <p>{pillar.description}</p>
-            <ul aria-label={`${pillar.title} topics`}>
-              {pillar.topics.map((topic) => (
-                <li key={topic}>{topic}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-
-      <SectionHeading
-        id="publications"
-        index="Publications"
-        title="Research record"
-        description="A compact index of peer-reviewed work. Junhoo Lee is highlighted in each author list."
-        action={
-          <a
-            href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Complete profile ↗
-          </a>
+    const staggerContainer = {
+        animate: {
+            transition: {
+                staggerChildren: 0.1
+            }
         }
-      />
-      <div className={styles.publicationGroups}>
-        {publicationSections.map((section) => (
-          <section className={styles.publicationGroup} key={section.section}>
-            <div className={styles.publicationGroupTitle}>
-              <h3>{section.section}</h3>
-              {section.note ? <span>{section.note}</span> : null}
-            </div>
-            <div>
-              {section.items.map((publication) => (
-                <PublicationRow publication={publication} key={publication.title} />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+    };
 
-      <SectionHeading
-        id="news"
-        index="Updates"
-        title="Recent news"
-        description="Talks, publications, and research-community activity."
-      />
-      <NewsList items={news.slice(0, 5)} />
-      <details className={styles.newsArchive}>
-        <summary>Earlier news · {news.length - 5} entries</summary>
-        <NewsList items={news.slice(5)} />
-      </details>
+    return (
+        <motion.div
+            initial="initial"
+            animate="animate"
+            variants={staggerContainer}
+            className="space-y-20"
+        >
 
-      <SectionHeading
-        id="background"
-        index="Background"
-        title="Education, recognition, and service"
-      />
-      <div className={styles.backgroundGrid}>
-        <section>
-          <h3>Education</h3>
-          <ul className={styles.factList}>
-            {education.map((item) => (
-              <li key={item.degree}>
-                <strong>{item.degree}</strong>
-                <span>{item.institution}</span>
-                <small>{item.period}</small>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <section>
-          <h3>Awards</h3>
-          <ul className={styles.factList}>
-            {awards.map((item) => (
-              <li key={`${item.year}-${item.title}`}>
-                <strong>{item.title}</strong>
-                <span>{item.year}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <section>
-          <h3>Academic service</h3>
-          <ul className={styles.factList}>
-            {academicService.map((item) => (
-              <li key={`${item.role}-${item.venue}-${item.year}`}>
-                <strong>
-                  {item.role} · {item.venue}
-                </strong>
-                <span>{item.year}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </div>
-  );
+            {/* About Section */}
+            <motion.section id="about" className="scroll-mt-20" variants={fadeInUp}>
+                <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-8">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900">About Me</h2>
+
+                    {/* CV Download Button */}
+                    <div className="flex items-center gap-2">
+                        <a
+                            href="/cv.pdf"
+                            download="Junhoo_Lee_CV.pdf"
+                            className="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-md border border-stone-200 hover:border-stone-400 bg-white"
+                        >
+                            <Download size={14} /> Download CV
+                        </a>
+                    </div>
+                </div>
+
+                <div className="prose prose-lg text-gray-700 leading-relaxed">
+                    {PROFILE.bio.map((paragraph, i) => (
+                        <p key={i} className="mb-4" dangerouslySetInnerHTML={{
+                            __html: renderBio(paragraph)
+                        }}></p>
+                    ))}
+                    <p>
+                        I am always open to discussing new ideas and potential collaborations. Feel free to reach out to me via email at <a href={`mailto:${PROFILE.email}`} className="text-blue-600 hover:text-blue-800 transition-colors">{PROFILE.email}</a>.
+                    </p>
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">Education</h3>
+                    <div className="space-y-4">
+                        {EDUCATION.map((edu, i) => (
+                            <div key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-gray-900">{edu.degree}</span>
+                                    <span className="text-gray-600">{edu.institution}</span>
+                                </div>
+                                <div className="text-gray-500 font-mono text-sm mt-1 sm:mt-0 shrink-0">
+                                    {edu.period}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </motion.section>
+
+
+            {/* News Section */}
+            <motion.section id="news" className="scroll-mt-20" variants={fadeInUp}>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">News</h2>
+                <ul className="space-y-4 text-gray-700 text-sm">
+                    {NEWS.map((item, i) => (
+                        <li key={i} className="flex gap-2">
+                            <span className="font-bold min-w-[100px] text-gray-500">[{item.date}]</span>
+                            <span>
+                                {item.content.split(item.linkText)[0]}
+                                <a href={item.link} target="_blank" className="text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                                    {item.linkText}
+                                </a>
+                                {item.content.split(item.linkText)[1]}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </motion.section>
+
+            {/* Publications Section */}
+            <motion.section id="publications" className="scroll-mt-20" variants={fadeInUp}>
+                <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-8">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900">Publications</h2>
+                    <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ&hl=ko&authuser=3" target="_blank" className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
+                        View Google Scholar <ArrowUpRight size={14} />
+                    </a>
+                </div>
+
+                <div className="space-y-8">
+                    {PUBLICATIONS.map((section, i) => {
+                        const sectionColorMap: Record<string, string> = {
+                            blue: 'bg-blue-600',
+                            teal: 'bg-teal-500',
+                            indigo: 'bg-indigo-500',
+                            gray: 'bg-gray-400'
+                        };
+                        const colorClass = sectionColorMap[section.color] || 'bg-gray-400';
+
+                        return (
+                            <div key={i}>
+                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center justify-center gap-2 text-center">
+                                    <span className={`w-2 h-2 rounded-full ${colorClass}`}></span>
+                                    {section.section}
+                                </h3>
+                                <div className="mx-auto max-w-5xl space-y-5">
+                                    {section.items.map((pub, j) => (
+                                        <PublicationItem key={j} {...pub} />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </motion.section>
+
+            {/* Awards & Honors Section */}
+            <motion.section id="awards" className="scroll-mt-20" variants={fadeInUp}>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 border-b border-gray-200 pb-4 mb-8">Awards & Honors</h2>
+                <div className="space-y-4">
+                    {AWARDS.map((award, i) => (
+                        <AwardsItem key={i} {...award} />
+                    ))}
+                </div>
+            </motion.section>
+
+        </motion.div>
+    );
 }
 
-function SectionHeading({
-  action,
-  description,
-  id,
-  index,
-  title,
+function PublicationItem({
+    title,
+    authors,
+    venue,
+    year,
+    link,
+    paperLink,
+    projectLink,
+    codeLink,
+    codeLabel = "Code",
+    tldr,
+    category,
+    subTag
 }: {
-  action?: ReactNode;
-  description?: string;
-  id: string;
-  index: string;
-  title: string;
+    title: string,
+    authors: string[],
+    venue: string,
+    year: string,
+    link?: string,
+    paperLink?: string,
+    projectLink?: string,
+    codeLink?: string,
+    codeLabel?: string,
+    tldr: string,
+    category: string,
+    subTag: string
 }) {
-  return (
-    <div className={styles.sectionHeading} id={id}>
-      <p>{index}</p>
-      <div>
-        <h2>{title}</h2>
-        {description ? <span>{description}</span> : null}
-      </div>
-      {action ? <div className={styles.sectionAction}>{action}</div> : null}
-    </div>
-  );
-}
+    const resolvedProjectLink = projectLink ?? (link && link.startsWith("/") ? link : undefined);
+    const resolvedPaperLink = paperLink ?? (link && !link.startsWith("/") ? link : undefined);
+    const resolvedCodeLink = codeLink;
+    const primaryLink = resolvedProjectLink ?? resolvedPaperLink;
+    const isPrimaryExternalLink = Boolean(primaryLink && !primaryLink.startsWith("/"));
+    const paperLabel = resolvedPaperLink?.includes("arxiv.org") ? "arXiv" : "Paper";
 
-function PublicationRow({ publication }: { publication: Publication }) {
-  const project = PROJECT_BY_PUBLICATION_TITLE.get(publication.title);
-  const projectLink = project?.projectLink ?? publication.projectLink;
-  const fallbackLink = publication.paperLink ?? publication.link;
-  const titleLink = projectLink ?? fallbackLink;
-  const paperLink = project?.paperLink ?? publication.paperLink ??
-    (publication.link?.startsWith("http") ? publication.link : undefined);
+    const getCategoryColor = (cat: string) => {
+        switch (cat) {
+            case 'Large Language Models': return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'Generative Models': return 'bg-violet-100 text-violet-800 border-violet-200';
+            case 'Learning Theory': return 'bg-slate-100 text-slate-800 border-slate-200';
+            case 'Knowledge Distillation': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            case 'Meta-Learning': return 'bg-sky-100 text-sky-800 border-sky-200';
+            case 'Data Efficiency': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
 
-  return (
-    <article className={styles.publication}>
-      <div className={styles.publicationYear}>{publication.year}</div>
-      <div className={styles.publicationMain}>
-        <h4>{titleLink ? <SmartLink href={titleLink}>{publication.title}</SmartLink> : publication.title}</h4>
-        <p className={styles.authors}>
-          {publication.authors.map((author, index) => (
-            <span key={`${author}-${index}`}>
-              {author.includes("Junhoo Lee") ? <strong>{author}</strong> : author}
-              {index < publication.authors.length - 1 ? ", " : ""}
-            </span>
-          ))}
-        </p>
-        <p className={styles.venue}>{publication.venue}</p>
-      </div>
-      <div className={styles.publicationLinks}>
-        {projectLink ? <Link href={projectLink}>Project</Link> : null}
-        {paperLink ? <SmartLink href={paperLink}>Paper</SmartLink> : null}
-        {publication.codeLink ? <SmartLink href={publication.codeLink}>Code</SmartLink> : null}
-      </div>
-    </article>
-  );
-}
+    const venueMatch = venue.match(/^(.*)\(([^()]+)\)\s*$/);
+    const venueFull = venueMatch ? venueMatch[1].trim() : venue;
+    const venueShort = venueMatch ? venueMatch[2].trim() : venue;
+    const showYearBadge = Boolean(year && !venueShort.includes(year));
 
-function NewsList({ items }: { items: readonly NewsItem[] }) {
-  return (
-    <ol className={styles.newsList}>
-      {items.map((item, index) => {
-        const [before, after] = item.content.includes(item.linkText)
-          ? item.content.split(item.linkText)
-          : [item.content, ""];
+    return (
+        <div className="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md">
+            <h4 className="text-lg font-bold text-gray-900 mb-1.5 transition-colors duration-200 leading-snug">
+                {primaryLink ? (
+                    isPrimaryExternalLink ? (
+                        <a href={primaryLink} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                            {title}
+                        </a>
+                    ) : (
+                        <Link href={primaryLink!} className="hover:text-blue-600 hover:underline decoration-blue-500 underline-offset-4 decoration-2">
+                            {title}
+                        </Link>
+                    )
+                ) : (
+                    <span>{title}</span>
+                )}
+            </h4>
 
-        return (
-          <li key={`${item.date}-${index}`}>
-            <time>{item.date}</time>
-            <p>
-              {before}
-              {item.content.includes(item.linkText) ? (
-                <SmartLink href={item.link}>{item.linkText}</SmartLink>
-              ) : null}
-              {after}
+            <div className="flex flex-wrap gap-2 mb-1.5">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded border ${getCategoryColor(category)}`}>
+                    {venueShort}
+                </span>
+                {showYearBadge && (
+                    <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded border border-gray-200">
+                        {year}
+                    </span>
+                )}
+                <span className="text-xs font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                    {category}
+                </span>
+                <span className="text-xs font-medium text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-100">
+                    {subTag}
+                </span>
+            </div>
+
+            {venueFull !== venueShort && (
+                <p className="text-xs text-gray-500 mb-2 leading-relaxed">
+                    {venueFull}
+                </p>
+            )}
+
+            <div className="text-gray-600 mb-2 font-medium leading-snug">
+                {authors.map((author, i) => {
+                    const isJunhoo = author.includes("Junhoo Lee");
+                    return (
+                        <span key={i}>
+                            <span className={isJunhoo ? "text-gray-900 font-semibold border-b-2 border-blue-100" : "text-gray-600"}>
+                                {author}
+                            </span>
+                            {i < authors.length - 1 ? ", " : ""}
+                        </span>
+                    );
+                })}
+            </div>
+
+            <p className="text-sm text-gray-600 leading-relaxed italic border-l-2 border-gray-200 pl-2.5">
+                {tldr}
             </p>
-          </li>
-        );
-      })}
-    </ol>
-  );
+
+            {(resolvedProjectLink || resolvedPaperLink || resolvedCodeLink) && (
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
+                    {resolvedProjectLink && (
+                        <Link
+                            href={resolvedProjectLink}
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
+                        >
+                            <ArrowUpRight size={14} /> Project Page
+                        </Link>
+                    )}
+                    {resolvedPaperLink && (
+                        <a
+                            href={resolvedPaperLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-stone-50 px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
+                        >
+                            <FileText size={14} /> {paperLabel}
+                        </a>
+                    )}
+                    {resolvedCodeLink && (
+                        <a
+                            href={resolvedCodeLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-stone-700 transition-colors hover:border-blue-300 hover:text-blue-600"
+                        >
+                            <Github size={14} /> {codeLabel}
+                        </a>
+                    )}
+                </div>
+            )}
+        </div>
+    )
 }
 
-function SmartLink({ children, href }: { children: ReactNode; href: string }) {
-  return href.startsWith("/") ? (
-    <Link href={href}>{children}</Link>
-  ) : (
-    <a href={href} target="_blank" rel="noreferrer">
-      {children}
-    </a>
-  );
+function AwardsItem({ year, title, amount }: { year: string, title: string, amount?: string }) {
+    return (
+        <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 text-gray-700">
+            <span className="font-bold text-gray-400 font-mono w-[60px] shrink-0">{year}</span>
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
+                <span className="font-medium text-gray-800">{title}</span>
+                {amount && <span className="text-gray-400 text-xs sm:text-sm font-normal">({amount})</span>}
+            </div>
+        </div>
+    )
 }

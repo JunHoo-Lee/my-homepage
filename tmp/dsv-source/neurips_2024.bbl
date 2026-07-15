@@ -1,0 +1,186 @@
+\begin{thebibliography}{10}
+
+\bibitem{svm:reconstructmulti}
+Gon Buzaglo, Niv Haim, Gilad Yehudai, Gal Vardi, and Michal Irani.
+\newblock Reconstructing training data from multiclass neural networks, 2023.
+
+\bibitem{distillation_trajectory}
+George Cazenavette, Tongzhou Wang, Antonio Torralba, Alexei~A. Efros, and Jun-Yan Zhu.
+\newblock Dataset distillation by matching training trajectories.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops}, pages 4750--4759, June 2022.
+
+\bibitem{gan2}
+Yunjey Choi, Minje Choi, Munyoung Kim, Jung-Woo Ha, Sunghun Kim, and Jaegul Choo.
+\newblock Stargan: Unified generative adversarial networks for multi-domain image-to-image translation, 2018.
+
+\bibitem{data:mnist}
+Li~Deng.
+\newblock The mnist database of handwritten digit images for machine learning research.
+\newblock {\em IEEE Signal Processing Magazine}, 29(6):141--142, 2012.
+
+\bibitem{convnet}
+Ian~J. Goodfellow, Yoshua Bengio, and Aaron Courville.
+\newblock {\em Deep Learning}.
+\newblock MIT Press, Cambridge, MA, USA, 2016.
+\newblock \url{http://www.deeplearningbook.org}.
+
+\bibitem{svm:marginreconstruct}
+Niv Haim, Gal Vardi, Gilad Yehudai, michal Irani, and Ohad Shamir.
+\newblock Reconstructing training data from trained neural networks.
+\newblock In Alice~H. Oh, Alekh Agarwal, Danielle Belgrave, and Kyunghyun Cho, editors, {\em Advances in Neural Information Processing Systems}, 2022.
+
+\bibitem{resnet}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Deep residual learning for image recognition.
+\newblock {\em CoRR}, abs/1512.03385, 2015.
+
+\bibitem{gan1}
+Tero Karras, Samuli Laine, and Timo Aila.
+\newblock A style-based generator architecture for generative adversarial networks.
+\newblock {\em CoRR}, abs/1812.04948, 2018.
+
+\bibitem{ADAM}
+Diederik~P Kingma and Jimmy Ba.
+\newblock Adam: A method for stochastic optimization.
+\newblock {\em arXiv preprint arXiv:1412.6980}, 2014.
+
+\bibitem{fl2}
+Jakub Kone{\v{c}}n{\'y}, H.~Brendan McMahan, Daniel Ramage, and Peter Richt{\'{a}}rik.
+\newblock Federated optimization: Distributed machine learning for on-device intelligence.
+\newblock {\em CoRR}, abs/1610.02527, 2016.
+
+\bibitem{dataset:cifar10}
+Alex Krizhevsky.
+\newblock Learning multiple layers of features from tiny images.
+\newblock Technical report, 2009.
+
+\bibitem{practicalDD}
+Hyunho Lee, Junhoo Lee, and Nojun Kwak.
+\newblock Practical dataset distillation based on deep support vectors, 2024.
+
+\bibitem{distillation:nongrad1}
+Songhua Liu, Kai Wang, Xingyi Yang, Jingwen Ye, and Xinchao Wang.
+\newblock Dataset distillation via factorization.
+\newblock In S.~Koyejo, S.~Mohamed, A.~Agarwal, D.~Belgrave, K.~Cho, and A.~Oh, editors, {\em Advances in Neural Information Processing Systems}, volume~35, pages 1100--1113. Curran Associates, Inc., 2022.
+
+\bibitem{dataset:celebA}
+Ziwei Liu, Ping Luo, Xiaogang Wang, and Xiaoou Tang.
+\newblock Deep learning face attributes in the wild.
+\newblock In {\em 2015 IEEE International Conference on Computer Vision (ICCV)}, pages 3730--3738, 2015.
+
+\bibitem{svmhomo}
+Kaifeng Lyu and Jian Li.
+\newblock Gradient descent maximizes the margin of homogeneous neural networks.
+\newblock In {\em International Conference on Learning Representations}, 2020.
+
+\bibitem{total_prior1}
+Aravindh Mahendran and Andrea Vedaldi.
+\newblock Understanding deep image representations by inverting them.
+\newblock {\em CoRR}, abs/1412.0035, 2014.
+
+\bibitem{fl_start}
+Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise~Aguera y~Arcas.
+\newblock Communication-efficient learning of deep networks from decentralized data.
+\newblock In {\em Artificial intelligence and statistics}, pages 1273--1282. PMLR, 2017.
+
+\bibitem{FL1}
+H.~Brendan McMahan, Eider Moore, Daniel Ramage, and Blaise~Ag{\"{u}}era y~Arcas.
+\newblock Federated learning of deep networks using model averaging.
+\newblock {\em CoRR}, abs/1602.05629, 2016.
+
+\bibitem{adversaraialuniversal}
+Seyed{-}Mohsen Moosavi{-}Dezfooli, Alhussein Fawzi, Omar Fawzi, and Pascal Frossard.
+\newblock Universal adversarial perturbations.
+\newblock {\em CoRR}, abs/1610.08401, 2016.
+
+\bibitem{dataset:svhn}
+Yuval Netzer, Tao Wang, Adam Coates, Alessandro Bissacco, Bo~Wu, and Andrew~Y Ng.
+\newblock Reading digits in natural images with unsupervised feature learning.
+\newblock 2011.
+
+\bibitem{SVMEX3}
+Onuwa Okwuashi and Christopher~E. Ndehedehe.
+\newblock Deep support vector machine for hyperspectral image classification.
+\newblock {\em Pattern Recognition}, 103:107298, 2020.
+
+\bibitem{pytorch}
+Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison, Andreas K{\"{o}}pf, Edward~Z. Yang, Zach DeVito, Martin Raison, Alykhan Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu~Fang, Junjie Bai, and Soumith Chintala.
+\newblock Pytorch: An imperative style, high-performance deep learning library.
+\newblock {\em CoRR}, abs/1912.01703, 2019.
+
+\bibitem{SVMex2}
+Zhiquan Qi, Bo~Wang, Yingjie Tian, and Peng Zhang.
+\newblock When ensemble learning meets deep learning: a new deep support vector machine for classification.
+\newblock {\em Knowledge-Based Systems}, 107:54--60, 2016.
+
+\bibitem{CLIP}
+Alec Radford, Jong~Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever.
+\newblock Learning transferable visual models from natural language supervision.
+\newblock {\em CoRR}, abs/2103.00020, 2021.
+
+\bibitem{SDXL}
+Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Bj{\"o}rn Ommer.
+\newblock High-resolution image synthesis with latent diffusion models.
+\newblock In {\em Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}, pages 10684--10695, 2022.
+
+\bibitem{imagenet}
+Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, Sanjeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy, Aditya Khosla, Michael~S. Bernstein, Alexander~C. Berg, and Li~Fei{-}Fei.
+\newblock Imagenet large scale visual recognition challenge.
+\newblock {\em CoRR}, abs/1409.0575, 2014.
+
+\bibitem{SVMex1}
+Hichem Sahbi.
+\newblock Totally deep support vector machines.
+\newblock {\em CoRR}, abs/1912.05864, 2019.
+
+\bibitem{svm:theory}
+Daniel Soudry, Elad Hoffer, Mor Shpigel~Nacson, Suriya Gunasekar, and Nathan Srebro.
+\newblock The implicit bias of gradient descent on separable data.
+\newblock In {\em International Conference on Learning Representations (ICLR)}, Vancouver, BC, Canada, 2018.
+\newblock Poster presented at ICLR 2018.
+
+\bibitem{svmpractical2}
+Yichuan Tang.
+\newblock Deep learning using linear support vector machines.
+\newblock {\em arXiv preprint arXiv:1306.0239}, 2013.
+
+\bibitem{svmpractical}
+Jingyuan Wang, Kai Feng, and Junjie Wu.
+\newblock Svm-based deep stacking networks.
+\newblock In {\em Proceedings of the AAAI conference on artificial intelligence}, pages 5273--5280, 2019.
+
+\bibitem{distillation:grad1}
+Tongzhou Wang, Jun-Yan Zhu, Antonio Torralba, and Alexei~A Efros.
+\newblock Dataset distillation.
+\newblock {\em arXiv preprint arXiv:1811.10959}, 2018.
+
+\bibitem{xu2019adversarial}
+Han Xu, Yao Ma, Haochen Liu, Debayan Deb, Hui Liu, Jiliang Tang, and Anil~K. Jain.
+\newblock Adversarial attacks and defenses in images, graphs and text: A review, 2019.
+
+\bibitem{total_prior}
+Hongxu Yin, Arun Mallya, Arash Vahdat, Jos{\'{e}}~M. {\'{A}}lvarez, Jan Kautz, and Pavlo Molchanov.
+\newblock See through gradients: Image batch recovery via gradinversion.
+\newblock {\em CoRR}, abs/2104.07586, 2021.
+
+\bibitem{margin:genfclassifer}
+Runpeng Yu and Xinchao Wang.
+\newblock Generator born from classifier.
+\newblock In {\em Thirty-seventh Conference on Neural Information Processing Systems}, 2023.
+
+\bibitem{DSA}
+Bo~Zhao and Hakan Bilen.
+\newblock Dataset condensation with differentiable siamese augmentation.
+\newblock {\em CoRR}, abs/2102.08259, 2021.
+
+\bibitem{DM}
+Bo~Zhao and Hakan Bilen.
+\newblock Dataset condensation with distribution matching.
+\newblock {\em CoRR}, abs/2110.04181, 2021.
+
+\bibitem{DC}
+Bo~Zhao, Konda~Reddy Mopuri, and Hakan Bilen.
+\newblock Dataset condensation with gradient matching.
+\newblock {\em CoRR}, abs/2006.05929, 2020.
+
+\end{thebibliography}
