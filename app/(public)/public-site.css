@@ -310,6 +310,10 @@ html[data-public-theme="dark"] .public-theme-toggle__accessible--light {
   line-height: 1.2;
 }
 
+.public-section-heading h2:only-child {
+  margin-top: 0;
+}
+
 .public-section-note {
   margin: 0 0 2px;
   color: var(--public-muted);
@@ -570,7 +574,7 @@ html[data-public-theme="dark"] .public-theme-toggle__accessible--light {
 }
 
 .publications-hero h1 {
-  margin-top: 10px;
+  margin-top: 0;
   font-size: clamp(2.8rem, 6vw, 4.3rem);
   font-weight: 720;
   letter-spacing: -0.06em;

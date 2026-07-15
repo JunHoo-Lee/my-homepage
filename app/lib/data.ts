@@ -27,9 +27,9 @@ export const PROFILE = {
     email: "mrjunoo@snu.ac.kr",
     website: "https://junhoo.me",
     bio: [
-        "Hi, I'm Junhoo Lee. I am a Ph.D. candidate at Seoul National University (MIPAL), advised by Prof. Nojun Kwak.",
-        "My research studies how foundation models acquire reusable structure, and how that structure can be controlled, adapted, and diagnosed across language, vision, generative modeling, and embodied interfaces.",
-        "I work on inference-time planning for discrete diffusion language models, fast adaptation and task generalization in meta-learning, and model diagnosis for pretrained deep networks. Recently, I have been extending this line toward vision-language-action and embodied foundation models, where pretrained semantic structure must remain reliable under changing instructions, visual observations, and action interfaces.",
+        "I am a Ph.D. candidate at Seoul National University (MIPAL), advised by Prof. Nojun Kwak.",
+        "I work on diffusion language models, meta-learning, and methods for analyzing and attributing pretrained models. I also work on vision-language-action models.",
+        "I will join ALIN-LAB at KAIST as a postdoctoral researcher in September 2026.",
     ]
 };
 
@@ -61,7 +61,7 @@ export const FEATURED_PROJECTS = [
         fullTitle: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
         venue: "ACL 2026",
         detail: "Long Paper · Oral",
-        summary: "Inference-time planning for diffusion language models through template-then-fill generation.",
+        summary: "Template Infilling is a conditioning method for diffusion language models that places structural anchors throughout the target response before filling masked segments.",
         image: "/template-infilling/figure-main.png",
         imageAlt: "Template Infilling method overview",
         projectLink: "/template-infilling",
@@ -73,7 +73,7 @@ export const FEATURED_PROJECTS = [
         fullTitle: "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
         venue: "CVPR 2026",
         detail: "Black-box attribution",
-        summary: "Query-only attribution of fine-tuned text-to-image APIs via compositional semantic fingerprints.",
+        summary: "CSF attributes fine-tuned text-to-image models to their base-model lineages using only query access and compositional, underspecified prompts.",
         image: "/csf/image.png",
         imageAlt: "CSF fingerprinting result table",
         projectLink: "/csf",
@@ -84,8 +84,8 @@ export const FEATURED_PROJECTS = [
         title: "Deep Support Vectors",
         fullTitle: "Deep Support Vectors",
         venue: "NeurIPS 2024",
-        detail: "Model diagnosis",
-        summary: "A support-vector perspective for interpreting and editing pretrained deep networks.",
+        detail: "DeepKKT",
+        summary: "DeepKKT adapts the Karush–Kuhn–Tucker condition to identify or generate Deep Support Vectors from trained deep classifiers.",
         image: "/dsv/figure-hero.png",
         imageAlt: "Deep Support Vectors qualitative overview",
         projectLink: "/dsv",

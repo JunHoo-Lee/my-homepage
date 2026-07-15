@@ -41,8 +41,8 @@ export default function Home() {
                         Machine learning researcher at MIPAL, advised by Prof. Nojun Kwak. Ph.D. expected August 2026.
                     </p>
                     <p className="public-hero__thesis">
-                        I study how foundation models acquire reusable structure—and how that structure can be controlled,
-                        adapted, and diagnosed across language, vision, generative modeling, and embodied systems.
+                        I work on diffusion language models, meta-learning, and methods for analyzing and attributing
+                        pretrained models. I also work on vision-language-action models.
                     </p>
                     <div className="public-identity-links" aria-label="Profile links">
                         <a href={`mailto:${PROFILE.email}`}>Email</a>
@@ -67,7 +67,7 @@ export default function Home() {
             <aside className="public-lead-update" aria-label="Latest update">
                 <time dateTime={LATEST_UPDATE.datetime}>{LATEST_UPDATE.date}</time>
                 <p>
-                    <strong>Next chapter.</strong> {LATEST_UPDATE.prefix}
+                    {LATEST_UPDATE.prefix}
                     <a href={LATEST_UPDATE.link} target="_blank" rel="noopener noreferrer">
                         {LATEST_UPDATE.linkText}
                     </a>
@@ -78,10 +78,8 @@ export default function Home() {
             <section id="work" className="public-section" aria-labelledby="work-title">
                 <div className="public-section-heading">
                     <div>
-                        <p className="public-section-kicker">Selected work</p>
-                        <h2 id="work-title">Three projects, one research direction</h2>
+                        <h2 id="work-title">Selected Research</h2>
                     </div>
-                    <p className="public-section-note">Planning structure · semantic attribution · model diagnosis</p>
                 </div>
 
                 <div className="featured-work-grid">
@@ -118,8 +116,7 @@ export default function Home() {
             <section id="publications" className="public-section" aria-labelledby="selected-publications-title">
                 <div className="public-section-heading public-section-heading--compact">
                     <div>
-                        <p className="public-section-kicker">Publications</p>
-                        <h2 id="selected-publications-title">Selected publications</h2>
+                        <h2 id="selected-publications-title">Selected Publications</h2>
                     </div>
                     <Link href="/publications">All publications →</Link>
                 </div>
@@ -130,8 +127,7 @@ export default function Home() {
                 <section id="talks" className="public-section public-section--compact" aria-labelledby="talks-title">
                     <div className="public-section-heading public-section-heading--compact">
                         <div>
-                            <p className="public-section-kicker">Talks & service</p>
-                            <h2 id="talks-title">Selected activity</h2>
+                            <h2 id="talks-title">Talks & Academic Service</h2>
                         </div>
                     </div>
                     <ul className="public-activity-list">
@@ -147,7 +143,7 @@ export default function Home() {
                         ))}
                         <li>
                             <time>2026</time>
-                            <span><strong>ICML Gold Reviewer</strong><br />Top reviewer recognition</span>
+                            <span><strong>ICML Gold Reviewer</strong></span>
                         </li>
                         <li>
                             <time>2024–26</time>
@@ -159,8 +155,7 @@ export default function Home() {
                 <section id="news" className="public-section public-section--compact" aria-labelledby="news-title">
                     <div className="public-section-heading public-section-heading--compact">
                         <div>
-                            <p className="public-section-kicker">News</p>
-                            <h2 id="news-title">Recent updates</h2>
+                            <h2 id="news-title">Recent News</h2>
                         </div>
                     </div>
                     <ol className="public-news-list">
@@ -181,8 +176,7 @@ export default function Home() {
             <section id="education" className="public-section" aria-labelledby="education-title">
                 <div className="public-section-heading public-section-heading--compact">
                     <div>
-                        <p className="public-section-kicker">Background</p>
-                        <h2 id="education-title">Education & selected honors</h2>
+                        <h2 id="education-title">Education & Selected Honors</h2>
                     </div>
                     <a href="/cv.pdf" target="_blank" rel="noopener noreferrer">Download CV →</a>
                 </div>
