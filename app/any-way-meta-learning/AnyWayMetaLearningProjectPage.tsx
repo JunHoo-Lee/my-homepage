@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Merriweather, Noto_Sans } from "next/font/google";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 
 import styles from "./AnyWayMetaLearningProjectPage.module.css";
 
@@ -26,10 +29,48 @@ const sectionLinks = [
 ];
 
 const abstractParagraphs = [
-    "Meta-learning is usually trained and evaluated under a fixed N-way setup, even though real few-shot tasks do not arrive with a single, immutable class cardinality.",
-    "Any-Way Meta Learning starts from the observation that episodic numeric labels are exchangeable: the same semantic class can be mapped to different numeric labels across episodes, so the classifier should not have to inherit a fixed-way bottleneck from training.",
-    "The paper turns that observation into an any-way training recipe, then adds semantic supervision and mixup-style regularization to recover class-level structure that pure label equivalence would otherwise discard.",
+    String.raw`Meta-learning is usually trained and evaluated under a fixed $N$-way setup, even though real few-shot tasks do not arrive with a single, immutable class cardinality.`,
+    String.raw`Any-Way Meta Learning starts from the observation that episodic numeric labels are exchangeable: the same semantic class can be mapped to different numeric labels across episodes, so the classifier should not have to inherit a fixed-way bottleneck from training.`,
+    String.raw`The paper turns that observation into an any-way training recipe, then adds semantic supervision and mixup-style regularization to recover class-level structure that pure label equivalence would otherwise discard.`,
 ];
+
+const methodParagraphs = [
+    String.raw`The method replaces the usual fixed-way head with an any-way classifier $g_a$ that has a larger output pool of size $O$. Each episode samples a task cardinality $N$, forms a task $\tau = (\mathcal{X}_s, \mathcal{X}_q)$, and assigns the episode's numeric labels through disjoint selection maps instead of committing to one permanent $N$-way classifier.`,
+    String.raw`For a task with $N$ classes, the paper constructs $J = \left\lfloor O/N \right\rfloor$ non-overlapping assignments $S = \{s_j\}_{j=1}^{J}$. Each assignment extracts one valid $N$-class view from the same shared output pool, so the learner can optimize multiple label layouts inside the same episode.`,
+    String.raw`Because pure label equivalence can wash out semantic structure, the framework also adds a semantic classifier and mixup-style supervision to re-inject class meaning when needed.`,
+];
+
+const anyWayLossMarkdown = String.raw`$$
+L_a = \sum_{j=1}^{J} L\left(S_j(g_a(f(x))), y\right),
+\qquad
+J = \left\lfloor \frac{O}{N} \right\rfloor.
+$$`;
+
+const methodNoteMarkdown = String.raw`Here, $S_j : \mathbb{R}^{O} \rightarrow \mathbb{R}^{N}$ indexes one assignment of numeric labels out of the $O$ output nodes. Since the assignments do not overlap, the method reuses one forward pass while supervising several task-label layouts at once.`;
+
+const algorithmMarkdown = String.raw`
+1. Sample a random task size $N \le O$ and an episode $\tau$.
+2. Generate non-overlapping assignments $S = \{s_j\}_{j=1}^{J}$ with $J = \left\lfloor O/N \right\rfloor$.
+3. Optimize the support set $\mathcal{X}_s$ with the inner-loop any-way loss $L_{a,\mathrm{in}}$.
+4. Update the meta-parameters with the query-set loss $L_{a,\mathrm{out}}$ on $\mathcal{X}_q$.
+5. At inference time, ensemble all assignment views rather than relying on one fixed-way head.
+`;
+
+const inferenceEquationMarkdown = String.raw`$$
+\mathrm{logit} = \sum_{j=1}^{J} S_j\left(g_a(f(x_{\mathrm{query}}))\right).
+$$`;
+
+const resultsParagraphs = [
+    String.raw`Across MiniImageNet, TieredImageNet, Cars, and CUB, the paper shows that any-way MAML matches or surpasses fixed-way MAML on both in-domain and cross-domain evaluations. The gains are especially noticeable when the test-time way differs from the training episodes or when the task is fine-grained.`,
+    String.raw`The central point is not only higher peak accuracy, but also broader operating range: the same learner can handle multiple task cardinalities without being retrained for each specific way.`,
+];
+
+const analysisParagraphs = [
+    String.raw`The paper explains the improvement through two complementary effects. First, any-way training escapes the early optimization stall faster than fixed-way training, which shows up clearly in the validation curves. Second, every new numeric-label assignment acts like an almost-free ensemble member, so the model keeps gaining robustness as more assignments or output nodes are used.`,
+    String.raw`Semantic supervision further helps when transferring across related but not identical datasets, especially once the benchmarks become more fine-grained.`,
+];
+
+const analysisEquationMarkdown = String.raw`The ensemble view is built into the objective: increasing the number of usable assignments or enlarging $O$ gives the model more distinct label layouts to combine, which is why the paper reports stronger performance as assignment diversity grows.`;
 
 const resultCards = [
     {
@@ -110,6 +151,36 @@ function MetricCard({
             <h3 className={styles.metricTitle}>{title}</h3>
             <p className={styles.metricDescription}>{description}</p>
         </article>
+    );
+}
+
+function MarkdownBlock({
+    content,
+    className,
+}: {
+    content: string;
+    className?: string;
+}) {
+    const classes = className
+        ? `${styles.markdownBlock} ${className}`
+        : styles.markdownBlock;
+
+    return (
+        <div className={classes}>
+            <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                    p: ({ children }) => <p>{children}</p>,
+                    ul: ({ children }) => <ul>{children}</ul>,
+                    ol: ({ children }) => <ol>{children}</ol>,
+                    li: ({ children }) => <li>{children}</li>,
+                    code: ({ children }) => <code>{children}</code>,
+                }}
+            >
+                {content}
+            </ReactMarkdown>
+        </div>
     );
 }
 
@@ -211,28 +282,27 @@ export default function AnyWayMetaLearningProjectPage() {
             <Section id="abstract" title="Abstract">
                 <div className={styles.sectionText}>
                     {abstractParagraphs.map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
+                        <MarkdownBlock key={paragraph} content={paragraph} />
                     ))}
                 </div>
             </Section>
 
             <Section id="method" title="Method Overview">
                 <div className={styles.sectionText}>
-                    <p>
-                        The method replaces the usual fixed N-way classifier with a larger output pool of size O. For
-                        each episode, the algorithm samples a task cardinality N, draws non-overlapping numeric-label
-                        assignments from that output pool, and optimizes the same underlying task through multiple label
-                        views.
-                    </p>
-                    <p>
-                        In the paper&apos;s main setup, training episodes vary across 3, 5, 7, and 9 ways while testing
-                        still includes 10-way evaluation. This lets the model learn across task cardinalities instead of
-                        specializing to only one of them.
-                    </p>
-                    <p>
-                        Because pure label equivalence can wash out semantic structure, the framework also adds a
-                        semantic classifier and mixup-style supervision to re-inject class meaning when needed.
-                    </p>
+                    {methodParagraphs.map((paragraph) => (
+                        <MarkdownBlock key={paragraph} content={paragraph} />
+                    ))}
+                </div>
+
+                <div className={styles.equationStack}>
+                    <div className={styles.equationCard}>
+                        <MarkdownBlock content={anyWayLossMarkdown} className={styles.equationMarkdown} />
+                    </div>
+                    <div className={styles.equationCard}>
+                        <MarkdownBlock content={methodNoteMarkdown} className={styles.noteMarkdown} />
+                        <MarkdownBlock content={algorithmMarkdown} className={styles.noteMarkdown} />
+                        <MarkdownBlock content={inferenceEquationMarkdown} className={styles.equationMarkdown} />
+                    </div>
                 </div>
 
                 <div className={styles.mediaGrid}>
@@ -267,16 +337,9 @@ export default function AnyWayMetaLearningProjectPage() {
 
             <Section id="results" title="Benchmark Highlights">
                 <div className={styles.sectionText}>
-                    <p>
-                        Across MiniImageNet, TieredImageNet, Cars, and CUB, the paper shows that any-way MAML matches
-                        or surpasses fixed-way MAML on both in-domain and cross-domain evaluations. The gains are
-                        especially noticeable when the test-time way differs from the training episodes or when the task
-                        is fine-grained.
-                    </p>
-                    <p>
-                        The central point is not only higher peak accuracy, but also broader operating range: the same
-                        learner can handle multiple task cardinalities without being retrained for each specific way.
-                    </p>
+                    {resultsParagraphs.map((paragraph) => (
+                        <MarkdownBlock key={paragraph} content={paragraph} />
+                    ))}
                 </div>
 
                 <div className={styles.metricGrid}>
@@ -288,16 +351,12 @@ export default function AnyWayMetaLearningProjectPage() {
 
             <Section id="analysis" title="Analysis">
                 <div className={styles.sectionText}>
-                    <p>
-                        The paper explains the improvement through two complementary effects. First, any-way training
-                        escapes the early optimization stall faster than fixed-way training, which shows up clearly in the
-                        validation curves. Second, every new numeric-label assignment acts like an almost-free ensemble
-                        member, so the model keeps gaining robustness as more assignments or output nodes are used.
-                    </p>
-                    <p>
-                        Semantic supervision further helps when transferring across related but not identical datasets,
-                        especially once the benchmarks become more fine-grained.
-                    </p>
+                    {analysisParagraphs.map((paragraph) => (
+                        <MarkdownBlock key={paragraph} content={paragraph} />
+                    ))}
+                    <div className={styles.equationCard}>
+                        <MarkdownBlock content={analysisEquationMarkdown} className={styles.noteMarkdown} />
+                    </div>
                 </div>
 
                 <div className={styles.analysisLayout}>

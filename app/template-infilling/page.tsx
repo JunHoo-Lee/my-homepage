@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-
+import ProjectShell from "@/app/components/public/ProjectShell";
+import { createProjectMetadata } from "@/app/lib/public-content";
 import TemplateInfillingProjectPage from "./TemplateInfillingProjectPage";
 
-export const metadata: Metadata = {
-  title: "Template Infilling | Junhoo Lee",
-  description:
-    "Project page for Unlocking the Potential of Diffusion Language Models through Template Infilling.",
-};
+export const metadata = createProjectMetadata("template-infilling");
 
 export default function Page() {
-  return <TemplateInfillingProjectPage />;
+  return (
+    <ProjectShell slug="template-infilling">
+      <TemplateInfillingProjectPage />
+    </ProjectShell>
+  );
 }
