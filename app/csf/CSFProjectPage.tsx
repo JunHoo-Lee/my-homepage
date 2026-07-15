@@ -765,8 +765,6 @@ $P(b^* \mid s) - \max_{b \neq b^*} P(b \mid s) > \delta$.`}
       <style jsx global>{`
         .csf-page {
           min-height: 100vh;
-          max-width: 100%;
-          overflow-x: clip;
           background: #ffffff;
           color: #111111;
         }

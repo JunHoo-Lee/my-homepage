@@ -1,0 +1,178 @@
+\section{Preliminaries}\label{sec:prelim}
+
+
+% \begin{figure}[t]
+%   \centering
+%    \includegraphics[width=0.8\linewidth]{./figure/stationarity.png}
+%    % \includegraphics[width=0.8\linewidth]{author-kit-CVPR2024-v2/figure/manifoldfigure.pdf}
+
+%    \caption{Intuitive explanation of the stationarity condition in deep learning. As the direction of the gradient converges, the overall angle of the weight is represented as $\angle w^{\infty} \simeq \angle -g^\infty$.}
+%    \label{fig:intuitive_stat}
+% \end{figure}
+
+\subsection{Notation} \label{sec:notation}
+
+In \nj{the} SVM formulation, \( \tilde{w} (:= [w;b])\) represents the concatenated weight vector $w$ and bias $b$. %. which corresponds to the decision hyperplane and the bias term. 
+Each data instance, expanded to include the bias term, is denoted by \( \tilde{x}_i (:= [x_i;1])\), while the corresponding binary label is represented by \( y_i \in \{\pm1\}\). The Lagrange multipliers are denoted by \( \alpha_i \)'s. 
+
+Transitioning to the context of deep learning, we denote the parameter vector of a neural network model by \( \theta \), which, upon optimization, yields \( \theta^* \) as the set of learned weights. The mapping function \( \Phi(x_i; \theta) \) represents the transformation of input data into %\nj{the} feature space or 
+a $C$-dimensional logit in a $C$-class classification problem in a manner dictated by the parameters \( \theta \), \ie $\Phi(x_i; \theta) = [\Phi_1(x_i; \theta), \cdots, \Phi_C(x_i; \theta)]^T \in \mathbb{R}^C$. 
+\nj{We} define \nj{the} \textbf{score} as the logit of a target \nj{class, \ie} $\Phi_{y_i}(x_i; \theta)$. % is the value of the logit for the target class. 
+If the score is the largest among logits, \ie $\argmax_c \ \Phi_{c}(x_i; \theta) = y_i$, then it correctly classifies the sample. 
+The Lagrange multipliers adapted to the optimization in deep learning are represented by \( \lambda_i \)'s. $(x, y)$ denotes a pair of input and output and \( \mathcal{I} \) is the index set \nj{with $|\mathcal{I}| = n$.}
+
+
+
+
+% By substituting the optimization variable \( w \) with \( x \), our objective shifts to adapting the KKT (Karush-Kuhn-Tucker) conditions to the deep learning framework. Additionally, we must consider the characteristics of the data: 1. It involves a multiclass setting,
+% 2. The data typically resides in a manifold, which is of a smaller dimension than its defined dimension.}
+
+% \jh{PThe final condition, Stationarity gives some insight on SVM. That is, the support vector encodes decision boundary $w$. So finding decision hyperplane corresponds finding according vectors. So if we have training dataset and trained models(SVM), we can have two optimizations.}
+
+% 1. We can 'pick' support vectors amoing training sets which encodes hyperplane
+
+% 2. We can 'synthetize' support vectors without any trained sets, And this synthesized set can equivalently encode hyperplane.
+
+% Our paper deals with this issue - reconstructing support vectors from trained \textbf{deep learning} models - which means, are to sample-or-synthezsize support vectors.
+
+% As we can achieve this by subtituting optimization variable $w$ to $x$, our goal becomes is to modify eq.~\ref{eq:KKT} to deep learning regime. Also, we should consider its data. 1. It deals with multiclass setting. 2. The data typically lies in smaller dimension than its defined dimension \ie. manifold.
+% %We adhere to this notation to maintain clarity and consistency throughout our discussion on the application.
+
+%\jh{In introducing DSV, we use \nj{$(x^s, y^s)$ for denoting the support vector, $\theta^*$ for the trained model and $\lambda$ for the Lagrange multiplierss}}
+
+%\subsection{SVM, and SVM in deep learning}
+
+
+%This section presents the specific conditions that DSVs (Deep Support Vectors) must satisfy and discusses \jh{how to achieve that condition within gradient descent framework.}
+% with first-order computation cost that meets these conditions.
+
+
+\subsection{Support Vector Machines}
+\label{sec:KKTcondition}
+
+% \jh{SVM의 주요 아이디어는 데이터가 주어졌을 때, 이를 분류할 수 있는 최적의 초평면을 찾고자 하는 것이다. 해당 초평면은 해당 초평면과 가장 가까운 support vector들로서 정의되며, support vector와 초평면사이의 거리를 마진이라고 한다. 초평면은 1. 클래스를 올바르게 분류하면서, 2. 마진을 최대화 하여야 한다. 이는 SVM이 다음 조건을 만족해야 한다는 것을 의미한다.}
+The fundamental concept of Support Vector Machines (SVMs) is to find the optimal hyperplane that classifies the given data. This hyperplane is defined by the closest data points to itself known as support vectors, and the distance between the support vectors and the hyperplane is termed the margin. The hyperplane must classify the classes correctly while maximizing the margin. This leads to the following \jh{KKT} conditions that an SVM  must satisfy: \nj{
+\textbf{(1) Primal feasibility:} $\forall i,\ y_i \tilde{w}^T \tilde{x}_i \geq 1$,  \textbf{(2) Dual feasibility:} $\forall i,\ \alpha_i \geq 0$, \textbf{(3) Complementary slackness:}  $\alpha_i \left( y_i \tilde{w}^T \tilde{x}_i - 1 \right) = 0$ and \textbf{(4) Stationarity:} $\tilde{w} =   \sum_{i=1}^n \alpha_i y_i \tilde{x}_i$.}
+%
+%\begin{equation}
+%\begin{aligned}
+%&\text{Primal feasibility:} && \forall i,\ y_i \tilde{w}^T \tilde{x}_i \geq 1, \\
+%&\text{Dual feasibility:} && \forall i,\ \alpha_i \geq 0, \\
+%&\text{Complementary slackness}: &&  \alpha_i \left( y_i \tilde{w}^T \tilde{x}_i - 1 \right) = 0, \\
+%&\text{Stationarity:} && \tilde{w} =   \sum_{i=1}^n \alpha_i y_i \tilde{x}_i .
+%\end{aligned}
+%\label{eq:KKT}
+%\end{equation}
+%
+% \jh{Stationarity condition은 우리가 구하고자 하는 support vector가 특이값을 가지기 위해서 도함수가 0이어야 한다는 것을 뜻하며, Primal condition과 dual condition은 구한 특이값이 제대로 $x$들을 classify해야 하며, 동시에 마진 밖에 있어야 하는 것을 의미한다. 그리고 나머지 조건, complentary slackness는 support vector가 우리가 정의한 경계에 있어야 한다는 뜻이다.}
+% implies that the derivatives must equal zero for the support vectors to be at their critical values. 
+
+The primal and dual conditions ensure these critical values correctly classify the data while being outside the margin. The complementary slackness condition mandates that support vectors lie on the decision boundary. 
+The stationarity condition \nj{ensures} that the derivative of the Lagrangian is zero. %\ie functional boundary 1 \label{sec:KKTcondition}
+% \jh{In this paper, we adapt this condition in deep learning without Complementary slackness, as complementary slackness requires distance measure, which is ambiguous and computationary expensive in deep learning.}
+
+
+The final condition, stationarity, offers profound insights into \nj{SVMs}. It underscores that support vectors \nj{encode} the decision boundary $\tilde{w}$. Consequently, identifying the decision hyperplane in SVMs is tantamount to pinpointing the corresponding support vectors. This implies that with a trained model at our disposal, we can reconstruct the SVM in two distinct ways:
+
+1. \textbf{Support Vector Selection:} From the trained model, we can extract support vectors \nj{among the training data} that inherently encode the decision hyperplane.
+
+2. \textbf{Support Vector Synthesis:} Alternatively, it is feasible to generate or synthesize support vectors, even in the absence of a training set, which can effectively represent the decision hyperplane by generating samples that satisfy $|\tilde{w}^T\tilde{x}| = 1$.
+
+\begin{comment}
+\paragraph{%Viewpoint of gradient descent with hinge loss}
+\nj{Relationship with Hinge loss}}
+
+We start our discussion by applying the gradient descent module to SVM directly. When we perform gradient descent with the hinge loss in linear model $w$, The optimized $\tilde{w}^*$ satisfies KKT condition without complementary slackness.
+
+Suppose we initialize weight $\tilde{w}$ with 0, and optimize it with gradient descent with learning rate $\alpha$
+%
+% \begin{equation}
+% \text{Hinge Loss:} \quad L = \frac{1}{N} \sum_{i=1}^N \max(0, 1 - y_i(\tilde{w}^T \tilde{x}_i))
+% \end{equation}
+%
+% \begin{equation}
+% \frac{\partial L}{\partial w} = \frac{1}{N} \sum_{i=1}^N \left\{ \begin{array}{ll} 0, & \text{if } y_i(w^T x_i) \geq 1 \\ -y_i x_i, & \text{otherwise} \end{array} \right.
+% \end{equation} \label{eq:hingegrad}
+%
+%
+% As in eq~\ref{eq:hingegrad}, we can notice that gradient does not flow for $x_i$ if and only if the model satisfies primary condition. So define $\beta_i \in \mathbf{N}$ which is a number of effectve gradient numbers Suppose we performed gradient descent $T$ times, then the gradient corresponds $x_i$ actually flows if and only if the model does not satisfied primal condition.  Suppose we conducted gradient descent $T$ times, and we achieved 100\% for training set \footnote{Following condition is natural as general deep learning exploits overparameterized, settting. \ie Accuracy amoing training sets are 100\%}. Then the converged weight $w^\star$ becomes
+% As in eq~\ref{eq:hingegrad}, we can notice that gradient does not flow for $x_i$ if and only if the model satisfies primary condition. So define $\beta_i \in \mathbf{N}$ which is a number of effectve gradient numbers Suppose we performed gradient descent $T$ times, then the gradient corresponds $x_i$ actually flows if and only if the model does not satisfied primal condition.  Suppose we conducted gradient descent $T$ times, and we achieved 100\% for training set \footnote{Following condition is natural as general deep learning exploits overparameterized, settting. \ie Accuracy amoing training sets are 100\%}. Then the converged weight $w^\star$ becomes
+%
+\begin{equation*}
+\text{Hinge Loss:} \ L_h(x_i, y_i; \tilde{w}) = \frac{1}{n} \sum_{i=1}^n \max(0, 1 - y_i(\tilde{w}^T \tilde{x}_i))
+\end{equation*}
+%
+\begin{equation}\label{eq:hingegrad}
+\nabla_{\tilde{w}}  L_h = \frac{1}{n} \sum_{i=1}^n \begin{cases} 0, & \text{if } y_i(\tilde{w}^T \tilde{x}_i) > 1 \\ -y_i \tilde{x}_i, & \text{otherwise.} \end{cases}
+\end{equation}
+
+\nj{아래 부분은 없애는게 좋아 보임. }
+% \jh{In this context, $\beta_i$ represents the number of times the gradient produced by $x_i$ contributes to the model's update during gradient descent. This is based on the property of the hinge loss, where the loss for correctly classified instances is zero, resulting in no gradient contribution from such instances. Therefore, $\beta_i$ effectively counts the number of times $x_i$ was misclassified and contributed to the adjustment of the model's weights. Suppose we trained a model with T steps of gradient descent to achieve 100\% accuracy, with a learning rate of $\alpha$. The converged weight $w^\star$ is then given by:}
+% %
+% \begin{equation}\label{eq:hingeend}
+% w^* := w_0 - \sum_{i=1}^{T} \alpha \frac{\partial L}{\partial w_i} = \sum_{i=1}^{T} \alpha \beta_i y_i x_i
+% \end{equation}
+ 
+
+% \jh{This formulation reflects that the updates to the weights w during training are influenced only by those instances that were misclassified, as indicated by the counts in $\beta_i$. Combining eq.~\ref{eq:hingegrad} and eq.~\ref{eq:hingeend}, stationarity condition becomes}
+%
+\end{comment}
+
+
+
+% \begin{equation}
+% w^\star := w_0 - \sum_{i=0}^{T-1}\alpha \frac{\partial L}{\partial w_i} = \sum_{i=0}^{T-1}T\alpha\beta_iy_ix_i
+% \end{equation}
+
+% And this condition satisfies stationarity condition as $beta_i, alpha, T > 0$. \blacksquare
+
+
+
+
+% \paragraph{Multiclass Support Vector Machines}
+
+% \jh{In this paragraph, I'm to expand it to multi-class notation, for natural connection to svm. The goal of this paragraph is to convert stationarity condition as gradient of scoring function}
+
+% \jh{To do so, I should introduce scoring functinon notation, in sec.3.1., and ref it, then I should interpret the primal feasibility to argmax condition, Then I should omit complementary slackness, as we relatively define its slackness, or, jsut try to Then, convertstationarity condition as}
+
+\begin{comment}
+%\nj{아래 내용이 다른 논문에서 가지고 온 것인지? 그렇다면 cite할 것. 아니면 우리가 했다고 강조할 것. }
+% \jh{또한, 이 KKT condition은 딥 러닝에 있어서는 다음과 같은 수식으로 쓸 수 있다 (cite)}
+\jh{여기에다가 그러면 어떻게 적을까요? Theorem. 이라고 적는게 좋을까요? 저희가 처음으로 제시한 조건입니다.}
+
+Moreover, these KKT conditions can be adapted to deep learning as follows:
+%
+\begin{equation*} \label{eq:DeepKKT}
+\begin{aligned}
+&\text{Primal condition:} && 
+\jh{\forall\, i \in \mathcal{I}, \quad \underset{X_i}{\text{arg\,max}}\; \Phi(X_i; \theta^*) = y_i} \\
+%\jh{\forall argmax \Phi(X_i; \theta^*) = y_i}, \\%  \nj{\Phi_{y_i}(x_i; \theta^*) \geq 1}\\ 
+&\text{Dual condition:} && \forall\, i \in \mathcal{I}, \quad \lambda_i \geq 0, \\
+% &\text{CS condition:} 
+%&\text{slackness:} 
+% && \forall\, i \in \mathcal{I}, \quad % \in [n],
+% \ \nj{\lambda_i (y_i \Phi(x_i; \theta^*) - 1) = 0}, \\
+&\text{Stationarity:} && \jh{\theta^* = -\sum_{i=1}^n \lambda_i \nabla_{\theta} \mathcal{L}(\Phi(x_i; \theta^*), y_i).}
+\end{aligned}
+\end{equation*}
+
+% where \( \mathcal{I} \) is the index set, \( \Phi \) represents a function with parameters \( \theta^* \), and \( y_i \) is the corresponding label for each \( X_i \).
+
+% \nj{위 식에서 multi-class가 사용되는데 이것을 사용할 때 $y_i$를 어떻게 설정할지에 대해서 설명할 것. 이 것 때문에 지난 번 문제가 (+냐 -냐) 생긴 게 아닐까 하는 생각이 듦. }
+% \nj{아래 부분 설명은 좀 더 이해하기 쉽게 쓸 것.}
+\jh{Priaml condition과 Dual conditoin은 naive하게 그대로 옮겨놓은것.}
+\jh{We neglet CS condition as we CS condition requires a measure in parameter space, which is extremely expensive.}
+\jh{또한 stationarity condition, which is our main contribution은 \ref{fig:intuitive_stat} 에서 설명하고 있는데 기존 등가성 증명 \cite{svm:theory}에서 따온 것이다.  overparameterized model 에서는 결국 gradient direction이 converge되는데, 특정 timestamp t부터 특정 방향으로만 움직인다고 가정하면, 일반적인 cross entropy와 같은 logistic loss의 경우는 loss가 절대로 0이 되지 않기 때문에 특정 timestamp T 부터는 계속해서 같은 방향으로만 parameter가 이동한다. 따라서 일반적인 infinite step에서 $w^\infty$는 converge gradient 방향으로 수렴한다.  \footnote{물론 이때 따라서 loss의 크기도 줄어들기 때문에 해당 방향으로 수렴하지 않는다고 생각할 수 있지만, Consider $\sum_{i=1}^\infty \frac{1}{n} = \infty$를 생각해 보면, loss의 크기가 줄어든다고 할 지라도 특정 gradient 방향으로 수렴할 수 있다.}
+
+% lambda가 importance sampling으로 해석될 수 있다.
+% We can interpret this condition on a high level. In an overparameterized setting, models with a typical exponential-tail loss will memorize entire dataset due to the overparameterization, and the exponential loss, being non-zero, allows a few influential data points to shape the converged gradient. These few data points can be viewed as support vectors, and ultimately, the model is designed to overfit these vectors from a certain point onwards. Hence, typically, the model is trained in an overfitted manner such that the final weights not only fit the data (\hh{Stationarity}) but also particularly classify the support vectors effectively (\hh{Primal \nj{conditioin}}).
+
+% \jh{또한 stationarity condition을 해석해보면 다음과 같다. 이 조건을 high-level에서 설명하자면, Overparmeterized setting에서의 model과 일반적인 expotential tail을 가진 loss는, overparamterized condtion은 때문에 우리는 trained dataset을 전부다 외우게 되고, expotential loss는 0이 되지 않기 때문에 이중 영향을 많이 끼치는 몇개의 data가 converged gradient를 형성하게 된다. 그리고 이 몇개의 data를 support vector로 볼 수 있고, 결국 특정 시점부터 모델은 그 support vector를 overfitting하도록 설계된다. 따라서 일반적으로 우리는 모델을 overfitted manner로 학습하므로 결국 최종적인 weight는 데이터를 다 맞추면서 (Primal) support vector를 특히 잘 classify하도록 형성된다 (Stationarity).
+
+% $\nabla L $은 exponential tail의 영향으로 dominant한 몇개의 support vector들의 합으로 근사될 수 있으며, 따라서 KKT stationary  condition을 활용하여 $\Delta_{\text{KKT}}$ =  $|\mathbf{W}_f - \Sigma^i \lambda_i\nabla L(\mathbf{x_i}, \mathbf{y})|$ 로 kkt loss를 구성할 수 있다. 따라서 충분히 기학습된 W와 주어진 L에 대하여 $x_i$에 대한 gradient update를 통해서 support vector들을 구할 수 있다.  
+% \subsection{Dynamics in Deep learning}
+
+% \jh{Deep learning에서의 가장 핵심적인 property는 overparameterization에서의 overfitting property이다. 이때 일어나는 일은 }
+
+% \jh{딥러닝으로 문제를 풀 때 있어 가장 특징적인 부분은 바로 이들이 처리하는 데이터가 고차원의 데이터라는 것이다. 이 경우 문제가 생기는 점은, 그 데이터가 담고 있는 정보량은 실제 이들이 놓여 있는 공간보다 훨씬 작다는 점이다. 다시 말해서, dataset $ x \in \mathcal{D}$에서 $x\in \mathbf{R^N}$이라고 하면, $dim{D} << N$이라는 것이다. 예를 들어서, 우리가 $R^N$차원에서 임의로 생성한 화이트 노이즈 같은 경우 실제 매니폴드에 있다고 할 수 없을 것이다. 머신 러닝에 비해서 딥러닝이 가지는 가장 특징적인 지점이 바로 이곳에 있다. 머신 러닝은 이런 고차원 데이터를 직접적으로 핸들하지 못해, 임의로 hand-craft된 low-dimenstional한 feature를 뽑아서 그 이후에 머신 러닝을 수행하지만, 딥러닝은 그러지 않아도 괜찮다.}\hh{딥러닝의 장점은 high dimension의 input이 들어와도 human bias(implicit bias)로 인한 dimension 감소(extraction)없이도  모델이 알아서(overparmeter setting에서) fitting해준다는 건데, 이번 연구를 통해서 역으로 fitting된 model에서 datamanifold의 boundary feature들을 뽑아 낼 수 있다(extracted feature을 뽑아 낼 수 있다는 것이다)를 얘기하고 싶은거야? }
+\end{comment}

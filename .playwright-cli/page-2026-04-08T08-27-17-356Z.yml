@@ -1,0 +1,308 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "Section navigation" [ref=e3]:
+      - generic [ref=e4]:
+        - link "Home" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e6]
+          - text: Home
+        - generic [ref=e9]:
+          - link "Abstract" [ref=e10] [cursor=pointer]:
+            - /url: "#abstract"
+          - link "Key Ideas" [ref=e11] [cursor=pointer]:
+            - /url: "#key-ideas"
+          - link "DeepKKT" [ref=e12] [cursor=pointer]:
+            - /url: "#deepkkt"
+          - link "Distillation" [ref=e13] [cursor=pointer]:
+            - /url: "#distillation"
+          - link "Evidence" [ref=e14] [cursor=pointer]:
+            - /url: "#visual-evidence"
+          - link "Generation" [ref=e15] [cursor=pointer]:
+            - /url: "#generative"
+          - link "Code" [ref=e16] [cursor=pointer]:
+            - /url: "#code"
+          - link "BibTeX" [ref=e17] [cursor=pointer]:
+            - /url: "#bibtex"
+    - generic [ref=e19]:
+      - paragraph [ref=e20]: NeurIPS 2024
+      - heading "Deep Support Vectors" [level=1] [ref=e21]
+      - paragraph [ref=e22]: DeepKKT uncovers support-vector-like samples inside deep classifiers, enables few-shot distillation with almost no data, and turns a classifier into a latent generator.
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - text: Junhoo Lee
+          - superscript [ref=e25]: "1"
+          - text: ","
+        - generic [ref=e26]:
+          - text: Hyunho Lee
+          - superscript [ref=e27]: "1"
+          - text: ","
+        - generic [ref=e28]:
+          - text: Kyomin Hwang
+          - superscript [ref=e29]: "1"
+          - text: ","
+        - generic [ref=e30]:
+          - text: Nojun Kwak
+          - superscript [ref=e31]: "1"
+      - generic [ref=e32]:
+        - generic [ref=e33]: Advances in Neural Information Processing Systems 37
+        - generic [ref=e34]:
+          - superscript [ref=e35]: "1"
+          - text: Seoul National University
+      - generic [ref=e36]:
+        - link "Paper" [ref=e37] [cursor=pointer]:
+          - /url: /dsv/deep-support-vectors-paper.pdf
+          - img [ref=e38]
+          - generic [ref=e41]: Paper
+        - link "GitHub" [ref=e42] [cursor=pointer]:
+          - /url: https://github.com/JunHoo-Lee/Neurips24_DeepSupportVectors
+          - img [ref=e43]
+          - generic [ref=e46]: GitHub
+        - link "Supplementary" [ref=e47] [cursor=pointer]:
+          - /url: /dsv/deep-support-vectors-supplemental.zip
+          - img [ref=e48]
+          - generic [ref=e52]: Supplementary
+        - link "arXiv" [ref=e53] [cursor=pointer]:
+          - /url: https://arxiv.org/abs/2403.17329
+          - img [ref=e54]
+          - generic [ref=e57]: arXiv
+    - generic [ref=e60]:
+      - paragraph [ref=e62]: "The opening figure is rendered directly from `figure/overall_photo.pdf` in the paper source. It shows DSV generations on ImageNet, CIFAR10, and CIFAR100 produced without revisiting the original training data, which frames the paper's core claim: modern classifiers really do contain recoverable support-vector-like structure."
+      - img "Generated images from the original overall_photo figure in the Deep Support Vectors source." [ref=e64]
+      - paragraph [ref=e65]: "Source figure: `figure/overall_photo.pdf` from the official TeX release."
+    - generic [ref=e69]:
+      - heading "Abstract" [level=2] [ref=e70]
+      - generic [ref=e71]:
+        - paragraph [ref=e72]: Deep learning achieves remarkable accuracy, but it still hides the samples and cues that actually shape its decision boundary. Deep Support Vectors asks whether a modern classifier can recover something as structurally important and interpretable as classic support vectors.
+        - paragraph [ref=e73]: "The paper introduces DeepKKT, a deep-learning adaptation of the Karush-Kuhn-Tucker condition, to identify or synthesize Deep Support Vectors (DSVs). These DSVs behave like boundary-defining samples: they exhibit high uncertainty, summarize model behavior, and reveal what features a classifier relies on to separate classes."
+        - paragraph [ref=e74]: That same optimization recipe also leads to practical few-shot distillation and classifier-driven generation. One framework ties together interpretability, compression, and synthesis without requiring the original training set at reconstruction time.
+    - generic [ref=e78]:
+      - heading "Key Ideas" [level=2] [ref=e79]
+      - generic [ref=e80]:
+        - article [ref=e81]:
+          - img [ref=e83]
+          - heading "Recover boundary-critical samples" [level=3] [ref=e87]
+          - paragraph [ref=e88]: "DSVs act like support vectors for deep networks: they sit near the boundary, surface uncertainty, and summarize what the classifier treats as essential."
+        - article [ref=e89]:
+          - img [ref=e91]
+          - heading "Distill from a trained classifier" [level=3] [ref=e98]
+          - paragraph [ref=e99]: DeepKKT turns a frozen classifier into a practical distillation signal, avoiding the usual full-dataset, snapshot-heavy matching pipelines.
+        - article [ref=e100]:
+          - img [ref=e102]
+          - heading "Reuse classification as generation" [level=3] [ref=e105]
+          - paragraph [ref=e106]: Once labels become latent variables, the same optimization supports synthesis, interpolation, and editing without a separate generator.
+    - generic [ref=e110]:
+      - heading "DeepKKT" [level=2] [ref=e111]
+      - generic [ref=e112]:
+        - paragraph [ref=e113]: DeepKKT extends the KKT recipe from maximum-margin classifiers to overparameterized deep networks. Instead of only enforcing correct classification, it also tracks dual feasibility, a stationarity-style relation between the trained model and candidate samples, and a manifold prior that keeps synthesized DSVs on plausible data support.
+        - paragraph [ref=e114]: This produces a practical recipe for recovering support-vector-like samples from a trained classifier without replaying full training. In the paper, the conditions are evaluated on ConvNet and ResNet backbones across CIFAR10, CIFAR100, SVHN, and ImageNet.
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - generic [ref=e117]: Primal
+          - paragraph [ref=e118]: arg max Phi_c(x_i; theta*) = y_i
+          - paragraph [ref=e119]: Candidate DSVs must still land on the target class.
+        - generic [ref=e120]:
+          - generic [ref=e121]: Dual
+          - paragraph [ref=e122]: lambda_i >= 0
+          - paragraph [ref=e123]: The multiplier becomes a natural measure of sample importance.
+        - generic [ref=e124]:
+          - generic [ref=e125]: Stationarity
+          - paragraph [ref=e126]: theta* ~= sum_i lambda_i grad_theta L(Phi(x_i; theta*), y_i)
+          - paragraph [ref=e127]: Support-vector structure is tied back to the trained model.
+        - generic [ref=e128]:
+          - generic [ref=e129]: Manifold
+          - paragraph [ref=e130]: x_i in M
+          - paragraph [ref=e131]: Synthesized DSVs stay close to plausible data support.
+      - article [ref=e133]:
+        - generic [ref=e134]:
+          - heading "Why the full objective matters" [level=3] [ref=e135]
+          - paragraph [ref=e136]: "This figure is rendered directly from `figure/primalstat.pdf`. The paper uses it to show that primal-only optimization captures weak texture cues, while the full DeepKKT objective moves samples toward meaningful class structure."
+        - img "Original primalstat figure from the Deep Support Vectors source." [ref=e138]
+    - generic [ref=e142]:
+      - heading "Few-Shot Distillation" [level=2] [ref=e143]
+      - generic [ref=e144]:
+        - paragraph [ref=e145]: The few-shot result is especially striking because DeepKKT does not depend on full-dataset access, trajectory matching, or Hessian-heavy objectives. A pretrained classifier itself becomes the supervisory signal for distillation.
+        - paragraph [ref=e146]: On CIFAR10, the source table shows that DSV-based distillation remains competitive even in extremely data-starved settings, including zero-shot cases where no original class image is used to initialize the distilled set.
+      - generic [ref=e147]:
+        - generic [ref=e148]:
+          - table [ref=e150]:
+            - rowgroup [ref=e151]:
+              - row "img/cls shot/class ratio (%) DC DSA DM DSV" [ref=e152]:
+                - columnheader "img/cls" [ref=e153]
+                - columnheader "shot/class" [ref=e154]
+                - columnheader "ratio (%)" [ref=e155]
+                - columnheader "DC" [ref=e156]
+                - columnheader "DSA" [ref=e157]
+                - columnheader "DM" [ref=e158]
+                - columnheader "DSV" [ref=e159]
+            - rowgroup [ref=e160]:
+              - row "1 0 0 - - - 21.68 +/- 0.80" [ref=e161]:
+                - rowheader "1" [ref=e162]
+                - cell "0" [ref=e163]
+                - cell "0" [ref=e164]
+                - cell "-" [ref=e165]
+                - cell "-" [ref=e166]
+                - cell "-" [ref=e167]
+                - cell "21.68 +/- 0.80" [ref=e168]
+              - row "1 0.02 16.48 +/- 0.81 15.41 +/- 1.91 13.03 +/- 0.15 22.69 +/- 0.38" [ref=e169]:
+                - cell "1" [ref=e170]
+                - cell "0.02" [ref=e171]
+                - cell "16.48 +/- 0.81" [ref=e172]
+                - cell "15.41 +/- 1.91" [ref=e173]
+                - cell "13.03 +/- 0.15" [ref=e174]
+                - cell "22.69 +/- 0.38" [ref=e175]
+              - row "10 0.2 19.66 +/- 0.78 21.15 +/- 0.58 22.42 +/- 0.43 -" [ref=e176]:
+                - cell "10" [ref=e177]
+                - cell "0.2" [ref=e178]
+                - cell "19.66 +/- 0.78" [ref=e179]
+                - cell "21.15 +/- 0.58" [ref=e180]
+                - cell "22.42 +/- 0.43" [ref=e181]
+                - cell "-" [ref=e182]
+              - row "50 1 25.90 +/- 0.62 26.01 +/- 0.70 24.42 +/- 0.29 -" [ref=e183]:
+                - cell "50" [ref=e184]
+                - cell "1" [ref=e185]
+                - cell "25.90 +/- 0.62" [ref=e186]
+                - cell "26.01 +/- 0.70" [ref=e187]
+                - cell "24.42 +/- 0.29" [ref=e188]
+                - cell "-" [ref=e189]
+              - row "500 10 28.06 +/- 0.61 28.20 +/- 0.63 25.06 +/- 1.20 -" [ref=e190]:
+                - cell "500" [ref=e191]
+                - cell "10" [ref=e192]
+                - cell "28.06 +/- 0.61" [ref=e193]
+                - cell "28.20 +/- 0.63" [ref=e194]
+                - cell "25.06 +/- 1.20" [ref=e195]
+                - cell "-" [ref=e196]
+              - row "10 0 0 - - - 30.35 +/- 0.99" [ref=e197]:
+                - rowheader "10" [ref=e198]
+                - cell "0" [ref=e199]
+                - cell "0" [ref=e200]
+                - cell "-" [ref=e201]
+                - cell "-" [ref=e202]
+                - cell "-" [ref=e203]
+                - cell "30.35 +/- 0.99" [ref=e204]
+              - row "10 0.2 25.06 +/- 1.20 26.67 +/- 1.04 29.77 +/- 0.66 37.90 +/- 1.69" [ref=e205]:
+                - cell "10" [ref=e206]
+                - cell "0.2" [ref=e207]
+                - cell "25.06 +/- 1.20" [ref=e208]
+                - cell "26.67 +/- 1.04" [ref=e209]
+                - cell "29.77 +/- 0.66" [ref=e210]
+                - cell "37.90 +/- 1.69" [ref=e211]
+              - row "50 1 36.44 +/- 0.52 36.63 +/- 0.52 36.63 +/- 0.52 -" [ref=e212]:
+                - cell "50" [ref=e213]
+                - cell "1" [ref=e214]
+                - cell "36.44 +/- 0.52" [ref=e215]
+                - cell "36.63 +/- 0.52" [ref=e216]
+                - cell "36.63 +/- 0.52" [ref=e217]
+                - cell "-" [ref=e218]
+              - row "500 10 43.55 +/- 0.50 44.66 +/- 0.59 47.96 +/- 0.95 -" [ref=e219]:
+                - cell "500" [ref=e220]
+                - cell "10" [ref=e221]
+                - cell "43.55 +/- 0.50" [ref=e222]
+                - cell "44.66 +/- 0.59" [ref=e223]
+                - cell "47.96 +/- 0.95" [ref=e224]
+                - cell "-" [ref=e225]
+              - row "50 0 0 - - - 39.35 +/- 0.54" [ref=e226]:
+                - rowheader "50" [ref=e227]
+                - cell "0" [ref=e228]
+                - cell "0" [ref=e229]
+                - cell "-" [ref=e230]
+                - cell "-" [ref=e231]
+                - cell "-" [ref=e232]
+                - cell "39.35 +/- 0.54" [ref=e233]
+              - row "50 1 41.22 +/- 0.90 41.29 +/- 0.45 48.93 +/- 0.92 53.56 +/- 0.73" [ref=e234]:
+                - cell "50" [ref=e235]
+                - cell "1" [ref=e236]
+                - cell "41.22 +/- 0.90" [ref=e237]
+                - cell "41.29 +/- 0.45" [ref=e238]
+                - cell "48.93 +/- 0.92" [ref=e239]
+                - cell "53.56 +/- 0.73" [ref=e240]
+              - row "500 10 52.00 +/- 0.59 52.19 +/- 0.53 60.59 +/- 0.41 -" [ref=e241]:
+                - cell "500" [ref=e242]
+                - cell "10" [ref=e243]
+                - cell "52.00 +/- 0.59" [ref=e244]
+                - cell "52.19 +/- 0.53" [ref=e245]
+                - cell "60.59 +/- 0.41" [ref=e246]
+                - cell "-" [ref=e247]
+          - paragraph [ref=e248]: "Reproduced as HTML from `sec/main_table.tex` in the source, using the CIFAR10 few-shot dataset distillation numbers."
+        - complementary [ref=e249]:
+          - generic [ref=e250]:
+            - img [ref=e251]
+            - generic [ref=e255]: What stands out
+          - paragraph [ref=e256]: DSV is the only method reported in the zero-shot rows, and it remains strong when just one or ten shots per class are available for initialization.
+          - paragraph [ref=e257]: "The table makes the paper's systems point very clear: a pretrained classifier alone can synthesize useful distilled data without replaying the original full dataset."
+    - generic [ref=e261]:
+      - heading "Visual Evidence" [level=2] [ref=e262]
+      - generic [ref=e263]:
+        - paragraph [ref=e264]: The paper makes the support-vector analogy concrete in several ways. Candidate DSVs become higher-entropy over optimization, consistent with moving toward a decision boundary, and the learned Lagrange multipliers correlate with downstream classwise test accuracy.
+        - paragraph [ref=e265]: The same decision signals are also visible. DSV-guided edits expose the precise traits a classifier leans on, showing how local semantic changes can flip the model's prediction.
+      - generic [ref=e266]:
+        - article [ref=e267]:
+          - generic [ref=e268]:
+            - heading "Entropy rises near the boundary" [level=3] [ref=e269]
+            - paragraph [ref=e270]: "Rendered from `figure/Entropy_DSV.pdf`. As optimization proceeds, DSV candidates become higher-entropy, which matches the intuition that support vectors should lie close to the decision boundary."
+          - img "Entropy change figure from the Deep Support Vectors source." [ref=e272]
+        - article [ref=e273]:
+          - generic [ref=e274]:
+            - heading "Lambda tracks classwise generalization" [level=3] [ref=e275]
+            - paragraph [ref=e276]: "Rendered from `figure/pearson.pdf`. The source figure links the sum of learned lambda values to classwise test accuracy, turning DeepKKT multipliers into a readable importance signal."
+          - img "Pearson correlation figure from the Deep Support Vectors source." [ref=e278]
+        - article [ref=e279]:
+          - generic [ref=e280]:
+            - heading "Decision criteria become editable" [level=3] [ref=e281]
+            - paragraph [ref=e282]: "Rendered from `figure/editimages.pdf`. The examples show original images, DSV-informed manual edits, and DeepKKT-based edits that change the classifier's prediction by altering the precise cue it relies on."
+          - img "Edited image examples from the Deep Support Vectors source." [ref=e284]
+    - generic [ref=e288]:
+      - heading "Classifier as Generator" [level=2] [ref=e289]
+      - generic [ref=e290]:
+        - paragraph [ref=e291]: DeepKKT also reframes a classifier as a latent generative model. By treating labels or soft labels as latent variables, the method can synthesize unseen images, interpolate between classes, and perform semantically meaningful edits.
+        - paragraph [ref=e292]: The source figures further show why the full objective matters. Primal-only optimization does not yield meaningful samples, while the stationarity-aware objective produces sharper, more class-consistent generations that stay close to the data manifold.
+      - generic [ref=e293]:
+        - article [ref=e294]:
+          - generic [ref=e295]:
+            - heading "Class interpolation from soft labels" [level=3] [ref=e296]
+            - paragraph [ref=e297]: "Rendered from `figure/interpolation_fig_compressed.pdf`. The interpolation figure shows that DeepKKT can move smoothly between class semantics while staying in-distribution."
+          - img "Interpolation figure from the Deep Support Vectors source." [ref=e299]
+        - article [ref=e300]:
+          - generic [ref=e301]:
+            - heading "Mixup in latent label space" [level=3] [ref=e302]
+            - paragraph [ref=e303]: "Rendered from `figure/mixup_overall.pdf_compressed.pdf`. The supplementary figure illustrates label-space mixing as a direct extension of the same DeepKKT reconstruction objective."
+          - img "Mixup figure from the Deep Support Vectors supplementary source." [ref=e305]
+        - article [ref=e306]:
+          - generic [ref=e307]:
+            - heading "ImageNet mixing examples" [level=3] [ref=e308]
+            - paragraph [ref=e309]: "Rendered from `figure/mix_imagenet_compressed.pdf`. The ImageNet examples make the same point at larger scale: semantic mixing is coming from the classifier-guided objective itself, not from a separately trained generator."
+          - img "ImageNet mixing figure from the Deep Support Vectors source." [ref=e311]
+    - generic [ref=e315]:
+      - heading "Supplementary Code Layout" [level=2] [ref=e316]
+      - generic [ref=e317]:
+        - paragraph [ref=e318]: "The supplementary release ships a compact reconstruction pipeline under `submit_code/`. The page below mirrors that layout rather than inventing a new pseudo-repo structure: `pl_main.py` is the Lightning entrypoint, `base_reconstruct_imagenet.yaml` holds the default reconstruction config, and the optimization logic is split across `models.py`, `svm_modules.py`, and the dataset helpers."
+        - paragraph [ref=e319]: For the project page, the code block is presented exactly around that release entrypoint so the GitHub link, README, and reproduction snippet all line up with the supplementary package users actually receive.
+      - generic [ref=e320]:
+        - generic [ref=e321]:
+          - generic [ref=e322]: Main command
+          - code [ref=e324]: python pl_main.py --yaml base_reconstruct_imagenet.yaml \ --loss_weight 1e-4 \ --UPSCALE_cycle 2000 \ --tv_scale 200000 \ --alpha_scale 1e-4
+        - generic [ref=e325]:
+          - generic [ref=e326]: Base yaml
+          - code [ref=e328]: "ARCHITECTURE: resnet BATCH_SIZE: 256 CHECKPATH: \"./checkpoints/\" SAVE_NAME: RECONSTRUCT DATASET: CIFAR10 NUM_SAMPLES: 1 PATH_DATASETS: \"./data\" RECONSTRUCT_DATA: true REF_MODEL_PATH: ./models/imagenet.ckpt DATAPATH: \"./data\" MODE: \"RECONSTRUCT\" NUM_WORKERS: 12"
+      - generic [ref=e329]:
+        - article [ref=e330]:
+          - heading "pl_main.py" [level=3] [ref=e331]
+          - paragraph [ref=e332]: PyTorch Lightning entrypoint that parses optimization flags, loads the yaml config, and dispatches reconstruction, base training, or SVM retraining modes.
+        - article [ref=e333]:
+          - heading "base_reconstruct_imagenet.yaml" [level=3] [ref=e334]
+          - paragraph [ref=e335]: Default reconstruction config used by the supplementary release for DSV synthesis runs.
+        - article [ref=e336]:
+          - heading "models.py / svm_modules.py" [level=3] [ref=e337]
+          - paragraph [ref=e338]: Core model and DeepKKT optimization logic used for reconstruction and downstream evaluation.
+    - generic [ref=e342]:
+      - generic [ref=e343]:
+        - heading "BibTeX" [level=2] [ref=e344]
+        - button "Copy BibTeX" [ref=e345] [cursor=pointer]:
+          - img [ref=e346]
+          - generic [ref=e349]: Copy
+      - code [ref=e351]: "@article{lee2024deepsupportvectors, title = {Deep Support Vectors}, author = {Lee, Junhoo and Lee, Hyunho and Hwang, Kyomin and Kwak, Nojun}, journal = {Advances in Neural Information Processing Systems}, volume = {37}, year = {2024}, eprint = {2403.17329}, archivePrefix = {arXiv}, primaryClass = {cs.LG}, url = {https://arxiv.org/abs/2403.17329} }"
+    - contentinfo [ref=e352]:
+      - paragraph [ref=e354]: "This page follows the section rhythm of the template-infilling project page, but every showcased DSV figure is rendered from the original TeX figure assets and the few-shot table is rebuilt from `sec/main_table.tex` rather than image-cropped screenshots."
+    - link "Back to top" [ref=e355] [cursor=pointer]:
+      - /url: "#top"
+      - img [ref=e356]
+  - alert [ref=e358]

@@ -1,0 +1,38 @@
+\begin{abstract}
+% \nj{While the success of deep learning has been attributed to its theoretical equivalence with Support Vector Machines (SVM), the practical implications of this relationship have not been thoroughly explored. This paper pioneers an exploration in this domain, specifically focusing on the identification of Deep Support Vectors (DSVs) within deep learning models. We introduce the concept of DeepKKT conditions, an adaptation of the traditional Karush-Kuhn-Tucker (KKT) conditions tailored for deep learning. Through empirical investigations, we illustrate that DSVs exhibit similarities to support vectors in SVM, offering a tangible method to interpret the decision-making criteria of models. Additionally, our findings demonstrate that models can be effectively reconstructed using DSVs, resembling the process in SVM, and the proposed DSV generation process can be used as a high-quality image generation model \nj{(See Fig.~\ref{fig:generated})}. %The code  will be available. % in the provided repository
+% }
+\jh{Deep learning has achieved tremendous success. \nj{However,} unlike SVMs, which provide direct decision criteria and can be trained with a small dataset, it still has significant weaknesses due to its requirement for massive datasets during training and the black-box characteristics on decision criteria. \nj{This paper addresses} these issues by identifying support vectors in deep learning models. To this end, we propose the DeepKKT condition, an adaptation of the traditional Karush-Kuhn-Tucker (KKT) condition for deep learning models, and confirm that generated Deep Support Vectors (DSVs) using this condition exhibit properties similar to traditional support vectors. This allows us to apply our method to few-shot dataset distillation problems and alleviate the black-box characteristics of deep learning models. Additionally, we demonstrate that the DeepKKT condition can transform conventional classification models into generative models with high fidelity, particularly as latent \jh{generative} models using class labels as latent variables. We validate the effectiveness of DSVs \nj{using common datasets (ImageNet, CIFAR10 \nj{and} CIFAR100) on the general architectures (ResNet and ConvNet)}, proving their practical applicability. (See Fig.~\ref{fig:generated})}
+
+%\jh{While the success of deep learning is often explained to its theoritical equivalence to SVM (Support Vector Machines), Its practical relationship have is not yet been explored. This paper is the first to delve into this area, focusing particularly on identifying Deep Support Vectors (DSVs) within deep learning models. We introduce the DeepKKT conditions, an adaptation of the traditional KKT (Karush-Kuhn-Tucker) conditions for deep learning.}
+%\jh{Our empirical investigations demonstrate that DSVs can function similarly to support vectors in SVM, providing a tangible way to interpret the decision-making criteria of models. Furthermore, we reveal that models can be effectively reconstructed using DSVs akin to SVM. Code is available at \href{https://github.com/deepsupportvector/deepsupportvector}{this repository}}
+%This reconstruction not only achieves performance comparable to existing dataset reconstruction methods but also marks a significant step forward as the first practical dataset distillation algorithm.}
+\end{abstract}
+
+% 딥러닝은 막대한 성공을 거뒀지만, 직접적인 decision critierion을 제공하고, 적은 양의 dataset으로 훈련 가능했던 svm과는 달리 훈련시 막대한 양의 데이터셋을 요구한다는 사실과 그것의 general한 decision process를 알 수 없다는 black-box characteristics 여전히 큰 약점으로 남아 있다. 본 페이퍼에서 우리는 이러한 문제를 딥 러닝 모델에서 support vector를 찾아냄으로서 해결하였다. 이를 위하여, 우리는 기존의n adaptation of the traditional Karush-Kuhn-Tucker (KKT)  KKT condition을 변형한 DeepKKT 조건을 제시하였고, 이 DeepKKT 조건으로 만든 Deep Support Vector (DSVs)가 기존의 Support vector과 유사한 성질을 띄고 있음을 확인하였고, 이것으로 few-shot dataset distillation 문제에 적용핤 수 있고, black-box characteristics를 완화할 수 있음을 보였다. 또한, DeepKKT condition은 기존의 classification model을 generative model로서 활용가능할 수 있음을 보였으며 실제로 높은 fidelity를 보였따. 특히 class 자체를 latent로 쓴 latent genration model로서 사용할 수 있음을 보였다. 우리는 DSVs를 ImageNet, CIFAR10, CIFAR100, ResNet, Convolutional Network 등 일반적인 조건에서 검증하였고 실제로 작동가능함을 보였다.
+% \hh{Support vectors effectively encapsulate decision boundary information in linear \nj{classifiers} while also acting as a representation of a segment of the original dataset. This study pioneers the extension of support vectors defined in linear \nj{classifiers} to their equivalent role as Deep Support Vectors (DSVs) in nonlinear deep learning classifier models. We extracted Deep Support Vectors (DSVs) solely using a pre-trained \nj{deep network}, eliminating the need to access the training dataset. Utilizing semantic invariance condition, we ensured that the DSVs satisfy the KKT condition while residing on the data manifold. The extracted DSVs not only reconstruct and represent the original dataset but also serve as a distilled dataset while providing global explanations \nj{which have not been addressed in previous works of} Explainable Artificial Intelligence (XAI).}
+
+
+
+% 1. 사람들은 딥러닝의 성공을 SVM과의 등가성을 이용하여 설명하지만, 막상 그것이 어떻게 이루어져 있는지는 찾지 않는다.
+% 2. 본 페이퍼에서는 처음으로 그것에 대해서 다루고, 정확히는 딥 러닝 모델 속에서의 Deep Support Vectors(DSVs)를 찾기 위하여 딥 러닝에서의 KKT 조건인 DeepKKT 조건을 정의한다.
+% 3. DeepKKT 조건은 cross entropy와 같은 logsitic loss를 가지고 있는 기존의 모든 multi-classfication loss 가진 딥러닝 모델에 대해 적용 가능하다
+% 4. 실험적으로 DSVs가 서포트 벡터와 같은 역할을 할 수 있음을 보였으며, DSVs를 통하여 모델의 decision criterion을 설명할 수 있음을 보였다.
+% 5. DSVs는 akin to SVMs, DSVs를 통하여 reconstruction이 가능하고, 이것은 기존의 dataset reconstruction과 비슷한 성능을 보일 뿐 아니라, practical한 최초의 dataset distillation algorithm으로 작용한다.
+
+% The ABSTRACT is to be in fully justified italicized text, at the top of the left-hand column, below the author and affiliation information.
+% Use the word ``Abstract'' as the title, in 12-point Times, boldface type, centered relative to the column, initially capitalized.
+% The abstract is to be in 10-point, single-spaced type.
+% Leave two blank lines after the Abstract, then begin the main text.
+
+
+
+
+% This document provides a basic paper template and submission guidelines.
+% Abstracts must be a single paragraph, ideally between 4--6 sentences long.
+% Gross violations will trigger corrections at the camera-ready phase.
+
+% Support vectors effectively encapsulate decision boundary information in linear spaces while also acting as a representation of a segment of the original dataset. This study pioneers the extension of support vectors defined in linear spaces to their equivalent role as Deep Support Vectors (DSVs) in nonlinear deep learning classifier models. We extracted Deep Support Vectors (DSVs) solely using a pre-trained model, eliminating the need to access the training dataset. Utilizing semantic invariance condition, we ensured that the DSVs satisfy the KKT condition while residing on the data manifold.
+
+
+% 기존의 support vector은 linear한 공간에서 data들을 효과적으로 classify 하는 decision boundary 정보를 함축적으로 가지고 있는 동시에 original dataset의 일부를 대표한다. 본 연구에서는 linear 공간에서 정의되는 support vector를 최초로 non linear 공간의 딥러닝 classifier 모델에서 동치의 역할을 하는 Deep support vector으로 확장한다. 학습할때 사용한 dataset에 접근없이 오직 기학습된 모델만을 활용하여 DSV들을 추출하였으며, we propose a semantic invariance condition을 활용하여 KKT condition을 만족하면서 data manifold 위에 있도록 DSV를 구하였다. We show that 추출된 DSV들은 original dataset의 represented reconstruction 일뿐만 아니라 distilled dataset 역할도 하는데, 기존의 distillation 방법보다 훨씬 computation면에서 이점이 있다.  또한 DSV는 기존에 설명하지 못한 global explaination도 제공하면서  
+

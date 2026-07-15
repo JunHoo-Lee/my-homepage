@@ -12,17 +12,6 @@
 
 # testing
 /coverage
-/test-results
-/playwright-report
-/blob-report
-/backups/private/
-/.playwright-cli/
-/tmp/
-/DRO/
-/app_setup/
-/supabase/
-* 2.tsx
-* 2.png
 
 # next.js
 /.next/
@@ -46,7 +35,6 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-!.env.example
 
 # vercel
 .vercel
