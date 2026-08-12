@@ -145,15 +145,25 @@
   overflow-wrap: anywhere;
 }
 
-.educationList .thesisAward {
-  display: inline-block;
-  margin-top: 0.35rem;
-  border-radius: 999px;
-  background: var(--public-accent-soft);
+.thesisAward {
+  display: grid;
+  gap: 0.08rem;
+  margin-top: 0.5rem;
+  border-left: 3px solid var(--public-accent);
+  padding-left: 0.65rem;
+}
+
+.thesisAward strong {
   color: var(--public-accent);
-  padding: 0.2rem 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 900;
+  font-family: var(--font-home-heading), sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.thesisAward span {
+  color: #666;
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .newsList article {
@@ -163,6 +173,7 @@
   padding: 0.55rem 0;
   color: #555;
   font-family: var(--font-home-body), sans-serif;
+  border-bottom: 1px solid var(--public-border);
 }
 
 .newsList article > * {

@@ -86,9 +86,10 @@ export default function Home() {
                   </cite>
                 </p>
                 {item.degree.startsWith("Ph.D.") ? (
-                  <p className={styles.thesisAward}>
-                    Best Ph.D. Dissertation Award · GSCT representative awardee · 1 of 27 Ph.D. graduates
-                  </p>
+                  <div className={styles.thesisAward}>
+                    <strong>Best Ph.D. Dissertation Award</strong>
+                    <span>GSCT representative awardee · 1 recipient among 27 Ph.D. graduates</span>
+                  </div>
                 ) : null}
               </div>
               <time>{item.period}</time>
