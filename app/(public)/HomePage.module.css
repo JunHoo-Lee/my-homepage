@@ -17,12 +17,14 @@
 }
 
 .profileImage {
+  display: block;
   width: 12.5rem;
   height: 12.5rem;
+  margin: 0 auto;
   border-radius: 50%;
   box-shadow: 0 0 0.625rem rgb(0 0 0 / 10%);
   object-fit: cover;
-  object-position: center 27%;
+  object-position: center;
 }
 
 .profileHeader h1 {

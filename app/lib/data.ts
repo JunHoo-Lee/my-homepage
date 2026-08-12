@@ -27,9 +27,7 @@ export const PROFILE = {
     email: "mrjunoo@snu.ac.kr",
     website: "https://junhoo.me",
     bio: [
-        "I am a Ph.D. candidate at Seoul National University (MIPAL), advised by Prof. Nojun Kwak.",
         "I work on diffusion language models, meta-learning, and methods for analyzing and attributing pretrained models. I also work on vision-language-action models.",
-        "I will join ALIN-LAB at KAIST as a postdoctoral researcher in September 2026.",
     ]
 };
 

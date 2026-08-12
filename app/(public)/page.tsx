@@ -65,7 +65,7 @@ export default function Home() {
       <section className={styles.section} id="about">
         <SectionTitle>About Me</SectionTitle>
         <div className={styles.aboutCopy}>
-          {profile.bio.slice(1).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {profile.bio.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
         </div>
       </section>
 
