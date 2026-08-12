@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs dev --disable-source-maps",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs build --webpack",
     "start": "NODE_OPTIONS=--max-old-space-size=4096 node scripts/next-runner.cjs start",
     "lint": "eslint"
   },
