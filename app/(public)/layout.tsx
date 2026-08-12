@@ -1,5 +1,17 @@
-import PublicHeader from "./components/PublicHeader";
-import "./public-site.css";
+import { PublicHomeFrame } from "@/app/components/public/PublicSiteShell";
+import { Montserrat, Mulish } from "next/font/google";
+
+const montserrat = Montserrat({
+    subsets: ["latin"],
+    weight: ["400", "700"],
+    variable: "--font-home-heading",
+});
+
+const mulish = Mulish({
+    subsets: ["latin"],
+    weight: ["400", "900"],
+    variable: "--font-home-body",
+});
 
 export default function PublicLayout({
     children,
@@ -7,18 +19,8 @@ export default function PublicLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="public-site">
-            <PublicHeader />
-            {children}
-            <footer className="public-footer">
-                <div className="public-container public-footer__inner">
-                    <div>
-                        <strong>Junhoo Lee</strong>
-                        <span>Machine learning researcher · Seoul, Korea</span>
-                    </div>
-                    <p>© 2026 Junhoo Lee</p>
-                </div>
-            </footer>
+        <div className={`${montserrat.variable} ${mulish.variable}`}>
+            <PublicHomeFrame>{children}</PublicHomeFrame>
         </div>
     );
 }

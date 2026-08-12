@@ -1,212 +1,125 @@
-import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import Script from "next/script";
 import type { ReactNode } from "react";
+import { GraduationCap, Github, Mail } from "lucide-react";
+
 import {
-    EDUCATION,
-    FEATURED_PROJECTS,
-    HOME_NEWS,
-    LATEST_UPDATE,
-    PROFILE,
-    SELECTED_HONORS,
-    SELECTED_PUBLICATIONS,
-    TALKS,
-} from "@/app/lib/data";
-import PublicationList from "./components/PublicationList";
+  PERSON_JSON_LD,
+  PROJECT_BY_PUBLICATION_TITLE,
+  PUBLIC_SITE_CONTENT,
+  scholarlyArticleJsonLd,
+} from "@/app/lib/public-content";
 
-export const metadata: Metadata = {
-    alternates: { canonical: "/" },
-};
+import NewsList from "./NewsList";
+import PublicationGallery from "./PublicationGallery";
+import styles from "./HomePage.module.css";
 
-function SmartLink({ href, children }: { href: string; children: ReactNode }) {
-    if (href.startsWith("/")) {
-        return <Link href={href}>{children}</Link>;
-    }
+const { education, news, profile, projects, publicationSections } = PUBLIC_SITE_CONTENT;
 
-    return (
-        <a href={href} target="_blank" rel="noopener noreferrer">
-            {children}
-        </a>
-    );
-}
+const SELECTED_PUBLICATION_TITLES = [
+  "Unlocking the Potential of Diffusion Language Models through Template Infilling",
+  "Deep Support Vectors",
+  "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
+] as const;
 
 export default function Home() {
-    return (
-        <main id="about" className="public-main public-container">
-            <section className="public-hero" aria-labelledby="home-title">
-                <div className="public-hero__copy">
-                    <p className="public-eyebrow">Ph.D. Candidate · Seoul National University</p>
-                    <h1 id="home-title">Junhoo Lee</h1>
-                    <p className="public-hero__role">
-                        Machine learning researcher at MIPAL, advised by Prof. Nojun Kwak. Ph.D. expected August 2026.
-                    </p>
-                    <p className="public-hero__thesis">
-                        I work on diffusion language models, meta-learning, and methods for analyzing and attributing
-                        pretrained models. I also work on vision-language-action models.
-                    </p>
-                    <div className="public-identity-links" aria-label="Profile links">
-                        <a href={`mailto:${PROFILE.email}`}>Email</a>
-                        <a href="/cv.pdf" target="_blank" rel="noopener noreferrer">CV</a>
-                        <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ" target="_blank" rel="noopener noreferrer">Scholar</a>
-                        <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noopener noreferrer">GitHub</a>
-                        <a href="https://www.linkedin.com/in/junhoo-lee-8483b62a5/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                    </div>
-                </div>
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      { ...PERSON_JSON_LD, "@context": undefined },
+      ...projects.map((project) => ({
+        ...scholarlyArticleJsonLd(project),
+        "@context": undefined,
+      })),
+    ],
+  };
 
-                <div className="public-profile-photo">
-                    <Image
-                        src="/myface.jpeg"
-                        alt="Junhoo Lee by the sea"
-                        fill
-                        priority
-                        sizes="(max-width: 600px) 90px, 208px"
-                    />
-                </div>
-            </section>
+  return (
+    <div className={styles.page}>
+      <Script
+        id="homepage-structured-data"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        type="application/ld+json"
+      />
 
-            <aside className="public-lead-update" aria-label="Latest update">
-                <time dateTime={LATEST_UPDATE.datetime}>{LATEST_UPDATE.date}</time>
-                <p>
-                    {LATEST_UPDATE.prefix}
-                    <a href={LATEST_UPDATE.link} target="_blank" rel="noopener noreferrer">
-                        {LATEST_UPDATE.linkText}
-                    </a>
-                    {LATEST_UPDATE.suffix}
+      <header className={styles.profileHeader}>
+        <Image
+          alt="Junhoo Lee"
+          className={styles.profileImage}
+          height={200}
+          priority
+          sizes="(max-width: 640px) 160px, 200px"
+          src="/myface.jpeg"
+          width={200}
+        />
+        <h1>{profile.name}</h1>
+        <p>{profile.role} at {profile.affiliation}</p>
+        <nav className={styles.headerIcons} aria-label="Profile links">
+          <a href="/cv.pdf" target="_blank" rel="noreferrer" aria-label="Curriculum vitae"><strong>CV</strong></a>
+          <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ" target="_blank" rel="noreferrer" aria-label="Google Scholar"><GraduationCap aria-hidden="true" /></a>
+          <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noreferrer" aria-label="GitHub"><Github aria-hidden="true" /></a>
+          <a href={`mailto:${profile.email}`} aria-label="Email"><Mail aria-hidden="true" /></a>
+        </nav>
+      </header>
+
+      <section className={styles.section} id="about">
+        <SectionTitle>About Me</SectionTitle>
+        <div className={styles.aboutCopy}>
+          {profile.bio.slice(1).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        </div>
+      </section>
+
+      <section className={styles.section} id="education">
+        <SectionTitle>Education</SectionTitle>
+        <div className={styles.educationList}>
+          {education.map((item) => (
+            <article key={item.degree}>
+              <div>
+                <h3>{item.degree}</h3>
+                <p>{item.institution}</p>
+                <p className={styles.thesisTitle}>
+                  <span>{item.degree.startsWith("Ph.D.") ? "Ph.D. Dissertation" : "B.S. Thesis"}</span>
+                  <cite>
+                    {item.degree.startsWith("Ph.D.")
+                      ? "Projection, Persistence, and Elicitation of Learned Internal Structure"
+                      : "Improvement of Elevator Control Algorithm Using Reinforcement Learning"}
+                  </cite>
                 </p>
-            </aside>
+                {item.degree.startsWith("Ph.D.") ? (
+                  <div className={styles.thesisAward}>
+                    <strong>Best Ph.D. Dissertation Award</strong>
+                    <span>GSCT representative awardee · 1 recipient among 27 Ph.D. graduates</span>
+                  </div>
+                ) : null}
+              </div>
+              <time>{item.period}</time>
+            </article>
+          ))}
+        </div>
+      </section>
 
-            <section id="work" className="public-section" aria-labelledby="work-title">
-                <div className="public-section-heading">
-                    <div>
-                        <h2 id="work-title">Selected Research</h2>
-                    </div>
-                </div>
+      <section className={styles.section} id="news">
+        <SectionTitle>News</SectionTitle>
+        <NewsList news={news} />
+      </section>
 
-                <div className="featured-work-grid">
-                    {FEATURED_PROJECTS.map((project) => (
-                        <article className="featured-work" key={project.title}>
-                            <Link
-                                className="featured-work__figure"
-                                href={project.projectLink}
-                                aria-label={`Open ${project.fullTitle} project page`}
-                            >
-                                <Image
-                                    src={project.image}
-                                    alt={project.imageAlt}
-                                    fill
-                                    sizes="(max-width: 840px) 100vw, 360px"
-                                />
-                            </Link>
-                            <div className="featured-work__meta">
-                                <span>{project.venue}</span>
-                                <span>{project.detail}</span>
-                            </div>
-                            <h3><Link href={project.projectLink}>{project.title}</Link></h3>
-                            <p>{project.summary}</p>
-                            <div className="featured-work__links" aria-label={`Resources for ${project.title}`}>
-                                <Link href={project.projectLink}>Project</Link>
-                                <SmartLink href={project.paperLink}>Paper</SmartLink>
-                                <a href={project.codeLink} target="_blank" rel="noopener noreferrer">Code</a>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            </section>
+      <section className={styles.section} id="publications">
+        <PublicationGallery
+          publications={publicationSections.flatMap((section) => section.items).map((publication) => {
+            const project = PROJECT_BY_PUBLICATION_TITLE.get(publication.title);
+            return {
+              ...publication,
+              resolvedPaperLink: project?.paperLink ?? publication.paperLink ?? publication.link,
+              resolvedProjectLink: project?.projectLink ?? publication.projectLink,
+            };
+          })}
+          selectedTitles={SELECTED_PUBLICATION_TITLES}
+        />
+      </section>
+    </div>
+  );
+}
 
-            <section id="publications" className="public-section" aria-labelledby="selected-publications-title">
-                <div className="public-section-heading public-section-heading--compact">
-                    <div>
-                        <h2 id="selected-publications-title">Selected Publications</h2>
-                    </div>
-                    <Link href="/publications">All publications →</Link>
-                </div>
-                <PublicationList publications={SELECTED_PUBLICATIONS} />
-            </section>
-
-            <div className="public-two-column-sections">
-                <section id="talks" className="public-section public-section--compact" aria-labelledby="talks-title">
-                    <div className="public-section-heading public-section-heading--compact">
-                        <div>
-                            <h2 id="talks-title">Talks & Academic Service</h2>
-                        </div>
-                    </div>
-                    <ul className="public-activity-list">
-                        {TALKS.map((talk) => (
-                            <li key={`${talk.year}-${talk.title}`}>
-                                <time>{talk.year}</time>
-                                <span>
-                                    <strong><SmartLink href={talk.link}>{talk.title}</SmartLink></strong>
-                                    <br />
-                                    {talk.venue}
-                                </span>
-                            </li>
-                        ))}
-                        <li>
-                            <time>2026</time>
-                            <span><strong>ICML Gold Reviewer</strong></span>
-                        </li>
-                        <li>
-                            <time>2024–26</time>
-                            <span><strong>Conference Reviewer</strong><br />CVPR, ICCV, ECCV, ICLR, ICML, NeurIPS</span>
-                        </li>
-                    </ul>
-                </section>
-
-                <section id="news" className="public-section public-section--compact" aria-labelledby="news-title">
-                    <div className="public-section-heading public-section-heading--compact">
-                        <div>
-                            <h2 id="news-title">Recent News</h2>
-                        </div>
-                    </div>
-                    <ol className="public-news-list">
-                        {HOME_NEWS.map((item) => (
-                            <li key={`${item.datetime}-${item.linkText}`}>
-                                <time dateTime={item.datetime}>{item.date}</time>
-                                <span>
-                                    {item.prefix}
-                                    <SmartLink href={item.link}>{item.linkText}</SmartLink>
-                                    {item.suffix}
-                                </span>
-                            </li>
-                        ))}
-                    </ol>
-                </section>
-            </div>
-
-            <section id="education" className="public-section" aria-labelledby="education-title">
-                <div className="public-section-heading public-section-heading--compact">
-                    <div>
-                        <h2 id="education-title">Education & Selected Honors</h2>
-                    </div>
-                    <a href="/cv.pdf" target="_blank" rel="noopener noreferrer">Download CV →</a>
-                </div>
-
-                <div className="public-background-grid">
-                    <div className="public-background-column">
-                        <h3>Education</h3>
-                        {EDUCATION.map((education) => (
-                            <div className="public-background-entry" key={education.degree}>
-                                <span>{education.period.split(" (")[0]}</span>
-                                <p>
-                                    <strong>{education.degree}</strong><br />
-                                    {education.institution}
-                                    {education.degree.startsWith("Ph.D.") ? " · Advisor: Prof. Nojun Kwak" : ""}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="public-background-column">
-                        <h3>Selected honors</h3>
-                        {SELECTED_HONORS.map((honor) => (
-                            <div className="public-background-entry" key={`${honor.year}-${honor.title}`}>
-                                <span>{honor.year}</span>
-                                <p><strong>{honor.title}</strong></p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        </main>
-    );
+function SectionTitle({ children }: { children: ReactNode }) {
+  return <h2 className={styles.sectionTitle}>{children}</h2>;
 }

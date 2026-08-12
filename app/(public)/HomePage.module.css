@@ -1,0 +1,357 @@
+.page {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: #fff;
+  box-shadow: 0 0 1.25rem rgb(0 0 0 / 10%);
+  padding: 1.25rem;
+  color: #333;
+  font-family: var(--font-home-heading), sans-serif;
+}
+
+.profileHeader {
+  position: relative;
+  margin-bottom: 0.625rem;
+  text-align: center;
+}
+
+.profileImage {
+  width: 12.5rem;
+  height: 12.5rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0.625rem rgb(0 0 0 / 10%);
+  object-fit: cover;
+  object-position: center 27%;
+}
+
+.profileHeader h1 {
+  width: fit-content;
+  margin: 0 auto 0.625rem;
+  color: #333;
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+.profileHeader > p {
+  width: fit-content;
+  margin: 0 auto 1.25rem;
+  color: #777;
+  font-family: var(--font-home-body), sans-serif;
+  font-size: 1.125rem;
+}
+
+.headerIcons {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+}
+
+.headerIcons a {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--public-accent);
+  color: #fff;
+  margin: 0 0 0.625rem 0.625rem;
+  font-size: 1.125rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.headerIcons a:hover {
+  background: #0f6fa6;
+}
+
+.headerIcons svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.section {
+  min-width: 0;
+  margin: 0 1.25rem 1.875rem;
+  scroll-margin-top: 1rem;
+}
+
+.sectionTitle,
+.publicationHeading {
+  border-bottom: 2px solid var(--public-accent);
+  padding: 0 0 0.3125rem 0.625rem;
+}
+
+.sectionTitle {
+  margin: 0 0 0.9375rem;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.aboutCopy p {
+  margin: 0.7rem 0;
+  color: #555;
+  font-family: var(--font-home-body), sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.educationList article {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.65rem 0;
+  color: #555;
+  font-family: var(--font-home-body), sans-serif;
+}
+
+.educationList article > div {
+  min-width: 0;
+}
+
+.educationList h3,
+.educationList p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.educationList time {
+  flex: 0 0 auto;
+  color: #777;
+  padding-top: 0.15rem;
+  font-size: 0.875rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.educationList .thesisTitle {
+  margin-top: 0.35rem;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.thesisTitle span {
+  color: #777;
+  margin-right: 0.35rem;
+  font-weight: 900;
+}
+
+.thesisTitle cite {
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.thesisAward {
+  display: grid;
+  gap: 0.08rem;
+  margin-top: 0.5rem;
+  border-left: 3px solid var(--public-accent);
+  padding-left: 0.65rem;
+}
+
+.thesisAward strong {
+  color: var(--public-accent);
+  font-family: var(--font-home-heading), sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.thesisAward span {
+  color: #666;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.newsList article {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.55rem 0;
+  color: #555;
+  font-family: var(--font-home-body), sans-serif;
+  border-bottom: 1px solid var(--public-border);
+}
+
+.newsList article > * {
+  min-width: 0;
+}
+
+.newsList time {
+  color: #777;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.newsList p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.newsToggle {
+  display: block;
+  margin: 0.55rem 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--public-accent);
+  padding: 0.35rem 0;
+  font-family: var(--font-home-body), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.publicationHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.publicationHeading h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.publicationToggle {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.publicationToggle button {
+  min-width: 5.5rem;
+  border: 1px solid #cfd3d6;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #555;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-home-body), sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.publicationToggle .activeToggle {
+  border-color: var(--public-accent);
+  background: var(--public-accent);
+  color: #fff;
+  font-weight: 900;
+}
+
+.publicationList {
+  display: grid;
+}
+
+.publication {
+  min-width: 0;
+  padding: 0.65rem 0;
+  color: #555;
+  font-family: var(--font-home-body), sans-serif;
+}
+
+.publication h3 {
+  margin: 0;
+  color: #333;
+  font-family: var(--font-home-heading), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.authors,
+.venue {
+  margin: 0.2rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.authors strong {
+  color: #333;
+  font-weight: 900;
+}
+
+.venue {
+  color: #777;
+  font-style: italic;
+}
+
+.paperLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.paperLinks a {
+  color: var(--public-accent);
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.paperLinks a + a::before {
+  margin-right: 0.9rem;
+  color: #333;
+  content: "|";
+}
+
+.paperLinks a:hover {
+  color: #0f6fa6;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 1.25rem 0.2rem;
+  }
+
+  .profileImage {
+    width: 10rem;
+    height: 10rem;
+  }
+
+  .headerIcons {
+    position: static;
+    display: flex;
+    justify-content: center;
+  }
+
+  .headerIcons a {
+    margin: 0.5rem 0.3rem 0;
+  }
+
+  .section {
+    margin-inline: 1rem;
+  }
+
+  .educationList article {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .educationList time {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .publicationHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .publicationToggle,
+  .publicationToggle button {
+    width: 100%;
+  }
+
+  .newsList article {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}

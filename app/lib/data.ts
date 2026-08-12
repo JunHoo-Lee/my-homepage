@@ -146,6 +146,7 @@ export const HOME_NEWS = [
 ];
 
 export const NEWS = [
+    { date: "Aug 28, 2026", content: "I will receive the Best Ph.D. Dissertation Award as the representative awardee of the SNU Graduate School of Convergence Science and Technology (1 recipient among 27 Ph.D. graduates).", link: "", linkText: "" },
     { date: "Jul 5, 2026", content: "I will be at ACL 2026 in San Diego, presenting our long paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" as an oral presentation!", link: "/template-infilling", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Jun 5, 2026", content: "I will be at CVPR 2026 in Denver, presenting our \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" paper!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
     { date: "May 2026", content: "I was selected as an ICML 2026 Gold Reviewer, recognizing top reviewers for this year's conference.", link: "https://icml.cc/Conferences/2026", linkText: "ICML 2026" },
