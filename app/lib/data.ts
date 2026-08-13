@@ -27,7 +27,8 @@ export const PROFILE = {
     email: "mrjunoo@snu.ac.kr",
     website: "https://junhoo.me",
     bio: [
-        "I work on diffusion language models, meta-learning, and methods for analyzing and attributing pretrained models. I also work on vision-language-action models.",
+        "My research aims to understand the internal mechanisms of foundation models and turn these insights into methods for controlling and adapting their behavior. My current work brings this perspective to robot agents, with the goal of enabling reliable interaction across language, vision, and action.",
+        "I am a Ph.D. candidate at Seoul National University, advised by Prof. Nojun Kwak, and will join ALIN-LAB at KAIST as a postdoctoral researcher in September 2026.",
     ]
 };
 
