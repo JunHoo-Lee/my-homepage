@@ -8,6 +8,7 @@ export type Publication = {
     projectLink?: string;
     codeLink?: string;
     codeLabel?: string;
+    presentation?: string;
     category: string;
     subTag: string;
     tldr: string;
@@ -181,6 +182,7 @@ export const PUBLICATIONS: PublicationSection[] = [
                 projectLink: "/template-infilling",
                 paperLink: "https://arxiv.org/abs/2510.13870",
                 codeLink: "https://github.com/JunHoo-Lee/Template-Infilling",
+                presentation: "Long Paper · Oral Presentation",
                 category: "Large Language Models",
                 subTag: "Long Paper, Oral Presentation",
                 tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
@@ -223,6 +225,7 @@ export const PUBLICATIONS: PublicationSection[] = [
                 venue: "The 4th AI for Visual Arts Workshop at the European Conference on Computer Vision (AI4VA, ECCV Workshops)",
                 year: "2026",
                 paperLink: "https://arxiv.org/abs/2511.18277",
+                presentation: "Poster Presentation",
                 category: "Generative Models",
                 subTag: "Poster Presentation",
                 tldr: "Sparse point-to-point motion guidance for controllable video editing."

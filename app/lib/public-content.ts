@@ -21,6 +21,7 @@ export type Publication = {
   paperLink?: string;
   codeLink?: string;
   codeLabel?: string;
+  presentation?: string;
   category: string;
   subTag: string;
   tldr: string;

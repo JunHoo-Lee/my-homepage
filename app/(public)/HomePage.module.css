@@ -346,6 +346,12 @@
   font-style: italic;
 }
 
+.presentation {
+  color: var(--public-accent);
+  font-style: normal;
+  font-weight: 900;
+}
+
 .paperLinks {
   display: flex;
   flex-wrap: wrap;
