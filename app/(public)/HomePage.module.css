@@ -38,7 +38,7 @@
 .profileHeader > p {
   width: fit-content;
   margin: 0 auto 1.25rem;
-  color: #777;
+  color: #666;
   font-family: var(--font-home-body), sans-serif;
   font-size: 1.125rem;
 }
@@ -94,7 +94,7 @@
 
 .aboutCopy p {
   margin: 0.7rem 0;
-  color: #555;
+  color: #444;
   font-family: var(--font-home-body), sans-serif;
   font-size: 0.9375rem;
   line-height: 1.6;
@@ -106,7 +106,7 @@
   justify-content: space-between;
   gap: 2rem;
   padding: 0.65rem 0;
-  color: #555;
+  color: #444;
   font-family: var(--font-home-body), sans-serif;
 }
 
@@ -123,7 +123,7 @@
 
 .educationList time {
   flex: 0 0 auto;
-  color: #777;
+  color: #666;
   padding-top: 0.15rem;
   font-size: 0.875rem;
   font-style: italic;
@@ -132,12 +132,12 @@
 
 .educationList .thesisTitle {
   margin-top: 0.35rem;
-  color: #555;
+  color: #444;
   font-size: 0.875rem;
 }
 
 .thesisTitle span {
-  color: #777;
+  color: #666;
   margin-right: 0.35rem;
   font-weight: 900;
 }
@@ -173,7 +173,7 @@
   grid-template-columns: 7rem minmax(0, 1fr);
   gap: 1rem;
   padding: 0.55rem 0;
-  color: #555;
+  color: #444;
   font-family: var(--font-home-body), sans-serif;
   border-bottom: 1px solid var(--public-border);
 }
@@ -183,7 +183,7 @@
 }
 
 .newsList time {
-  color: #777;
+  color: #666;
   font-size: 0.875rem;
   font-style: italic;
 }
@@ -228,7 +228,7 @@
   justify-content: space-between;
   gap: 1rem;
   margin: 0 0 0.35rem;
-  color: #777;
+  color: #666;
   font-family: var(--font-home-body), sans-serif;
   font-size: 0.8rem;
 }
@@ -257,7 +257,7 @@
   border: 1px solid #cfd3d6;
   border-radius: 0.5rem;
   background: #fff;
-  color: #555;
+  color: #444;
   padding: 0.4rem 0.75rem;
   font-family: var(--font-home-body), sans-serif;
   font-size: 0.9rem;
@@ -281,12 +281,12 @@
   gap: 1rem;
   border-bottom: 1px solid var(--public-border);
   padding: 0.55rem 0;
-  color: #555;
+  color: #444;
   font-family: var(--font-home-body), sans-serif;
 }
 
 .awardList time {
-  color: #777;
+  color: #666;
   font-size: 0.875rem;
   font-style: italic;
 }
@@ -305,7 +305,7 @@
 }
 
 .awardList p {
-  color: #777;
+  color: #666;
 }
 
 .publicationList {
@@ -315,7 +315,7 @@
 .publication {
   min-width: 0;
   padding: 0.65rem 0;
-  color: #555;
+  color: #444;
   font-family: var(--font-home-body), sans-serif;
 }
 
@@ -342,7 +342,7 @@
 }
 
 .venue {
-  color: #777;
+  color: #666;
   font-style: italic;
 }
 
