@@ -59,7 +59,12 @@ export function PublicationEntries({
               </span>
             ))}
           </p>
-          <p className={styles.venue}>{publication.venue}, {publication.year}.</p>
+          <p className={styles.venue}>
+            {publication.venue}, {publication.year}.
+            {publication.presentation ? (
+              <span className={styles.presentation}> {publication.presentation}</span>
+            ) : null}
+          </p>
           <div className={styles.paperLinks}>
             {publication.resolvedPaperLink ? <SmartLink href={publication.resolvedPaperLink}>paper</SmartLink> : null}
             {publication.resolvedProjectLink ? <Link href={publication.resolvedProjectLink}>project page</Link> : null}
