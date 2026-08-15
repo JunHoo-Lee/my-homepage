@@ -291,7 +291,7 @@ export function scholarlyArticleJsonLd(project: Project) {
     author: project.authors.map((name) => ({
       "@type": "Person",
       name,
-      ...(name === PROFILE.name ? { url: SITE_URL } : {}),
+      ...(name === PROFILE.name ? { "@id": `${SITE_URL}/#person`, url: SITE_URL } : {}),
     })),
     isPartOf: {
       "@type": "PublicationIssue",
@@ -302,9 +302,48 @@ export function scholarlyArticleJsonLd(project: Project) {
   };
 }
 
+export function publicationAnchorId(publication: Publication) {
+  return publication.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export function publicationJsonLd(publication: Publication) {
+  const project = PROJECT_BY_PUBLICATION_TITLE.get(publication.title);
+  const resourceLink =
+    project?.paperLink ??
+    publication.paperLink ??
+    publication.link;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "@id": absoluteUrl(`/publications#${publicationAnchorId(publication)}`),
+    headline: publication.title,
+    name: publication.title,
+    datePublished: publication.year,
+    url: absoluteUrl(`/publications#${publicationAnchorId(publication)}`),
+    author: publication.authors.map((name) => ({
+      "@type": "Person",
+      name,
+      ...(name.includes(PROFILE.name)
+        ? { "@id": `${SITE_URL}/#person`, url: SITE_URL }
+        : {}),
+    })),
+    isPartOf: {
+      "@type": "Periodical",
+      name: publication.venue,
+    },
+    ...(resourceLink ? { sameAs: absoluteUrl(resourceLink) } : {}),
+    ...(publication.tldr ? { description: publication.tldr } : {}),
+  };
+}
+
 export const PERSON_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${SITE_URL}/#person`,
   name: PROFILE.name,
   url: SITE_URL,
   image: absoluteUrl("/myface.jpeg"),
@@ -320,5 +359,6 @@ export const PERSON_JSON_LD = {
     "https://scholar.google.com/citations?user=CvvfGxkAAAAJ",
     "https://www.linkedin.com/in/junhoo-lee-8483b62a5/",
   ],
+  award: AWARDS.map((award) => award.title),
   knowsAbout: RESEARCH_PILLARS.flatMap((pillar) => pillar.topics),
 };

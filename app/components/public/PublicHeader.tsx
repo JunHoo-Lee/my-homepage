@@ -8,7 +8,7 @@ import styles from "./PublicChrome.module.css";
 const links = [
   { href: "/#research", label: "Research" },
   { href: "/#projects", label: "Projects" },
-  { href: "/#publications", label: "Publications" },
+  { href: "/publications", label: "Publications" },
   { href: "/#news", label: "News" },
 ];
 

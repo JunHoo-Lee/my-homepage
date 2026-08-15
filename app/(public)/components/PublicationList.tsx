@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Publication } from "@/app/lib/data";
+import { publicationAnchorId } from "@/app/lib/public-content";
 
 function venueLabel(publication: Publication) {
     const venue = publication.venue;
@@ -40,7 +41,11 @@ export default function PublicationList({ publications }: { publications: Public
                     (publication.link && !publication.link.startsWith("/") ? publication.link : undefined);
 
                 return (
-                    <article className="publication-row" key={`${publication.year}-${publication.title}`}>
+                    <article
+                        className="publication-row"
+                        id={publicationAnchorId(publication)}
+                        key={`${publication.year}-${publication.title}`}
+                    >
                         <div className="publication-venue" aria-label={`${venueLabel(publication)} ${publication.year}`}>
                             <strong>{venueLabel(publication)}</strong>
                             <span>{publication.year}</span>
