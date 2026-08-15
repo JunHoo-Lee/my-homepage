@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Script from "next/script";
 import type { ReactNode } from "react";
 import { GraduationCap, Github, Mail } from "lucide-react";
 
@@ -14,7 +13,7 @@ import NewsList from "./NewsList";
 import PublicationGallery from "./PublicationGallery";
 import styles from "./HomePage.module.css";
 
-const { education, news, profile, projects, publicationSections } = PUBLIC_SITE_CONTENT;
+const { awards, education, news, profile, projects, publicationSections } = PUBLIC_SITE_CONTENT;
 
 const SELECTED_PUBLICATION_TITLES = [
   "Unlocking the Potential of Diffusion Language Models through Template Infilling",
@@ -36,7 +35,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <Script
+      <script
         id="homepage-structured-data"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         type="application/ld+json"
@@ -115,6 +114,22 @@ export default function Home() {
           })}
           selectedTitles={SELECTED_PUBLICATION_TITLES}
         />
+      </section>
+
+      <section className={styles.section} id="awards">
+        <SectionTitle>Awards &amp; Honors</SectionTitle>
+        <div className={styles.awardList}>
+          {awards.map((award) => (
+            <article key={`${award.year}-${award.title}`}>
+              <time>{award.year}</time>
+              <div>
+                <h3>{award.title}</h3>
+                {"detail" in award && award.detail ? <p>{award.detail}</p> : null}
+                {"amount" in award && award.amount ? <p>{award.amount}</p> : null}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   );

@@ -215,10 +215,32 @@
   margin-bottom: 0.65rem;
 }
 
+.publicationHeading h1,
 .publicationHeading h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+.publicationSources {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.35rem;
+  color: #777;
+  font-family: var(--font-home-body), sans-serif;
+  font-size: 0.8rem;
+}
+
+.publicationSources div {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.publicationSources a {
+  color: var(--public-accent);
+  text-decoration: none;
 }
 
 .publicationToggle {
@@ -226,8 +248,12 @@
   gap: 0.45rem;
 }
 
-.publicationToggle button {
+.publicationToggle a,
+.publicationToggle span {
+  display: inline-flex;
   min-width: 5.5rem;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #cfd3d6;
   border-radius: 0.5rem;
   background: #fff;
@@ -235,7 +261,7 @@
   padding: 0.4rem 0.75rem;
   font-family: var(--font-home-body), sans-serif;
   font-size: 0.9rem;
-  cursor: pointer;
+  text-decoration: none;
 }
 
 .publicationToggle .activeToggle {
@@ -243,6 +269,43 @@
   background: var(--public-accent);
   color: #fff;
   font-weight: 900;
+}
+
+.awardList {
+  display: grid;
+}
+
+.awardList article {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 1rem;
+  border-bottom: 1px solid var(--public-border);
+  padding: 0.55rem 0;
+  color: #555;
+  font-family: var(--font-home-body), sans-serif;
+}
+
+.awardList time {
+  color: #777;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.awardList h3,
+.awardList p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.awardList h3 {
+  color: #333;
+  font-family: var(--font-home-heading), sans-serif;
+  font-weight: 700;
+}
+
+.awardList p {
+  color: #777;
 }
 
 .publicationList {
@@ -348,10 +411,18 @@
   }
 
   .publicationToggle,
-  .publicationToggle button {
+  .publicationToggle a,
+  .publicationToggle span {
     width: 100%;
   }
 
+  .publicationSources {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .awardList article,
   .newsList article {
     grid-template-columns: 1fr;
     gap: 0.2rem;

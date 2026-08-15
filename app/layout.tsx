@@ -6,6 +6,7 @@ export const metadata: Metadata = {
     title: "Junhoo Lee | Machine Learning Researcher",
     description:
         "Junhoo Lee is a machine learning researcher and Ph.D. candidate at Seoul National University.",
+    alternates: { canonical: "/" },
     openGraph: {
         title: "Junhoo Lee | Machine Learning Researcher",
         description:
