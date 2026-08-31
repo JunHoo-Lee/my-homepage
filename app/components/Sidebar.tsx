@@ -44,12 +44,12 @@ export default function Sidebar() {
       </div>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Junhoo Lee</h1>
-      <p className="text-gray-600 font-medium mb-1">PhD Student</p>
-      <p className="text-sm text-gray-500 mb-4">Seoul National University (MIPAL)</p>
+      <p className="text-gray-600 font-medium mb-1">Postdoctoral Researcher</p>
+      <p className="text-sm text-gray-500 mb-4">KAIST</p>
 
       <div className="flex flex-col gap-2 w-full mb-8 text-sm">
-        <a href="mailto:mrjunoo@snu.ac.kr" className="flex items-center justify-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
-          <Mail size={16} /> mrjunoo@snu.ac.kr
+        <a href="mailto:junhoo.lee@kaist.ac.kr" className="flex items-center justify-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+          <Mail size={16} /> junhoo.lee@kaist.ac.kr
         </a>
         <div className="flex justify-center gap-4 mt-2">
           <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 transition-transform hover:scale-110">

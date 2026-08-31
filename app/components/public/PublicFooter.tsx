@@ -5,7 +5,7 @@ export default function PublicFooter() {
     <footer className={styles.footer}>
       <span>© {new Date().getFullYear()} Junhoo Lee</span>
       <div className={styles.footerLinks}>
-        <a href="mailto:mrjunoo@snu.ac.kr">Email</a>
+        <a href="mailto:junhoo.lee@kaist.ac.kr">Email</a>
         <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noreferrer">
           GitHub
         </a>

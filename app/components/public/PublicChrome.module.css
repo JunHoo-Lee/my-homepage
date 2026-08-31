@@ -174,7 +174,7 @@
 
 .homeMain {
   width: min(100% - 2.5rem, 65rem);
-  margin: 1.25rem auto;
+  margin: 0 auto 1.25rem;
 }
 
 .shell.homeShell {
