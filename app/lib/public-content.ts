@@ -353,7 +353,7 @@ export const PERSON_JSON_LD = {
   affiliation: {
     "@type": "CollegeOrUniversity",
     name: PROFILE.affiliation,
-    url: "https://www.snu.ac.kr/",
+    url: "https://www.kaist.ac.kr/",
   },
   sameAs: [
     "https://github.com/JunHoo-Lee",

@@ -23,21 +23,21 @@ export type PublicationSection = {
 
 export const PROFILE = {
     name: "Junhoo Lee",
-    role: "Ph.D. Candidate",
-    affiliation: "Seoul National University",
-    email: "mrjunoo@snu.ac.kr",
+    role: "Postdoctoral Researcher",
+    affiliation: "KAIST",
+    email: "junhoo.lee@kaist.ac.kr",
     website: "https://junhoo.me",
     bio: [
         "My research aims to understand the internal mechanisms of foundation models and turn these insights into methods for controlling and adapting their behavior. My current work brings this perspective to robot agents, with the goal of enabling reliable interaction across language, vision, and action.",
-        "I am a Ph.D. candidate at Seoul National University, advised by Prof. Nojun Kwak, and will join ALIN-LAB at KAIST as a postdoctoral researcher in September 2026.",
+        "I am a postdoctoral researcher at KAIST, working with Prof. Jinwoo Shin. I received my Ph.D. from Seoul National University, where I was advised by Prof. Nojun Kwak.",
     ]
 };
 
 export const EDUCATION = [
     {
-        degree: "Ph.D. Candidate in Intelligence and Information",
+        degree: "Ph.D. in Intelligence and Information",
         institution: "Seoul National University",
-        period: "Sep 2021 – Aug 2026 (Expected)",
+        period: "Sep 2021 – Aug 2026",
     },
     {
         degree: "B.Sc. in Electrical and Computer Engineering",
@@ -49,10 +49,10 @@ export const EDUCATION = [
 export const LATEST_UPDATE = {
     date: "Sep 2026",
     datetime: "2026-09",
-    prefix: "I will join ",
+    prefix: "I joined ",
     linkText: "ALIN-LAB",
     link: "https://alinlab.kaist.ac.kr/",
-    suffix: " at KAIST as a postdoctoral researcher in September 2026.",
+    suffix: " at KAIST as a postdoctoral researcher, working with Prof. Jinwoo Shin.",
 };
 
 export const FEATURED_PROJECTS = [
@@ -146,7 +146,7 @@ export const HOME_NEWS = [
 ];
 
 export const NEWS = [
-    { date: "Aug 28, 2026", content: "I will receive the Best Ph.D. Dissertation Award as the representative awardee of the SNU Graduate School of Convergence Science and Technology (1 recipient among 27 Ph.D. graduates).", link: "", linkText: "" },
+    { date: "Aug 28, 2026", content: "I received the Best Ph.D. Dissertation Award as the representative awardee of the SNU Graduate School of Convergence Science and Technology (1 recipient among 27 Ph.D. graduates).", link: "", linkText: "" },
     { date: "Jul 5, 2026", content: "I will be at ACL 2026 in San Diego, presenting our long paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" as an oral presentation!", link: "/template-infilling", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Jun 5, 2026", content: "I will be at CVPR 2026 in Denver, presenting our \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" paper!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
     { date: "May 2026", content: "I was selected as an ICML 2026 Gold Reviewer, recognizing top reviewers for this year's conference.", link: "https://icml.cc/Conferences/2026", linkText: "ICML 2026" },
@@ -335,6 +335,7 @@ export const AWARDS = [
         title: "Best Ph.D. Dissertation Award",
         detail: "GSCT, Seoul National University · 1 recipient among 27 Ph.D. graduates"
     },
+    { year: "2026", title: "InnoCore Fellowship" },
     { year: "2026", title: "ICML Gold Reviewer" },
     { year: "2023", title: "BK21 Future Innovation Talent Bronze Prize", amount: "USD 1,000" },
     { year: "2023", title: "BK21 Outstanding Research Talent Fellowship", amount: "USD 3,500" },
