@@ -35,14 +35,6 @@
   font-weight: 700;
 }
 
-.profileHeader > p {
-  width: fit-content;
-  margin: 0 auto 1.25rem;
-  color: #666;
-  font-family: var(--font-home-body), sans-serif;
-  font-size: 1.125rem;
-}
-
 .headerIcons {
   position: absolute;
   top: 0.625rem;

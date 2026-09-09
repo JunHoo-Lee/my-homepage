@@ -52,7 +52,6 @@ export default function Home() {
           width={200}
         />
         <h1>{profile.name}</h1>
-        <p>{profile.role} at {profile.affiliation}</p>
         <nav className={styles.headerIcons} aria-label="Profile links">
           <a href="/cv.pdf" target="_blank" rel="noreferrer" aria-label="Curriculum vitae"><strong>CV</strong></a>
           <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ" target="_blank" rel="noreferrer" aria-label="Google Scholar"><GraduationCap aria-hidden="true" /></a>
