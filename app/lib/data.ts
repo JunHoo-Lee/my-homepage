@@ -29,7 +29,7 @@ export const PROFILE = {
     website: "https://junhoo.me",
     bio: [
         "My research aims to understand the internal mechanisms of foundation models and turn these insights into methods for controlling and adapting their behavior. My current work brings this perspective to robot agents, with the goal of enabling reliable interaction across language, vision, and action.",
-        "I am a postdoctoral researcher at KAIST, working with Prof. Jinwoo Shin. I received my Ph.D. from Seoul National University, where I was advised by Prof. Nojun Kwak.",
+        "I am currently a postdoctoral researcher at KAIST, working with Prof. Jinwoo Shin. I received my Ph.D. from Seoul National University, where I was advised by Prof. Nojun Kwak.",
     ]
 };
 
