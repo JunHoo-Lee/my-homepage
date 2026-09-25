@@ -15,11 +15,13 @@ import styles from "./HomePage.module.css";
 
 const { awards, education, news, profile, projects, publicationSections } = PUBLIC_SITE_CONTENT;
 
-const SELECTED_PUBLICATION_TITLES = [
-  "Unlocking the Potential of Diffusion Language Models through Template Infilling",
-  "Deep Support Vectors",
-  "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
-] as const;
+const SELECTED_PUBLICATION_TITLES = publicationSections
+  .flatMap((section) => section.items)
+  .filter((publication) =>
+    publication.authors[0]?.replace(/[*†]/g, "").trim() === "Junhoo Lee" ||
+    publication.authors.some((author) => /^Junhoo Lee\s*[*†]/.test(author)),
+  )
+  .map((publication) => publication.title);
 
 export default function Home() {
   const structuredData = {
