@@ -1,5 +1,5 @@
 export const SCHOLAR_PROFILE = `
-I'm a postdoctoral researcher at KAIST working in computer vision and machine learning. I need you to find the most relevant and trending papers/discussions for me.
+I'm a research fellow at KAIST working in computer vision and machine learning. I need you to find the most relevant and trending papers/discussions for me.
 
 ## Target Research Groups & Labs
 - Kaiming He (Meta FAIR)

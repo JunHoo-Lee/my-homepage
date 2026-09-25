@@ -44,7 +44,7 @@ export default function Sidebar() {
       </div>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Junhoo Lee</h1>
-      <p className="text-gray-600 font-medium mb-1">Postdoctoral Researcher</p>
+      <p className="text-gray-600 font-medium mb-1">Research Fellow</p>
       <p className="text-sm text-gray-500 mb-4">KAIST</p>
 
       <div className="flex flex-col gap-2 w-full mb-8 text-sm">

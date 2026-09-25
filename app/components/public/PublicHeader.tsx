@@ -31,7 +31,7 @@ export default function PublicHeader({ project = false }: { project?: boolean })
         <div className={styles.headerInner}>
           <Link className={styles.identity} href="/" onClick={() => setMenuOpen(false)}>
             <span className={styles.name}>Junhoo Lee</span>
-            <span className={styles.role}>Postdoctoral Researcher · KAIST</span>
+            <span className={styles.role}>Research Fellow · KAIST</span>
           </Link>
 
           <nav className={styles.nav} aria-label="Primary navigation">

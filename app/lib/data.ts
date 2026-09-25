@@ -23,13 +23,13 @@ export type PublicationSection = {
 
 export const PROFILE = {
     name: "Junhoo Lee",
-    role: "Postdoctoral Researcher",
+    role: "Research Fellow",
     affiliation: "KAIST",
     email: "junhoo.lee@kaist.ac.kr",
     website: "https://junhoo.me",
     bio: [
         "My research aims to understand the internal mechanisms of foundation models and turn these insights into methods for controlling and adapting their behavior. My current work brings this perspective to robot agents, with the goal of enabling reliable interaction across language, vision, and action.",
-        "I am currently a postdoctoral researcher at KAIST, working with Prof. Jinwoo Shin. I received my Ph.D. from Seoul National University, where I was advised by Prof. Nojun Kwak.",
+        "I am currently a research fellow at KAIST, working with Prof. Jinwoo Shin. I received my Ph.D. from Seoul National University, where I was advised by Prof. Nojun Kwak.",
     ]
 };
 
@@ -52,7 +52,7 @@ export const LATEST_UPDATE = {
     prefix: "I joined ",
     linkText: "ALIN-LAB",
     link: "https://alinlab.kaist.ac.kr/",
-    suffix: " at KAIST as a postdoctoral researcher, working with Prof. Jinwoo Shin.",
+    suffix: " at KAIST as a research fellow, working with Prof. Jinwoo Shin.",
 };
 
 export const FEATURED_PROJECTS = [

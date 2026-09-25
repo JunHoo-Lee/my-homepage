@@ -5,12 +5,12 @@ export const metadata: Metadata = {
     metadataBase: new URL("https://junhoo.me"),
     title: "Junhoo Lee | Machine Learning Researcher",
     description:
-        "Junhoo Lee is a postdoctoral researcher at KAIST working with Prof. Jinwoo Shin.",
+        "Junhoo Lee is a research fellow at KAIST working with Prof. Jinwoo Shin.",
     alternates: { canonical: "/" },
     openGraph: {
         title: "Junhoo Lee | Machine Learning Researcher",
         description:
-            "Junhoo Lee is a postdoctoral researcher at KAIST working with Prof. Jinwoo Shin.",
+            "Junhoo Lee is a research fellow at KAIST working with Prof. Jinwoo Shin.",
         url: "https://junhoo.me",
         siteName: "Junhoo Lee",
         type: "website",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         card: "summary",
         title: "Junhoo Lee | Machine Learning Researcher",
         description:
-            "Junhoo Lee is a postdoctoral researcher at KAIST working with Prof. Jinwoo Shin.",
+            "Junhoo Lee is a research fellow at KAIST working with Prof. Jinwoo Shin.",
         images: ["/myface.jpeg"],
     },
 };
