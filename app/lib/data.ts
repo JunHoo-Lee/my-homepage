@@ -146,6 +146,7 @@ export const HOME_NEWS = [
 ];
 
 export const NEWS = [
+    { date: "Sep 2026", content: "Three papers accepted to NeurIPS 2026: Discriminative Score Function, Clean Data Can Still Carry Backdoors, and ManiFusion!", link: "", linkText: "" },
     { date: "Aug 28, 2026", content: "I will receive the Best Ph.D. Dissertation Award as the representative awardee of the SNU Graduate School of Convergence Science and Technology (1 recipient among 27 Ph.D. graduates).", link: "", linkText: "" },
     { date: "Jul 5, 2026", content: "I will be at ACL 2026 in San Diego, presenting our long paper \"Unlocking the Potential of Diffusion Language Models through Template Infilling\" as an oral presentation!", link: "/template-infilling", linkText: "\"Unlocking the Potential of Diffusion Language Models through Template Infilling\"" },
     { date: "Jun 5, 2026", content: "I will be at CVPR 2026 in Denver, presenting our \"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\" paper!", link: "/csf", linkText: "\"CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models\"" },
@@ -173,6 +174,33 @@ export const PUBLICATIONS: PublicationSection[] = [
         color: "blue",
         note: "(First Author / Co-first †)",
         items: [
+            {
+                title: "Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors",
+                authors: ["Junhoo Lee", "Hyeonjin Kim", "Sangbum Han", "Nojun Kwak"],
+                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
+                year: "2026",
+                category: "Generative Models",
+                subTag: "",
+                tldr: ""
+            },
+            {
+                title: "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse",
+                authors: ["Junhoo Lee*", "Baekseung Kim*", "Seungyeon Kim", "Nojun Kwak"],
+                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
+                year: "2026",
+                category: "Model Security",
+                subTag: "",
+                tldr: ""
+            },
+            {
+                title: "ManiFusion: Unlocking High-Throughput Generation via Superposition in Manifold Space",
+                authors: ["Minkyu Kim", "Baekseung Kim", "Junhoo Lee", "Jangho Kim", "Nojun Kwak"],
+                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
+                year: "2026",
+                category: "Generative Models",
+                subTag: "",
+                tldr: ""
+            },
             {
                 title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
                 authors: ["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"],
