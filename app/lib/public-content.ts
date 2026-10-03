@@ -49,6 +49,7 @@ export type ResearchPillar = {
 };
 
 export type ProjectSlug =
+  | "acro"
   | "template-infilling"
   | "csf"
   | "dsv"
@@ -102,6 +103,29 @@ export const RESEARCH_PILLARS: ResearchPillar[] = [
 ];
 
 export const PROJECTS: Project[] = [
+  {
+    slug: "acro",
+    title: "ACRO: Actor–Critic Rollout Orchestration",
+    shortTitle: "ACRO",
+    venue: "Preprint",
+    year: "2026",
+    summary:
+      "A learned Critic and physical trajectory retraction give a fixed vision-language-action policy more promising continuations.",
+    image: "/acro/assets/figures/method.svg",
+    imageAlt: "ACRO estimates when to intervene, selects a historical state, and physically retracts before resuming the VLA",
+    projectLink: "/acro",
+    paperLink: "/acro/assets/paper/acro-preprint.pdf",
+    codeLink: "https://github.com/JunHoo-Lee/ACRO",
+    featured: false,
+    authors: ["Junhoo Lee", "Seungyeon Kim", "Baekseung Kim", "Minkyu Kim", "Suhyun Jeon", "Jimyeong Kim", "Nojun Kwak"],
+    sections: [
+      { id: "why", label: "Motivation" },
+      { id: "method", label: "Method" },
+      { id: "pipeline", label: "Execution loop" },
+      { id: "results", label: "Results" },
+      { id: "cite", label: "BibTeX" },
+    ],
+  },
   {
     slug: "template-infilling",
     title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",

@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return [
         { url: SITE_URL, changeFrequency: "monthly", priority: 1 },
         { url: `${SITE_URL}/publications`, changeFrequency: "monthly", priority: 0.9 },
+        { url: `${SITE_URL}/acro`, changeFrequency: "monthly", priority: 0.8 },
         { url: `${SITE_URL}/template-infilling`, changeFrequency: "yearly", priority: 0.8 },
         { url: `${SITE_URL}/csf`, changeFrequency: "yearly", priority: 0.8 },
         { url: `${SITE_URL}/dsv`, changeFrequency: "yearly", priority: 0.8 },

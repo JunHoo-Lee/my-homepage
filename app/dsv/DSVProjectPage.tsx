@@ -12,7 +12,7 @@ import {
   Target,
   Waypoints,
 } from "lucide-react";
-import { DM_Sans, Noto_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -21,15 +21,21 @@ import remarkMath from "remark-math";
 
 import BibtexCopyButton from "../csf/BibtexCopyButton";
 
-const displayFont = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+const displayFont = localFont({
+  src: [
+    { path: "../../public/fonts/dm-sans/DMSans-Latin.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/dm-sans/DMSans-Latin.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/dm-sans/DMSans-Latin.woff2", weight: "700", style: "normal" },
+  ],
   display: "swap",
 });
 
-const bodyFont = Noto_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+const bodyFont = localFont({
+  src: [
+    { path: "../../public/fonts/noto-sans/NotoSans-Latin.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/noto-sans/NotoSans-Latin.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/noto-sans/NotoSans-Latin.woff2", weight: "700", style: "normal" },
+  ],
   display: "swap",
 });
 

@@ -5,6 +5,9 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    return [{ source: "/acro", destination: "/acro/index.html" }];
+  },
   turbopack: {
     root: projectRoot,
   },

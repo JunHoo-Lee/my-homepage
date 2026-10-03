@@ -67,7 +67,7 @@ export function PublicationEntries({
           </p>
           <div className={styles.paperLinks}>
             {publication.resolvedPaperLink ? <SmartLink href={publication.resolvedPaperLink}>paper</SmartLink> : null}
-            {publication.resolvedProjectLink ? <Link href={publication.resolvedProjectLink}>project page</Link> : null}
+            {publication.resolvedProjectLink ? <SmartLink href={publication.resolvedProjectLink}>project page</SmartLink> : null}
             {publication.codeLink ? <SmartLink href={publication.codeLink}>code</SmartLink> : null}
           </div>
         </article>
@@ -77,6 +77,9 @@ export function PublicationEntries({
 }
 
 function SmartLink({ children, href }: { children: ReactNode; href: string }) {
+  if (href === "/acro" || href.startsWith("/acro/")) {
+    return <a href={href}>{children}</a>;
+  }
   return href.startsWith("/") ? <Link href={href}>{children}</Link> : (
     <a href={href} target="_blank" rel="noreferrer">{children}</a>
   );
