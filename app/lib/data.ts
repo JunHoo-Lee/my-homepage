@@ -170,6 +170,24 @@ export const NEWS = [
 
 export const PUBLICATIONS: PublicationSection[] = [
     {
+        section: "Preprint",
+        color: "blue",
+        items: [
+            {
+                title: "ACRO: Actor–Critic Rollout Orchestration",
+                authors: ["Junhoo Lee", "Seungyeon Kim", "Baekseung Kim", "Minkyu Kim", "Suhyun Jeon", "Jimyeong Kim", "Nojun Kwak"],
+                venue: "Preprint",
+                year: "2026",
+                projectLink: "/acro",
+                paperLink: "/acro/assets/paper/acro-preprint.pdf",
+                codeLink: "https://github.com/JunHoo-Lee/ACRO",
+                category: "Robot Learning",
+                subTag: "Rollout Orchestration",
+                tldr: "ACRO uses learned success estimates and physical re-entry to improve task completion with a fixed VLA policy.",
+            },
+        ],
+    },
+    {
         section: "Main Conference",
         color: "blue",
         note: "(First Author / Co-first †)",
@@ -355,7 +373,7 @@ export const PUBLICATIONS: PublicationSection[] = [
     }
 ];
 
-export const SELECTED_PUBLICATIONS = PUBLICATIONS[0].items;
+export const SELECTED_PUBLICATIONS = PUBLICATIONS.find((section) => section.section === "Main Conference")!.items;
 
 export const AWARDS = [
     {

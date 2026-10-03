@@ -5,6 +5,7 @@ publication list, and dedicated project pages for selected papers.
 
 ## Project Pages
 
+- `/acro`: ACRO project page, recovery replay, and preprint downloads
 - `/csf`: CSF project page
 - `/shot`: SHOT project page
 - `/template-infilling`: Template Infilling project page
@@ -49,4 +50,4 @@ Open `http://localhost:3000` and navigate to the route you want to inspect.
 
 - The publication list can render separate `Project Page`, `Paper`, and `Code`
   buttons when those links are present in `app/lib/data.ts`.
-- Project pages are implemented as route-local React components under `app/*/`.
+- Project pages are implemented as route-local React components under `app/*/`. ACRO preserves its standalone article layout under `public/acro`, with `/acro` rewritten to its HTML entry point.
