@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+    verification: { other: { "naver-site-verification": "14977446e9eaa2b746946e2cf949d7c5edab3e7f" } },
     metadataBase: new URL("https://junhoo.me"),
     title: "Junhoo Lee | Machine Learning Researcher",
     description:
