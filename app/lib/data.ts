@@ -237,6 +237,8 @@ export const PUBLICATIONS: PublicationSection[] = [
         "items": [
             {
                 "title": "Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors",
+                "projectLink": "/dsf",
+                "paperLink": "/dsf/assets/dsf-paper.pdf",
                 "authors": [
                     "Junhoo Lee",
                     "Hyeonjin Kim",
@@ -251,6 +253,8 @@ export const PUBLICATIONS: PublicationSection[] = [
             },
             {
                 "title": "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse",
+                "projectLink": "/backdoor",
+                "paperLink": "/backdoor/assets/backdoor-paper.pdf",
                 "authors": [
                     "Junhoo Lee*",
                     "Baekseung Kim*",
