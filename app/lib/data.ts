@@ -22,14 +22,14 @@ export type PublicationSection = {
 };
 
 export const PROFILE = {
-    name: "Junhoo Lee",
-    role: "Research Fellow",
-    affiliation: "KAIST",
-    email: "junhoo.lee@kaist.ac.kr",
-    website: "https://junhoo.me",
-    bio: [
-        "My research aims to understand the internal mechanisms of foundation models and turn these insights into methods for controlling and adapting their behavior. My current work brings this perspective to robot agents, with the goal of enabling reliable interaction across language, vision, and action.",
-        "I am currently a research fellow at KAIST, working with Prof. Jinwoo Shin. I received my Ph.D. from Seoul National University, where I was advised by Prof. Nojun Kwak.",
+    "name": "Junhoo Lee",
+    "role": "Postdoctoral Researcher",
+    "affiliation": "KAIST",
+    "email": "junhoo.lee@kaist.ac.kr",
+    "website": "https://junhoo.me",
+    "bio": [
+        "I view AI through the lens of self-reference. Many of its remarkable capabilities emerge from recursive structures in which a system's own outputs, representations, or experiences feed back into its subsequent operation. I am fascinated by why these structures appear across different levels of AI, how they give rise to new capabilities, and what makes them work.",
+        "My current research focuses on robot harnesses, looped models, and continual harnessing, while I remain open to exploring other directions. I am a postdoctoral researcher at KAIST, working with Prof. Jinwoo Shin, and received my Ph.D. from Seoul National University under Prof. Nojun Kwak."
     ]
 };
 
@@ -52,7 +52,7 @@ export const LATEST_UPDATE = {
     prefix: "I joined ",
     linkText: "ALIN-LAB",
     link: "https://alinlab.kaist.ac.kr/",
-    suffix: " at KAIST as a research fellow, working with Prof. Jinwoo Shin.",
+    suffix: " at KAIST as a postdoctoral researcher, working with Prof. Jinwoo Shin.",
 };
 
 export const FEATURED_PROJECTS = [
@@ -170,204 +170,359 @@ export const NEWS = [
 
 export const PUBLICATIONS: PublicationSection[] = [
     {
-        section: "Preprint",
-        color: "blue",
-        items: [
+        "section": "Preprint",
+        "color": "slate",
+        "items": [
             {
-                title: "ACRO: Actor–Critic Rollout Orchestration",
-                authors: ["Junhoo Lee", "Seungyeon Kim", "Baekseung Kim", "Minkyu Kim", "Suhyun Jeon", "Jimyeong Kim", "Nojun Kwak"],
-                venue: "Preprint",
-                year: "2026",
-                projectLink: "/acro",
-                paperLink: "/acro/assets/paper/acro-preprint.pdf",
-                codeLink: "https://github.com/JunHoo-Lee/ACRO",
-                category: "Robot Learning",
-                subTag: "Rollout Orchestration",
-                tldr: "ACRO uses learned success estimates and physical re-entry to improve task completion with a fixed VLA policy.",
-            },
-        ],
-    },
-    {
-        section: "Main Conference",
-        color: "blue",
-        note: "(First Author / Co-first †)",
-        items: [
-            {
-                title: "Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors",
-                authors: ["Junhoo Lee", "Hyeonjin Kim", "Sangbum Han", "Nojun Kwak"],
-                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
-                year: "2026",
-                category: "Generative Models",
-                subTag: "",
-                tldr: ""
+                "title": "RobotUse: Allocating Computation, Context, and Decisions",
+                "authors": [
+                    "Junhoo Lee",
+                    "Injun Baek",
+                    "Seungyeon Kim",
+                    "Suhyun Jeon",
+                    "Minkyu Kim",
+                    "Baekseung Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "arXiv preprint arXiv:2610.04929",
+                "year": "2026",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2610.04929",
+                "projectLink": "https://robotuse-team.github.io/"
             },
             {
-                title: "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse",
-                authors: ["Junhoo Lee*", "Baekseung Kim*", "Seungyeon Kim", "Nojun Kwak"],
-                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
-                year: "2026",
-                category: "Model Security",
-                subTag: "",
-                tldr: ""
+                "title": "Recursive Harness Distillation across Agents for Robot Manipulation",
+                "authors": [
+                    "Seungyeon Kim",
+                    "Junhoo Lee",
+                    "Minkyu Kim",
+                    "Baekseung Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "arXiv preprint arXiv:2609.33378",
+                "year": "2026",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2609.33378"
             },
             {
-                title: "ManiFusion: Unlocking High-Throughput Generation via Superposition in Manifold Space",
-                authors: ["Minkyu Kim", "Baekseung Kim", "Junhoo Lee", "Jangho Kim", "Nojun Kwak"],
-                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
-                year: "2026",
-                category: "Generative Models",
-                subTag: "",
-                tldr: ""
-            },
-            {
-                title: "Unlocking the Potential of Diffusion Language Models through Template Infilling",
-                authors: ["Junhoo Lee", "Seungyeon Kim", "Nojun Kwak"],
-                venue: "Annual Meeting of the Association for Computational Linguistics (ACL 2026)",
-                year: "2026",
-                projectLink: "/template-infilling",
-                paperLink: "https://arxiv.org/abs/2510.13870",
-                codeLink: "https://github.com/JunHoo-Lee/Template-Infilling",
-                presentation: "Long Paper · Oral Presentation",
-                category: "Large Language Models",
-                subTag: "Long Paper, Oral Presentation",
-                tldr: "Unlike autoregressive LMs, diffusion LMs work better with template-then-fill rather than sequential prompting."
-            },
-            {
-                title: "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
-                authors: ["Junhoo Lee", "Mijin Koo", "Nojun Kwak"],
-                venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
-                year: "2026",
-                projectLink: "/csf",
-                paperLink: "/csf/csf-paper.pdf",
-                codeLink: "https://github.com/JunHoo-Lee/csf-t2i-fingerprinting",
-                category: "Generative Models",
-                subTag: "Query-Only Attribution",
-                tldr: "A problem-first project page for black-box lineage attribution of fine-tuned text-to-image APIs using compositional semantic fingerprints."
-            },
-            {
-                title: "Deep Edge Filter †",
-                authors: ["Dongkwan Lee†", "Junhoo Lee†", "Nojun Kwak"],
-                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
-                year: "2025",
-                link: "https://arxiv.org/abs/2510.13865",
-                category: "Learning Theory",
-                subTag: "Representation Analysis",
-                tldr: "Just as humans perceive edges (high-frequency) as core components, deep features in neural networks exhibit the same tendency."
-            },
-            {
-                title: "What's Making That Sound Right Now? Video-centric Audio-Visual Localization",
-                authors: ["Hahyeon Choi", "Junhoo Lee", "Nojun Kwak"],
-                venue: "The IEEE/CVF International Conference on Computer Vision (ICCV)",
-                year: "2025",
-                link: "https://arxiv.org/abs/2507.04667",
-                category: "Generative Models",
-                subTag: "Audio-Visual Localization",
-                tldr: "Video-centric audio-visual localization benchmark (AVATAR) with temporal dynamics."
-            },
-            {
-                title: "Point-to-Point: Sparse Motion Guidance for Controllable Video Editing",
-                authors: ["Yeji Song", "Jaehyun Lee", "Mijin Koo", "Junhoo Lee", "Nojun Kwak"],
-                venue: "The 4th AI for Visual Arts Workshop at the European Conference on Computer Vision (AI4VA, ECCV Workshops)",
-                year: "2026",
-                paperLink: "https://arxiv.org/abs/2511.18277",
-                category: "Generative Models",
-                subTag: "Controllable Video Editing",
-                tldr: "Sparse point-to-point motion guidance for controllable video editing."
-            },
-            {
-                title: "Deep Support Vectors",
-                authors: ["Junhoo Lee", "Hyunho Lee", "Kyomin Hwang", "Nojun Kwak"],
-                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
-                year: "2024",
-                projectLink: "/dsv",
-                paperLink: "https://arxiv.org/abs/2403.17329",
-                codeLink: "https://github.com/JunHoo-Lee/Neurips24_DeepSupportVectors",
-                category: "Learning Theory",
-                subTag: "Isometry",
-                tldr: "Deep learning has support vectors just like SVMs."
-            },
-            {
-                title: "Any-Way Meta Learning",
-                authors: ["Junhoo Lee", "Yearim Kim", "Hyunho Lee", "Nojun Kwak"],
-                venue: "The AAAI Conference on Artificial Intelligence (AAAI)",
-                year: "2024",
-                projectLink: "/any-way-meta-learning",
-                paperLink: "https://arxiv.org/abs/2401.05097",
-                category: "Meta-Learning",
-                subTag: "Few-Shot Learning",
-                tldr: "Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling."
-            },
-            {
-                title: "SHOT: Suppressing the Hessian along the Optimization Trajectory",
-                authors: ["Junhoo Lee", "Jayeon Yoo", "Nojun Kwak"],
-                venue: "The Conference on Neural Information Processing Systems (NeurIPS)",
-                year: "2023",
-                projectLink: "/shot",
-                paperLink: "https://arxiv.org/abs/2310.02751",
-                category: "Meta-Learning",
-                subTag: "Optimization",
-                tldr: "The key to meta-learning adaptation is flattening the learning trajectory."
+                "title": "ACRO: Actor–Critic Rollout Orchestration",
+                "authors": [
+                    "Junhoo Lee",
+                    "Seungyeon Kim",
+                    "Baekseung Kim",
+                    "Minkyu Kim",
+                    "Suhyun Jeon",
+                    "Jimyeong Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "Preprint",
+                "year": "2026",
+                "projectLink": "https://junhoo.me/acro",
+                "paperLink": "https://junhoo.me/acro/assets/paper/acro-preprint.pdf",
+                "codeLink": "https://github.com/JunHoo-Lee/ACRO",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": ""
             }
         ]
     },
     {
-        section: "Workshop",
-        color: "teal",
-        items: [
+        "section": "Main Conference",
+        "color": "blue",
+        "note": "(First Author / Co-first *)",
+        "items": [
             {
-                title: "Do Not Think About Pink Elephant! †",
-                authors: ["Kyomin Hwang†", "Suyoung Kim†", "Junhoo Lee†", "Nojun Kwak"],
-                venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops, Responsible Generative AI)",
-                year: "2024",
-                link: "https://arxiv.org/abs/2404.15154",
-                category: "Generative Models",
-                subTag: "Safety",
-                tldr: "First discovery that negation doesn't work in large models — telling them not to generate something makes them generate it."
+                "title": "Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors",
+                "authors": [
+                    "Junhoo Lee",
+                    "Hyeonjin Kim",
+                    "Sangbum Han",
+                    "Nojun Kwak"
+                ],
+                "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2026",
+                "category": "Generative Models",
+                "subTag": "",
+                "tldr": ""
             },
             {
-                title: "Coreset Selection for Object Detection",
-                authors: ["Hojun Lee", "Suyoung Kim", "Junhoo Lee", "Jaeyoung Yoo", "Nojun Kwak"],
-                venue: "The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops, Dataset Distillation)",
-                year: "2024",
-                link: "https://openaccess.thecvf.com/content/CVPR2024W/",
-                category: "Data Efficiency",
-                subTag: "Dataset Pruning",
-                tldr: "Efficient coreset selection method specifically designed for object detection tasks."
+                "title": "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse",
+                "authors": [
+                    "Junhoo Lee*",
+                    "Baekseung Kim*",
+                    "Seungyeon Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2026",
+                "category": "Model Security",
+                "subTag": "",
+                "tldr": ""
             },
             {
-                title: "Practical Dataset Distillation Based on Deep Support Vectors",
-                authors: ["Hyunho Lee", "Junhoo Lee", "Nojun Kwak"],
-                venue: "The European Conference on Computer Vision Workshops (ECCV Workshops, Dataset Distillation Challenge)",
-                year: "2024",
-                link: "https://arxiv.org/abs/2405.00348",
-                category: "Data Efficiency",
-                subTag: "Dataset Distillation",
-                tldr: "Applying DeepKKT loss for dataset distillation when only partial data is accessible."
+                "title": "ManiFusion: Unlocking High-Throughput Generation via Superposition in Manifold Space",
+                "authors": [
+                    "Minkyu Kim",
+                    "Baekseung Kim",
+                    "Junhoo Lee",
+                    "Jangho Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2026",
+                "category": "Generative Models",
+                "subTag": "",
+                "tldr": ""
+            },
+            {
+                "title": "Unlocking the Potential of Diffusion Language Models through Template Infilling",
+                "authors": [
+                    "Junhoo Lee",
+                    "Seungyeon Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "Annual Meeting of the Association for Computational Linguistics (ACL)",
+                "year": "2026",
+                "projectLink": "/template-infilling",
+                "paperLink": "/template-infilling/template-infilling-paper.pdf",
+                "codeLink": "https://github.com/JunHoo-Lee/Template-Infilling",
+                "presentation": "Long Paper · Oral Presentation",
+                "category": "Large Language Models",
+                "subTag": "Long Paper, Oral Presentation",
+                "tldr": "Template Infilling places structural anchors throughout a response before filling masked segments."
+            },
+            {
+                "title": "CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models",
+                "authors": [
+                    "Junhoo Lee",
+                    "Mijin Koo",
+                    "Nojun Kwak"
+                ],
+                "venue": "The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
+                "year": "2026",
+                "projectLink": "/csf",
+                "paperLink": "/csf/csf-paper.pdf",
+                "codeLink": "https://github.com/JunHoo-Lee/csf-t2i-fingerprinting",
+                "category": "Generative Models",
+                "subTag": "Query-Only Attribution",
+                "tldr": "A problem-first project page for black-box lineage attribution of fine-tuned text-to-image APIs using compositional semantic fingerprints.",
+                "link": "/csf"
+            },
+            {
+                "title": "Deep Edge Filter: Return of the Human-Crafted Layer in Deep Learning",
+                "authors": [
+                    "Dongkwan Lee*",
+                    "Junhoo Lee*",
+                    "Nojun Kwak"
+                ],
+                "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2025",
+                "link": "https://arxiv.org/abs/2510.13865",
+                "category": "Learning Theory",
+                "subTag": "Representation Analysis",
+                "tldr": "Just as humans perceive edges (high-frequency) as core components, deep features in neural networks exhibit the same tendency."
+            },
+            {
+                "title": "What's Making That Sound Right Now? Video-centric Audio-Visual Localization",
+                "authors": [
+                    "Hahyeon Choi",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "The IEEE/CVF International Conference on Computer Vision (ICCV)",
+                "year": "2025",
+                "link": "https://arxiv.org/abs/2507.04667",
+                "category": "Generative Models",
+                "subTag": "Audio-Visual Localization",
+                "tldr": "Video-centric audio-visual localization benchmark (AVATAR) with temporal dynamics."
+            },
+            {
+                "title": "Deep Support Vectors",
+                "authors": [
+                    "Junhoo Lee",
+                    "Hyunho Lee",
+                    "Kyomin Hwang",
+                    "Nojun Kwak"
+                ],
+                "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2024",
+                "projectLink": "/dsv",
+                "paperLink": "https://arxiv.org/abs/2403.17329",
+                "codeLink": "https://github.com/JunHoo-Lee/Neurips24_DeepSupportVectors",
+                "category": "Learning Theory",
+                "subTag": "Isometry",
+                "tldr": "Deep learning has support vectors just like SVMs.",
+                "link": "/dsv"
+            },
+            {
+                "title": "Any-Way Meta Learning",
+                "authors": [
+                    "Junhoo Lee",
+                    "Yearim Kim",
+                    "Hyunho Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "The AAAI Conference on Artificial Intelligence (AAAI)",
+                "year": "2024",
+                "projectLink": "/any-way-meta-learning",
+                "paperLink": "https://arxiv.org/abs/2401.05097",
+                "category": "Meta-Learning",
+                "subTag": "Few-Shot Learning",
+                "tldr": "Breaking fixed N-way constraint in meta-learning by exploiting label equivalence from episodic task sampling.",
+                "link": "https://arxiv.org/abs/2401.05097"
+            },
+            {
+                "title": "SHOT: Suppressing the Hessian along the Optimization Trajectory for Gradient-Based Meta-Learning",
+                "authors": [
+                    "Junhoo Lee",
+                    "Jayeon Yoo",
+                    "Nojun Kwak"
+                ],
+                "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2023",
+                "projectLink": "/shot",
+                "paperLink": "https://arxiv.org/abs/2310.02751",
+                "category": "Meta-Learning",
+                "subTag": "Optimization",
+                "tldr": "The key to meta-learning adaptation is flattening the learning trajectory.",
+                "link": "https://arxiv.org/abs/2310.02751"
             }
         ]
     },
     {
-        section: "Journal",
-        color: "indigo",
-        items: [
+        "section": "Workshop",
+        "color": "teal",
+        "items": [
             {
-                title: "End-to-End Multi-Entity Customization",
-                authors: ["Wonhark Park*", "Jaehyun Lee*", "Wonsik Shin", "Junhoo Lee", "Nojun Kwak"],
-                venue: "IET Image Processing",
-                year: "2026",
-                category: "Generative Models",
-                subTag: "Accepted",
-                tldr: "Accepted to IET Image Processing in 2026."
+                "title": "3DROID: A Renderable 3D Gaussian Dataset with Measured Per-Scene Reliability",
+                "authors": [
+                    "Wonguen Cho",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "The 1st Workshop on Physical World AI: Geometry, Characteristics, and Multimodal Sensing at the Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2026",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2610.01744"
             },
             {
-                title: "The Role of Teacher Calibration in Knowledge Distillation",
-                authors: ["Suyoung Kim", "Seonguk Park", "Junhoo Lee", "Nojun Kwak"],
-                venue: "IEEE Access",
-                year: "2025",
-                link: "https://arxiv.org/abs/2508.20224",
-                category: "Knowledge Distillation",
-                subTag: "Calibration",
-                tldr: "Teacher's calibration error strongly correlates with student accuracy — well-calibrated teachers transfer knowledge better."
+                "title": "Completion Aware Guidance for World Action Models",
+                "authors": [
+                    "Seungyeon Kim",
+                    "Junhoo Lee",
+                    "Baekseung Kim",
+                    "Minkyu Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "Robotics World Modeling Workshop at the Conference on Neural Information Processing Systems (NeurIPS)",
+                "year": "2026",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://openreview.net/forum?id=VgfaOELumv"
+            },
+            {
+                "title": "Point-to-Point: Sparse Motion Guidance for Controllable Video Editing",
+                "authors": [
+                    "Yeji Song",
+                    "Jaehyun Lee",
+                    "Mijin Koo",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "The 4th AI for Visual Arts Workshop at the European Conference on Computer Vision (AI4VA, ECCV Workshops)",
+                "year": "2026",
+                "paperLink": "https://arxiv.org/abs/2511.18277",
+                "category": "Generative Models",
+                "subTag": "",
+                "tldr": ""
+            },
+            {
+                "title": "Do Not Think About Pink Elephant!",
+                "authors": [
+                    "Kyomin Hwang*",
+                    "Suyoung Kim*",
+                    "Junhoo Lee*",
+                    "Nojun Kwak"
+                ],
+                "venue": "The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops, Responsible Generative AI)",
+                "year": "2024",
+                "link": "https://arxiv.org/abs/2404.15154",
+                "category": "Generative Models",
+                "subTag": "Safety",
+                "tldr": "First discovery that negation doesn't work in large models — telling them not to generate something makes them generate it."
+            },
+            {
+                "title": "Coreset Selection for Object Detection",
+                "authors": [
+                    "Hojun Lee",
+                    "Suyoung Kim",
+                    "Junhoo Lee",
+                    "Jaeyoung Yoo",
+                    "Nojun Kwak"
+                ],
+                "venue": "The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops, Dataset Distillation)",
+                "year": "2024",
+                "link": "https://openaccess.thecvf.com/content/CVPR2024W/",
+                "category": "Data Efficiency",
+                "subTag": "Dataset Pruning",
+                "tldr": "Efficient coreset selection method specifically designed for object detection tasks."
+            },
+            {
+                "title": "Practical Dataset Distillation Based on Deep Support Vectors",
+                "authors": [
+                    "Hyunho Lee",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "The European Conference on Computer Vision Workshops (ECCV Workshops, Dataset Distillation Challenge)",
+                "year": "2024",
+                "link": "https://arxiv.org/abs/2405.00348",
+                "category": "Data Efficiency",
+                "subTag": "Dataset Distillation",
+                "tldr": "Applying DeepKKT loss for dataset distillation when only partial data is accessible."
+            }
+        ]
+    },
+    {
+        "section": "Journal",
+        "color": "indigo",
+        "items": [
+            {
+                "title": "End-to-End Multi-Entity Customization",
+                "authors": [
+                    "Wonhark Park*",
+                    "Jaehyun Lee*",
+                    "Wonsik Shin",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "IET Image Processing",
+                "year": "2026",
+                "category": "Generative Models",
+                "subTag": "",
+                "tldr": ""
+            },
+            {
+                "title": "The Role of Teacher Calibration in Knowledge Distillation",
+                "authors": [
+                    "Suyoung Kim",
+                    "Seonguk Park",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "IEEE Access",
+                "year": "2025",
+                "link": "https://arxiv.org/abs/2508.20224",
+                "category": "Knowledge Distillation",
+                "subTag": "Calibration",
+                "tldr": "Teacher's calibration error strongly correlates with student accuracy — well-calibrated teachers transfer knowledge better."
             }
         ]
     }
@@ -377,28 +532,85 @@ export const SELECTED_PUBLICATIONS = PUBLICATIONS.find((section) => section.sect
 
 export const AWARDS = [
     {
-        year: "2026",
-        title: "Best Ph.D. Dissertation Award",
-        detail: "GSCT, Seoul National University · 1 recipient among 27 Ph.D. graduates"
+        "year": "2026",
+        "title": "NeurIPS Top Reviewer"
     },
-    { year: "2026", title: "InnoCore Fellowship" },
-    { year: "2026", title: "ICML Gold Reviewer" },
-    { year: "2023", title: "BK21 Future Innovation Talent Bronze Prize", amount: "USD 1,000" },
-    { year: "2023", title: "BK21 Outstanding Research Talent Fellowship", amount: "USD 3,500" },
-    { year: "2022", title: "Yulchon AI Star Scholarship", amount: "USD 8,000" },
-    { year: "2021", title: "3rd Place, SNU FastMRI Challenge (out of 107 teams)", amount: "USD 3,000" },
-    { year: "2021", title: "Kwanak Scholarship", amount: "full funded" },
-    { year: "2017-2018", title: "National Science and Engineering Scholarship", amount: "full funded" }
+    {
+        "year": "2026",
+        "title": "Best Ph.D. Dissertation Award",
+        "detail": "GSCT, Seoul National University · 1 recipient among 27 Ph.D. graduates"
+    },
+    {
+        "year": "2026",
+        "title": "InnoCore Fellowship"
+    },
+    {
+        "year": "2026",
+        "title": "ICML Gold Reviewer"
+    },
+    {
+        "year": "2023",
+        "title": "BK21 Future Innovation Talent Bronze Prize",
+        "amount": "USD 1,000"
+    },
+    {
+        "year": "2023",
+        "title": "BK21 Outstanding Research Talent Fellowship",
+        "amount": "USD 3,500"
+    },
+    {
+        "year": "2022",
+        "title": "Yulchon AI Star Scholarship",
+        "amount": "USD 8,000"
+    },
+    {
+        "year": "2021",
+        "title": "3rd Place, SNU FastMRI Challenge (out of 107 teams)",
+        "amount": "USD 3,000"
+    },
+    {
+        "year": "2021",
+        "title": "Kwanak Scholarship",
+        "amount": "full funded"
+    },
+    {
+        "year": "2017-2018",
+        "title": "National Science and Engineering Scholarship",
+        "amount": "full funded"
+    }
 ];
 
 export const ACADEMIC_SERVICE = [
-    { role: "Gold Reviewer", venue: "ICML", year: "2026" },
-    { role: "Reviewer", venue: "CVPR", year: "2025, 2026" },
-    { role: "Reviewer", venue: "ICLR", year: "2025, 2026" },
-    { role: "Reviewer", venue: "NeurIPS", year: "2024, 2025, 2026" },
-    { role: "Reviewer", venue: "ICCV", year: "2025" },
-    { role: "Reviewer", venue: "ECCV", year: "2026" },
-    { role: "Reviewer", venue: "ICML", year: "2026" },
+    {
+        "role": "Top Reviewer",
+        "venue": "NeurIPS",
+        "year": "2026"
+    },
+    {
+        "role": "Gold Reviewer",
+        "venue": "ICML",
+        "year": "2026"
+    },
+    {
+        "role": "Reviewer",
+        "venue": "CVPR",
+        "year": "2025, 2026"
+    },
+    {
+        "role": "Reviewer",
+        "venue": "ICLR",
+        "year": "2025, 2026"
+    },
+    {
+        "role": "Reviewer",
+        "venue": "NeurIPS",
+        "year": "2024, 2025, 2026"
+    },
+    {
+        "role": "Reviewer",
+        "venue": "ICCV",
+        "year": "2025"
+    }
 ];
 
 export const SELECTED_HONORS = [

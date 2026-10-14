@@ -133,7 +133,7 @@ export const PROJECTS: Project[] = [
     venue: "ACL 2026 · Long Paper · Oral",
     year: "2026",
     summary:
-      "A template-then-fill inference strategy that better matches the non-autoregressive structure of diffusion language models.",
+      "A template-then-fill inference strategy that places structural anchors throughout a response before filling masked segments.",
     image: "/template-infilling/figure-main.png",
     imageAlt: "Template Infilling method overview comparing generation orders",
     projectLink: "/template-infilling",
@@ -225,7 +225,7 @@ export const PROJECTS: Project[] = [
   },
   {
     slug: "shot",
-    title: "SHOT: Suppressing the Hessian along the Optimization Trajectory",
+    title: "SHOT: Suppressing the Hessian along the Optimization Trajectory for Gradient-Based Meta-Learning",
     shortTitle: "SHOT",
     venue: "NeurIPS 2023",
     year: "2023",
@@ -385,5 +385,5 @@ export const PERSON_JSON_LD = {
     "https://www.linkedin.com/in/junhoo-lee-8483b62a5/",
   ],
   award: AWARDS.map((award) => award.title),
-  knowsAbout: RESEARCH_PILLARS.flatMap((pillar) => pillar.topics),
+  knowsAbout: ["Self-reference", "Robot Harness", "Looped Models", "Continual Harness"],
 };
