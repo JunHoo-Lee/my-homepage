@@ -7,3 +7,5 @@ Sources for the benchmark overview used in the paper are documented in [the prep
 The article layout is inspired by [VISTA](https://vista-research.github.io/) and its [page repository](https://github.com/vista-research/vista-research.github.io). ACRO’s HTML, CSS, and JavaScript were authored for this page. The [VISTA implementation](https://github.com/joshhhhhan/VISTA) was reviewed for its package and execution organization.
 
 Roboto is distributed under the SIL Open Font License; see [FONT-LICENSE.txt](assets/FONT-LICENSE.txt).
+
+The 36-second explainer reuses the same recorded stand-mixer execution and Q trace. Playback is slowed to 10 physical steps/s; no simulated frames are synthesized. Its summary reports the manuscript’s SimplerEnv and RoboCasa aggregate results. The refreshed cream/teal visual language follows the RoboUse project page.
