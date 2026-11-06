@@ -13,5 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${SITE_URL}/any-way-meta-learning`, changeFrequency: "yearly", priority: 0.7 },
         { url: `${SITE_URL}/shot`, changeFrequency: "yearly", priority: 0.7 },
         { url: `${SITE_URL}/mysteryofunlearnedparameters`, changeFrequency: "monthly", priority: 0.8 },
+        { url: `${SITE_URL}/wp-llm`, changeFrequency: "monthly", priority: 0.8 },
     ];
 }
