@@ -1,21 +1,25 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-export async function POST(request: Request) {
-    const body = await request.json();
-    const { password } = body;
+import { SESSION_COOKIE, SESSION_TTL_SECONDS, createSessionToken, passwordMatches } from '@/utils/session';
 
-    // Use PRIVATE_PASSWORD from env
-    if (password === process.env.PRIVATE_PASSWORD) {
-        // Set cookie
-        (await cookies()).set('auth_session', 'true', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60, // 1 hour
-            path: '/',
-        });
-        return NextResponse.json({ success: true });
+export async function POST(request: Request) {
+    const body = await request.json().catch(() => ({}));
+
+    // Refuse to log anyone in when PRIVATE_PASSWORD is not configured.
+    if (!process.env.PRIVATE_PASSWORD || !(await passwordMatches(body?.password))) {
+        return NextResponse.json({ success: false }, { status: 401 });
     }
 
-    return NextResponse.json({ success: false }, { status: 401 });
+    const token = await createSessionToken();
+    if (!token) return NextResponse.json({ success: false }, { status: 500 });
+
+    (await cookies()).set(SESSION_COOKIE, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: SESSION_TTL_SECONDS,
+        path: '/',
+    });
+    return NextResponse.json({ success: true });
 }

@@ -98,6 +98,19 @@ export default function Home() {
         </div>
       </section>
 
+      <section className={styles.section} id="posts">
+        <SectionTitle>Posts</SectionTitle>
+        <div className={styles.educationList}>
+          <article>
+            <div>
+              <h3><a href="/mysteryofunlearnedparameters">The Mystery of the Unlearned Parameters</a></h3>
+              <p>Why huge sparse n-gram tables behave like write-once memory, and what that means for CPU–GPU dual LLMs.</p>
+            </div>
+            <time>Nov 2026</time>
+          </article>
+        </div>
+      </section>
+
       <section className={styles.section} id="news">
         <SectionTitle>News</SectionTitle>
         <NewsList news={news} />

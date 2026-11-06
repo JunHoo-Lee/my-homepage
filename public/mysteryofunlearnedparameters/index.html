@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Why huge sparse n-gram tables behave like write-once memory, what that means for CPU–GPU dual LLMs, and our experiments.">
+<meta name="author" content="Junhoo Lee">
+<link rel="canonical" href="https://junhoo.me/mysteryofunlearnedparameters">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Mystery of the Unlearned Parameters">
+<meta property="og:description" content="Why huge sparse n-gram tables behave like write-once memory, what that means for CPU–GPU dual LLMs, and our experiments.">
+<meta property="og:url" content="https://junhoo.me/mysteryofunlearnedparameters">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Mystery of the Unlearned Parameters">
+<meta name="twitter:description" content="Why huge sparse n-gram tables behave like write-once memory, what that means for CPU–GPU dual LLMs, and our experiments.">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Learn Less, Remember More</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;600&family=Crimson+Pro:ital,wght@0,400;1,400&family=Noto+Serif+KR:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap">
+<style>
+/* Layout: one long-form essay column (~66ch) with figures up to 760px. Amber = CPU statistical memory, blue = GPU neural model, used the same way in prose, diagrams and charts. Mystery phrases start fogged and clear on hover, tap or focus. */
+:root{
+  --paper:#f4f6f7; --ink:#18202b; --muted:#5a6573; --rule:#d5dbe0; --panel:#ffffff;
+  --gpu:#1f5f8b; --cpu:#b5700f; --base:#8a94a1; --good:#2f7a4f; --glow:rgba(181,112,15,.14);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Literata",Georgia,"Times New Roman",serif;
+  --cjk:"Noto Serif KR","Noto Serif SC","Apple SD Gothic Neo","PingFang SC",serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11161d; --ink:#e3e8ee; --muted:#9aa6b4; --rule:#2a333f; --panel:#18202a;
+  --gpu:#6aaee0; --cpu:#e6a447; --base:#7d8896; --good:#6cc28f; --glow:rgba(230,164,71,.16); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11161d; --ink:#e3e8ee; --muted:#9aa6b4; --rule:#2a333f; --panel:#18202a;
+  --gpu:#6aaee0; --cpu:#e6a447; --base:#7d8896; --good:#6cc28f; --glow:rgba(230,164,71,.16); color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:1.08rem;line-height:1.7}
+[lang="ko"],[lang="zh"]{font-family:var(--cjk);line-height:1.85;word-break:keep-all}
+.l-ko,.l-zh{display:none}
+:root[data-lang="ko"] .l-en,:root[data-lang="ko"] .l-zh,:root[data-lang="zh"] .l-en,:root[data-lang="zh"] .l-ko{display:none}
+:root[data-lang="ko"] .l-ko,:root[data-lang="zh"] .l-zh{display:revert}
+.wrap{max-width:760px;margin:0 auto;padding-block:2rem 6rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.col{max-width:66ch}
+.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.langs{display:inline-flex;border:1px solid var(--rule);border-radius:999px;padding:3px;gap:2px;background:var(--panel)}
+.langs button{border:0;background:none;border-radius:999px;padding:.3rem .8rem;font-family:var(--mono);font-size:.8rem;color:var(--muted);cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.langs button:focus-visible{outline:2px solid var(--gpu);outline-offset:2px}
+header.hero{position:relative;padding-block:1.2rem 1rem;margin:0 0 1rem}
+header.hero::before{content:"";position:absolute;inset:-1.5rem -1rem;border-radius:12px;pointer-events:none;
+  background:radial-gradient(260px circle at var(--mx,30%) var(--my,40%),var(--glow),transparent 70%);transition:background .2s}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;letter-spacing:-0.01em}
+h1[lang],h2[lang],h3[lang]{font-family:var(--cjk);letter-spacing:0}
+h1{font-size:clamp(2.1rem,6vw,3.3rem);font-weight:700;margin:0 0 .6rem}
+.dek{font-style:italic;color:var(--muted);font-size:1.12rem;margin:0 0 1rem}
+.hint{font-family:var(--mono);font-size:.78rem;color:var(--cpu);margin:0}
+h2{font-size:1.5rem;margin:3.2rem 0 .8rem}
+h3{font-size:1.15rem;margin:2rem 0 .5rem}
+p{margin:0 0 1.1rem}
+strong{font-weight:600}
+.math{font-family:var(--mono);font-size:.92em;background:var(--panel);border:1px solid var(--rule);padding:.6rem .9rem;display:block;overflow-x:auto;margin:0 0 1.2rem;border-radius:4px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+figure{margin:2rem 0 2.4rem}
+figcaption{font-size:.92rem;color:var(--muted);margin-top:.6rem;max-width:66ch;line-height:1.6}
+figcaption b{color:var(--ink);font-weight:600}
+.fig{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:1rem;overflow-x:auto;filter:saturate(.25) contrast(.9);transition:filter .7s ease}
+.fig:hover,.fig:focus-within,.fig.seen{filter:none}
+svg{display:block;width:100%;height:auto;max-width:100%}
+svg text{font-family:var(--mono);font-size:12px;fill:var(--muted)}
+svg .lbl{fill:var(--ink)} svg .t-cpu{fill:var(--cpu)} svg .t-gpu{fill:var(--gpu)}
+.grid line{stroke:var(--rule);stroke-width:1}
+table{border-collapse:collapse;width:100%;font-size:.95rem;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;margin:1rem 0 1.4rem}
+th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--display);font-weight:500;color:var(--muted);font-size:.85rem}
+td.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+.cpu{color:var(--cpu);font-weight:600}.gpu{color:var(--gpu);font-weight:600}
+a{color:var(--gpu)} a:focus-visible{outline:2px solid var(--gpu);outline-offset:2px}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0}
+.refs{font-size:.9rem;color:var(--muted)} .refs li{margin-bottom:.35rem}
+/* mystery fog */
+.m{filter:blur(4px);opacity:.5;cursor:help;border-radius:3px;background:var(--glow);transition:filter .8s ease,opacity .8s ease,background 1.2s ease;outline:none}
+.m:hover,.m:focus-visible,.m.seen,.revealed .m{filter:none;opacity:1}
+.m.seen,.revealed .m{background:transparent;box-shadow:inset 0 -2px 0 var(--cpu)}
+.m:focus-visible{box-shadow:0 0 0 2px var(--gpu)}
+.counter{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:5;
+  display:flex;align-items:center;gap:.7rem;background:var(--panel);border:1px solid var(--rule);border-radius:999px;padding:.45rem .5rem .45rem .9rem;
+  font-family:var(--mono);font-size:.78rem;color:var(--muted);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.counter b{color:var(--cpu);font-size:.95rem}
+.counter .dots{display:flex;gap:3px}
+.counter .dots i{width:7px;height:7px;border-radius:50%;background:var(--rule);transition:background .4s}
+.counter .dots i.on{background:var(--cpu)}
+.counter button{font-family:var(--mono);font-size:.75rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:999px;padding:.25rem .6rem;cursor:pointer}
+.counter button:focus-visible{outline:2px solid var(--gpu);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.m,.fig,header.hero::before,.counter .dots i{transition:none}}
+@media (max-width:480px){.counter .dots{display:none}}
+
+.parts g[data-part]{cursor:pointer;transition:opacity .4s}
+.parts.focus g[data-part]{opacity:.28}
+.parts.focus g[data-part].on{opacity:1}
+.parts g[data-part]:focus-visible{outline:none}
+.parts g[data-part]:focus-visible rect{stroke-width:2.5}
+.explain{margin-top:.8rem;border-top:1px solid var(--rule);padding-top:.7rem;min-height:4.2rem;font-size:.95rem}
+.explain .eyebrow{display:block;margin-bottom:.2rem}
+.chart-wrap{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.75rem;line-height:1.45;padding:.45rem .6rem;border-radius:4px;max-width:260px;z-index:3}
+.tip a{color:var(--paper)}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;font-family:var(--mono);font-size:.78rem;color:var(--muted);margin:.4rem 0 0}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
+.play{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:1.1rem 1.1rem 1.2rem;margin:1.6rem 0 2.2rem}
+.play h3{margin:0 0 .3rem}
+.play .sub{color:var(--muted);font-size:.95rem;margin:0 0 1rem}
+.ctl{display:grid;gap:.6rem;margin-bottom:1rem}
+.ctl label{display:flex;justify-content:space-between;gap:1rem;font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+.ctl label b{color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--cpu)}
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem}
+.meter{border:1px solid var(--rule);border-radius:4px;padding:.6rem .7rem}
+.meter .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.meter .v{font-family:var(--display);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.regime{margin-top:.9rem;font-family:var(--display);font-size:1.05rem}
+.regime span{padding:.15rem .5rem;border-radius:3px;border:1px solid currentColor}
+.r-iter{color:var(--gpu)} .r-mix{color:var(--muted)} .r-write{color:var(--cpu)}
+.presets{display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem}
+.play button{font-family:var(--mono);font-size:.82rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:4px;padding:.4rem .7rem;cursor:pointer}
+.play button:hover{border-color:var(--gpu)} .play button:focus-visible{outline:2px solid var(--gpu);outline-offset:2px}
+.play button[disabled]{cursor:default;opacity:.6}
+.prefix{font-family:var(--mono);font-size:1.02rem;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:.7rem .9rem;margin-bottom:.8rem;word-break:break-word}
+.prefix .blank{display:inline-block;min-width:3.5ch;border-bottom:2px solid var(--cpu);color:var(--cpu)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin-bottom:.9rem}
+.opts button.ok{border-color:var(--good);color:var(--good)} .opts button.no{border-color:var(--cpu);color:var(--cpu)}
+.bar{display:grid;grid-template-columns:7rem minmax(0,1fr) 4.5rem;gap:.5rem;align-items:center;font-family:var(--mono);font-size:.82rem;margin:.25rem 0}
+.bar i{display:block;height:.7rem;background:var(--cpu);border-radius:2px;width:0}
+.bar .n{text-align:right;color:var(--muted)}
+.score{display:flex;flex-wrap:wrap;gap:1.2rem;font-family:var(--mono);font-size:.85rem;color:var(--muted);margin:.2rem 0 .8rem}
+.score b{color:var(--ink);font-size:1rem}
+.verdict{margin:.6rem 0 .6rem;font-size:.98rem}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .6s ease}}
+
+.b3{border-radius:12px}
+#archFig{background:#0f1620;border-color:#1f2b38;filter:none}
+#archFig .explain{color:#c9d4de;border-top-color:#1f2b38}
+#archFig .explain b{color:#ffffff}
+.b3 text{font-family:"Crimson Pro",Georgia,serif}
+.b3 .b3-h{font-size:17px;font-style:italic;letter-spacing:.02em}
+.b3 .b3-t{font-size:15px}
+.b3 .b3-s{font-size:12.5px;font-family:var(--mono)}
+.b3 .b3-q{font-size:16px;font-style:italic}
+.b3 .b3-out{font-size:26px;font-style:italic}
+.parts.b3.focus g[data-part]{opacity:.25}
+.parts.b3.focus g[data-part].on{opacity:1}
+.math{border:0;background:none;padding:.4rem 0;text-align:center;overflow-x:auto}
+
+#lens{transition:opacity .35s ease;transform-origin:420px 250px}
+#lens.open{opacity:1}
+@media (prefers-reduced-motion:no-preference){#lens{transform:scale(.92);transition:opacity .35s ease,transform .35s ease}#lens.open{transform:scale(1)}}
+
+.bib{position:relative;margin:.6rem 0 0}
+.bib pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:1rem 1rem 1rem;overflow-x:auto;margin:0;white-space:pre}
+.bib button{position:absolute;top:.6rem;right:.6rem;font-family:var(--mono);font-size:.75rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:4px;padding:.25rem .6rem;cursor:pointer}
+.bib button:focus-visible{outline:2px solid var(--gpu);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<div class="top"><div class="eyebrow"><span class="l-en">Notes on CPU–GPU dual language models</span><span class="l-ko" lang="ko">CPU–GPU 이중 언어 모델 노트</span><span class="l-zh" lang="zh">关于 CPU–GPU 双语言模型的笔记</span></div><div class="langs" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="zh" aria-pressed="false">中文</button><button type="button" data-lang="ko" aria-pressed="false">한국어</button></div></div>
+<header class="hero col" id="hero">
+<h1 class="l-en">The Mystery of the Unlearned Parameters</h1><h1 class="l-ko" lang="ko">학습되지 않은 파라미터의 미스터리</h1><h1 class="l-zh" lang="zh">未被学习的参数之谜</h1>
+
+<p class="l-en dek">From the peculiar mechanics of Engram tables and the Infinite-Sparse Regime to the rise of CPU–GPU Dual LLMs, with our own experiments.</p><p class="l-ko dek" lang="ko">Engram 테이블의 이상한 동작과 무한 희소 영역에서 CPU–GPU 이중 LLM까지, 우리 실험과 함께.</p><p class="l-zh dek" lang="zh">从 Engram 表的奇特机制、无限稀疏区间，到 CPU–GPU 双 LLM 的兴起，附上我们自己的实验。</p>
+
+</header>
+<div class="col">
+<p class="l-en">A strange shift is quietly unfolding at the frontier of LLM architecture research. For years the scaling playbook was simple: pack more knowledge into dense Transformer weights, or route computation through sparse Mixture-of-Experts layers. Recently a different design has started to gain traction: bolting massive <strong>N-gram memory ("Engram") tables</strong> outside the neural backbone and offloading them to system RAM.</p><p class="l-ko" lang="ko">LLM 아키텍처 연구의 최전선에서 이상한 변화가 조용히 일어나고 있다. 지난 몇 년간 언어 모델을 키우는 방법은 단순했다. dense Transformer 가중치에 지식을 더 채우거나, 희소 Mixture-of-Experts 층으로 계산을 나누는 것이다. 그런데 최근 전혀 다른 설계가 주목받고 있다. 거대한 <strong>N-gram 메모리(Engram) 테이블</strong>을 신경망 바깥에 붙이고 시스템 RAM에 통째로 올려 두는 방식이다.</p><p class="l-zh" lang="zh">在 LLM 架构研究的前沿，一个奇怪的转变正在悄然发生。多年来，扩展语言模型的套路很简单：要么把更多知识塞进稠密 Transformer 权重，要么用稀疏的混合专家层分摊计算。最近，一种截然不同的设计开始受到关注：在神经网络主干之外挂上巨大的 <strong>N-gram 记忆（Engram）表</strong>，并把它整个放进系统内存。</p>
+
+<p class="l-en">The intuition sounds simple. Let a giant lookup table handle local patterns and frequent collocations, and free the Transformer to focus on contextual reasoning. Yet the moment we look at how these architectures actually train, we run into a mystery that defies standard deep learning intuition.</p><p class="l-ko" lang="ko">직관은 단순해 보인다. 거대한 조회 테이블이 지역 패턴과 자주 쓰이는 연어를 맡고, Transformer는 문맥 추론에 집중하게 하자는 것이다. 그런데 이 아키텍처가 실제로 어떻게 학습되는지 들여다보는 순간, 기존 딥러닝 직관으로는 설명되지 않는 미스터리에 부딪힌다.</p><p class="l-zh" lang="zh">直觉看起来很简单：让巨大的查找表负责局部模式和高频搭配，让 Transformer 专注于上下文推理。可一旦仔细看这些架构实际如何训练，就会撞上一个违背深度学习常识的谜题。</p>
+
+</div>
+<figure><div class="fig" id="archFig">
+<svg viewBox="0 0 760 470" class="parts b3" id="arch" role="img" aria-label="Animated CPU-GPU dual language model. The CPU statistical LM returns several candidate next tokens with counts; the GPU network weighs them against the full context and picks one.">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+    <linearGradient id="gpuG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#58C4DD" stop-opacity=".18"/><stop offset="1" stop-color="#58C4DD" stop-opacity=".04"/></linearGradient>
+    <linearGradient id="cpuG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#F0AC5F" stop-opacity=".18"/><stop offset="1" stop-color="#F0AC5F" stop-opacity=".04"/></linearGradient>
+    <clipPath id="lensClip"><circle cx="420" cy="250" r="168"/></clipPath>
+  </defs>
+  <rect x="0" y="0" width="760" height="470" rx="12" fill="#0f1620"/>
+  <g stroke="#1b2633" stroke-width="1"><line x1="0" y1="94" x2="760" y2="94"/><line x1="0" y1="188" x2="760" y2="188"/><line x1="0" y1="282" x2="760" y2="282"/><line x1="0" y1="376" x2="760" y2="376"/><line x1="190" y1="0" x2="190" y2="470"/><line x1="380" y1="0" x2="380" y2="470"/><line x1="570" y1="0" x2="570" y2="470"/></g>
+  <text x="28" y="34" class="b3-h" fill="#F0AC5F">CPU · statistical LM</text>
+  <text x="732" y="34" class="b3-h" fill="#58C4DD" text-anchor="end">GPU · neural LM</text>
+
+  <g data-part="tokens" tabindex="0"><rect x="28" y="50" width="704" height="40" rx="8" fill="none" stroke="#5a6b7c"/>
+    <text id="ctxPre" x="44" y="76" class="b3-q" fill="#8fa1b3"></text><text id="ctx" x="0" y="76" class="b3-q" fill="#e8eef4"></text></g>
+
+  <g data-part="cpu" tabindex="0"><rect x="28" y="110" width="330" height="200" rx="12" fill="url(#cpuG)" stroke="#F0AC5F"/>
+    <text x="46" y="134" class="b3-s" fill="#c9a06f">longest suffix it has seen</text>
+    <text id="cpuQ" x="46" y="160" class="b3-q" fill="#e8eef4"></text>
+    <g id="cand"></g>
+    <text id="cpuFoot" x="46" y="298" class="b3-s" fill="#8fa1b3">99.8B tokens · 500 GB · no gradients</text></g>
+  <g data-part="query" tabindex="0"><path id="pQuery" d="M300 90 C 300 100, 300 104, 300 110" stroke="#5CD0B3" stroke-opacity=".45" stroke-width="2" fill="none"/></g>
+  <g data-part="hints" tabindex="0"><path id="pHint" d="M358 230 C 382 230, 392 230, 410 230" stroke="#F0AC5F" stroke-opacity=".45" stroke-width="2" fill="none"/>
+    <text x="384" y="252" class="b3-s" fill="#F0AC5F" text-anchor="middle">hints</text></g>
+  <g data-part="encoder" tabindex="0"><rect id="encBox" x="410" y="206" width="90" height="48" rx="8" fill="none" stroke="#F0AC5F"/>
+    <text x="455" y="228" text-anchor="middle" class="b3-t" fill="#F0AC5F">mix</text><text x="455" y="244" text-anchor="middle" class="b3-s" fill="#c9a06f">⌕ zoom</text></g>
+  <g data-part="fusion" tabindex="0"><path id="pFuse" d="M500 230 H540" stroke="#F0AC5F" stroke-opacity=".45" stroke-width="2" fill="none"/></g>
+  <g data-part="layers" tabindex="0"><rect x="540" y="110" width="192" height="200" rx="12" fill="url(#gpuG)" stroke="#58C4DD"/>
+    <rect id="L1" x="558" y="130" width="156" height="34" rx="6" fill="#58C4DD" fill-opacity=".06" stroke="#58C4DD"/><text x="636" y="152" text-anchor="middle" class="b3-t" fill="#58C4DD">layer 1</text>
+    <rect id="L2" x="558" y="176" width="156" height="34" rx="6" fill="#58C4DD" fill-opacity=".06" stroke="#58C4DD"/><text x="636" y="198" text-anchor="middle" class="b3-t" fill="#58C4DD">layer ⋯</text>
+    <rect id="L3" x="558" y="222" width="156" height="34" rx="6" fill="#58C4DD" fill-opacity=".06" stroke="#58C4DD"/><text x="636" y="244" text-anchor="middle" class="b3-t" fill="#58C4DD">layer L</text>
+    <text x="636" y="290" text-anchor="middle" class="b3-s" fill="#8fbfd0">reads the whole context</text>
+    <path d="M636 90 V110" stroke="#58C4DD" stroke-opacity=".6" fill="none"/></g>
+  <g data-part="head" tabindex="0"><path d="M636 310 V330" stroke="#58C4DD" stroke-opacity=".6" fill="none"/>
+    <rect x="400" y="330" width="332" height="36" rx="8" fill="none" stroke="#e8eef4" stroke-opacity=".6"/>
+    <text x="566" y="353" text-anchor="middle" class="b3-t" fill="#e8eef4">logits ⊕ prior → choose</text>
+    <g id="choice"></g></g>
+  <g data-part="grad" tabindex="0"><text x="28" y="456" class="b3-s" fill="#8fa1b3">memory: written once, read forever</text>
+    <text x="732" y="456" class="b3-s" fill="#8fa1b3" text-anchor="end">gradients: GPU side only</text></g>
+  <circle id="dot" r="6" fill="#5CD0B3" filter="url(#glow)" opacity="0"/>
+
+  <g id="lens" opacity="0" style="pointer-events:none">
+    <circle cx="420" cy="250" r="172" fill="#FFFF66" fill-opacity=".08" filter="url(#soft)"/>
+    <g clip-path="url(#lensClip)">
+      <rect x="240" y="70" width="360" height="360" fill="#121c28"/>
+      <text x="420" y="122" text-anchor="middle" class="b3-h" fill="#FFFF66">mixing, up close</text>
+      <text x="420" y="146" text-anchor="middle" class="b3-s" fill="#8fa1b3">query = hidden state h of the current token</text>
+      <g id="slots"></g>
+      <text x="420" y="300" text-anchor="middle" class="b3-q" fill="#e8eef4">h′ = h + g · Σ αᵢ vᵢ</text>
+      <text x="420" y="326" text-anchor="middle" class="b3-q" fill="#e8eef4">z = z_net + β · log cᵢ</text>
+      <text id="gateTxt" x="420" y="356" text-anchor="middle" class="b3-s" fill="#5CD0B3"></text>
+      <text id="lensNote" x="420" y="380" text-anchor="middle" class="b3-s" fill="#8fa1b3"></text>
+    </g>
+    <circle cx="420" cy="250" r="168" fill="none" stroke="#FFFF66" stroke-width="2.5"/>
+    <path d="M539 369 L590 420" stroke="#FFFF66" stroke-width="7" stroke-linecap="round"/>
+  </g>
+</svg>
+<div class="explain" id="archExplain"><div id="archText"></div></div></div><figcaption class="l-en"><b>Figure 1. A CPU–GPU dual language model.</b> A statistical LM built once from the corpus sits in system RAM and offers candidates with counts. A small neural LM on the GPU weighs them against the whole context and makes the choice. Only the GPU side is trained. Counts are real queries to our index; the network weights shown are illustrative.</figcaption><figcaption class="l-ko" lang="ko"><b>그림 1. CPU–GPU 이중 언어 모델.</b> 코퍼스로 한 번 만든 통계 LM이 시스템 RAM에 있고 후보를 개수와 함께 내놓는다. GPU의 작은 신경 LM이 전체 문맥에 비추어 후보를 저울질하고 선택한다. 학습되는 것은 GPU 쪽뿐이다. 개수는 우리 인덱스에 실제로 던진 쿼리 결과이고, 네트워크 가중치는 설명용 예시다.</figcaption><figcaption class="l-zh" lang="zh"><b>图 1. CPU–GPU 双语言模型。</b>由语料一次性构建的统计 LM 位于系统内存，给出带计数的候选；GPU 上的小型神经 LM 结合整个上下文权衡这些候选并做出选择。只有 GPU 端被训练。计数来自对我们索引的真实查询，图中的网络权重仅为示意。</figcaption>
+</figure>
+
+<div class="col">
+<h2 class="l-en">1. How do unupdated parameters make a model smarter?</h2><h2 class="l-ko" lang="ko">1. 갱신되지 않는 파라미터가 어떻게 모델을 똑똑하게 만드는가</h2><h2 class="l-zh" lang="zh">1. 没有更新的参数如何让模型更聪明？</h2>
+
+<p class="l-en">The most extreme testing ground for this shift is the <a href="https://github.com/KellerJordan/modded-nanogpt" target="_blank" rel="noopener">NanoGPT Speedrun</a>: a race to reach GPT-2-level validation loss (3.28 on FineWeb) in the shortest wall-clock time on 8×H100. Early records came from better optimizers like Muon and kernel work. The recent leaps came from outside the dense weights: a <strong>65-billion-parameter hashed N-gram embedding table</strong>.</p><p class="l-ko" lang="ko">이 변화가 가장 극단적으로 증명된 곳은 <a href="https://github.com/KellerJordan/modded-nanogpt" target="_blank" rel="noopener">NanoGPT Speedrun</a>이다. 8×H100에서 GPT-2 수준의 검증 손실(FineWeb 3.28)에 가장 빨리 도달하는 경쟁이다. 초기 기록은 Muon 같은 옵티마이저와 커널 최적화에서 나왔다. 최근의 큰 도약은 dense 가중치 바깥, <strong>650억 파라미터짜리 해시 N-gram 임베딩 테이블</strong>에서 나왔다.</p><p class="l-zh" lang="zh">这一转变最极端的试验场是 <a href="https://github.com/KellerJordan/modded-nanogpt" target="_blank" rel="noopener">NanoGPT Speedrun</a>：在 8×H100 上以最短时间达到 GPT-2 水平的验证损失（FineWeb 上 3.28）。早期纪录来自 Muon 等更好的优化器和内核优化。最近的飞跃则来自稠密权重之外：一张 <strong>650 亿参数的哈希 N-gram 嵌入表</strong>。</p>
+
+</div>
+<figure><div class="fig chart-wrap" id="srFig"><svg id="srChart" viewBox="0 0 700 380" role="img" aria-label="NanoGPT speedrun record time over time, log scale"></svg><div class="tip" id="srTip" hidden></div><div class="legend"><span><i style="background:var(--gpu)"></i><span class="l-en">optimizer, kernels, architecture</span><span class="l-ko" lang="ko">옵티마이저·커널·구조</span><span class="l-zh" lang="zh">优化器、内核、架构</span>
+</span><span><i style="background:var(--cpu)"></i><span class="l-en">lookup memory: value / bigram / n-gram embeddings</span><span class="l-ko" lang="ko">조회형 메모리: value·bigram·n-gram 임베딩</span><span class="l-zh" lang="zh">查表记忆：value / bigram / n-gram 嵌入</span>
+</span></div></div><figcaption class="l-en"><b>Figure 2. Two years of NanoGPT speedrun records</b> (8×H100, reach 3.28 val loss on FineWeb; log scale). Hover or tap a point for the change behind it. Amber points add lookup memory to the model. The latest drop, from 1.13 to 0.67 minutes, includes an 84.6M-row hashed n-gram table. Data: modded-nanogpt README.</figcaption><figcaption class="l-ko" lang="ko"><b>그림 2. 2년간의 NanoGPT 스피드런 기록</b> (8×H100, FineWeb 검증 손실 3.28 도달, 로그 축). 점에 커서를 대거나 누르면 그 기록의 변경 내용이 나온다. 주황색 점은 모델에 조회형 메모리를 더한 기록이다. 가장 최근의 하락(1.13분 → 0.67분)에는 8,460만 행짜리 해시 n-gram 테이블이 들어 있다. 출처: modded-nanogpt README.</figcaption><figcaption class="l-zh" lang="zh"><b>图 2. 两年的 NanoGPT speedrun 纪录</b>（8×H100，在 FineWeb 上达到 3.28 验证损失；对数坐标）。悬停或点击数据点可查看该纪录的改动。橙色点表示给模型加入了查表记忆。最新的一次下降（1.13 分钟 → 0.67 分钟）包含一张 8460 万行的哈希 n-gram 表。数据：modded-nanogpt README。</figcaption>
+</figure>
+
+<div class="col">
+<p class="l-en">The core Transformer stays tiny while the table sits in CPU memory and gets sparse updates only on the rows it touches. Here is the paradox. <span class="m" data-k="k1" tabindex="0"><strong>The table has 65 billion parameters, yet the run sees only a few hundred million tokens.</strong></span> Most rows are updated once or twice, or never. Everything we know about deep learning says representations emerge from thousands of gradient steps. How does a ghost table of barely-touched parameters accelerate convergence so much?</p><p class="l-ko" lang="ko">Transformer 본체는 작게 두고, 거대한 테이블은 CPU 메모리에 둔 채 건드린 행만 희소하게 갱신한다. 여기서 역설이 생긴다. <span class="m" data-k="k1" tabindex="0"><strong>테이블에는 파라미터가 650억 개 있는데, 학습 전체에서 보는 토큰은 수억 개뿐이다.</strong></span> 대부분의 행은 한두 번 갱신되거나 아예 갱신되지 않는다. 우리가 아는 딥러닝에서 표현은 수천 번의 gradient step이 쌓이며 생긴다. 거의 건드려지지 않은 유령 같은 테이블이 어떻게 수렴을 이렇게 앞당기는가?</p><p class="l-zh" lang="zh">Transformer 主干保持很小，巨大的表放在 CPU 内存中，只对被访问的行做稀疏更新。悖论就在这里。<span class="m" data-k="k1" tabindex="0"><strong>这张表有 650 亿个参数，而整个训练只看了几亿个 token。</strong></span>大多数行只被更新一两次，甚至从未被更新。按我们对深度学习的理解，表示来自成千上万次梯度累积。一张几乎没被碰过的幽灵表，怎么能如此加速收敛？</p>
+
+<p class="l-en">It gets stranger with the 6.7-second speedrun result by Herman Brunborg, which drops gradient updates on the table entirely. It uses idle CPU cores to build an N-gram search index over up to 37 billion tokens and feeds the continuations to a tiny GPU Transformer as hints. Holding the Transformer's budget fixed at 70.8M tokens, scaling only the hint corpus <span class="m" data-k="k2" tabindex="0">took validation loss from 3.72 down to 3.27.</span></p><p class="l-ko" lang="ko">Herman Brunborg의 6.7초 스피드런 결과를 보면 더 이상해진다. 이 방식은 테이블의 gradient 갱신을 아예 버린다. 남는 CPU 코어로 최대 370억 토큰에 대한 N-gram 검색 인덱스를 만들고, 뒤에 이어진 문장을 작은 GPU Transformer에 힌트로 넣는다. Transformer 학습량을 7,080만 토큰으로 고정한 채 힌트 코퍼스만 키웠더니 <span class="m" data-k="k2" tabindex="0">검증 손실이 3.72에서 3.27로 떨어졌다.</span></p><p class="l-zh" lang="zh">Herman Brunborg 的 6.7 秒 speedrun 结果让事情更奇怪。它完全放弃了对表的梯度更新，而是用空闲的 CPU 核心在最多 370 亿 token 上构建 N-gram 检索索引，把后续文本作为提示喂给一个很小的 GPU Transformer。在 Transformer 训练量固定为 7080 万 token 的情况下，仅扩大提示语料，<span class="m" data-k="k2" tabindex="0">验证损失就从 3.72 降到了 3.27。</span></p>
+
+<p class="l-en">One approach runs sparse gradient descent on a 65B table. The other skips gradient learning and injects non-parametric retrieval hints. Why do both produce the same kind of efficiency jump? What is the model actually learning?</p><p class="l-ko" lang="ko">하나는 650억 테이블에 희소 gradient descent를 돌리고, 다른 하나는 gradient 학습 없이 비모수 검색 힌트를 넣는다. 서로 다른 두 메커니즘이 왜 같은 종류의 효율 도약을 만드는가? 모델은 실제로 무엇을 배우고 있는가?</p><p class="l-zh" lang="zh">一种方法在 650 亿的表上做稀疏梯度下降，另一种完全绕过梯度学习，注入非参数的检索提示。两种不同的机制为什么带来同一种效率飞跃？模型到底在学什么？</p>
+
+<h2 class="l-en">2. The Infinite-Sparse Regime</h2><h2 class="l-ko" lang="ko">2. 무한 희소 영역</h2><h2 class="l-zh" lang="zh">2. 无限稀疏区间</h2>
+
+<p class="l-en">Stop asking what the model learns and ask how each parameter is updated. Push the table to its limit. In a dense network, or a modest hash table, many contexts share weights or collide in a bucket, so early and late gradients interfere and we need iterative optimization to resolve them. Now let the table grow past 65B, past 1T, toward <span style="font-family:var(--mono)">M → ∞</span>. Every N-gram <i>g</i> gets its own slot <i>e<sub>g</sub></i>, and by Zipf's law almost every long-tail N-gram appears once or twice in the whole corpus.</p><p class="l-ko" lang="ko">모델이 무엇을 배우는지가 아니라 각 파라미터가 어떻게 갱신되는지를 묻자. 테이블을 극한까지 키워 본다. dense 네트워크나 적당한 크기의 해시 테이블에서는 여러 문맥이 같은 가중치를 공유하거나 같은 버킷에 충돌한다. 그래서 초반과 후반의 gradient가 서로 간섭하고, 이를 풀려면 반복 최적화가 필요하다. 이제 테이블을 650억, 1조를 넘어 <span style="font-family:var(--mono)">M → ∞</span>까지 키운다. 모든 N-gram <i>g</i>가 자기만의 칸 <i>e<sub>g</sub></i>를 갖고, Zipf 법칙에 따라 롱테일 N-gram 거의 전부는 코퍼스 전체에서 한두 번만 나온다.</p><p class="l-zh" lang="zh">不要再问模型学到了什么，而要问每个参数是如何被更新的。把表推到极限。在稠密网络或中等大小的哈希表里，许多上下文共享权重或落入同一个桶，早期和后期的梯度相互干扰，需要迭代优化来化解。现在让表超过 650 亿、超过 1 万亿，直到 <span style="font-family:var(--mono)">M → ∞</span>。每个 N-gram <i>g</i> 都有自己的槽位 <i>e<sub>g</sub></i>，而根据齐普夫定律，几乎所有长尾 N-gram 在整个语料中只出现一两次。</p>
+
+<p class="l-en">Consider a rare N-gram seen for the first time at minute 1 versus hour 10. Once the backbone has picked up basic syntax, the update written into that untouched slot does the same job either way:</p><p class="l-ko" lang="ko">드문 N-gram을 학습 1분째에 처음 보는 경우와 10시간째에 처음 보는 경우를 비교해 보자. 본체가 기본 문법을 익힌 뒤라면, 비어 있던 칸에 쓰이는 갱신은 어느 쪽이든 같은 일을 한다.</p><p class="l-zh" lang="zh">比较一个罕见 N-gram 在训练第 1 分钟和第 10 小时首次出现的情形。只要主干已经学会基本语法，写进那个空槽位的更新在两种情况下作用相同：</p>
+
+<div class="math">\[\Delta e_g(t_1) \approx \Delta e_g(t_2)\]</div>
+<p class="l-en">We call this <strong>training-time invariance</strong>. When most entries are visited once, the variable that governs learning is the slot's own visit count, not the global step. If a value is fixed by one or two visits, keeping momentum and variance and backpropagating into it is no longer iterative optimization. <span class="m" data-k="k3" tabindex="0"><strong>In the infinite limit, sparse gradient descent collapses into one-shot associative memory writing.</strong></span> That is why a 65B table of mostly untouched rows works, and why a non-parametric N-gram index can replace it.</p><p class="l-ko" lang="ko">이를 <strong>학습 시점 불변성</strong>이라 부르자. 대부분의 칸이 한 번만 방문되면, 학습을 지배하는 변수는 전체 step 수가 아니라 그 칸의 방문 횟수가 된다. 값이 한두 번의 방문으로 정해진다면 momentum과 variance를 유지하며 역전파하는 것은 더 이상 반복 최적화가 아니다. <span class="m" data-k="k3" tabindex="0"><strong>무한 극한에서 희소 gradient descent는 한 번 쓰고 끝나는 연상 기억 저장으로 붕괴한다.</strong></span> 거의 건드려지지 않은 650억 테이블이 통하는 이유도, 비모수 N-gram 인덱스가 그것을 대체할 수 있는 이유도 여기에 있다.</p><p class="l-zh" lang="zh">我们称之为<strong>训练时间不变性</strong>。当大多数槽位只被访问一次时，支配学习的变量不再是全局步数，而是该槽位自己的访问次数。如果一个值由一两次访问决定，那么维持动量和方差并反向传播就不再是迭代优化。<span class="m" data-k="k3" tabindex="0"><strong>在无限极限下，稀疏梯度下降坍缩为一次性的联想记忆写入。</strong></span>这就是为什么一张几乎没被更新的 650 亿表能起作用，也是为什么非参数 N-gram 索引能替代它。</p>
+
+<div class="play" id="sim"><h3 class="l-en">Try it: when does learning turn into writing?</h3><h3 class="l-ko" lang="ko">직접 해 보기: 학습은 언제 쓰기가 되는가?</h3><h3 class="l-zh" lang="zh">试一试：学习何时变成写入？</h3>
+<p class="l-en sub">A toy model of a hashed n-gram table. Move the table size and the training budget and watch how often each row is actually updated. Unique 2–4-grams are modelled as U ≈ T<sup>0.95</sup> and rows are filled at random.</p><p class="l-ko sub" lang="ko">해시 n-gram 테이블의 장난감 모델이다. 테이블 크기와 학습량을 움직이며 각 행이 실제로 몇 번 갱신되는지 보자. 고유한 2~4-gram 수는 U ≈ T<sup>0.95</sup>로 두고, 행은 무작위로 채워진다고 가정했다.</p><p class="l-zh sub" lang="zh">一个哈希 n-gram 表的玩具模型。移动表大小和训练量，看看每一行实际被更新多少次。独特 2–4-gram 的数量设为 U ≈ T<sup>0.95</sup>，行被随机填充。</p>
+<div class="presets"><button type="button" data-m="6" data-t="9.7"><span class="l-en">small table</span><span class="l-ko" lang="ko">작은 테이블</span><span class="l-zh" lang="zh">小表</span>
+</button><button type="button" data-m="10.8" data-t="8.7"><span class="l-en">speedrun: 65B rows, 0.5B tokens</span><span class="l-ko" lang="ko">스피드런: 650억 행, 5억 토큰</span><span class="l-zh" lang="zh">speedrun：650 亿行，5 亿 token</span>
+</button><button type="button" data-m="13" data-t="11">M → ∞</button></div><div class="ctl"><label for="mRange"><span class="l-en">table rows M</span><span class="l-ko" lang="ko">테이블 행 수 M</span><span class="l-zh" lang="zh">表的行数 M</span>
+ <b id="mOut"></b></label><input id="mRange" type="range" min="5" max="13" step="0.1" value="10.8"><label for="tRange"><span class="l-en">training tokens T</span><span class="l-ko" lang="ko">학습 토큰 T</span><span class="l-zh" lang="zh">训练 token T</span>
+ <b id="tOut"></b></label><input id="tRange" type="range" min="8" max="12" step="0.1" value="8.7"></div><div class="meters"><div class="meter"><div class="k"><span class="l-en">updates per used row</span><span class="l-ko" lang="ko">사용된 행당 갱신</span><span class="l-zh" lang="zh">每个已用行的更新次数</span>
+</div><div class="v" id="vUpd"></div></div><div class="meter"><div class="k"><span class="l-en">rows never touched</span><span class="l-ko" lang="ko">한 번도 안 쓰인 행</span><span class="l-zh" lang="zh">从未被触碰的行</span>
+</div><div class="v" id="vEmpty"></div></div><div class="meter"><div class="k"><span class="l-en">n-grams sharing a row</span><span class="l-ko" lang="ko">행을 공유하는 n-gram</span><span class="l-zh" lang="zh">共享一行的 n-gram</span>
+</div><div class="v" id="vColl"></div></div></div><div class="regime"><span class="l-en">Regime:</span><span class="l-ko" lang="ko">영역:</span><span class="l-zh" lang="zh">区间：</span>
+ <span id="vReg"></span></div></div>
+
+</div><hr><div class="col">
+<h2 class="l-en">3. What we measured</h2><h2 class="l-ko" lang="ko">3. 우리가 측정한 것</h2><h2 class="l-zh" lang="zh">3. 我们的测量</h2>
+
+<p class="l-en">If the thought experiment holds, a large share of dense pretraining is spent forcing weight matrices to memorize local statistics that never needed iterative learning. So pre-computed N-gram statistics, injected as hints during training, should buy efficiency in an ordinary model too. We tested this directly.</p><p class="l-ko" lang="ko">이 사고실험이 맞다면 dense pretraining의 상당 부분은 반복 학습이 필요 없었던 지역 통계를 가중치에 외우게 하는 데 쓰이고 있다. 그렇다면 미리 계산한 N-gram 통계를 학습 중에 힌트로 넣어 주면 평범한 모델에서도 효율이 올라가야 한다. 이것을 직접 실험했다.</p><p class="l-zh" lang="zh">如果这个思想实验成立，稠密预训练中相当一部分算力被花在迫使权重矩阵记忆本不需要迭代学习的局部统计上。那么在训练中注入预先计算好的 N-gram 统计作为提示，普通模型也应当获得效率提升。我们直接做了实验。</p>
+
+<p class="l-en">The setup: a 124M modded-nanoGPT model trained on a math-heavy web mix. A CPU-side table stores 1- to 6-gram continuations over about 45B tokens. At every position the model receives the top-k next tokens and their counts and adds them as a gated logit bonus. To rule out leakage, every lookup removes all occurrences from the current document (leave-one-document-out, or LODO).</p><p class="l-ko" lang="ko">설정은 이렇다. 수학 비중이 높은 웹 데이터로 124M modded-nanoGPT 모델을 학습한다. CPU 쪽 테이블은 약 450억 토큰에서 1~6-gram 이어짐을 저장한다. 모델은 위치마다 다음 토큰 후보 top-k와 개수를 받아 gated logit bonus로 더한다. 누출을 막기 위해 모든 조회에서 현재 문서의 출현을 전부 뺀다(leave-one-document-out, LODO).</p><p class="l-zh" lang="zh">设置如下：在偏重数学的网页数据上训练一个 124M 的 modded-nanoGPT 模型。CPU 端的表保存约 450 亿 token 上的 1 到 6-gram 后续统计。模型在每个位置得到 top-k 候选下一个 token 及其计数，以门控 logit 加成的形式加入。为了排除泄漏，每次查询都去掉当前文档的所有出现（留一文档，LODO）。</p>
+
+</div>
+<figure><div class="fig"><svg viewBox="0 0 640 360" role="img" aria-label="Held-out loss versus training tokens for the baseline and the hinted model">
+    <g class="grid">
+      <line x1="60" y1="46.4" x2="620" y2="46.4"/><line x1="60" y1="99.1" x2="620" y2="99.1"/><line x1="60" y1="151.8" x2="620" y2="151.8"/><line x1="60" y1="204.5" x2="620" y2="204.5"/><line x1="60" y1="257.3" x2="620" y2="257.3"/>
+    </g>
+    <line x1="60" y1="310" x2="620" y2="310" stroke="var(--muted)"/>
+    <text x="52" y="50.4" text-anchor="end">2.5</text><text x="52" y="103.1" text-anchor="end">2.4</text><text x="52" y="155.8" text-anchor="end">2.3</text><text x="52" y="208.5" text-anchor="end">2.2</text><text x="52" y="261.3" text-anchor="end">2.1</text>
+    <text x="125" y="330" text-anchor="middle">0.3B</text><text x="307.4" y="330" text-anchor="middle">0.5B</text><text x="554.9" y="330" text-anchor="middle">1B</text>
+    <text x="340" y="352" text-anchor="middle">training tokens (log scale)</text>
+    <text x="14" y="180" transform="rotate(-90 14 180)" text-anchor="middle">held-out loss (nats/token, LODO)</text>
+    <line x1="125" y1="59.5" x2="554.9" y2="191.4" stroke="var(--base)" stroke-width="2.5"/>
+    <circle cx="125" cy="59.5" r="5" fill="var(--base)"/><circle cx="554.9" cy="191.4" r="5" fill="var(--base)"/>
+    <text x="133" y="52" class="lbl">no hints 2.475</text><text x="562" y="186" class="lbl">2.225</text>
+    <line x1="125" y1="163.4" x2="554.9" y2="273.1" stroke="var(--cpu)" stroke-width="2.5"/>
+    <circle cx="125" cy="163.4" r="5" fill="var(--cpu)"/><circle cx="554.9" cy="273.1" r="5" fill="var(--cpu)"/>
+    <text x="133" y="185" class="t-cpu">N-gram hints 2.278</text><text x="562" y="278" class="t-cpu">2.070</text>
+    <line x1="125" y1="163.4" x2="463.9" y2="163.4" stroke="var(--ink)" stroke-dasharray="4 4"/>
+    <circle cx="463.9" cy="163.4" r="4" fill="var(--paper)" stroke="var(--ink)"/>
+    <text x="300" y="155" text-anchor="middle" class="lbl">≈2.6× fewer tokens for the same loss</text>
+  </svg></div><figcaption class="l-en"><b>Figure 3. Token efficiency.</b> At 300M tokens the hinted model (2.278) is already close to the baseline at 1B tokens (2.225). Interpolating the baseline in log-tokens, it would need about 0.78B tokens to match, roughly 2.6× more. The gap remains at 1B (2.070 vs 2.225). All losses use leave-one-document-out lookups.</figcaption><figcaption class="l-ko" lang="ko"><b>그림 3. 토큰 효율.</b> 300M 토큰에서 힌트 모델(2.278)은 이미 1B 토큰 기준선(2.225)에 가깝다. 기준선을 로그 토큰으로 보간하면 같은 손실에 약 0.78B 토큰, 즉 약 2.6배가 필요하다. 1B에서도 차이가 남는다(2.070 대 2.225). 모든 손실은 자기 문서를 뺀 조회로 쟀다.</figcaption><figcaption class="l-zh" lang="zh"><b>图 3. token 效率。</b>在 3 亿 token 时，带提示的模型（2.278）已接近基线 10 亿 token 时的水平（2.225）。按对数 token 插值，基线需要约 7.8 亿 token 才能追平，约 2.6 倍。到 10 亿 token 差距仍在（2.070 对 2.225）。所有损失都使用留一文档查询。</figcaption>
+</figure>
+
+<div class="col">
+<p class="l-en">The first result matches the thought experiment: <span class="m" data-k="k4" tabindex="0"><strong>at 300M training tokens the hinted model reaches a held-out loss the baseline needs about 2.6× more tokens to reach</strong></span>, and the gap does not close at 1B. That is a little better than the 2× we expected.</p><p class="l-ko" lang="ko">첫 결과는 사고실험과 맞는다. <span class="m" data-k="k4" tabindex="0"><strong>300M 토큰에서 힌트 모델이 도달한 held-out 손실에, 기준선은 약 2.6배의 토큰이 필요하다.</strong></span> 그 차이는 1B에서도 닫히지 않는다. 예상한 2배보다 조금 더 크다.</p><p class="l-zh" lang="zh">第一个结果符合思想实验：<span class="m" data-k="k4" tabindex="0"><strong>在 3 亿训练 token 时，带提示模型达到的留出损失，基线需要约 2.6 倍的 token 才能达到</strong></span>，而且到 10 亿 token 差距也没有缩小。这比我们预期的 2 倍还要多一些。</p>
+
+<p class="l-en">The more telling result comes from removing the table. If the network had learned the statistics anyway, taking the hints away should cost nothing. It costs more than nothing:</p><p class="l-ko" lang="ko">더 의미 있는 결과는 테이블을 뗐을 때 나온다. 네트워크가 통계를 어차피 배웠다면 힌트를 빼도 손해가 없어야 한다. 그런데 손해가 있다.</p><p class="l-zh" lang="zh">更能说明问题的是把表拿掉。如果网络本来就学会了这些统计，去掉提示应该没有损失。可事实上有损失：</p>
+
+</div>
+<figure><div class="fig"><svg viewBox="0 0 640 190" role="img" aria-label="Held-out loss with and without the table at 300M tokens">
+    <g class="grid"><line x1="200" y1="20" x2="200" y2="150"/><line x1="333.3" y1="20" x2="333.3" y2="150"/><line x1="466.7" y1="20" x2="466.7" y2="150"/><line x1="600" y1="20" x2="600" y2="150"/></g>
+    <text x="200" y="170" text-anchor="middle">2.0</text><text x="333.3" y="170" text-anchor="middle">2.2</text><text x="466.7" y="170" text-anchor="middle">2.4</text><text x="600" y="170" text-anchor="middle">2.6</text>
+    <text x="190" y="44" text-anchor="end" class="lbl">trained with hints, table on</text>
+    <rect x="200" y="30" width="185.3" height="22" fill="var(--cpu)"/><text x="391" y="46" class="t-cpu">2.278</text>
+    <text x="190" y="84" text-anchor="end" class="lbl">baseline, never had a table</text>
+    <rect x="200" y="70" width="316.7" height="22" fill="var(--base)"/><text x="523" y="86" class="lbl">2.475</text>
+    <text x="190" y="124" text-anchor="end" class="lbl">trained with hints, table removed</text>
+    <rect x="200" y="110" width="356.7" height="22" fill="var(--gpu)"/><text x="562" y="126" class="t-gpu">2.535</text>
+  </svg></div><figcaption class="l-en"><b>Figure 4. The network stops memorizing.</b> Same 124M model at 300M tokens, held-out loss in nats/token (lower is better). It did not learn the statistics the table already held. It learned to rely on them.</figcaption><figcaption class="l-ko" lang="ko"><b>그림 4. 네트워크가 외우기를 멈춘다.</b> 같은 124M 모델, 300M 토큰, held-out 손실(nats/token, 낮을수록 좋음). 테이블이 이미 가진 통계를 배우지 않고 그것에 기대는 법을 배웠다.</figcaption><figcaption class="l-zh" lang="zh"><b>图 4. 网络停止了记忆。</b>同一个 124M 模型，3 亿 token，留出损失（nats/token，越低越好）。它没有学习表里已有的统计，而是学会了依赖它们。</figcaption>
+</figure>
+
+<div class="col">
+<p class="l-en"><span class="m" data-k="k5" tabindex="0"><strong>Without its table, the hinted model is worse than a baseline that never had one (+0.06).</strong></span> This is the behaviour the Infinite-Sparse argument predicts. The network does not duplicate what the external memory stores. It spends its capacity elsewhere and reads the rest from the table.</p><p class="l-ko" lang="ko"><span class="m" data-k="k5" tabindex="0"><strong>테이블을 뗀 힌트 모델은 처음부터 테이블이 없던 기준선보다도 나쁘다(+0.06).</strong></span> 무한 희소 논증이 예측하는 행동이다. 네트워크는 외부 메모리에 있는 것을 중복해서 저장하지 않는다. 용량을 다른 데 쓰고 나머지는 테이블에서 읽는다.</p><p class="l-zh" lang="zh"><span class="m" data-k="k5" tabindex="0"><strong>去掉表后，带提示的模型比从未有过表的基线还要差（+0.06）。</strong></span>这正是无限稀疏论证所预测的行为。网络不会重复存储外部记忆已有的内容，而是把容量用在别处，其余从表中读取。</p>
+
+<p class="l-en">A fair objection is leakage. With occurrence-level leave-one-out, a document can still see its own earlier text through the table. Re-evaluating with full document exclusion barely moves the numbers:</p><p class="l-ko" lang="ko">누출을 의심할 수 있다. 출현 단위 leave-one-out에서는 문서가 테이블을 통해 자기 앞부분을 볼 수 있다. 문서 전체를 빼고 다시 재도 숫자는 거의 그대로다.</p><p class="l-zh" lang="zh">一个合理的质疑是泄漏。在按出现留一的设置下，文档仍可能通过表看到自己前面的文本。用完整的文档排除重新评估，数字几乎不变：</p>
+
+<div class="l-en"><div class="tbl"><table><thead><tr><th>Run</th><th>Gain, occurrence LOO</th><th>Gain, document LOO</th></tr></thead><tbody><tr><td>124M, 300M tokens</td><td class="num">−0.206</td><td class="num">−0.197</td></tr><tr><td>124M, 1B tokens</td><td class="num">−0.164</td><td class="num">−0.155</td></tr></tbody></table></div></div><div class="l-ko" lang="ko"><div class="tbl"><table><thead><tr><th>실행</th><th>이득 (출현 LOO)</th><th>이득 (문서 LOO)</th></tr></thead><tbody><tr><td>124M, 300M 토큰</td><td class="num">−0.206</td><td class="num">−0.197</td></tr><tr><td>124M, 1B 토큰</td><td class="num">−0.164</td><td class="num">−0.155</td></tr></tbody></table></div></div><div class="l-zh" lang="zh"><div class="tbl"><table><thead><tr><th>运行</th><th>收益（按出现留一）</th><th>收益（按文档留一）</th></tr></thead><tbody><tr><td>124M，3 亿 token</td><td class="num">−0.206</td><td class="num">−0.197</td></tr><tr><td>124M，10 亿 token</td><td class="num">−0.164</td><td class="num">−0.155</td></tr></tbody></table></div></div>
+
+<p class="l-en"><span class="m" data-k="k6" tabindex="0">About 0.01 nats came from same-document copying.</span> The rest is real.</p><p class="l-ko" lang="ko"><span class="m" data-k="k6" tabindex="0">같은 문서 베끼기에서 온 몫은 약 0.01 nats뿐이다.</span> 나머지는 진짜다.</p><p class="l-zh" lang="zh"><span class="m" data-k="k6" tabindex="0">来自同文档复制的部分只有约 0.01 nats。</span>其余都是真实的。</p>
+
+<h3 class="l-en">No pretraining at all</h3><h3 class="l-ko" lang="ko">pretraining 없이</h3><h3 class="l-zh" lang="zh">完全没有预训练</h3>
+
+<p class="l-en">The stronger claim is that the external memory can stand in for pretraining. To push on it we started a looped student from random weights, with no pretraining corpus at all, and trained it only by on-policy distillation from a 4B teacher on grade-school math prompts. One arm (S) reads the N-gram table. The other (S−table) is identical without it.</p><p class="l-ko" lang="ko">더 강한 주장은 외부 메모리가 pretraining을 대신할 수 있다는 것이다. 이를 밀어붙이려고 pretraining 코퍼스 없이 무작위 가중치에서 루프 학생을 시작했고, 4B teacher로부터 초등 수학 프롬프트에 대한 on-policy distillation만으로 학습했다. 한쪽(S)은 N-gram 테이블을 읽고, 다른 쪽(S−table)은 테이블만 없는 동일한 모델이다.</p><p class="l-zh" lang="zh">更强的主张是外部记忆可以替代预训练。为此，我们从随机权重启动一个循环学生模型，完全不用预训练语料，只通过一个 4B 教师在小学数学题上的同策略蒸馏来训练。一组（S）读取 N-gram 表，另一组（S−table）除了没有表之外完全相同。</p>
+
+</div>
+<figure><div class="fig"><svg viewBox="0 0 640 330" role="img" aria-label="Reference-solution NLL over training steps for the from-scratch student with and without the table">
+    <g class="grid"><line x1="60" y1="63.3" x2="620" y2="63.3"/><line x1="60" y1="106.7" x2="620" y2="106.7"/><line x1="60" y1="150" x2="620" y2="150"/><line x1="60" y1="193.3" x2="620" y2="193.3"/><line x1="60" y1="236.7" x2="620" y2="236.7"/></g>
+    <line x1="60" y1="280" x2="620" y2="280" stroke="var(--muted)"/>
+    <text x="52" y="67.3" text-anchor="end">2.5</text><text x="52" y="110.7" text-anchor="end">2.4</text><text x="52" y="154" text-anchor="end">2.3</text><text x="52" y="197.3" text-anchor="end">2.2</text><text x="52" y="240.7" text-anchor="end">2.1</text>
+    <text x="60" y="300" text-anchor="middle">1000</text><text x="200" y="300" text-anchor="middle">1500</text><text x="340" y="300" text-anchor="middle">2000</text><text x="480" y="300" text-anchor="middle">2500</text><text x="620" y="300" text-anchor="middle">3000</text>
+    <text x="340" y="322" text-anchor="middle">distillation steps (from random init)</text>
+    <text x="14" y="160" transform="rotate(-90 14 160)" text-anchor="middle">NLL on GSM8K reference solutions</text>
+    <polyline fill="none" stroke="var(--base)" stroke-width="2.5" points="60,39.5 130,102.8 200,118.4 270,114 340,124.9 410,119.2 480,147.4 550,175.1 620,200.3"/>
+    <polyline fill="none" stroke="var(--gpu)" stroke-width="2" stroke-dasharray="5 4" points="60,84.1 130,123.6 200,159.5 270,141.3 340,161.7 410,153.9 480,186.4 550,226.3 620,235.8"/>
+    <polyline fill="none" stroke="var(--cpu)" stroke-width="2.5" points="60,141.8 130,170.8 200,198.1 270,170.4 340,194.2 410,182.9 480,207.6 550,244 620,252.3"/>
+    <text x="604" y="194" text-anchor="end" class="lbl">S−table 2.184</text>
+    <text x="604" y="229" text-anchor="end" class="t-gpu">S, hints off 2.102</text>
+    <text x="604" y="270" text-anchor="end" class="t-cpu">S, hints on 2.064</text>
+  </svg></div><figcaption class="l-en"><b>Figure 5. A from-scratch student with external memory.</b> 148M looped model, random init, trained only by on-policy distillation. Lower is better. <span class="m" data-k="k7" tabindex="0">The arm with the table stays 0.12–0.24 nats below the identical arm without it across all 3000 steps.</span> Turning the hints off at evaluation keeps part of the gain, so some of it moved into the weights.</figcaption><figcaption class="l-ko" lang="ko"><b>그림 5. 외부 메모리를 단 무작위 초기화 학생.</b> 148M 루프 모델을 무작위 초기화에서 on-policy distillation만으로 학습했다. 낮을수록 좋다. <span class="m" data-k="k7" tabindex="0">테이블이 있는 쪽이 3,000 step 내내 0.12~0.24 nats 낮다.</span> 평가 때 힌트를 꺼도 이득의 일부가 남아, 그만큼은 가중치로 옮겨 갔다.</figcaption><figcaption class="l-zh" lang="zh"><b>图 5. 带外部记忆、从零开始的学生。</b>148M 循环模型，随机初始化，仅用同策略蒸馏训练。越低越好。<span class="m" data-k="k7" tabindex="0">有表的一组在全部 3000 步中始终低 0.12–0.24 nats。</span>评估时关闭提示仍保留部分收益，说明其中一部分转移进了权重。</figcaption>
+</figure>
+
+<div class="col">
+<h2 class="l-en">4. Building the infinite limit</h2><h2 class="l-ko" lang="ko">4. 무한 극한을 직접 만들기</h2><h2 class="l-zh" lang="zh">4. 构建无限极限</h2>
+
+<p class="l-en">So we built it. We took a public, heavily filtered pretraining mix chosen for quality per token (DCLM and FineWeb-Edu via Zyda-2, Ultra-FineWeb-L3, Nemotron-CC-Math, FineMath, UltraData-Code). We removed every document that shares a 13-gram with the GSM8K, MMLU, ARC, HellaSwag or PIQA test sets, and indexed what was left as a suffix array: <span class="m" data-k="k8" tabindex="0"><strong>99.8B tokens, a 500GB table, about 8 ms per query</strong></span>. There is no maximum N. For any context it returns the longest suffix that ever occurred and what followed it.</p><p class="l-ko" lang="ko">그래서 직접 만들었다. 토큰당 품질을 기준으로 고른 공개 정제 pretraining 혼합(Zyda-2를 통한 DCLM과 FineWeb-Edu, Ultra-FineWeb-L3, Nemotron-CC-Math, FineMath, UltraData-Code)을 받았다. GSM8K, MMLU, ARC, HellaSwag, PIQA test 셋과 13-gram이 겹치는 문서를 모두 빼고, 남은 것을 suffix array로 인덱싱했다. <span class="m" data-k="k8" tabindex="0"><strong>998억 토큰, 500GB 테이블, 쿼리당 약 8ms</strong></span>. N에 상한이 없다. 어떤 문맥이든 지금까지 나온 가장 긴 접미사와 그 뒤에 온 것을 돌려준다.</p><p class="l-zh" lang="zh">于是我们把它建了出来。我们选取一个按每 token 质量挑选的公开精炼预训练混合（经 Zyda-2 的 DCLM 和 FineWeb-Edu、Ultra-FineWeb-L3、Nemotron-CC-Math、FineMath、UltraData-Code），删除所有与 GSM8K、MMLU、ARC、HellaSwag、PIQA 测试集共享 13-gram 的文档，再把剩下的内容建成后缀数组：<span class="m" data-k="k8" tabindex="0"><strong>998 亿 token，500GB 的表，每次查询约 8 毫秒</strong></span>。N 没有上限。对任何上下文，它返回出现过的最长后缀以及其后的内容。</p>
+
+<div class="play" id="game"><h3 class="l-en">Play: beat the memory</h3><h3 class="l-ko" lang="ko">게임: 메모리를 이겨라</h3><h3 class="l-zh" lang="zh">游戏：战胜记忆</h3>
+<p class="l-en sub">Each prompt is a real query against our 100B-token index. Pick the next word, then see what the CPU memory alone would have said and how long a context it matched.</p><p class="l-ko sub" lang="ko">각 문제는 우리 1,000억 토큰 인덱스에 실제로 던진 쿼리다. 다음 단어를 고른 뒤, CPU 메모리 혼자라면 뭐라고 답했을지와 얼마나 긴 문맥을 맞췄는지 확인해 보자.</p><p class="l-zh sub" lang="zh">每道题都是对我们 1000 亿 token 索引的真实查询。选出下一个词，然后看看只靠 CPU 记忆会怎么回答，以及它匹配了多长的上下文。</p>
+<div class="score"><span><span class="l-en">round</span><span class="l-ko" lang="ko">라운드</span><span class="l-zh" lang="zh">回合</span>
+ <b id="gRound"></b></span><span><span class="l-en">you</span><span class="l-ko" lang="ko">나</span><span class="l-zh" lang="zh">你</span>
+ <b id="gYou">0</b></span><span><span class="l-en">memory</span><span class="l-ko" lang="ko">메모리</span><span class="l-zh" lang="zh">记忆</span>
+ <b id="gMem">0</b></span></div><div class="prefix" id="gPrefix"></div><div class="opts" id="gOpts"></div><div id="gMemBox" hidden></div><p class="verdict" id="gVerdict"></p><button type="button" id="gNext" hidden><span class="l-en">next prompt</span><span class="l-ko" lang="ko">다음 문제</span><span class="l-zh" lang="zh">下一题</span>
+</button></div>
+
+<h2 class="l-en">5. Beyond offloading</h2><h2 class="l-ko" lang="ko">5. 오프로딩을 넘어서</h2><h2 class="l-zh" lang="zh">5. 超越卸载</h2>
+
+<p class="l-en">Seen through learning dynamics, putting a huge table on the CPU is not a hardware compromise. It splits language modeling into two regimes, <span class="gpu">iterative optimization</span> and <span class="cpu">write-once memory</span>, and gives each the hardware it suits.</p><p class="l-ko" lang="ko">학습 동역학의 관점에서 보면 거대한 테이블을 CPU에 두는 것은 하드웨어 타협이 아니다. 언어 모델링을 <span class="gpu">반복 최적화</span>와 <span class="cpu">한 번 쓰는 기억</span>이라는 두 영역으로 나누고, 각각에 맞는 하드웨어를 주는 것이다.</p><p class="l-zh" lang="zh">从学习动力学看，把巨大的表放到 CPU 上不是硬件上的妥协。它把语言建模拆成<span class="gpu">迭代优化</span>和<span class="cpu">一次写入记忆</span>两个区间，并让每一部分运行在适合它的硬件上。</p>
+
+</div>
+<figure><div class="fig"><svg viewBox="0 0 720 330" role="img" aria-label="Proposed CPU-GPU dual language model: per-position suffix-array lookup feeds a hint encoder; a looped GPU core reads the hints at every pass; counts add a gated bonus to the logits">
+    <text x="20" y="24" class="lbl" style="font-size:13px;font-weight:600">Proposed CPU–GPU dual LLM</text>
+    <rect x="20" y="44" width="680" height="34" rx="4" fill="none" stroke="var(--muted)"/>
+    <text x="360" y="66" text-anchor="middle" class="lbl">tokens  x₁ … xₜ</text>
+    <path d="M140 78 V108" stroke="var(--cpu)" fill="none" stroke-width="1.5"/><path d="M135 102 L140 108 L145 102" stroke="var(--cpu)" fill="none" stroke-width="1.5"/>
+    <path d="M520 78 V108" stroke="var(--gpu)" fill="none" stroke-width="1.5"/><path d="M515 102 L520 108 L525 102" stroke="var(--gpu)" fill="none" stroke-width="1.5"/>
+    <rect x="20" y="108" width="240" height="150" rx="4" fill="var(--cpu)" fill-opacity="0.12" stroke="var(--cpu)"/>
+    <text x="140" y="130" text-anchor="middle" class="t-cpu" style="font-weight:600">CPU · statistical LM</text>
+    <text x="34" y="154" class="t-cpu">1  suffix-array lookup per position</text>
+    <text x="34" y="174" class="t-cpu">2  drop own document (training)</text>
+    <text x="34" y="194" class="t-cpu">3  hint packet:</text>
+    <text x="50" y="212" class="t-cpu">longest match L*, count C</text>
+    <text x="50" y="230" class="t-cpu">top-8 next tokens + counts</text>
+    <text x="50" y="248" class="t-cpu">continuation spans</text>
+    <path d="M260 183 H330" stroke="var(--cpu)" fill="none" stroke-width="1.5"/><path d="M324 178 L330 183 L324 188" stroke="var(--cpu)" fill="none" stroke-width="1.5"/>
+    <rect x="330" y="108" width="370" height="150" rx="4" fill="var(--gpu)" fill-opacity="0.12" stroke="var(--gpu)"/>
+    <text x="515" y="130" text-anchor="middle" class="t-gpu" style="font-weight:600">GPU · neural LM</text>
+    <rect x="346" y="146" width="70" height="40" rx="3" fill="none" stroke="var(--gpu)"/><text x="381" y="171" text-anchor="middle" class="t-gpu">prelude</text>
+    <rect x="432" y="140" width="170" height="52" rx="3" fill="none" stroke="var(--gpu)" stroke-dasharray="4 3"/>
+    <text x="517" y="160" text-anchor="middle" class="t-gpu">core blocks × N passes</text>
+    <text x="517" y="180" text-anchor="middle" class="t-gpu">hint cross-attn each pass</text>
+    <rect x="618" y="146" width="66" height="40" rx="3" fill="none" stroke="var(--gpu)"/><text x="651" y="171" text-anchor="middle" class="t-gpu">coda</text>
+    <path d="M416 166 H432 M602 166 H618" stroke="var(--gpu)" fill="none"/>
+    <text x="346" y="216" class="t-gpu">small, shared weights: learns to compose</text>
+    <text x="346" y="236" class="t-gpu">and reason; reads memory, does not store it</text>
+    <path d="M140 258 V292 H430" stroke="var(--cpu)" fill="none" stroke-dasharray="4 3"/>
+    <path d="M515 258 V292" stroke="var(--gpu)" fill="none"/>
+    <rect x="430" y="280" width="170" height="30" rx="4" fill="none" stroke="var(--ink)"/>
+    <text x="515" y="300" text-anchor="middle" class="lbl">logits + gated count bonus</text>
+    <text x="150" y="286">counts</text>
+    <path d="M600 295 H660" stroke="var(--ink)" fill="none"/><path d="M654 290 L660 295 L654 300" stroke="var(--ink)" fill="none"/>
+    <text x="668" y="299" class="lbl">xₜ₊₁</text>
+  </svg></div><figcaption class="l-en"><b>Figure 6. A dual model we can build today.</b> The CPU side is the 100B-token suffix array from section 4. It costs no gradients and grows by appending text. The GPU side is a small looped core that sees the hints at every pass and adds a gated bonus from the counts to its own logits. During training each lookup excludes the current document, so the core learns to use the memory instead of copying from it.</figcaption><figcaption class="l-ko" lang="ko"><b>그림 6. 지금 만들 수 있는 이중 모델.</b> CPU 쪽은 4절의 1,000억 토큰 suffix array다. gradient가 들지 않고 텍스트를 덧붙이기만 하면 커진다. GPU 쪽은 매 pass마다 힌트를 보는 작은 루프 코어이고, 개수에서 나온 gated bonus를 자기 logit에 더한다. 학습 중에는 모든 조회에서 현재 문서를 빼서, 코어가 메모리를 베끼지 않고 쓰는 법을 배우게 한다.</figcaption><figcaption class="l-zh" lang="zh"><b>图 6. 今天就能搭建的双模型。</b>CPU 端是第 4 节的 1000 亿 token 后缀数组，不需要梯度，追加文本即可扩容。GPU 端是一个小型循环核心，每一轮都读取提示，并把由计数得到的门控加成加到自己的 logits 上。训练时每次查询都排除当前文档，让核心学会使用记忆而不是照抄。</figcaption>
+</figure>
+
+<div class="l-en"><div class="tbl"><table><thead><tr><th></th><th>Parameter offloading</th><th>CPU–GPU dual LLM</th></tr></thead><tbody><tr><td>Goal</td><td>Work around GPU memory limits</td><td>Separate optimization from memory</td></tr><tr><td>CPU</td><td>Cold storage for weights</td><td><span class="cpu">Statistical LM: counts, retrieval, exact long-tail evidence</span></td></tr><tr><td>GPU</td><td>Holds all knowledge and compute</td><td><span class="gpu">Compact neural LM: composition and reasoning</span></td></tr><tr><td>Learning</td><td>Gradient descent on every parameter</td><td>One-shot writing on CPU, iterative learning on GPU</td></tr></tbody></table></div></div><div class="l-ko" lang="ko"><div class="tbl"><table><thead><tr><th></th><th>파라미터 오프로딩</th><th>CPU–GPU 이중 LLM</th></tr></thead><tbody><tr><td>목표</td><td>GPU 메모리 한계 우회</td><td>최적화와 기억의 분리</td></tr><tr><td>CPU</td><td>가중치 냉장 창고</td><td><span class="cpu">통계 LM: 개수, 검색, 정확한 롱테일 증거</span></td></tr><tr><td>GPU</td><td>모든 지식과 계산을 떠안음</td><td><span class="gpu">작은 신경 LM: 조합과 추론</span></td></tr><tr><td>학습</td><td>모든 파라미터에 gradient descent</td><td>CPU는 한 번 쓰기, GPU는 반복 학습</td></tr></tbody></table></div></div><div class="l-zh" lang="zh"><div class="tbl"><table><thead><tr><th></th><th>参数卸载</th><th>CPU–GPU 双 LLM</th></tr></thead><tbody><tr><td>目标</td><td>绕开 GPU 显存限制</td><td>把优化与记忆分开</td></tr><tr><td>CPU</td><td>权重的冷存储</td><td><span class="cpu">统计 LM：计数、检索、精确的长尾证据</span></td></tr><tr><td>GPU</td><td>承载全部知识与计算</td><td><span class="gpu">紧凑神经 LM：组合与推理</span></td></tr><tr><td>学习</td><td>对所有参数做梯度下降</td><td>CPU 一次写入，GPU 迭代学习</td></tr></tbody></table></div></div>
+
+<div class="col">
+<p class="l-en">Scaling laws then take two arguments instead of one:</p><p class="l-ko" lang="ko">그러면 scaling law는 인자를 하나가 아니라 두 개 받는다.</p><p class="l-zh" lang="zh">于是缩放定律的输入从一个变成两个：</p>
+
+<div class="math">\[P(y \mid x) = F_{\text{GPU}}\big(x,\; M_{\text{CPU}}(x)\big)\]</div>
+<p class="l-en">Two questions follow. Is it cheaper to double <span class="gpu">N<sub>GPU</sub></span> or to grow <span class="cpu">M<sub>CPU</sub></span> 10×? And as the CPU memory approaches the infinite limit, how small can the GPU network get?</p><p class="l-ko" lang="ko">두 가지 질문이 따라온다. <span class="gpu">N<sub>GPU</sub></span>를 두 배로 하는 것과 <span class="cpu">M<sub>CPU</sub></span>를 10배로 하는 것 중 무엇이 더 싼가? 그리고 CPU 메모리가 무한 극한에 다가갈 때 GPU 네트워크는 얼마나 작아질 수 있는가?</p><p class="l-zh" lang="zh">随之而来两个问题。把 <span class="gpu">N<sub>GPU</sub></span> 翻倍和把 <span class="cpu">M<sub>CPU</sub></span> 扩大 10 倍，哪个更划算？当 CPU 记忆逼近无限极限时，GPU 网络能有多小？</p>
+
+<h2 class="l-en">Epilogue: learn less, remember more</h2><h2 class="l-ko" lang="ko">에필로그: 덜 배우고 더 기억하기</h2><h2 class="l-zh" lang="zh">尾声：少学一点，多记一点</h2>
+
+<p class="l-en">The unlearned 65B parameters point at a blind spot in modern pretraining. A large part of what we push into dense matrices through thousands of optimizer steps is time-invariant statistical memory, information that only needs to be written once and looked up when needed. Our measurements so far agree: hints buy about 2.6× in tokens, the network stops memorizing what the table holds, and a model with no pretraining learns faster with the table beside it. The next generation may come less from training larger networks faster and more from <span class="m" data-k="k9" tabindex="0"><strong>reducing what the network has to learn at all</strong></span>.</p><p class="l-ko" lang="ko">학습되지 않은 650억 파라미터는 현대 pretraining의 사각지대를 가리킨다. 수천 번의 optimizer step으로 dense 행렬에 밀어 넣는 것의 상당 부분은 시점과 무관한 통계적 기억, 즉 한 번 쓰고 필요할 때 찾아보면 되는 정보다. 지금까지의 측정도 같은 방향이다. 힌트는 토큰 기준 약 2.6배의 효율을 주고, 네트워크는 테이블이 가진 것을 외우기를 멈추며, pretraining 없는 모델도 테이블 옆에서 더 빨리 배운다. 다음 세대는 더 큰 네트워크를 더 빨리 학습하는 데서보다 <span class="m" data-k="k9" tabindex="0"><strong>네트워크가 배워야 할 것 자체를 줄이는 데서</strong></span> 나올지도 모른다.</p><p class="l-zh" lang="zh">那 650 亿个未被学习的参数指向了现代预训练的一个盲区。我们通过成千上万次优化步骤塞进稠密矩阵的东西，很大一部分是与时间无关的统计记忆，只需写入一次、需要时查阅。我们目前的测量也指向同一方向：提示带来约 2.6 倍的 token 效率，网络不再记忆表中已有的内容，没有预训练的模型在表的帮助下也学得更快。下一代模型或许不在于更快地训练更大的网络，而在于<span class="m" data-k="k9" tabindex="0"><strong>减少网络本身需要学习的东西</strong></span>。</p>
+
+<hr>
+<ol class="refs">
+<li>NanoGPT speedrun: <a href="https://github.com/KellerJordan/modded-nanogpt" target="_blank" rel="noopener">github.com/KellerJordan/modded-nanogpt</a></li>
+<li>Infini-gram: <a href="https://github.com/liujch1998/infini-gram" target="_blank" rel="noopener">github.com/liujch1998/infini-gram</a></li>
+<li class="l-en">Engram-style hashed N-gram memory and the 6.7-second hint-index run are cited as reported by their authors. All charts come from our own runs.</li><li class="l-ko" lang="ko">Engram식 해시 N-gram 메모리와 6.7초 힌트 인덱스 결과는 저자들의 보고를 인용했다. 모든 그래프는 우리 실험에서 나왔다.</li><li class="l-zh" lang="zh">Engram 式哈希 N-gram 记忆和 6.7 秒提示索引的结果引自作者的报告。所有图表均来自我们自己的实验。</li>
+
+</ol>
+<h3 class="l-en">Citation</h3><h3 class="l-ko" lang="ko">인용</h3><h3 class="l-zh" lang="zh">引用</h3>
+
+<div class="bib"><pre id="bibtex">@misc{lee2026unlearned,
+  author       = {Lee, Junhoo},
+  title        = {The Mystery of the Unlearned Parameters: From Engram Tables to {CPU--GPU} Dual {LLMs}},
+  year         = {2026},
+  month        = nov,
+  howpublished = {\url{https://junhoo.me/mysteryofunlearnedparameters}},
+  note         = {Blog post}
+}</pre><button type="button" id="copyBib"><span class="l-en">copy</span><span class="l-ko" lang="ko">복사</span><span class="l-zh" lang="zh">复制</span></button></div>
+</div></div>
+<div class="counter" id="counter" aria-live="polite"><span><span class="l-en">mysteries revealed</span><span class="l-ko" lang="ko">풀린 미스터리</span><span class="l-zh" lang="zh">已揭开的谜团</span> <b id="cnt">0</b> / <span id="tot">9</span></span><span class="dots" id="dots"></span><button type="button" id="revealAll"><span class="l-en">reveal all</span><span class="l-ko" lang="ko">모두 보기</span><span class="l-zh" lang="zh">全部显示</span></button></div>
+<script>
+(function(){
+  const root=document.documentElement;
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  function setLang(l){
+    if(l==='en')root.removeAttribute('data-lang');else root.setAttribute('data-lang',l);
+    root.lang=l==='zh'?'zh':l==='ko'?'ko':'en';
+    document.querySelectorAll('.langs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===l)));
+    store.set('ll-lang',l);
+    document.dispatchEvent(new Event('langchange'));
+  }
+  document.querySelectorAll('.langs button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+  setLang(store.get('ll-lang')||'en');
+
+  const keys=[...new Set([...document.querySelectorAll('.m')].map(e=>e.dataset.k))];
+  const seen=new Set();
+  const dots=document.getElementById('dots');
+  keys.forEach(()=>{const i=document.createElement('i');dots.append(i)});
+  document.getElementById('tot').textContent=keys.length;
+  function mark(k){
+    if(seen.has(k))return;
+    seen.add(k);
+    document.querySelectorAll('.m[data-k="'+k+'"]').forEach(e=>e.classList.add('seen'));
+    document.getElementById('cnt').textContent=seen.size;
+    [...dots.children].forEach((d,i)=>d.classList.toggle('on',i<seen.size));
+  }
+  document.querySelectorAll('.m').forEach(e=>{
+    let t;
+    e.addEventListener('mouseenter',()=>{t=setTimeout(()=>mark(e.dataset.k),450)});
+    e.addEventListener('mouseleave',()=>clearTimeout(t));
+    e.addEventListener('click',()=>mark(e.dataset.k));
+    e.addEventListener('focus',()=>mark(e.dataset.k));
+  });
+  document.getElementById('revealAll').addEventListener('click',()=>{keys.forEach(mark);document.body.classList.add('revealed')});
+  document.querySelectorAll('.fig').forEach(f=>{
+    f.addEventListener('mouseenter',()=>f.classList.add('seen'));
+    f.addEventListener('click',()=>f.classList.add('seen'));
+  });
+  const hero=document.getElementById('hero');
+  hero.addEventListener('pointermove',ev=>{const r=hero.getBoundingClientRect();hero.style.setProperty('--mx',(ev.clientX-r.left)+'px');hero.style.setProperty('--my',(ev.clientY-r.top)+'px')});
+})();
+</script>
+
+<script>
+(function(){
+  const root=document.documentElement;
+  const lang=()=>root.getAttribute('data-lang')||'en';
+  /* Figure 1 parts */
+  const PARTS={"corpus": ["Training corpus", "The raw text. In a dense model it is compressed into weights by gradient descent. Here it is kept, almost verbatim, on the CPU side.", "학습 코퍼스", "원본 텍스트다. dense 모델에서는 gradient descent로 가중치에 압축된다. 여기서는 거의 그대로 CPU 쪽에 남는다.", "训练语料", "原始文本。在稠密模型里它被梯度下降压缩进权重；这里它几乎原样保存在 CPU 端。"], "build": ["Build once", "Counting, sorting or suffix-array construction runs once over the corpus. It is a write, not an optimization: no loss, no steps, no learning rate.", "한 번만 구축", "개수 세기, 정렬, suffix array 구축을 코퍼스에 한 번 돌린다. 최적화가 아니라 쓰기다. 손실도, step도, 학습률도 없다.", "一次构建", "对语料做一次计数、排序或后缀数组构建。这是写入而不是优化：没有损失、没有步数、没有学习率。"], "cpu": ["Statistical LM", "The memory engine. Every context gets its own exact entry, so there are no hash collisions and no interference between early and late updates. It lives in cheap system RAM and scales with storage, not with GPU memory.", "통계 LM", "기억 엔진이다. 모든 문맥이 자기만의 정확한 항목을 가지므로 해시 충돌도, 초반과 후반 갱신 사이의 간섭도 없다. 값싼 시스템 RAM에 있고 GPU 메모리가 아니라 저장 공간에 따라 커진다.", "统计 LM", "记忆引擎。每个上下文都有自己精确的条目，没有哈希冲突，也没有早期与后期更新之间的干扰。它位于便宜的系统内存中，随存储而不是显存扩展。"], "tokens": ["Context", "The text so far. At every position the same prefix goes to both halves of the model.", "문맥", "지금까지의 텍스트다. 매 위치에서 같은 접두사가 모델의 두 부분에 동시에 들어간다.", "上下文", "到目前为止的文本。每个位置上，同一个前缀同时送往模型的两部分。"], "query": ["Query", "The CPU side looks up the longest suffix of the context it has seen before. This runs on idle CPU cores, in parallel with the GPU forward pass.", "조회", "CPU 쪽은 문맥의 접미사 중 이전에 본 가장 긴 것을 찾는다. 남는 CPU 코어에서 GPU forward와 병렬로 돈다.", "查询", "CPU 端查找上下文中出现过的最长后缀。它在空闲的 CPU 核心上运行，与 GPU 前向计算并行。"], "hints": ["Hints", "What comes back: next-token candidates with counts, how long the match was, and the text that followed. A few hundred bytes per position.", "힌트", "돌아오는 것: 개수가 붙은 다음 토큰 후보, 일치한 길이, 그 뒤에 이어진 텍스트. 위치당 수백 바이트다.", "提示", "返回的内容：带计数的下一个 token 候选、匹配长度，以及其后的文本。每个位置几百字节。"], "embed": ["Token embedding", "The usual input layer of the neural model.", "토큰 임베딩", "신경 모델의 일반적인 입력층이다.", "token 嵌入", "神经模型通常的输入层。"], "encoder": ["Hint encoder", "Turns counts and candidate tokens into vectors the network can read. It is tiny and trained with the GPU model.", "힌트 인코더", "개수와 후보 토큰을 네트워크가 읽을 수 있는 벡터로 바꾼다. 아주 작고 GPU 모델과 함께 학습된다.", "提示编码器", "把计数和候选 token 变成网络能读取的向量。它很小，与 GPU 模型一起训练。"], "layers": ["Neural LM", "A small network that no longer has to store surface statistics. Its capacity goes to composition, abstraction and reasoning over the context and the hints.", "신경 LM", "표면 통계를 저장할 필요가 없어진 작은 네트워크다. 용량을 문맥과 힌트 위에서의 조합, 추상화, 추론에 쓴다.", "神经 LM", "不再需要存储表层统计的小网络。它把容量用于在上下文和提示之上的组合、抽象与推理。"], "fusion": ["Fusion", "Where memory meets computation. Hints can enter the hidden state, the logits, or both. The network learns how much to trust them in each context.", "결합", "기억과 계산이 만나는 곳이다. 힌트는 hidden state로, logit으로, 또는 둘 다로 들어갈 수 있다. 네트워크는 문맥마다 힌트를 얼마나 믿을지 배운다.", "融合", "记忆与计算相遇的地方。提示可以进入隐藏状态、logits，或两者兼有。网络学习在每个上下文中该多大程度信任它们。"], "head": ["Output", "The neural logits are combined with a prior from the counts. When the memory has seen the context many times, the prior carries the prediction; when it has not, the network does.", "출력", "신경 logit에 개수에서 나온 prior를 합친다. 메모리가 그 문맥을 여러 번 봤으면 prior가 예측을 이끌고, 처음 보는 문맥이면 네트워크가 이끈다.", "输出", "神经 logits 与来自计数的先验相结合。记忆见过该上下文很多次时，由先验主导预测；没见过时，由网络主导。"], "grad": ["Two learning regimes", "Backpropagation and optimizer state exist only on the GPU side. The CPU side is written once and read many times. This is the split the Infinite-Sparse argument predicts.", "두 가지 학습 영역", "역전파와 optimizer state는 GPU 쪽에만 있다. CPU 쪽은 한 번 쓰고 여러 번 읽는다. 무한 희소 논증이 예측하는 분리가 이것이다.", "两种学习区间", "反向传播和优化器状态只存在于 GPU 端。CPU 端写入一次、读取多次。这正是无限稀疏论证所预测的分工。"]};
+  const arch=document.getElementById('arch'), txt=document.getElementById('archText');
+  function showPart(p){
+    arch.classList.add('focus');
+    arch.querySelectorAll('g[data-part]').forEach(g=>g.classList.toggle('on',g.dataset.part===p));
+    const d=PARTS[p], i=lang()==='ko'?2:lang()==='zh'?4:0;
+    txt.innerHTML='<b>'+d[i]+'.</b> '+d[i+1];
+  }
+  arch.querySelectorAll('g[data-part]').forEach(g=>{
+    g.addEventListener('mouseenter',()=>showPart(g.dataset.part));
+    g.addEventListener('click',()=>showPart(g.dataset.part));
+    g.addEventListener('focus',()=>showPart(g.dataset.part));
+  });
+  arch.addEventListener('mouseleave',()=>{arch.classList.remove('focus');arch.querySelectorAll('g.on').forEach(g=>g.classList.remove('on'))});
+  showPart('cpu'); arch.classList.remove('focus'); arch.querySelectorAll('g.on').forEach(g=>g.classList.remove('on'));
+  document.addEventListener('langchange',()=>{const on=arch.querySelector('g.on');showPart(on?on.dataset.part:'cpu');if(!on){arch.classList.remove('focus');arch.querySelectorAll('g.on').forEach(g=>g.classList.remove('on'))}});
+
+  /* Figure 2 speedrun */
+  const SR=[{"t": 45.0, "d": "2024-05-28", "s": "llm.c baseline", "u": "https://github.com/karpathy/llm.c/discussions/481", "mem": false}, {"t": 31.4, "d": "2024-06-06", "s": "Tuned learning rate & rotary embeddings", "u": "https://x.com/kellerjordan0/status/1798863559243513937", "mem": false}, {"t": 24.9, "d": "2024-10-04", "s": "Introduced the Muon optimizer", "u": "https://x.com/kellerjordan0/status/1842300916864844014", "mem": false}, {"t": 22.3, "d": "2024-10-11", "s": "Muon improvements", "u": "https://x.com/kellerjordan0/status/1844820919061287009", "mem": false}, {"t": 15.2, "d": "2024-10-14", "s": "Pad embeddings, ReLU², zero-init projections, QK-norm", "u": "https://x.com/kellerjordan0/status/1845865698532450646", "mem": false}, {"t": 13.1, "d": "2024-10-18", "s": "Distributed the overhead of Muon", "u": "https://x.com/kellerjordan0/status/1847291684016783746", "mem": false}, {"t": 12.0, "d": "2024-10-18", "s": "Upgraded PyTorch 2.5.0", "u": "https://x.com/kellerjordan0/status/1847358578686152764", "mem": false}, {"t": 10.8, "d": "2024-11-03", "s": "Untied embedding and head", "u": "https://x.com/kellerjordan0/status/1853188916704387239", "mem": false}, {"t": 8.2, "d": "2024-11-06", "s": "Value and embedding skip connections, momentum warmup, logit softcap", "u": "https://x.com/kellerjordan0/status/1854296101303800108", "mem": false}, {"t": 7.8, "d": "2024-11-08", "s": "Bfloat16 activations", "u": "https://x.com/kellerjordan0/status/1855267054774865980", "mem": false}, {"t": 7.2, "d": "2024-11-10", "s": "U-net pattern skip connections & double lr", "u": "https://x.com/kellerjordan0/status/1856053121103093922", "mem": false}, {"t": 5.03, "d": "2024-11-19", "s": "1024-ctx dense causal attention → 64K-ctx FlexAttention", "u": "https://x.com/kellerjordan0/status/1859331370268623321", "mem": false}, {"t": 4.66, "d": "2024-11-24", "s": "Attention window warmup", "u": "https://x.com/hi_tysam/status/1860851011797053450", "mem": false}, {"t": 4.41, "d": "2024-12-04", "s": "Value Embeddings", "u": "https://x.com/KoszarskyB/status/1864746625572257852", "mem": true}, {"t": 3.95, "d": "2024-12-08", "s": "U-net pattern value embeddings, assorted code optimizations", "u": "https://x.com/YouJiacheng/status/1865761473886347747", "mem": true}, {"t": 3.8, "d": "2024-12-10", "s": "Split value embeddings, block sliding window, separate block mask", "u": "https://x.com/YouJiacheng/status/1866734331559071981", "mem": true}, {"t": 3.57, "d": "2024-12-17", "s": "Sparsify value embeddings, improve rotary embeddings, drop an attn layer", "u": "https://x.com/YouJiacheng/status/1868938024731787640", "mem": true}, {"t": 3.4, "d": "2025-01-04", "s": "Lower logit softcap from 30 to 15", "u": "https://x.com/kellerjordan0/status/1876048851158880624", "mem": false}, {"t": 3.142, "d": "2025-01-13", "s": "FP8 head, offset logits, lr decay to 0.1 instead of 0.0", "u": "https://x.com/YouJiacheng/status/1878827972519772241", "mem": false}, {"t": 2.992, "d": "2025-01-16", "s": "Merged QKV weights, long-short attention, attention scale, lower Adam epsilon, batched Muon", "u": "https://x.com/leloykun/status/1880301753213809016", "mem": false}, {"t": 2.933, "d": "2025-01-26", "s": "Reduced batch size", "u": "https://x.com/leloykun/status/1885640350368420160", "mem": false}, {"t": 2.99, "d": "2025-05-24", "s": "Faster gradient all-reduce", "u": "https://x.com/KonstantinWille/status/1927137223238909969", "mem": false}, {"t": 2.979, "d": "2025-05-25", "s": "Overlap computation and gradient communication", "u": "https://x.com/kellerjordan0/status/1927460573098262616", "mem": false}, {"t": 2.966, "d": "2025-05-30", "s": "Replace gradient all_reduce with reduce_scatter", "u": "", "mem": false}, {"t": 2.896, "d": "2025-07-13", "s": "Upgrade PyTorch to 2.9.0.dev20250713+cu126", "u": "", "mem": false}, {"t": 2.863, "d": "2025-07-13", "s": "Align training batch starts with EoS, increase cooldown frac to .45", "u": "", "mem": false}, {"t": 2.817, "d": "2025-07-18", "s": "Transpose one of the MLP matrices + add Triton kernel for symmetric matmul", "u": "", "mem": false}, {"t": 2.812, "d": "2025-08-23", "s": "Sparse attention gate", "u": "", "mem": false}, {"t": 2.731, "d": "2025-09-03", "s": "Flash Attention 3, 2048 max_doc_len, update ws schedule", "u": "", "mem": false}, {"t": 2.717, "d": "2025-09-05", "s": "Drop first MLP layer", "u": "", "mem": false}, {"t": 2.656, "d": "2025-09-10", "s": "Dynamically incorporate YaRN during training and validation", "u": "", "mem": false}, {"t": 2.625, "d": "2025-09-11", "s": "Optimize distributed training, improve skip connection gating, and enhance bfloat16 usage", "u": "", "mem": false}, {"t": 2.565, "d": "2025-09-15", "s": "Asynchronously fetch and index data batches, extend final layer attention window for validation", "u": "", "mem": false}, {"t": 2.547, "d": "2025-09-18", "s": "Smear token embeddings 1 position forward", "u": "", "mem": false}, {"t": 2.527, "d": "2025-09-21", "s": "Drop first attn layer, extend all long windows for validation, update schedule", "u": "", "mem": false}, {"t": 2.495, "d": "2025-09-23", "s": "MuonCustomSizing, perform mlp and attn reduce scatter in shared call", "u": "", "mem": false}, {"t": 2.483, "d": "2025-09-27", "s": "Compute cross entropy in BF16 during training", "u": "", "mem": false}, {"t": 2.476, "d": "2025-09-29", "s": "Polar Express, replacement for Newton-Schulz", "u": "", "mem": false}, {"t": 2.447, "d": "2025-09-30", "s": "Only update Adam params every other step, reduce batch size", "u": "", "mem": false}, {"t": 2.358, "d": "2025-10-04", "s": "Backout, misc hyperparameter tuning, optimize lambda padding", "u": "", "mem": false}, {"t": 2.345, "d": "2025-10-24", "s": "NorMuon", "u": "https://arxiv.org/pdf/2510.05491", "mem": false}, {"t": 2.313, "d": "2025-10-27", "s": "Update NorMuon LR, Step Logic", "u": "", "mem": false}, {"t": 2.284, "d": "2025-11-10", "s": "Cautious Weight Decay w/ schedule", "u": "", "mem": false}, {"t": 2.269, "d": "2025-11-16", "s": "Backward hooks on Adam, [Profiling 101](https://blog.underfit.ai/profiling-101-nanogpt)", "u": "", "mem": false}, {"t": 2.248, "d": "2025-11-18", "s": "Refine skip arch, update exponential decay init", "u": "", "mem": false}, {"t": 2.203, "d": "2025-11-29", "s": "Batch size schedule", "u": "https://x.com/classiclarryd/status/1998212158770065844", "mem": false}, {"t": 2.193, "d": "2025-12-10", "s": "Multiply attn lambda with weight instead of data, fix warmup", "u": "https://x.com/classiclarryd/status/1999630732814348451", "mem": false}, {"t": 2.17, "d": "2025-12-11", "s": "Speed up Muon, additional pre-multiply lambda, reshape matrices, update lr, update NorMuon axis", "u": "https://x.com/classiclarryd/status/2000272495644152317", "mem": false}, {"t": 2.146, "d": "2025-12-14", "s": "Partial Key Offset", "u": "https://x.com/classiclarryd/status/2000841339299402142", "mem": false}, {"t": 2.128, "d": "2025-12-18", "s": "Extend Cautious Weight Decay to Adam parameters", "u": "https://x.com/classiclarryd/status/2002482925741486381", "mem": false}, {"t": 2.075, "d": "2025-12-19", "s": "Retie Embed to lm_head, retune fp8 scales", "u": "https://x.com/classiclarryd/status/2003167208483209668", "mem": false}, {"t": 2.037, "d": "2025-12-21", "s": "Smooth scalars via beta increase, decrease smear gate lr, freeze scalars during transitions, adam all reduce", "u": "https://x.com/classiclarryd/status/2003863282613190656", "mem": false}, {"t": 1.988, "d": "2025-12-22", "s": "Multi-token prediction, untie embed/lm_head at 2/3 training, lr update, tweak CWD", "u": "https://x.com/classiclarryd/status/2004248941878296580", "mem": false}, {"t": 1.94, "d": "2025-12-26", "s": "Asymmetric Logit Rescale", "u": "https://x.com/classiclarryd/status/2004791008098480232", "mem": false}, {"t": 1.918, "d": "2025-12-29", "s": "Gates on value embeds and skip connection", "u": "https://x.com/classiclarryd/status/2005659526960492638", "mem": true}, {"t": 1.894, "d": "2025-12-31", "s": "Optimize and compile Adam, increase Adam buffer precision, move gates from Muon to Adam parameter banks", "u": "https://x.com/classiclarryd/status/2007882371576873445", "mem": false}, {"t": 1.878, "d": "2026-01-04", "s": "Bfloat16 attn/mlp weights, mixed precision Muon, interweave Adam/Muon, finer-grain Adam beta", "u": "https://x.com/classiclarryd/status/2008261904566022590", "mem": false}, {"t": 1.82, "d": "2026-01-07", "s": "Paired Head Attention", "u": "https://x.com/classiclarryd/status/2008963501688324228", "mem": false}, {"t": 1.781, "d": "2026-01-10", "s": "Fused triton kernel for linear relu square MLP step", "u": "https://x.com/classiclarryd/status/2010545452832407943", "mem": false}, {"t": 1.765, "d": "2026-01-16", "s": "Fused triton kernel for softcapped multi-token prediction cross entropy step", "u": "https://x.com/classiclarryd/status/2012927211448516796", "mem": false}, {"t": 1.748, "d": "2026-01-18", "s": "Unified Optimizers and Transposed LM Head", "u": "https://x.com/classiclarryd/status/2013399457841160702", "mem": false}, {"t": 1.655, "d": "2026-01-19", "s": "Bigram Hash Embedding", "u": "https://x.com/classiclarryd/status/2013520088297558274", "mem": true}, {"t": 1.65, "d": "2026-01-26", "s": "Untie Value Embeds", "u": "https://x.com/classiclarryd/status/2016968386476200301", "mem": true}, {"t": 1.63, "d": "2026-01-30", "s": "Tuned nonzero Attn V and O init", "u": "https://x.com/classiclarryd/status/2017735338601726357", "mem": false}, {"t": 1.613, "d": "2026-01-30", "s": "Group Value Embeds into single parameter", "u": "https://x.com/classiclarryd/status/2018057653742920016", "mem": true}, {"t": 1.595, "d": "2026-01-31", "s": "Torch 2.10", "u": "", "mem": false}, {"t": 1.54, "d": "2026-01-31", "s": "Tune fused softcap kernels and fuse fp8 quantization in LM head", "u": "https://x.com/classiclarryd/status/2021015642472869978", "mem": false}, {"t": 1.535, "d": "2026-01-31", "s": "Move bigram hash to GPU", "u": "https://x.com/classiclarryd/status/2021450730117460439", "mem": true}, {"t": 1.528, "d": "2026-02-02", "s": "Kernel Optimizations", "u": "https://x.com/classiclarryd/status/2023319358303510719", "mem": false}, {"t": 1.521, "d": "2026-02-03", "s": "Tune value embed layout and ve_gates", "u": "https://x.com/classiclarryd/status/2023319358303510719", "mem": true}, {"t": 1.516, "d": "2026-02-06", "s": "Sparse bigram gradient comms and optimized loading on CPU", "u": "https://x.com/classiclarryd/status/2023319358303510719", "mem": true}, {"t": 1.496, "d": "2026-02-10", "s": "Increase minimum lr and add max_seq_len schedule", "u": "https://x.com/classiclarryd/status/2023319358303510719", "mem": false}, {"t": 1.485, "d": "2026-02-12", "s": "Partitioned Hyperconnections", "u": "https://x.com/classiclarryd/status/2026131531207761924", "mem": false}, {"t": 1.468, "d": "2026-02-16", "s": "Flattened GPT forward, removed post attention lambdas, added transpose kernels", "u": "https://x.com/classiclarryd/status/2027228782483182059", "mem": false}, {"t": 1.453, "d": "2026-02-23", "s": "Cross Entropy Kernel Optimizations", "u": "https://x.com/classiclarryd/status/2030087884854939947", "mem": false}, {"t": 1.446, "d": "2026-02-28", "s": "Reuse and tune backward transpose kernel", "u": "https://x.com/classiclarryd/status/2030403421027852337", "mem": false}, {"t": 1.435, "d": "2026-03-06", "s": "Replace partitioned hyperconnections with single saved activation", "u": "https://x.com/classiclarryd/status/2030465730718908884", "mem": false}, {"t": 1.426, "d": "2026-03-22", "s": "Tighten bounds on fa3 max_num_docs to match fineweb distribution", "u": "https://x.com/classiclarryd/status/2038077427180851240", "mem": false}, {"t": 1.411, "d": "2026-04-04", "s": "Fuse Cross Entropy Fwd/Bwk Kernel, to avoid recalc on softcap sigmoid", "u": "https://x.com/classiclarryd/status/2045270983343485140", "mem": false}, {"t": 1.406, "d": "2026-04-08", "s": "In Muon orthogonize Q and K matrices in pairs of heads, instead of across the full 6 head matrix", "u": "https://x.com/classiclarryd/status/2046046809609457904", "mem": false}, {"t": 1.363, "d": "2026-04-22", "s": "MUDD Skip Connections", "u": "https://x.com/classiclarryd/status/2058486428255035457", "mem": false}, {"t": 1.353, "d": "2026-04-29", "s": "Learnable XSA", "u": "https://x.com/classiclarryd/status/2058975556520329302", "mem": false}, {"t": 1.328, "d": "2026-05-20", "s": "Sign Trick on Bigram Embed", "u": "https://x.com/classiclarryd/status/2063061926092099868", "mem": true}, {"t": 1.32, "d": "2026-05-21", "s": "FP8 on MLP up-projection forward pass", "u": "", "mem": false}, {"t": 1.271, "d": "2026-05-27", "s": "MUDD gates and Lightweight Dynamically Composable MHA", "u": "https://x.com/classiclarryd/status/2081451521229881374", "mem": false}, {"t": 1.266, "d": "2026-05-27", "s": "Algebraic rewrite of XSA, same math faster execution", "u": "https://x.com/classiclarryd/status/2081909171554071027", "mem": false}, {"t": 1.256, "d": "2026-06-11", "s": "Faster Implementation of Relu^2 Kernel", "u": "https://x.com/classiclarryd/status/2083739041338630372", "mem": false}, {"t": 1.243, "d": "2026-07-13", "s": "Prefix token prediction auxiliary loss", "u": "https://x.com/classiclarryd/status/2083961001930834419", "mem": false}, {"t": 1.23, "d": "2026-07-17", "s": "MLP down projection in FP8 with efficient delayed scaling metric", "u": "https://x.com/classiclarryd/status/2086582390135406713", "mem": false}, {"t": 1.13, "d": "2026-08-03", "s": "128 -> 96 dim QK, Fuse QK Norm, RoPE, and KeyOffset into Triton, Move MLP bwk to FP8, Move QKV fwd and bwk to FP8.", "u": "", "mem": false}, {"t": 1.126, "d": "2026-08-06", "s": "Mask logits for infeasible token continuations during validation.", "u": "", "mem": false}, {"t": 0.665, "d": "2026-08-30", "s": "Sampled softmax over the early stages,  full FP8 MLP fwd+bwd, 84.6M-row hashed n-gram table, ANVIL optimizer stack, depth reduction + mixed-width QK a", "u": "", "mem": true}];
+  const svg=document.getElementById('srChart'), tip=document.getElementById('srTip'), NS='http://www.w3.org/2000/svg';
+  const W=700,H=380,ml=58,mr=24,mt=18,mb=46;
+  const t0=Date.parse('2024-05-01'),t1=Date.parse('2026-10-01');
+  const x=d=>ml+(Date.parse(d)-t0)/(t1-t0)*(W-ml-mr);
+  const ly0=Math.log10(0.5),ly1=Math.log10(60);
+  const y=v=>mt+(ly1-Math.log10(v))/(ly1-ly0)*(H-mt-mb);
+  function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||svg).append(e);return e}
+  [0.5,1,2,5,10,20,45].forEach(v=>{el('line',{x1:ml,x2:W-mr,y1:y(v),y2:y(v),stroke:'var(--rule)'});const t=el('text',{x:ml-8,y:y(v)+4,'text-anchor':'end'});t.textContent=v+' min'});
+  ['2024-07-01','2025-01-01','2025-07-01','2026-01-01','2026-07-01'].forEach(d=>{const t=el('text',{x:x(d),y:H-mb+20,'text-anchor':'middle'});t.textContent=d.slice(0,7)});
+  let path='';SR.forEach((r,i)=>{path+=(i?' H'+x(r.d)+' V':'M'+x(r.d)+' ')+y(r.t)});
+  el('path',{d:path,fill:'none',stroke:'var(--base)','stroke-width':1.5});
+  SR.forEach(r=>{
+    const c=el('circle',{cx:x(r.d),cy:y(r.t),r:r.mem?5.5:3.5,fill:r.mem?'var(--cpu)':'var(--gpu)',tabindex:0,style:'cursor:pointer'});
+    const show=()=>{tip.hidden=false;tip.innerHTML='<b>'+r.t+' min</b> · '+r.d+'<br>'+r.s.replace(/</g,'&lt;')+(r.u?'<br><a href="'+r.u+'" target="_blank" rel="noopener">source</a>':'');
+      const bb=svg.getBoundingClientRect(),sc=bb.width/W;let lx=x(r.d)*sc+10,ty=y(r.t)*sc-10;
+      if(lx>bb.width-270)lx=x(r.d)*sc-270;tip.style.left=Math.max(4,lx)+'px';tip.style.top=Math.max(4,ty)+'px';c.setAttribute('r',7)};
+    const hide=()=>{tip.hidden=true;c.setAttribute('r',r.mem?5.5:3.5)};
+    c.addEventListener('mouseenter',show);c.addEventListener('mouseleave',hide);c.addEventListener('focus',show);c.addEventListener('blur',hide);c.addEventListener('click',show);
+  });
+  [['2024-12-04',4.41,'value embeddings'],['2026-01-19',1.655,'bigram hash'],['2026-08-30',0.665,'n-gram table']].forEach(([d,v,s])=>{const t=el('text',{x:x(d)-8,y:y(v)-10,'text-anchor':'end',class:'t-cpu'});t.textContent=s});
+  const lab=el('text',{x:ml,y:H-6});lab.textContent='record date';
+
+  /* simulator */
+  const RG={en:['iterative learning: many contexts share each row','write-once memory: most rows are written once or twice','in between'],
+            ko:['반복 학습: 여러 문맥이 한 행을 공유한다','한 번 쓰는 기억: 대부분의 행이 한두 번만 쓰인다','중간'],
+            zh:['迭代学习：许多上下文共享同一行','一次写入记忆：大多数行只被写一两次','介于两者之间']};
+  const fmt=n=>n>=1e12?(n/1e12).toFixed(1)+'T':n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toFixed(1);
+  const pct=x=>(x>0&&x<0.001?'<0.1':(x*100).toFixed(x<0.1?1:0))+'%';
+  const m=document.getElementById('mRange'),t=document.getElementById('tRange');
+  function upd(){
+    const M=10**+m.value,T=10**+t.value,U=T**0.95,used=M*(1-Math.exp(-U/M));
+    const per=T/used,empty=1-used/M,coll=Math.max(0,1-used/U);
+    document.getElementById('mOut').textContent=fmt(M);document.getElementById('tOut').textContent=fmt(T);
+    document.getElementById('vUpd').textContent=per<10?per.toFixed(1):fmt(per);
+    document.getElementById('vEmpty').textContent=pct(empty);document.getElementById('vColl').textContent=pct(coll);
+    const r=document.getElementById('vReg'),L=RG[lang()];
+    if(per>50&&coll>0.3){r.textContent=L[0];r.className='r-iter'}else if(per<=3){r.textContent=L[1];r.className='r-write'}else{r.textContent=L[2];r.className='r-mix'}
+  }
+  m.addEventListener('input',upd);t.addEventListener('input',upd);
+  document.querySelectorAll('#sim .presets button').forEach(b=>b.addEventListener('click',()=>{m.value=b.dataset.m;t.value=b.dataset.t;upd()}));
+  document.addEventListener('langchange',upd);upd();
+
+  /* game */
+  const R=[
+    {p:"The capital of France is",a:"Paris",o:["Paris","Lyon","beautiful","a"],L:5,top:[["Paris",48]]},
+    {p:"Water boils at 100 degrees",a:"Celsius",o:["Celsius","Fahrenheit","Kelvin","hot"],L:6,top:[["Celsius",115],["C",21],["cent…",8],["at",2]]},
+    {p:"To be or not to",a:"be",o:["be","go","see","do"],L:5,top:[["be",4356]]},
+    {p:"import numpy as",a:"np",o:["np","numpy","pd","num"],L:3,top:[["np",102148]]},
+    {p:"Albert Einstein was born in",a:"Ulm",o:["Ulm","Berlin","Germany","1879"],L:5,top:[["Ulm",114],["(space)",64],["Germany",16],["the",8]]},
+    {p:"In 1492, Columbus sailed the ocean",a:"blue",o:["blue","wide","Atlantic","west"],L:9,top:[["blue",273]]},
+    {p:"The mitochondria is the powerhouse of the",a:"cell",o:["cell","body","organism","nucleus"],L:8,top:[["cell",31]]},
+    {p:"A triangle has three",a:"sides",o:["sides","angles","corners","points"],L:4,top:[["sides",674],["angles",289],["corners",12],["vertices",8]]},
+    {p:"She sold 48 clips in April and half as many in",a:"May",o:["May","the","March","June"],L:5,top:[["the",12],["cotton",6],["width",3],["men",1]],reason:true}
+  ];
+  const V={en:{hit:'The memory had this one written down. No reasoning needed.',spread:'The memory spreads its counts, but the right word is in its list.',reason:'The memory backs off to a short phrase and guesses "the". Halving April gives May: that step needs the GPU network.',match:'CPU memory: longest match {L} tokens',fin:'Final: you {y}, memory {m} of {n}. Facts and idioms live in the table. The arithmetic lives in the network.'},
+           ko:{hit:'메모리가 이미 적어 둔 답이다. 추론이 필요 없다.',spread:'메모리는 개수를 나눠 갖지만 정답은 목록 안에 있다.',reason:'메모리는 짧은 구절로 물러나 "the"라고 찍는다. 4월의 절반이면 5월이라는 단계는 GPU 네트워크가 해야 한다.',match:'CPU 메모리: 최장 일치 {L}토큰',fin:'최종: 나 {y}, 메모리 {m} / {n}. 사실과 관용구는 테이블에 있고, 계산은 네트워크에 있다.'},
+           zh:{hit:'记忆里早就写着这个答案，不需要推理。',spread:'记忆把计数分散开，但正确的词就在它的列表里。',reason:'记忆退回到一个短语，猜成了 "the"。四月的一半是五月：这一步需要 GPU 网络来完成。',match:'CPU 记忆：最长匹配 {L} 个 token',fin:'结果：你 {y}，记忆 {m}，共 {n} 题。事实和习语存在表里，算术存在网络里。'}};
+  let i=0,you=0,mem=0,done=false;const $=id=>document.getElementById(id);
+  function show(){
+    const r=R[i];done=false;$('gRound').textContent=(i+1)+' / '+R.length;$('gPrefix').textContent=r.p+' ';
+    const b=document.createElement('span');b.className='blank';b.textContent='____';$('gPrefix').append(b);
+    const box=$('gOpts');box.innerHTML='';
+    const o=r.o.slice();for(let k=o.length-1;k>0;k--){const j=(k*5+i*3)%(k+1);[o[k],o[j]]=[o[j],o[k]]}
+    o.forEach(w=>{const btn=document.createElement('button');btn.type='button';btn.textContent=w;btn.addEventListener('click',()=>pick(w,btn));box.append(btn)});
+    $('gMemBox').hidden=true;$('gVerdict').textContent='';$('gNext').hidden=true;
+  }
+  function verdict(){const r=R[i],v=V[lang()];let s=r.reason?v.reason:(r.top[0][0]===r.a?v.hit:v.spread);if(i===R.length-1)s+=' '+v.fin.replace('{y}',you).replace('{m}',mem).replace('{n}',R.length);$('gVerdict').textContent=s;
+    const h=$('gMemBox').querySelector('.eyebrow');if(h)h.textContent=v.match.replace('{L}',r.L)}
+  function pick(w,btn){
+    if(done)return;done=true;const r=R[i];
+    [...$('gOpts').children].forEach(x=>{x.disabled=true;if(x.textContent===r.a)x.classList.add('ok')});
+    if(w===r.a)you++;else btn.classList.add('no');
+    if(r.top[0][0]===r.a)mem++;
+    $('gYou').textContent=you;$('gMem').textContent=mem;$('gPrefix').querySelector('.blank').textContent=r.a;
+    const box=$('gMemBox');box.innerHTML='';const h=document.createElement('div');h.className='eyebrow';box.append(h);
+    const max=r.top[0][1];
+    r.top.forEach(([tok,c])=>{const row=document.createElement('div');row.className='bar';const a=document.createElement('span');a.textContent=tok;
+      const w2=document.createElement('span');const f=document.createElement('i');w2.append(f);const n=document.createElement('span');n.className='n';n.textContent=c.toLocaleString('en-US');
+      row.append(a,w2,n);box.append(row);requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.width=Math.max(2,100*c/max)+'%'}))});
+    box.hidden=false;verdict();if(i<R.length-1)$('gNext').hidden=false;
+  }
+  $('gNext').addEventListener('click',()=>{i++;show()});
+  document.addEventListener('langchange',()=>{if(done)verdict()});
+  show();
+})();
+</script>
+
+<script>
+(function(){
+  const svg=document.getElementById('arch'); if(!svg)return;
+  const NS='http://www.w3.org/2000/svg', $=id=>svg.querySelector('#'+id);
+  function el(n,a,p,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.append(e);return e}
+  const EX=[
+    {pre:'Interior angles add to 180°.', ctx:['A','triangle','has','three'], q:'"… A triangle has three"', L:4,
+     cand:[['sides',674],['angles',289],['corners',12],['vertices',8]], alpha:[.16,.70,.08,.06], gate:.74,
+     out:[['angles',.78,'mem'],['sides',.17,'mem'],['corners',.03,'mem'],['vertices',.02,'mem']],
+     note:'earlier context says "angles": the network overrules the top count'},
+    {pre:'She sold 48 clips in April and', ctx:['half','as','many','in'], q:'"… half as many in"', L:5,
+     cand:[['the',12],['cotton',6],['width',3],['men',1]], alpha:[.40,.30,.18,.12], gate:.12,
+     out:[['May',.81,'new'],['the',.09,'mem'],['June',.04,'new'],['cotton',.02,'mem']],
+     note:'the memory has no answer: the gate closes and the network computes "May"'}
+  ];
+  const cand=$('cand'),choice=$('choice'),slots=$('slots'),dot=$('dot'),lens=$('lens');
+  let k=0,t0=null,paused=false;
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2, seg=(t,a,b)=>Math.min(1,Math.max(0,(t-a)/(b-a)));
+  function build(e){
+    cand.innerHTML='';choice.innerHTML='';slots.innerHTML='';
+    $('cpuQ').textContent=e.q+'  · match '+e.L;
+    const max=e.cand[0][1];
+    e.cand.forEach(([w,c],i)=>{const y=186+i*24;
+      el('text',{x:46,y:y+5,class:'b3-t',fill:'#e8eef4'},cand,w);
+      el('rect',{x:132,y:y-4,width:150,height:9,rx:4,fill:'#F0AC5F','fill-opacity':.15},cand);
+      el('rect',{x:132,y:y-4,width:0,height:9,rx:4,fill:'#F0AC5F','data-w':150*c/max,class:'cbar'},cand);
+      el('text',{x:344,y:y+5,class:'b3-s',fill:'#c9a06f','text-anchor':'end'},cand,'×'+c.toLocaleString('en-US'))});
+    e.out.forEach(([w,p,src],i)=>{const x=404+i*82,g=el('g',{class:'chip','data-i':i,opacity:0},choice);
+      el('rect',{x:x,y:380,width:76,height:46,rx:8,fill:i===0?'#FFFF66':'none','fill-opacity':i===0?.12:0,stroke:i===0?'#FFFF66':'#5a6b7c','stroke-width':i===0?2:1},g);
+      el('text',{x:x+38,y:400,'text-anchor':'middle',class:'b3-t',fill:i===0?'#FFFF66':'#cfd8e1'},g,w);
+      el('text',{x:x+38,y:418,'text-anchor':'middle',class:'b3-s',fill:src==='new'?'#58C4DD':'#c9a06f'},g,(p*100).toFixed(0)+'% · '+(src==='new'?'net':'mem'))});
+    e.cand.forEach(([w],i)=>{const x=268+i*80;
+      el('rect',{x:x,y:170,width:72,height:30,rx:6,fill:'none',stroke:'#F0AC5F'},slots);
+      el('text',{x:x+36,y:190,'text-anchor':'middle',class:'b3-t',fill:'#F0AC5F'},slots,w);
+      el('rect',{x:x+6,y:212,width:60,height:46,rx:3,fill:'#58C4DD','fill-opacity':.08},slots);
+      el('rect',{x:x+6,y:258-46*e.alpha[i],width:60,height:46*e.alpha[i],rx:3,fill:'#58C4DD'},slots);
+      el('text',{x:x+36,y:274,'text-anchor':'middle',class:'b3-s',fill:'#8fbfd0'},slots,'α '+e.alpha[i].toFixed(2))});
+    $('gateTxt').textContent='gate g = '+e.gate.toFixed(2)+(e.gate>.5?'  (trust the memory)':'  (ignore the memory)');
+    $('lensNote').textContent=e.note;
+  }
+  function along(p,f,c){const L=p.getTotalLength(),pt=p.getPointAtLength(ease(f)*L);dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);dot.setAttribute('fill',c)}
+  function render(t){
+    const e=EX[k];
+    $('ctxPre').textContent=e.pre+' ';
+    const shown=Math.min(e.ctx.length,Math.floor(t/0.35)+1);
+    const pre=$('ctxPre');const x0=44+pre.getComputedTextLength()+6;$('ctx').setAttribute('x',x0);$('ctx').textContent=e.ctx.slice(0,shown).join(' ');
+    const fq=seg(t,1.6,2.2),fb=seg(t,2.2,3.0),fh=seg(t,3.2,3.9),ff=seg(t,3.9,4.3),fl=seg(t,4.3,5.3),fc=seg(t,5.4,6.0);
+    dot.setAttribute('opacity',(fq>0&&fq<1)||(fh>0&&ff<1)?1:0);
+    if(fq>0&&fq<1)along($('pQuery'),fq,'#5CD0B3');else if(fh>0&&fh<1)along($('pHint'),fh,'#F0AC5F');else if(ff>0&&ff<1)along($('pFuse'),ff,'#F0AC5F');
+    cand.querySelectorAll('.cbar').forEach(r=>r.setAttribute('width',(+r.dataset.w)*ease(fb)));
+    ['L1','L2','L3'].forEach((id,i)=>$(id).setAttribute('fill-opacity',fl>i/3&&t<7.6?.28:.06));
+    $('encBox').setAttribute('stroke-width',fh>0&&ff<1?2.5:1);
+    choice.querySelectorAll('.chip').forEach(g=>{const i=+g.dataset.i;g.setAttribute('opacity',t<7.6?seg(t,5.4+i*0.12,5.8+i*0.12)*(i===0?1:.75):Math.max(0,1-(t-7.6)*2))});
+  }
+  function frame(ts){
+    if(!paused){if(t0===null){t0=ts;build(EX[k])}const t=(ts-t0)/1000;render(t);if(t>8.2){k=(k+1)%EX.length;t0=null}}
+    requestAnimationFrame(frame);
+  }
+  function openLens(){lens.classList.add('open');paused=true}
+  function closeLens(){lens.classList.remove('open')}
+  ['encoder','fusion','hints'].forEach(p=>{const g=svg.querySelector('g[data-part="'+p+'"]');
+    g.addEventListener('mouseenter',openLens);g.addEventListener('focus',openLens);g.addEventListener('click',openLens);
+    g.addEventListener('mouseleave',closeLens);g.addEventListener('blur',closeLens)});
+  svg.addEventListener('mouseenter',()=>{paused=true});
+  svg.addEventListener('mouseleave',()=>{paused=false;closeLens()});
+  if(reduce){build(EX[0]);render(6.5);return}
+  build(EX[0]);requestAnimationFrame(frame);
+})();
+</script>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]]},svg:{fontCache:"global"},options:{enableMenu:false}};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" async></script>
+
+<script>
+(function(){const b=document.getElementById('copyBib'),pre=document.getElementById('bibtex');if(!b)return;
+b.addEventListener('click',()=>{const t=pre.textContent;const done=()=>{const o=b.innerHTML;b.textContent='✓';setTimeout(()=>{b.innerHTML=o},1200)};
+const sel=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r)};
+if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,sel)}else sel()});})();
+</script>
+
+</body>
+</html>
