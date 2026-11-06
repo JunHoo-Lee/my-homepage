@@ -11,7 +11,7 @@ publication list, and dedicated project pages for selected papers.
 - `/template-infilling`: Template Infilling project page
 - `/dsv`: Deep Support Vectors project page
 - `/mysteryofunlearnedparameters`: blog post on CPU–GPU dual LMs (static page under `public/`)
-- `/wp-llm`: WP-LLM, a chatbot whose weights were programmed, not trained (static page under `public/wp-llm`)
+- `/wplm`: WPLM, a chatbot whose weights were programmed, not trained (static page under `public/wplm`; `/wp-llm` redirects here)
 
 ## DSV Assets
 
