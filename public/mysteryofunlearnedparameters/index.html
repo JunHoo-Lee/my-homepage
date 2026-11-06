@@ -256,6 +256,15 @@ body.dark-intro{overflow:hidden}
 @media (prefers-reduced-motion:reduce){#intro{display:none}.eye,.ticker .track{animation:none}}
 @media (max-width:640px){.hero-eyes{font-size:1.8rem;top:-1.4rem}.counter .eyes{display:none}}
 
+/* large screens: grow the measure and the type together instead of leaving a thin column */
+@media (min-width:1200px){
+  body{font-size:clamp(1.08rem,.55rem + .5vw,1.32rem)}
+  .wrap{max-width:min(1400px,92vw)}
+  .col,header.hero{max-width:clamp(68ch,52vw,88ch)}
+  .top,figure,.play,.bib{max-width:clamp(980px,72vw,1320px)}
+  figcaption{max-width:clamp(66ch,52vw,88ch)}
+}
+
 .bib{position:relative;margin:.6rem 0 0}
 .bib pre{font-family:var(--mono);font-size:.82rem;line-height:1.55;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:1rem 1rem 1rem;overflow-x:auto;margin:0;white-space:pre}
 .bib button{position:absolute;top:.6rem;right:.6rem;font-family:var(--mono);font-size:.75rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:4px;padding:.25rem .6rem;cursor:pointer}
