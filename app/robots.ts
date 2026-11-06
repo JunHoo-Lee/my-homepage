@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: "*",
             allow: "/",
-            disallow: ["/api/", "/private/", "/login", "/papers", "/tasks"],
+            disallow: ["/api/"],
         },
         sitemap: "https://junhoo.me/sitemap.xml",
     };
