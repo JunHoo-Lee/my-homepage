@@ -103,6 +103,13 @@ export default function Home() {
         <div className={styles.educationList}>
           <article>
             <div>
+              <h3><a href="/wplm">The Chatbot Nobody Trained</a></h3>
+              <p>How a plain-text edit list sets the weights of WPLM, a chatbot that uses infini-gram as its memory.</p>
+            </div>
+            <time>Nov 2026</time>
+          </article>
+          <article>
+            <div>
               <h3><a href="/mysteryofunlearnedparameters">The Mystery of the Unlearned Parameters</a></h3>
               <p>Why huge sparse n-gram tables behave like write-once memory, and what that means for CPU–GPU dual LLMs.</p>
             </div>
