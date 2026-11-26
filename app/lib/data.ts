@@ -27,6 +27,9 @@ export const PROFILE = {
     "affiliation": "KAIST",
     "email": "junhoo.lee@kaist.ac.kr",
     "website": "https://junhoo.me",
+    "scholar": "https://scholar.google.com/citations?user=CvvfGxkAAAAJ",
+    "github": "https://github.com/JunHoo-Lee",
+    "linkedin": "https://www.linkedin.com/in/junhoo-lee-8483b62a5/",
     "bio": [
         "I view AI through the lens of self-reference. Many of its remarkable capabilities emerge from recursive structures in which a system's own outputs, representations, or experiences feed back into its subsequent operation. I am fascinated by why these structures appear across different levels of AI, how they give rise to new capabilities, and what makes them work.",
         "My current research focuses on robot harnesses, looped models, and continual harnessing, while I remain open to exploring other directions. I am a postdoctoral researcher at KAIST, working with Prof. Jinwoo Shin, and received my Ph.D. from Seoul National University under Prof. Nojun Kwak."
@@ -173,6 +176,22 @@ export const PUBLICATIONS: PublicationSection[] = [
         "section": "Preprint",
         "color": "slate",
         "items": [
+            {
+                "title": "N-Gram Memories at Two Bits: Quantizing Lookup Tables in Large Language Models",
+                "authors": [
+                    "Donghoon Han",
+                    "Minseop Jung",
+                    "Dong Woo Kwak",
+                    "SeungJae Lee",
+                    "Junhoo Lee"
+                ],
+                "venue": "arXiv preprint arXiv:2610.21810",
+                "year": "2026",
+                "category": "Large Language Models",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2610.21810"
+            },
             {
                 "title": "RobotUse: Allocating Computation, Context, and Decisions",
                 "authors": [
@@ -510,6 +529,21 @@ export const PUBLICATIONS: PublicationSection[] = [
                 "venue": "IET Image Processing",
                 "year": "2026",
                 "category": "Generative Models",
+                "subTag": "",
+                "tldr": ""
+            },
+            {
+                "title": "Layerwise-Priority-Based Gradient Adjustment for Few-Shot Learning",
+                "authors": [
+                    "Jangho Kim",
+                    "Junhoo Lee",
+                    "Donghoon Han",
+                    "Nojun Kwak"
+                ],
+                "venue": "Expert Systems with Applications",
+                "year": "2025",
+                "paperLink": "https://doi.org/10.1016/j.eswa.2025.127053",
+                "category": "Meta-Learning",
                 "subTag": "",
                 "tldr": ""
             },

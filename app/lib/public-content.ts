@@ -380,9 +380,9 @@ export const PERSON_JSON_LD = {
     url: "https://www.kaist.ac.kr/",
   },
   sameAs: [
-    "https://github.com/JunHoo-Lee",
-    "https://scholar.google.com/citations?user=CvvfGxkAAAAJ",
-    "https://www.linkedin.com/in/junhoo-lee-8483b62a5/",
+    PROFILE.github,
+    PROFILE.scholar,
+    PROFILE.linkedin,
   ],
   award: AWARDS.map((award) => award.title),
   knowsAbout: ["Self-reference", "Robot Harness", "Looped Models", "Continual Harness"],
