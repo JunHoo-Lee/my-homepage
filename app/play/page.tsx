@@ -19,12 +19,12 @@ const GAMES = [
     art: "survivors",
   },
   {
-    href: "/play/drive",
-    badge: "3D",
-    title: "Drive the homepage",
-    blurb: "Drive a toy car around a little world where every section of this site is a place. Bowling and a ramp included.",
-    meta: "Explore · 9 areas",
-    art: "drive",
+    href: "/play/explore",
+    badge: "Open world",
+    title: "Paperlands",
+    blurb: "A voxel island where every section of this site is a landmark and each paper sleeps in its own shrine. Follow the trails, dig, build, and find them all.",
+    meta: "Explore · dig & build · keyboard or touch",
+    art: "explore",
   },
 ] as const;
 
@@ -52,10 +52,11 @@ export default function PlayLauncher() {
                 </>
               ) : (
                 <>
-                  <span className={styles.car} />
-                  <span className={`${styles.pad} ${styles.p1}`} />
-                  <span className={`${styles.pad} ${styles.p2}`} />
-                  <span className={styles.slab} />
+                  <span className={styles.sunDisc} />
+                  <span className={styles.isle} />
+                  <span className={styles.hill} />
+                  <span className={styles.tree} />
+                  <span className={styles.beam} />
                 </>
               )}
             </div>
