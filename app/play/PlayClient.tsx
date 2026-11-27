@@ -236,6 +236,9 @@ export default function PlayClient({ content }: { content: PlayContent }) {
           <button type="button" className={styles.button} onClick={() => setMapOpen((open) => !open)} aria-expanded={mapOpen}>
             Map
           </button>
+          <Link className={styles.button} href="/play">
+            Games
+          </Link>
           <Link className={`${styles.button} ${styles.buttonPrimary}`} href="/">
             Classic view
           </Link>
