@@ -16,6 +16,22 @@ publication list, and dedicated project pages for selected papers.
 - `/play`: game picker, linked from each game as "Other games"
 - `/play/drive`: Drive mode, a three.js + cannon-es world where you drive a toy car around the homepage's sections (`?debug` exposes the car's physics body on `window.__drive`)
 
+## AI Agent Access
+
+The same read-only tool set (`app/lib/agent-tools.ts`) is exposed three ways:
+
+- **WebMCP** (`app/components/WebMCPTools.tsx`): on every page, browsers with
+  `navigator.modelContext` get `get_profile`, `search_publications`,
+  `get_publication_bibtex`, `get_news`, `get_awards_and_service`, `list_pages`
+  and `open_page`. Browsers without WebMCP skip it and never download the data.
+- **Remote MCP server** at `/mcp` (Streamable HTTP, stateless, no auth): the
+  same tools minus `open_page`, plus `llms.txt` / `llms-full.txt` as resources.
+- **llms.txt**: `/llms.txt` (index) and `/llms-full.txt` (all content as Markdown).
+
+Discovery: `/.well-known/mcp/server-card.json` (alias `/.well-known/mcp.json`),
+`/.well-known/api-catalog` (RFC 9727), and `<link>` hints in the root layout.
+Add new pages to `SITE_PAGES` in `app/lib/agent-tools.ts` so agents can find them.
+
 ## DSV Assets
 
 The `Deep Support Vectors` page is built from the official NeurIPS 2024 source
