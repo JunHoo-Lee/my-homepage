@@ -96,21 +96,31 @@ export const HUD_TERMS = {
   level: "h-index",
   xp: "citations",
   kills: "concerns addressed",
+  /** The kill counter's label for a count of n ("1 concern addressed"). */
+  killsLabel: (n: number) => (n === 1 ? "concern addressed" : "concerns addressed"),
   timer: "AoE",
   bossIn: (time: string) => `Reviewer 2 assigned in ${time}`,
   bossActive: "Reviewer 2 is reviewing",
   afterBoss: "until camera-ready",
+  bossBar: "Reviewer 2 · Score 3 · Confidence 5",
 } as const;
 
 export const SCREENS = {
+  /** The title card is the first page of a paper under review. */
+  runningHead: "Under double-blind review · Do not distribute",
   titleKicker: (id: number) => `Submission #${id} · Track: Survival`,
   title: "Gradient Survivors",
+  authors: "Anonymous Author(s)",
   pitch:
     "You are a tiny model under peer review. NaNs, overfitting, hallucinations and reviewer comments swarm in. At 2:30 Reviewer 2 is assigned to your paper. Survive until the 5:00 AoE deadline to get accepted.",
+  controlsCaption: "Table 1: Controls.",
+  bestSoFar: "Best decision so far",
   levelUpKicker: "Camera-ready revision",
   levelUpTitle: "Address one concern",
+  pausedKicker: (id: number | null) => `Submission #${id ?? "—"} · Status: under review`,
   paused: "Paused: coffee break ☕",
   withdraw: "Withdraw & resubmit",
+  decisionKicker: (id: number | null) => `Decision · Submission #${id ?? "—"}`,
 } as const;
 
 export type DecisionId = "DeskReject" | "Reject" | "Borderline" | "Accept" | "Oral";

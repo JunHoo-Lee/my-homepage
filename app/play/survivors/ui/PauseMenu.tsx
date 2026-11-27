@@ -45,7 +45,7 @@ export default function PauseMenu({ submission, settings, touch, onSettings, onR
   return (
     <div className={`${kit.overlay} ${styles.backdrop}`}>
       <section className={`${kit.paper} ${styles.card}`} role="dialog" aria-modal="true" aria-labelledby="gs-paused">
-        <p className={kit.eyebrow}>Submission #{submission ?? "—"} · Status: under review</p>
+        <p className={kit.eyebrow}>{SCREENS.pausedKicker(submission)}</p>
         <h2 id="gs-paused" className={styles.title}>
           {SCREENS.paused}
         </h2>
@@ -89,7 +89,7 @@ export default function PauseMenu({ submission, settings, touch, onSettings, onR
             <RestartIcon />
             {SCREENS.withdraw}
           </button>
-          <Link className={`${kit.button} ${kit.danger}`} href="/play" onClick={() => ui.play("click")} {...ui.hover}>
+          <Link className={`${kit.button} ${kit.danger}`} href="/play" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Quit
           </Link>
         </div>

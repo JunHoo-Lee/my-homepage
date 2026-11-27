@@ -109,7 +109,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   const share = async () => {
     ui.play("click");
     const score = reviewer2 ? `Reviewer 2 gave me a ${reviewer2.score} (confidence ${reviewer2.confidence}). ` : "";
-    const text = `${SCREENS.title} · Decision: ${decision.title}. ${score}Survived ${formatTime(result.time)}, ${result.kills} ${HUD_TERMS.kills}.`;
+    const text = `${SCREENS.title} · Decision: ${decision.title}. ${score}Survived ${formatTime(result.time)}, ${result.kills} ${HUD_TERMS.killsLabel(result.kills)}.`;
     const url = `${window.location.origin}/play/survivors`;
     try {
       if (navigator.share) {
@@ -141,10 +141,10 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
         aria-describedby="gs-meta"
         tabIndex={-1}
       >
-        <header className={styles.head}>
+        <header className={`${styles.head} ${styles[result.grade]}`}>
           <p className={kit.eyebrow}>
             <StampIcon className={styles.eyebrowIcon} />
-            Decision · Submission #{submission ?? "—"}
+            {SCREENS.decisionKicker(submission)}
           </p>
           <h2 id="gs-decision" className={styles.title}>
             {decision.title}
@@ -183,7 +183,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           <p className={`${styles.best} ${styles.newBest} ${counted ? styles.shown : ""}`}>New personal best!</p>
         ) : best ? (
           <p className={styles.best}>
-            Personal best: {DECISIONS[best.grade].title} · {formatTime(best.time)} · {best.kills.toLocaleString("en-US")} {HUD_TERMS.kills}
+            Personal best: {DECISIONS[best.grade].title} · {formatTime(best.time)} · {best.kills.toLocaleString("en-US")} {HUD_TERMS.killsLabel(best.kills)}
           </p>
         ) : null}
 
@@ -220,10 +220,10 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
             <ShareIcon />
             <span aria-live="polite">{copied ? "Copied!" : "Share"}</span>
           </button>
-          <Link className={kit.button} href="/play" onClick={() => ui.play("click")} {...ui.hover}>
+          <Link className={kit.button} href="/play" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Other games
           </Link>
-          <Link className={kit.button} href="/" onClick={() => ui.play("click")} {...ui.hover}>
+          <Link className={kit.button} href="/" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Classic view
           </Link>
         </div>

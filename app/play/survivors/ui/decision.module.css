@@ -99,24 +99,30 @@
   animation: slam 380ms cubic-bezier(0.6, 0, 0.95, 0.45) 650ms both;
 }
 
+/* per decision: the ink, and how far the phone-sized stamp reaches in from the right (see .title::before) */
 .DeskReject {
   --stamp: color-mix(in srgb, var(--red) 80%, var(--ink));
+  --stamp-room: 10rem;
 }
 
 .Reject {
   --stamp: var(--red);
+  --stamp-room: 8.1rem;
 }
 
 .Borderline {
   --stamp: var(--orange);
+  --stamp-room: 9.4rem;
 }
 
 .Accept {
   --stamp: var(--green);
+  --stamp-room: 8.4rem;
 }
 
 .Oral {
   --stamp: var(--purple);
+  --stamp-room: 5.6rem;
 }
 
 /* ---------------------------------------------------------------- reviews */
@@ -397,12 +403,20 @@
   }
 
   .head {
+    display: flow-root;
     padding-right: 0;
   }
 
   .title {
-    max-width: 62%;
     font-size: 1.65rem;
+  }
+
+  /* the title and the deadline line wrap around the stamp in the top right corner */
+  .title::before {
+    content: "";
+    float: right;
+    width: var(--stamp-room);
+    height: 3.3rem;
   }
 
   .stamp {

@@ -40,7 +40,7 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
           {LINE_NUMBERS}
         </pre>
         <div className={styles.running}>
-          <span>Under double-blind review · Do not distribute</span>
+          <span>{SCREENS.runningHead}</span>
           <button
             type="button"
             className={kit.iconButton}
@@ -67,7 +67,7 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
             <circle className={styles.ball} r="5" cx={LOSS_END.x} cy={LOSS_END.y} />
           )}
         </svg>
-        <p className={styles.byline}>Anonymous Author(s)</p>
+        <p className={styles.byline}>{SCREENS.authors}</p>
 
         <h2 className={styles.abstractTitle}>Abstract</h2>
         <p id="gs-abstract" className={styles.abstract}>
@@ -75,7 +75,7 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
         </p>
 
         <table className={styles.controls}>
-          <caption>Table 1: Controls.</caption>
+          <caption>{SCREENS.controlsCaption}</caption>
           <thead>
             <tr>
               <th scope="col">Action</th>
@@ -124,10 +124,10 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
 
         {best ? (
           <p className={styles.best}>
-            <span>Best decision so far</span>
+            <span>{SCREENS.bestSoFar}</span>
             <strong>{DECISIONS[best.grade].title}</strong>
             <span>
-              {formatTime(best.time)} · {best.kills.toLocaleString("en-US")} {HUD_TERMS.kills}
+              {formatTime(best.time)} · {best.kills.toLocaleString("en-US")} {HUD_TERMS.killsLabel(best.kills)}
             </span>
           </p>
         ) : null}
@@ -151,7 +151,8 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
               </span>
             )}
           </button>
-          <Link className={kit.button} href="/play" onClick={() => ui.play("click")} {...ui.hover}>
+          {/* in-game links are not prefetched: the game should not preload other pages' styles and fonts */}
+          <Link className={kit.button} href="/play" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Other games
           </Link>
         </div>

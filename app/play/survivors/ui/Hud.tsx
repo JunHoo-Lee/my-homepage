@@ -89,9 +89,9 @@ export default function Hud({ hud, hurt, pops, muted, touch, onToggleMute, onPau
             <BugIcon />
             <b>{kills}</b>
             <span className={styles.wide} aria-hidden="true">
-              {HUD_TERMS.kills}
+              {HUD_TERMS.killsLabel(hud.kills)}
             </span>
-            <span className={kit.srOnly}>{HUD_TERMS.kills}</span>
+            <span className={kit.srOnly}>{HUD_TERMS.killsLabel(hud.kills)}</span>
           </span>
           <button type="button" className={kit.iconButton} aria-label={muteLabel} title={touch ? undefined : `${muteLabel} (M)`} onClick={onToggleMute} {...ui.hover}>
             <SoundIcon muted={muted} />
@@ -117,7 +117,7 @@ export default function Hud({ hud, hurt, pops, muted, touch, onToggleMute, onPau
           <div className={styles.bossFill} style={clip(hud.boss.hp, hud.boss.maxHp)} />
           <span className={styles.bossLabel}>
             <Reviewer2Icon />
-            Reviewer 2 · Score 3 · Confidence 5
+            {HUD_TERMS.bossBar}
           </span>
         </div>
       ) : null}
