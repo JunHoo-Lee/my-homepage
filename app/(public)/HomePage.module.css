@@ -5,7 +5,7 @@
   border-radius: 0.625rem;
   background: #fff;
   box-shadow: 0 0 1.25rem rgb(0 0 0 / 10%);
-  padding: 1.25rem;
+  padding: 2.25rem 1.75rem 1.5rem;
   color: #333;
   font-family: var(--font-home-heading), sans-serif;
 }
@@ -35,7 +35,7 @@
 .profileHeader h1 {
   margin: 0;
   color: #333;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -78,7 +78,7 @@
 
 .section {
   min-width: 0;
-  margin: 0 1.25rem 1.875rem;
+  margin: 0 1.25rem 2.25rem;
   scroll-margin-top: 1rem;
 }
 
@@ -91,7 +91,7 @@
 .sectionTitle {
   margin: 0 0 0.9375rem;
   color: #333;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
@@ -221,7 +221,7 @@
 .publicationHeading h1,
 .publicationHeading h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
