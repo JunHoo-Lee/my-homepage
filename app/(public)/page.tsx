@@ -62,7 +62,7 @@ export default function Home() {
             <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub"><Github aria-hidden="true" /></a>
             <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin aria-hidden="true" /></a>
             <a href={`mailto:${profile.email}`} aria-label="Email"><Mail aria-hidden="true" /></a>
-            <a href="/play" aria-label="Drive mode: explore this page as a game" title="Drive mode" className={styles.gameIcon}><Gamepad2 aria-hidden="true" /></a>
+            <a href="/play/survivors" aria-label="Play Gradient Survivors, a game about my research" title="Play Gradient Survivors" className={styles.gameIcon}><Gamepad2 aria-hidden="true" /></a>
           </nav>
         </div>
       </header>
