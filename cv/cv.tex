@@ -87,17 +87,26 @@
 % Header
 \begin{center}
     {\Huge \textbf{JUNHOO LEE}} \\ \vspace{2mm}
-    Ph.D. Candidate, Seoul National University \\ \vspace{1mm}
+    Postdoctoral Researcher, KAIST \\ \vspace{1mm}
     \small
-    \href{mailto:mrjunoo@snu.ac.kr}{mrjunoo@snu.ac.kr} $|$ \href{https://junhoo.me}{https://junhoo.me}
+    \href{mailto:junhoo.lee@kaist.ac.kr}{junhoo.lee@kaist.ac.kr} $|$ \href{https://junhoo.me}{https://junhoo.me}
 \end{center}
+
+% Research Experience
+\section{Research Experience}
+\textbf{KAIST} \hfill Sep 2026 -- Present \\
+\textit{Postdoctoral Researcher}
+\newline
+{\small Working with Prof. Jinwoo Shin.}
 
 % Education
 \section{Education}
 \textbf{Seoul National University} \hfill Seoul, South Korea \\
-\textit{Ph.D. Candidate in Intelligence and Information} \hfill Sep 2021 -- Present (Exp. Aug 2026)
+\textit{Ph.D. in Intelligence and Information} \hfill Sep 2021 -- Aug 2026
 \newline
-{\small Advisor: Prof. Nojun Kwak, Machine Intelligence \& Pattern Analysis Laboratory (MIPAL)}
+{\small Advisor: Prof. Nojun Kwak, Machine Intelligence \& Pattern Analysis Laboratory (MIPAL)} \\
+{\small Dissertation: \textit{Projection, Persistence, and Elicitation of Learned Internal Structure}} \\
+{\small Best Ph.D. Dissertation Award, GSCT representative awardee (1 of 27 Ph.D. graduates).}
 
 \vspace{1mm}
 
@@ -109,64 +118,98 @@
 % Research Interests
 \section{Research Interests}
 {\normalsize
-My research studies how foundation models acquire reusable structure, and how
-that structure can be controlled, adapted, and diagnosed across language, vision,
-generative modeling, and embodied interfaces. My work on discrete diffusion
-language models introduces inference-time planning structure for controllable
-generation [C1], while my meta-learning papers study fast adaptation and task
-generalization through optimization-trajectory structure and flexible episodic
-interfaces [C6, C7]. I also work on model diagnosis, semantic robustness, and
-data-efficient transfer, including deep support vectors for pretrained-model
-interpretation [C5], black-box semantic fingerprinting for generative models
-[C2], multimodal temporal grounding [C4], and instruction-following failures in
-text-to-image generation [W1]. Recently, I have been extending this line toward
-vision-language-action and embodied foundation models, where pretrained semantic
-structure must remain reliable under changing instructions, visual observations,
-and action interfaces.
+I view AI through the lens of self-reference. Many of its remarkable capabilities emerge from recursive structures in which a system's own outputs, representations, or experiences feed back into its subsequent operation. I am fascinated by why these structures appear across different levels of AI, how they give rise to new capabilities, and what makes them work.
+
+My current research focuses on robot harnesses, looped models, and continual harnessing, while I remain open to exploring other directions.
 }
 
 % Publications
 \section{Publications}
+{\small $^*$: Equal contribution.}
 
 {\small
 \begin{publicationlist}
-    \item[\pubid{C1}] \textbf{\href{https://arxiv.org/abs/2510.13870}{Unlocking the Potential of Diffusion Language Models through Template Infilling}} \\
+    \item[\pubid{C1}] \textbf{\href{https://arxiv.org/abs/2610.19743}{Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors}} \\
+    \textit{\myname, Hyeonjin Kim, Sangbum Han, Nojun Kwak} \\
+    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2026.
+    \item[\pubid{C2}] \textbf{\href{https://arxiv.org/abs/2610.21208}{Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse}} \\
+    \textit{\textbf{Junhoo Lee}$^*$, Baekseung Kim$^*$, Seungyeon Kim, Nojun Kwak} \\
+    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2026.
+    \item[\pubid{C3}] \textbf{\href{https://arxiv.org/abs/2610.21433}{ManiFusion: Unlocking High-Throughput Generation via Superposition in Manifold Space}} \\
+    \textit{Minkyu Kim, Baekseung Kim, \myname, Jangho Kim, Nojun Kwak} \\
+    \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2026.
+    \item[\pubid{C4}] \textbf{\href{https://arxiv.org/abs/2510.13870}{Unlocking the Potential of Diffusion Language Models through Template Infilling}} \\
     \textit{\myname, Seungyeon Kim, Nojun Kwak} \\
-    \textit{Annual Meeting of the Association for Computational Linguistics (\textbf{ACL})}, 2026. \\
-    \oralpresentation{485/10518=4.61\%}
-    \item[\pubid{C2}] \textbf{\href{https://junhoo.me/csf/csf-paper.pdf}{CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models}} \\
+    \textit{Annual Meeting of the Association for Computational Linguistics (\textbf{ACL})}, 2026. \oralpresentation{485/10518=4.61\%}
+    \item[\pubid{C5}] \textbf{\href{https://arxiv.org/abs/2604.16363}{CSF: Black-box Fingerprinting via Compositional Semantics for Text-to-Image Models}} \\
     \textit{\myname, Mijin Koo, Nojun Kwak} \\
     \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition (\textbf{CVPR})}, 2026.
-    \item[\pubid{C3}] \textbf{\href{https://arxiv.org/abs/2510.13865}{Deep Edge Filter}} (Co-first) \\
-    \textit{Dongkwan Lee$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
+    \item[\pubid{C6}] \textbf{\href{https://arxiv.org/abs/2510.13865}{Deep Edge Filter: Return of the Human-Crafted Layer in Deep Learning}} \\
+    \textit{Dongkwan Lee$^*$, \textbf{Junhoo Lee}$^*$, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2025.
-    \item[\pubid{C4}] \textbf{\href{https://arxiv.org/abs/2507.04667}{What's Making That Sound Right Now? Video-centric Audio-Visual Localization}} \\
+    \item[\pubid{C7}] \textbf{\href{https://arxiv.org/abs/2507.04667}{What's Making That Sound Right Now? Video-centric Audio-Visual Localization}} \\
     \textit{Hahyeon Choi, \myname, Nojun Kwak} \\
     \textit{The IEEE/CVF International Conference on Computer Vision (\textbf{ICCV})}, 2025.
-    \item[\pubid{C5}] \textbf{\href{https://arxiv.org/abs/2403.17329}{Deep Support Vectors}} \\
+    \item[\pubid{C8}] \textbf{\href{https://arxiv.org/abs/2403.17329}{Deep Support Vectors}} \\
     \textit{\myname, Hyunho Lee, Kyomin Hwang, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2024.
-    \item[\pubid{C6}] \textbf{\href{https://arxiv.org/abs/2401.05097}{Any-Way Meta Learning}} \\
+    \item[\pubid{C9}] \textbf{\href{https://arxiv.org/abs/2401.05097}{Any-Way Meta Learning}} \\
     \textit{\myname, Yearim Kim, Hyunho Lee, Nojun Kwak} \\
     \textit{The AAAI Conference on Artificial Intelligence (\textbf{AAAI})}, 2024.
-    \item[\pubid{C7}] \textbf{\href{https://arxiv.org/abs/2310.02751}{SHOT: Suppressing the Hessian along the Optimization Trajectory}} \\
+    \item[\pubid{C10}] \textbf{\href{https://arxiv.org/abs/2310.02751}{SHOT: Suppressing the Hessian along the Optimization Trajectory for Gradient-Based Meta-Learning}} \\
     \textit{\myname, Jayeon Yoo, Nojun Kwak} \\
     \textit{The Conference on Neural Information Processing Systems (\textbf{NeurIPS})}, 2023.
-    \item[\pubid{W1}] \textbf{\href{https://arxiv.org/abs/2404.15154}{Do Not Think About Pink Elephant!}} (Co-first) \\
-    \textit{Kyomin Hwang$^\dagger$, Suyoung Kim$^\dagger$, \textbf{Junhoo Lee}$^\dagger$, Nojun Kwak} \\
-    \textit{CVPR Workshops -- Responsible Generative AI}, 2024.
-    \item[\pubid{W2}] \textbf{Coreset Selection for Object Detection} \\
-    \textit{Hojun Lee, Suyoung Kim, \myname, Jaeyoung Yoo, Nojun Kwak} \\
-    \textit{CVPR Workshops -- Dataset Distillation}, 2024.
-    \item[\pubid{W3}] \textbf{\href{https://arxiv.org/abs/2405.00348}{Practical Dataset Distillation Based on Deep Support Vectors}} \\
-    \textit{Hyunho Lee, \myname, Nojun Kwak} \\
-    \textit{ECCV Workshops -- Dataset Distillation Challenge}, 2024.
     \item[\pubid{J1}] \textbf{End-to-End Multi-Entity Customization} \\
     \textit{Wonhark Park$^*$, Jaehyun Lee$^*$, Wonsik Shin, \myname, Nojun Kwak} \\
-    \textit{IET Image Processing}, Accepted. 2026.
+    \textit{IET Image Processing}, 20(1), e70306, 2026.
     \item[\pubid{J2}] \textbf{\href{https://arxiv.org/abs/2508.20224}{The Role of Teacher Calibration in Knowledge Distillation}} \\
     \textit{Suyoung Kim, Seonguk Park, \myname, Nojun Kwak} \\
-    \textit{IEEE Access}, 2025.
+    \textit{IEEE Access}, 13, 115548--115557, 2025.
+    \item[\pubid{J3}] \textbf{\href{https://doi.org/10.1016/j.eswa.2025.127053}{Layerwise-Priority-Based Gradient Adjustment for Few-Shot Learning}} \\
+    \textit{Jangho Kim, \myname, Donghoon Han, Nojun Kwak} \\
+    \textit{Expert Systems with Applications}, 275, 127053, 2025.
+    \item[\pubid{W1}] \textbf{\href{https://arxiv.org/abs/2610.01744}{3DROID: A Renderable 3D Gaussian Dataset with Measured Per-Scene Reliability}} \\
+    \textit{Wonguen Cho, \myname, Nojun Kwak} \\
+    \textit{The 1st Workshop on Physical World AI: Geometry, Characteristics, and Multimodal Sensing at the Conference on Neural Information Processing Systems (NeurIPS)}, 2026.
+    \item[\pubid{W2}] \textbf{\href{https://arxiv.org/abs/2610.01559}{Completion Aware Guidance for World Action Models}} \\
+    \textit{Seungyeon Kim, \myname, Baekseung Kim, Minkyu Kim, Nojun Kwak} \\
+    \textit{Robotics World Modeling Workshop at the Conference on Neural Information Processing Systems (NeurIPS)}, 2026.
+    \item[\pubid{W3}] \textbf{\href{https://arxiv.org/abs/2511.18277}{Point-to-Point: Sparse Motion Guidance for Controllable Video Editing}} \\
+    \textit{Yeji Song, Jaehyun Lee, Mijin Koo, \myname, Nojun Kwak} \\
+    \textit{The 4th AI for Visual Arts Workshop at the European Conference on Computer Vision (AI4VA, ECCV Workshops)}, 2026.
+    \item[\pubid{W4}] \textbf{\href{https://arxiv.org/abs/2404.15154}{Do Not Think About Pink Elephant!}} \\
+    \textit{Kyomin Hwang$^*$, Suyoung Kim$^*$, \textbf{Junhoo Lee}$^*$, Nojun Kwak} \\
+    \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops, Responsible Generative AI)}, 2024.
+    \item[\pubid{W5}] \textbf{\href{https://arxiv.org/abs/2404.09161}{Coreset Selection for Object Detection}} \\
+    \textit{Hojun Lee, Suyoung Kim, \myname, Jaeyoung Yoo, Nojun Kwak} \\
+    \textit{The IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPR Workshops, Dataset Distillation)}, 2024.
+    \item[\pubid{W6}] \textbf{\href{https://arxiv.org/abs/2405.00348}{Practical Dataset Distillation Based on Deep Support Vectors}} \\
+    \textit{Hyunho Lee, \myname, Nojun Kwak} \\
+    \textit{The European Conference on Computer Vision Workshops (ECCV Workshops, Dataset Distillation Challenge)}, 2024.
+    \item[\pubid{P1}] \textbf{\href{https://arxiv.org/abs/2611.28756}{PSC-Gen: Physical Sequence Conditioning for Video Generation via Agentic Visual Planning}} \\
+    \textit{Wonsik Shin, Jinju Jang, \myname, Yeonjin Chang, Jimyeong Kim, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2611.28756}, 2026.
+    \item[\pubid{P2}] \textbf{\href{https://arxiv.org/abs/2610.21434}{Policy-Aligned Predictive Verification for Adaptive VLA Action-Chunk Execution}} \\
+    \textit{Minkyu Kim, \myname, Seungyeon Kim, Suhyun Jeon, Baekseung Kim, Donghoon Han, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2610.21434}, 2026.
+    \item[\pubid{P3}] \textbf{\href{https://arxiv.org/abs/2610.19957}{Complementary Future Token Pruning for World Action Models}} \\
+    \textit{Baekseung Kim, \myname, Sohyeon Hong, Suhyun Jeon, Minkyu Kim, Seungyeon Kim, Donghoon Han, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2610.19957}, 2026.
+    \item[\pubid{P4}] \textbf{\href{https://arxiv.org/abs/2610.21810}{N-Gram Memories at Two Bits: Quantizing Lookup Tables in Large Language Models}} \\
+    \textit{Donghoon Han, Minseop Jung, Dong Woo Kwak, SeungJae Lee, \myname} \\
+    \textit{arXiv preprint arXiv:2610.21810}, 2026.
+    \item[\pubid{P5}] \textbf{\href{https://arxiv.org/abs/2610.04929}{RobotUse: Allocating Computation, Context, and Decisions}} \\
+    \textit{\myname, Injun Baek, Seungyeon Kim, Suhyun Jeon, Minkyu Kim, Baekseung Kim, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2610.04929}, 2026.
+    \item[\pubid{P6}] \textbf{\href{https://arxiv.org/abs/2609.33378}{Recursive Harness Distillation across Agents for Robot Manipulation}} \\
+    \textit{Seungyeon Kim, \myname, Minkyu Kim, Baekseung Kim, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2609.33378}, 2026.
+    \item[\pubid{P7}] \textbf{\href{https://arxiv.org/abs/2610.19677}{ACRO: Actor--Critic Rollout Orchestration}} \\
+    \textit{\myname, Seungyeon Kim, Baekseung Kim, Minkyu Kim, Suhyun Jeon, Jimyeong Kim, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2610.19677}, 2026.
+    \item[\pubid{P8}] \textbf{\href{https://arxiv.org/abs/2608.27902}{LandingAgent: A Reference-Annotated Dataset and Agentic Generation Framework for Landing Pages}} \\
+    \textit{Injun Baek, HyeongSeok Lee, Yearim Kim, \myname, Nojun Kwak} \\
+    \textit{arXiv preprint arXiv:2608.27902}, 2026.
 \end{publicationlist}
 }
 
@@ -174,6 +217,9 @@ and action interfaces.
 \section{Awards \& Honors}
 {\small
 \begin{tabu} to 0.97\textwidth { X[0.8,l] X[0.2,r] }
+    Best Ph.D. Dissertation Award, GSCT, Seoul National University & 2026 \\
+    InnoCore Fellowship & 2026 \\
+    NeurIPS Top Reviewer & 2026 \\
     ICML Gold Reviewer & 2026 \\
     BK21 Future Innovation Talent Bronze Prize (USD 1,000) & 2023 \\
     BK21 Outstanding Research Talent Fellowship (USD 3,500) & 2023 \\
@@ -196,7 +242,7 @@ and action interfaces.
 % Skills
 \section{Skills}
 {\small
-\textbf{Programming Languages}: Python, CUDA, R, C++, Verilog; \textbf{ML Development Stack}: PyTorch, TensorFlow, Slurm, Docker.
+\textbf{Research Development}: Python, PyTorch, CUDA; \textbf{Experiment Infrastructure}: Slurm, Docker.
 }
 
 % Talks
@@ -209,6 +255,7 @@ and action interfaces.
 % Academic Service
 \section{Academic Service}
 {\small
+\textbf{Top Reviewer}: NeurIPS 2026.\\
 \textbf{Gold Reviewer}: ICML 2026.\\
 \textbf{Conference Reviewer}: CVPR (2025, 2026), ICCV (2025), ECCV (2026), ICLR (2025, 2026), ICML (2026), NeurIPS (2024, 2025, 2026).
 }

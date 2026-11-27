@@ -192,6 +192,61 @@ export const PUBLICATIONS: PublicationSection[] = [
         "color": "slate",
         "items": [
             {
+                "title": "PSC-Gen: Physical Sequence Conditioning for Video Generation via Agentic Visual Planning",
+                "authors": [
+                    "Wonsik Shin",
+                    "Jinju Jang",
+                    "Junhoo Lee",
+                    "Yeonjin Chang",
+                    "Jimyeong Kim",
+                    "Nojun Kwak"
+                ],
+                "venue": "arXiv preprint arXiv:2611.28756",
+                "year": "2026",
+                "category": "Generative Models",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2611.28756",
+                "projectLink": "https://ceteris11.github.io/PSC-Gen/"
+            },
+            {
+                "title": "Policy-Aligned Predictive Verification for Adaptive VLA Action-Chunk Execution",
+                "authors": [
+                    "Minkyu Kim",
+                    "Junhoo Lee",
+                    "Seungyeon Kim",
+                    "Suhyun Jeon",
+                    "Baekseung Kim",
+                    "Donghoon Han",
+                    "Nojun Kwak"
+                ],
+                "venue": "arXiv preprint arXiv:2610.21434",
+                "year": "2026",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2610.21434"
+            },
+            {
+                "title": "Complementary Future Token Pruning for World Action Models",
+                "authors": [
+                    "Baekseung Kim",
+                    "Junhoo Lee",
+                    "Sohyeon Hong",
+                    "Suhyun Jeon",
+                    "Minkyu Kim",
+                    "Seungyeon Kim",
+                    "Donghoon Han",
+                    "Nojun Kwak"
+                ],
+                "venue": "arXiv preprint arXiv:2610.19957",
+                "year": "2026",
+                "category": "Robotics",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2610.19957"
+            },
+            {
                 "title": "N-Gram Memories at Two Bits: Quantizing Lookup Tables in Large Language Models",
                 "authors": [
                     "Donghoon Han",
@@ -253,7 +308,7 @@ export const PUBLICATIONS: PublicationSection[] = [
                     "Jimyeong Kim",
                     "Nojun Kwak"
                 ],
-                "venue": "Preprint",
+                "venue": "arXiv preprint arXiv:2610.19677",
                 "year": "2026",
                 "projectLink": "https://junhoo.me/acro",
                 "paperLink": "https://junhoo.me/acro/assets/paper/acro-preprint.pdf",
@@ -261,6 +316,22 @@ export const PUBLICATIONS: PublicationSection[] = [
                 "category": "Robotics",
                 "subTag": "",
                 "tldr": ""
+            },
+            {
+                "title": "LandingAgent: A Reference-Annotated Dataset and Agentic Generation Framework for Landing Pages",
+                "authors": [
+                    "Injun Baek",
+                    "HyeongSeok Lee",
+                    "Yearim Kim",
+                    "Junhoo Lee",
+                    "Nojun Kwak"
+                ],
+                "venue": "arXiv preprint arXiv:2608.27902",
+                "year": "2026",
+                "category": "Agents",
+                "subTag": "",
+                "tldr": "",
+                "paperLink": "https://arxiv.org/abs/2608.27902"
             }
         ]
     },
@@ -312,6 +383,7 @@ export const PUBLICATIONS: PublicationSection[] = [
                 ],
                 "venue": "The Conference on Neural Information Processing Systems (NeurIPS)",
                 "year": "2026",
+                "paperLink": "https://arxiv.org/abs/2610.21433",
                 "category": "Generative Models",
                 "subTag": "",
                 "tldr": ""
