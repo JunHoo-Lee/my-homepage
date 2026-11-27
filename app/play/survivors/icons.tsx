@@ -241,16 +241,6 @@ export function BugIcon(props: IconProps) {
   );
 }
 
-/** An hourglass, for the AoE deadline. */
-export function DeadlineIcon(props: IconProps) {
-  return (
-    <Icon {...props}>
-      <path d="M6 3h12M6 21h12M7.5 3v2.6c0 1.6.8 3 2.1 3.9L12 11l2.4-1.5a4.7 4.7 0 0 0 2.1-3.9V3M7.5 21v-2.6c0-1.6.8-3 2.1-3.9L12 13l2.4 1.5a4.7 4.7 0 0 1 2.1 3.9V21" />
-      <path d="M9.5 19.5h5L12 17.5Z" fill="currentColor" />
-    </Icon>
-  );
-}
-
 /** Reviewer 2: round glasses, furrowed brows, a frown (Score: 3, Confidence: 5). */
 export function Reviewer2Icon(props: IconProps) {
   return (

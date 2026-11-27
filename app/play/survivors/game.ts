@@ -302,7 +302,7 @@ const BOSS_SHOT_LIFE = 4;
 
 const TAU = Math.PI * 2;
 const FONT = '"Helvetica Neue", Arial, sans-serif';
-const clamp =(v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 const easeOutCubic = (p: number) => 1 - (1 - p) ** 3;
 const easeOutBack = (p: number) => 1 + 2.70158 * (p - 1) ** 3 + 1.70158 * (p - 1) ** 2;
@@ -3575,6 +3575,10 @@ export function createGame(
           bullets: bullets.length,
           gems: gems.length,
         };
+      },
+      /** The audio engine's test counters (music mode playing, voices, ...), when it has them. */
+      get audio() {
+        return (audio as AudioEngine & { __debug?: unknown }).__debug ?? null;
       },
       /** Read-only snapshot for tests. */
       get state() {

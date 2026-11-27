@@ -473,9 +473,6 @@ const SFX: Record<SfxName, (v: Voice) => void> = {
   },
 };
 
-/** Every sound effect name; the SFX table's type guarantees none is missing. */
-export const SFX_NAMES = Object.keys(SFX) as SfxName[];
-
 /** Shared by renderSfx and the live engine (which passes a wobbled pitch without allocating). */
 function scheduleSfx(ctx: BaseAudioContext, dest: AudioNode, name: SfxName, when: number, pitch: number, volume: number, pan: number) {
   const design = SFX[name];
