@@ -5,6 +5,8 @@
  * World units are CSS pixels; the camera keeps the player centred.
  */
 
+import type { AudioEngine, EnemyKind } from "./contracts";
+
 export type PaperLink = { label: string; href: string };
 
 export type CardDef = {
@@ -38,9 +40,11 @@ export type Hud = {
   kills: number;
   boss: { hp: number; maxHp: number } | null;
   revives: number;
+  /** Current kill combo (kills chained within a short window), 0 when idle. */
+  combo: number;
 };
 
-export type Grade = "Oral" | "Accept" | "Borderline" | "Reject";
+export type Grade = "Oral" | "Accept" | "Borderline" | "Reject" | "DeskReject";
 
 export type RunResult = {
   grade: Grade;
@@ -49,6 +53,10 @@ export type RunResult = {
   level: number;
   bossDefeated: boolean;
   build: Card[];
+  /** Longest kill combo of the run. */
+  maxCombo: number;
+  /** Times the player took damage. */
+  hitsTaken: number;
 };
 
 export type GameCallbacks = {
@@ -57,6 +65,14 @@ export type GameCallbacks = {
   onEnd: (result: RunResult) => void;
   onToast: (message: string) => void;
   onAutoPause: () => void;
+  /** Fired a few seconds before Reviewer 2 spawns, so the UI can show a warning. */
+  onBossWarning: () => void;
+};
+
+export type GameOptions = {
+  audio: AudioEngine;
+  /** prefers-reduced-motion: no screen shake, softer flashes. */
+  reducedMotion: boolean;
 };
 
 export type GameHandle = {
@@ -203,13 +219,13 @@ const HEAL_CARD: CardDef = {
   describe: () => "Heal 40% HP",
 };
 
-type EnemyKind = "nan" | "overfit" | "halluc" | "explode" | "boss";
 
 const ENEMY: Record<EnemyKind, { r: number; hp: number; speed: number; dmg: number; color: string; label: string; xp: number }> = {
   nan: { r: 13, hp: 4, speed: 52, dmg: 8, color: "#8f9aa6", label: "NaN", xp: 1 },
   overfit: { r: 10, hp: 3, speed: 96, dmg: 6, color: "#d64545", label: "fit", xp: 1 },
   halluc: { r: 16, hp: 11, speed: 62, dmg: 10, color: "#7a5bb5", label: "?!", xp: 2 },
   explode: { r: 24, hp: 42, speed: 38, dmg: 18, color: "#d77a2b", label: "∇∞", xp: 6 },
+  comment: { r: 16, hp: 9, speed: 70, dmg: 9, color: "#fffdf8", label: "R?", xp: 2 },
   boss: { r: 50, hp: 1500, speed: 58, dmg: 24, color: "#2b2b2b", label: "R2", xp: 0 },
 };
 
@@ -256,8 +272,10 @@ export function createGame(
   canvas: HTMLCanvasElement,
   paperLinks: Record<string, PaperLink>,
   callbacks: GameCallbacks,
+  options: GameOptions,
 ): GameHandle {
   const ctx = canvas.getContext("2d")!;
+  void options; // wired up by the audio/juice pass
   let width = 0;
   let height = 0;
   let dpr = 1;
@@ -285,6 +303,7 @@ export function createGame(
   let move = { x: 0, y: 0 };
   let shake = 0;
   let bossSpawned = false;
+  let bossWarned = false;
   let bossDefeated = false;
   let waveCounter = 0;
   let spawnTimer = 0;
@@ -326,6 +345,7 @@ export function createGame(
     pendingLevelUps = 0;
     shake = 0;
     bossSpawned = false;
+    bossWarned = false;
     bossDefeated = false;
     spawnTimer = 0;
     Object.assign(player, { x: 0, y: 0, hp: 100, maxHp: 100, speed: 170, iframes: 0, pickup: 120, revives: 0 });
@@ -410,6 +430,7 @@ export function createGame(
       kills,
       boss: boss ? { hp: Math.max(0, boss.hp), maxHp: boss.maxHp } : null,
       revives: player.revives,
+      combo: 0,
     });
   };
 
@@ -549,7 +570,7 @@ export function createGame(
     const survived = t >= RUN_LENGTH;
     const grade: Grade = survived ? (bossDefeated ? "Oral" : "Accept") : t >= BOSS_TIME ? "Borderline" : "Reject";
     pushHud();
-    callbacks.onEnd({ grade, time: Math.min(t, RUN_LENGTH), kills, level, bossDefeated, build: build() });
+    callbacks.onEnd({ grade, time: Math.min(t, RUN_LENGTH), kills, level, bossDefeated, build: build(), maxCombo: 0, hitsTaken: 0 });
   };
 
   // ---------------------------------------------------------- spatial hash
@@ -733,6 +754,10 @@ export function createGame(
     }
 
     // spawning
+    if (!bossWarned && t >= BOSS_TIME - 4) {
+      bossWarned = true;
+      callbacks.onBossWarning();
+    }
     if (!bossSpawned && t >= BOSS_TIME) {
       bossSpawned = true;
       spawnEnemy("boss");

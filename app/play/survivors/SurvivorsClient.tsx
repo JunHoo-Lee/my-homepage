@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { createAudio } from "./audio";
 import { BOSS_TIME, RUN_LENGTH, createGame, formatTime, type Card, type GameHandle, type Grade, type Hud, type PaperLink, type RunResult } from "./game";
 import styles from "./survivors.module.css";
 
@@ -11,13 +12,14 @@ const BEST_KEY = "gradient-survivors-best";
 type Best = { time: number; kills: number; grade: Grade };
 
 const GRADE_COPY: Record<Grade, { title: string; line: string }> = {
+  DeskReject: { title: "Desk reject 📄", line: "The submission did not survive the formatting check." },
   Oral: { title: "Accepted · Oral 🏆", line: "You outlasted the review and defeated Reviewer 2." },
   Accept: { title: "Accepted ✅", line: "You survived the full review period." },
   Borderline: { title: "Borderline 🤔", line: "Reviewer 2 showed up and things got heated." },
   Reject: { title: "Rejected 📉", line: "The bugs overwhelmed the model. Resubmit?" },
 };
 
-const GRADE_RANK: Record<Grade, number> = { Reject: 0, Borderline: 1, Accept: 2, Oral: 3 };
+const GRADE_RANK: Record<Grade, number> = { DeskReject: 0, Reject: 1, Borderline: 2, Accept: 3, Oral: 4 };
 
 function readBest(): Best | null {
   try {
@@ -82,6 +84,7 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const audio = createAudio();
     const game = createGame(canvas, paperLinks, {
       onHud: setHud,
       onLevelUp: (next) => {
@@ -96,11 +99,16 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
       },
       onToast: setToast,
       onAutoPause: () => setPhase((current) => (current === "playing" ? "paused" : current)),
+      onBossWarning: () => {},
+    }, {
+      audio,
+      reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     });
     game.setPaused(true);
     gameRef.current = game;
     return () => {
       game.dispose();
+      audio.dispose();
       gameRef.current = null;
     };
   }, [paperLinks]);
