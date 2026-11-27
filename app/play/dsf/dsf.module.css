@@ -1,0 +1,1001 @@
+/*
+ * "What I Cannot Create": a blackboard in a dark lecture hall. Text that is
+ * "written on the board" uses the Caveat handwriting font (SIL OFL, see
+ * public/fonts/caveat); UI chrome uses the system sans.
+ */
+
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/caveat/Caveat-Latin-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/caveat/Caveat-Latin-700.woff2") format("woff2");
+}
+
+.root {
+  --chalk: #f4f1e6;
+  --chalk-dim: rgb(244 241 230 / 68%);
+  --yellow: #f6d86b;
+  --pink: #f2a0b5;
+  --blue: #8fc7ee;
+  --green: #a5d99a;
+  --slate: #1f2e2b;
+  --slate-deep: #14201e;
+  --wood: #8a6238;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive;
+  --ui: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, #1d1a17 0%, #0d0c0b 100%);
+  color: var(--chalk);
+  font-family: var(--ui);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------------------------------------------------------------- top bar */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: none;
+  min-height: 3rem;
+  padding: 0.45rem max(0.75rem, env(safe-area-inset-right)) 0.45rem max(0.75rem, env(safe-area-inset-left));
+  padding-top: max(0.45rem, env(safe-area-inset-top));
+}
+
+.back {
+  flex: none;
+  color: var(--chalk-dim);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--chalk);
+}
+
+.barTitle {
+  flex: 1;
+  font: 700 1.5rem/1 var(--hand);
+  color: var(--chalk-dim);
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.chip b {
+  font: 700 0.74rem/1.2 var(--mono);
+  color: var(--yellow);
+  white-space: nowrap;
+}
+
+.chip span {
+  font-size: 0.72rem;
+  color: var(--chalk-dim);
+  white-space: nowrap;
+}
+
+.meter {
+  position: relative;
+  flex: 1;
+  min-width: 5rem;
+  height: 1.5rem;
+  overflow: hidden;
+  border: 1.5px solid rgb(244 241 230 / 55%);
+  border-radius: 0.5rem;
+  background: rgb(244 241 230 / 7%);
+}
+
+.meterFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: repeating-linear-gradient(115deg, rgb(244 241 230 / 80%) 0 5px, rgb(244 241 230 / 62%) 5px 9px);
+  transition: width 120ms linear;
+}
+
+.meterGoal {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2.5px;
+  background: var(--yellow);
+}
+
+.meterText {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 700 0.72rem/1 var(--mono);
+  color: #fff;
+  mix-blend-mode: difference;
+  white-space: nowrap;
+}
+
+.steps {
+  flex: none;
+  min-width: 5.6rem;
+  font: 700 0.95rem/1 var(--mono);
+  text-align: right;
+}
+
+.steps small {
+  color: var(--chalk-dim);
+  font-size: 0.7rem;
+}
+
+.stepsLow {
+  color: var(--pink);
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+.barButtons {
+  display: flex;
+  flex: none;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1.5px solid rgb(244 241 230 / 40%);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--chalk);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.icon:hover {
+  background: rgb(244 241 230 / 10%);
+}
+
+/* ---------------------------------------------------------------- board */
+
+.boardWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 14px;
+}
+
+.fit {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas {
+  display: block;
+  border-radius: 3px;
+  background: var(--slate);
+  box-shadow:
+    0 0 0 9px var(--wood),
+    0 0 0 11px #4f3518,
+    0 20px 60px rgb(0 0 0 / 65%);
+  touch-action: none;
+  cursor: crosshair;
+  outline: none;
+}
+
+.toasts {
+  position: absolute;
+  top: 1.6rem;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: min(92%, 34rem);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  padding: 0.3rem 0.8rem;
+  border: 1.5px solid rgb(246 216 107 / 70%);
+  border-radius: 0.6rem;
+  background: rgb(20 32 30 / 88%);
+  color: var(--yellow);
+  font: 700 1.2rem/1.2 var(--hand);
+  text-align: center;
+  animation: toast 2.8s ease both;
+}
+
+/* ---------------------------------------------------------------- overlays */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: 1.25rem 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgb(8 12 11 / 55%);
+  animation: fade 220ms ease-out both;
+}
+
+.overlay > * {
+  margin-block: auto;
+}
+
+/* outro cards sit low so the finished drawing stays visible */
+.low {
+  align-items: end;
+  background: linear-gradient(to bottom, rgb(8 12 11 / 0%) 35%, rgb(8 12 11 / 70%) 100%);
+}
+
+.low > * {
+  margin-block: auto 0;
+}
+
+.slate {
+  background:
+    radial-gradient(60% 50% at 30% 20%, rgb(255 255 255 / 4%), transparent),
+    linear-gradient(135deg, #24352f, #19262a);
+}
+
+.card {
+  width: min(100%, 38rem);
+  padding: 1.3rem 1.5rem 1.4rem;
+  border: 2px solid rgb(244 241 230 / 75%);
+  border-radius: 1rem;
+  background: rgb(22 34 32 / 94%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 55%);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.outro {
+  width: min(100%, 46rem);
+}
+
+.kicker {
+  margin: 0 0 0.4rem;
+  color: var(--yellow);
+  font: 700 0.72rem/1.4 var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font: 700 clamp(2.6rem, 8vw, 4.2rem) / 0.95 var(--hand);
+}
+
+.sub {
+  margin: 0.5rem 0 1rem;
+  color: var(--chalk-dim);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.heading {
+  margin: 0 0 0.6rem;
+  font: 700 clamp(1.9rem, 5vw, 2.5rem) / 1.05 var(--hand);
+}
+
+.body {
+  margin: 0 0 0.7rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: rgb(244 241 230 / 88%);
+}
+
+.hint {
+  margin: 0 0 1rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--blue);
+  color: var(--blue);
+  font: 700 1.3rem/1.25 var(--hand);
+}
+
+.formula {
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgb(244 241 230 / 7%);
+  color: var(--blue);
+  font: 0.85rem/1.4 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.rules {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: rgb(244 241 230 / 85%);
+}
+
+.rules b {
+  color: var(--chalk);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin: 0 0 1.1rem;
+  font-size: 0.82rem;
+}
+
+.controls div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.controls dt {
+  padding: 0.12rem 0.45rem;
+  border: 1.5px solid rgb(244 241 230 / 50%);
+  border-radius: 0.4rem;
+  font: 700 0.74rem/1.4 var(--mono);
+}
+
+.controls dd {
+  margin: 0;
+  color: var(--chalk-dim);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.5rem 1.1rem;
+  border: 2px solid var(--chalk);
+  border-radius: 0.75rem;
+  font: 700 0.95rem/1.1 var(--ui);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--chalk);
+  color: #16221f;
+  box-shadow: 0 4px 0 rgb(244 241 230 / 35%);
+}
+
+.primary:hover {
+  background: #fff;
+}
+
+.primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgb(244 241 230 / 35%);
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.secondary {
+  border-color: rgb(244 241 230 / 50%);
+  background: transparent;
+  color: var(--chalk);
+}
+
+.secondary:hover {
+  background: rgb(244 241 230 / 10%);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible,
+.textButton:focus-visible,
+.icon:focus-visible,
+.burst:focus-visible,
+.chalkButton:focus-visible,
+.back:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+.saved {
+  color: var(--green);
+  font: 700 1.15rem/1.2 var(--hand);
+}
+
+.footnote {
+  margin: 1rem 0 0;
+  color: var(--chalk-dim);
+  font: 400 1.15rem/1.3 var(--hand);
+}
+
+.peekBack {
+  position: absolute;
+  bottom: 1.6rem;
+  left: 50%;
+  z-index: 3;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--chalk);
+  border-radius: 0.75rem;
+  background: rgb(22 34 32 / 92%);
+  color: var(--chalk);
+  font: 700 0.9rem/1.1 var(--ui);
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+.meta {
+  margin: 0.9rem 0 0;
+  color: var(--green);
+  font: 700 0.72rem/1.4 var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.textButton {
+  padding: 0.4rem 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--chalk-dim);
+  font: 700 0.85rem/1.1 var(--ui);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.textButton:hover {
+  color: var(--chalk);
+}
+
+/* ---------------------------------------------------------------- the idea, hand-wavy */
+
+.ideaCard {
+  width: min(100%, 42rem);
+}
+
+.idea {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0.2rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.idea li {
+  display: grid;
+  grid-template-columns: 6.2rem minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.idea b {
+  display: block;
+  font: 700 1.5rem/1.05 var(--hand);
+}
+
+.idea p {
+  margin: 0.2rem 0 0;
+  color: rgb(244 241 230 / 86%);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.punch {
+  margin: 0 0 1.1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px dashed rgb(246 216 107 / 65%);
+  border-radius: 0.7rem;
+  color: var(--yellow);
+  font: 700 1.4rem/1.2 var(--hand);
+  text-align: left;
+}
+
+.doodle {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1.5px solid rgb(244 241 230 / 35%);
+  border-radius: 0.5rem;
+  background: rgb(244 241 230 / 4%);
+}
+
+.doodle path,
+.doodle circle {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dLine {
+  stroke: var(--chalk);
+  stroke-width: 2.4;
+}
+
+.dBand {
+  stroke: var(--green);
+  stroke-width: 17;
+  opacity: 0.3;
+}
+
+.doodle .dDust {
+  fill: var(--chalk);
+  opacity: 0.85;
+}
+
+.dArrow {
+  stroke: var(--blue);
+  stroke-width: 1.8;
+}
+
+.dDash {
+  stroke: var(--blue);
+  stroke-width: 1.6;
+  stroke-dasharray: 3 3;
+}
+
+.dYes {
+  stroke: var(--green);
+  stroke-width: 2.6;
+}
+
+.dNo {
+  stroke: var(--pink);
+  stroke-width: 2.6;
+}
+
+.dPlane {
+  stroke: rgb(244 241 230 / 55%);
+  stroke-width: 1.4;
+}
+
+.doodle .dStar {
+  fill: var(--yellow);
+  stroke: none;
+}
+
+.dText {
+  fill: var(--chalk-dim);
+  font: 700 8px var(--mono);
+}
+
+/* ---------------------------------------------------------------- prologue */
+
+.prologue {
+  width: min(100%, 44rem);
+  padding: 1rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.quote {
+  margin: 0;
+  font: 700 clamp(2.4rem, 7.2vw, 4.6rem) / 1.02 var(--hand);
+  text-wrap: balance;
+  animation: write 1.5s ease-out both;
+}
+
+.credit {
+  margin: 0.7rem 0 0;
+  color: var(--chalk-dim);
+  font: 400 1.35rem/1.2 var(--hand);
+  animation: fade 0.8s ease 1.2s both;
+}
+
+.lines {
+  display: grid;
+  gap: 0.35rem;
+  margin: 2rem 0 1.6rem;
+}
+
+.lines p {
+  margin: 0;
+  color: rgb(244 241 230 / 90%);
+  font: 400 clamp(1.35rem, 3.6vw, 1.75rem) / 1.25 var(--hand);
+  animation: rise 0.7s ease both;
+}
+
+.lines p:last-child {
+  color: var(--yellow);
+  font-weight: 700;
+}
+
+.chalkButton {
+  padding: 0.5rem 1.3rem;
+  border: 2px solid var(--chalk);
+  border-radius: 0.8rem;
+  background: transparent;
+  color: var(--chalk);
+  font: 700 1.6rem/1.1 var(--hand);
+  cursor: pointer;
+  animation: rise 0.7s ease both;
+}
+
+.chalkButton:hover {
+  background: var(--chalk);
+  color: #16221f;
+}
+
+.skip {
+  margin: 1.2rem 0 0;
+  color: rgb(244 241 230 / 40%);
+  font-size: 0.72rem;
+}
+
+/* ---------------------------------------------------------------- finale */
+
+.finale {
+  align-items: start;
+  padding-bottom: 2.5rem;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.finaleInner {
+  width: min(100%, 58rem);
+  margin-block: 0.5rem auto;
+  text-align: center;
+}
+
+.struck {
+  margin: 0.5rem 0 1.3rem;
+  color: rgb(244 241 230 / 36%);
+  font: 400 clamp(1.2rem, 3vw, 1.7rem) / 1.1 var(--hand);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.note {
+  width: min(100%, 40rem);
+  margin: 1rem auto 0;
+  color: rgb(244 241 230 / 86%);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.rank {
+  display: inline-grid;
+  justify-items: center;
+  margin: 1.6rem 0 0.4rem;
+  padding: 0.7rem 1.4rem;
+  border: 2px dashed rgb(246 216 107 / 70%);
+  border-radius: 0.9rem;
+  transform: rotate(-1.2deg);
+}
+
+.rank span {
+  color: var(--chalk-dim);
+  font: 700 0.68rem/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rank b {
+  color: var(--yellow);
+  font: 700 2.3rem/1 var(--hand);
+}
+
+.rank p {
+  margin: 0.25rem 0 0;
+  color: var(--chalk-dim);
+  font-size: 0.82rem;
+}
+
+.section {
+  margin-top: 2.2rem;
+  text-align: left;
+}
+
+.section h3 {
+  margin: 0 0 0.8rem;
+  font: 700 2rem/1.1 var(--hand);
+}
+
+.section > p {
+  max-width: 46rem;
+  margin: 0.9rem 0 0;
+  color: rgb(244 241 230 / 86%);
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.section > p.punch {
+  max-width: none;
+  margin: 0;
+  color: var(--yellow);
+  font: 700 1.4rem/1.2 var(--hand);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.7rem;
+}
+
+.gallery figure {
+  margin: 0;
+  padding: 0.35rem 0.35rem 0.2rem;
+  border-radius: 0.3rem;
+  background: var(--chalk);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 40%);
+}
+
+.gallery figure:nth-child(odd) {
+  transform: rotate(-1.4deg);
+}
+
+.gallery figure:nth-child(even) {
+  transform: rotate(1.1deg);
+}
+
+.gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.15rem;
+}
+
+.gallery figcaption {
+  padding-top: 0.15rem;
+  color: #26332f;
+  font: 700 1.05rem/1.3 var(--hand);
+  text-align: center;
+}
+
+.implications {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.8rem;
+}
+
+.implications article {
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1.5px solid rgb(244 241 230 / 45%);
+  border-radius: 0.9rem;
+  background: rgb(244 241 230 / 5%);
+}
+
+.implications span {
+  color: var(--blue);
+  font: 700 0.68rem/1.4 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.implications h4 {
+  margin: 0.3rem 0 0.45rem;
+  font: 700 1.6rem/1.08 var(--hand);
+}
+
+.implications p {
+  margin: 0;
+  color: rgb(244 241 230 / 84%);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.fine {
+  margin: 1.8rem 0 1.4rem;
+  color: rgb(244 241 230 / 55%);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.finale .actions {
+  justify-content: center;
+}
+
+/* ---------------------------------------------------------------- bottom bar */
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: none;
+  min-height: 3.1rem;
+  padding: 0.4rem max(0.75rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+}
+
+.softmax {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  min-width: 0;
+}
+
+.softmax span {
+  color: var(--chalk-dim);
+  font: 0.72rem/1.3 var(--mono);
+}
+
+.softmax b {
+  font: 700 1.35rem/1.1 var(--hand);
+}
+
+.softmax em {
+  padding: 0.05rem 0.45rem;
+  border-radius: 0.4rem;
+  background: rgb(165 217 154 / 18%);
+  color: var(--green);
+  font: 700 0.7rem/1.5 var(--mono);
+  font-style: normal;
+}
+
+.burst {
+  position: relative;
+  flex: none;
+  min-width: 8.2rem;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.9rem;
+  overflow: hidden;
+  border: 2px solid var(--blue);
+  border-radius: 0.8rem;
+  background: linear-gradient(to right, rgb(143 199 238 / 38%) var(--charge, 100%), transparent var(--charge, 100%));
+  color: var(--chalk);
+  font: 700 0.9rem/1 var(--ui);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.burst:disabled {
+  border-color: rgb(143 199 238 / 40%);
+  color: var(--chalk-dim);
+  cursor: default;
+}
+
+.burst kbd {
+  margin-left: 0.3rem;
+  padding: 0.08rem 0.35rem;
+  border: 1px solid rgb(244 241 230 / 45%);
+  border-radius: 0.3rem;
+  font: 700 0.66rem/1.3 var(--mono);
+}
+
+/* ---------------------------------------------------------------- small screens */
+
+@media (max-width: 640px) {
+  .bar {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+  }
+
+  .meter {
+    order: 5;
+    flex-basis: 100%;
+  }
+
+  .boardWrap {
+    padding: 12px 12px 8px;
+  }
+
+  .card {
+    padding: 1rem 1.05rem 1.1rem;
+  }
+
+  .burst kbd {
+    display: none;
+  }
+
+  .burst {
+    min-width: 6.5rem;
+    min-height: 3.1rem;
+  }
+
+  .idea li {
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+
+  .softmax b {
+    font-size: 1.15rem;
+  }
+
+  .toast {
+    font-size: 1.05rem;
+  }
+}
+
+@media (hover: none) {
+  .controls div:nth-child(3) {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- motion */
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes write {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes toast {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  8%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote,
+  .credit,
+  .lines p,
+  .chalkButton,
+  .overlay,
+  .toast {
+    animation-duration: 1ms;
+    animation-delay: 0s !important;
+  }
+}
