@@ -243,7 +243,7 @@ export const CARDS: CardDef[] = [
     maxLevel: 3,
     icon: "✧",
     paper: "dsf",
-    describe: (l) => (l === 1 ? "Your classifier hides a generator: tokens appear from noise." : "samples tokens more often"),
+    describe: (l) => (l === 1 ? "If it understands, it can create: its gradients turn noise into tokens." : "samples tokens more often"),
   },
   {
     id: "robotuse",
@@ -252,7 +252,7 @@ export const CARDS: CardDef[] = [
     maxLevel: 3,
     icon: "⚙",
     paper: "robotuse",
-    describe: (l) => (l === 1 ? "Subagents fetch far-off tokens and report back only the result." : "+subagents, dispatched sooner"),
+    describe: (l) => (l === 1 ? "Act by sight, not code: you pick the target, subagents fetch far tokens." : "+subagents, dispatched sooner"),
   },
   {
     id: "reworld",
@@ -1653,7 +1653,8 @@ export function createGame(
 
     const ru = lvl("robotuse");
     if (ru && ready("robotuse", ROBOTUSE_CD[ru - 1], dt)) {
-      // RobotUse: you pick the target, a subagent handles the motion and returns only the result
+      // RobotUse: actions are chosen visually (pick the target), not written as code;
+  // a subagent handles the motion and reports back only the result
       for (let k = 0; k < 2 * ru; k += 1) {
         let best: Gem | null = null;
         let bestD = player.pickup * player.pickup;

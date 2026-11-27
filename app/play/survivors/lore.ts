@@ -71,8 +71,8 @@ export const CARD_FLAVOR: Record<CardIconId, string> = {
   acro: "Same policy. Better place to resume.",
   csf: "No weights, no watermark. Just oddly specific prompts.",
   rhd: "The strong agent writes it; the light agent debugs it.",
-  dsf: "What I cannot create, I do not understand.",
-  robotuse: "Keep the decision context compact.",
+  dsf: "“What I cannot create, I do not understand.” —Feynman",
+  robotuse: "Computer Use had a harness. Now robots do too.",
   reworld: "Simulate, diff, then commit to the live world.",
   checkpoint: "You did save a checkpoint, right?",
 };
