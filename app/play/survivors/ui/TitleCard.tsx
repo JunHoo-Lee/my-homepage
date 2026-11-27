@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 import { formatTime } from "../game";
 import { SoundIcon } from "../icons";
@@ -31,7 +32,14 @@ const LOSS_END = { x: 297, y: 34 };
 
 export default function TitleCard({ submission, best, touch, muted, motion, onToggleMute, onStart }: Props) {
   const ui = useUiSound();
+  const startRef = useRef<HTMLButtonElement>(null);
   const [lead, ...rest] = SCREENS.title.split(" ");
+
+  // Keyboard players start on "Start review". No autoFocus: it would scroll short screens past the
+  // title, and touch screens would show a focus ring nobody asked for.
+  useEffect(() => {
+    if (window.matchMedia("(pointer: fine)").matches) startRef.current?.focus({ preventScroll: true });
+  }, []);
 
   return (
     <div className={`${kit.overlay} ${styles.backdrop}`}>
@@ -134,6 +142,7 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
 
         <div className={`${kit.actions} ${styles.actions}`}>
           <button
+            ref={startRef}
             type="button"
             className={`${kit.button} ${kit.primary} ${styles.start}`}
             onClick={() => {
@@ -141,7 +150,6 @@ export default function TitleCard({ submission, best, touch, muted, motion, onTo
               onStart();
             }}
             aria-keyshortcuts="Enter"
-            autoFocus
             {...ui.hover}
           >
             Start review

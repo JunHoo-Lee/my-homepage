@@ -109,7 +109,8 @@ export type GameOptions = {
 export type GameHandle = {
   setMove: (x: number, y: number) => void;
   choose: (cardId: string) => void;
-  setPaused: (paused: boolean) => void;
+  /** False when the pause is refused: a level-up is up or the run is over (the game owns the phase). */
+  setPaused: (paused: boolean) => boolean;
   restart: () => void;
   dispose: () => void;
 };
@@ -299,6 +300,8 @@ const VICTORY_BEAT = 1;
 const DEATH_BEAT = 0.6;
 /** Lifetime of Reviewer 2's rejections (draw() fades them in as they leave its body). */
 const BOSS_SHOT_LIFE = 4;
+/** Semitones above the token chime's E5 for each step of a pickup chain: the A-minor pentatonic, in key with the score. */
+const GEM_LADDER = [0, 3, 5, 8, 10, 12, 15, 17];
 
 const TAU = Math.PI * 2;
 const FONT = '"Helvetica Neue", Arial, sans-serif';
@@ -392,6 +395,11 @@ export function createGame(
   // when the pixel ratio changes) and the screen-sized vignettes (dropped on every resize).
   let art: Art | null = null;
   let screenArt: ScreenArt | null = null;
+  /** The canvas must be redrawn even while the scene is frozen (a resize or a lost context clears it). */
+  let dirty = true;
+  const redraw = () => {
+    dirty = true;
+  };
 
   const resize = () => {
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -402,13 +410,17 @@ export function createGame(
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     screenArt = null;
+    dirty = true;
   };
   resize();
   window.addEventListener("resize", resize);
+  canvas.addEventListener("contextrestored", redraw);
 
   // Zoom out a little on small screens so there is room to dodge.
   const baseZoom = () => (Math.min(width, height) < 560 ? 0.78 : 1);
-  const spawnRadius = () => Math.hypot(width, height) / 2 / baseZoom() + 60;
+  /** Wide screens show the title card on the left (title.module.css): the demo plays in the free space to its right. */
+  const attractShift = () => (mode === "attract" && width >= 900 ? width * 0.2 : 0);
+  const spawnRadius = () => (Math.hypot(width, height) / 2 + attractShift()) / baseZoom() + 60;
 
   // ---------------------------------------------------------- state
   let mode: Mode = "attract";
@@ -489,10 +501,12 @@ export function createGame(
   /*
    * RENDER STATE (read by draw())
    *
-   * draw() runs every animation frame, also while paused, during a level-up
-   * and after the run ended, and only reads what is listed here. World units
-   * are CSS px. Use `clock` (sim seconds, frozen by pause and hit-stop) for
-   * idle animation so everything freezes together on impact.
+   * draw() runs every animation frame, also during a level-up, and only reads
+   * what is listed here. Paused or after the run ended it stops about a second
+   * later, once shake, flashes and the camera have settled (a resize redraws
+   * the still frame). World units are CSS px. Use `clock` (sim seconds, frozen
+   * by pause and hit-stop) for idle animation so everything freezes together
+   * on impact.
    *
    * Global
    *   mode            "attract": title-screen demo (autopilot, invulnerable, no HUD); "run": a real run
@@ -507,7 +521,8 @@ export function createGame(
    *   levelUpDelay    > 0 during the level-up freeze before the cards show (with `choosing`: cards are up)
    *
    * Camera (cam), resolved by present() just before draw()
-   *   x, y            world point at the screen centre (player + look-ahead lead)
+   *   x, y            world point at the screen centre (player + look-ahead lead; the attract
+   *                   demo on wide screens sits right of centre, beside the title card)
    *   zoom            CSS px per world unit (base zoom x zoom punch)
    *   shakeX, shakeY  screen-space shake offset in CSS px; shakeRot: radians around the screen
    *                   centre (all 0 with reducedMotion or in attract mode)
@@ -1010,6 +1025,7 @@ export function createGame(
 
   const damage = (e: Enemy, amount: number, kx: number, ky: number, source: DamageSource) => {
     if (e.hp <= 0 || e.entrance > 0) return;
+    if (e === boss.enemy && (victory > 0 || dying > 0)) return; // the decision is already made
     const crit = source !== "dropout" && source !== "blast" && Math.random() < CRIT_CHANCE;
     const dealt = crit ? amount * 2 : amount;
     const isBoss = e === boss.enemy;
@@ -1098,6 +1114,9 @@ export function createGame(
     burst("debris", player.x, player.y, 24, 260, 4, PALETTE.blue, 0.7);
     burst("spark", player.x, player.y, 10, 320, 2.5, "#ffffff", 0.4, 5);
     addTrauma(0.5);
+    // the stinger starts on the moment and covers the beat before the letter
+    sfx("explode", { pitch: 0.7, volume: 0.6 });
+    music("defeat");
   };
 
   const hurtPlayer = (amount: number) => {
@@ -1126,12 +1145,12 @@ export function createGame(
     const time = died ? Math.min(deathTime, RUN_LENGTH) : RUN_LENGTH;
     const grade: Grade = !died ? (bossDefeated ? "Oral" : "Accept") : time < DESK_REJECT_TIME ? "DeskReject" : time >= BOSS_TIME ? "Borderline" : "Reject";
     pushHud();
-    music(grade === "Oral" || grade === "Accept" ? "victory" : "defeat");
     lastResult = { grade, time, kills, level, bossDefeated, build: build(), maxCombo, hitsTaken };
     callbacks.onEnd(lastResult);
   };
 
   const startVictory = () => {
+    music("victory");
     t = RUN_LENGTH;
     victory = VICTORY_BEAT;
     slowMotion(0.3, VICTORY_BEAT);
@@ -1631,8 +1650,10 @@ export function createGame(
         sx -= uy * sway;
         sy += ux * sway;
       }
-      // Separation from neighbours so they do not collapse into one blob.
-      const reach = e.r + MAX_ENEMY_R;
+      // Separation from neighbours so they do not collapse into one blob. Comment bubbles are about
+      // 2.2x wider than tall: two of them compare as ellipses and push harder, so their text stays readable.
+      const comment = e.kind === "comment";
+      const reach = e.r + MAX_ENEMY_R + (comment ? 8 : 0);
       const x0 = cellOf(e.x - reach, gridX0);
       const x1 = cellOf(e.x + reach, gridX0);
       const y0 = cellOf(e.y - reach, gridY0);
@@ -1643,13 +1664,14 @@ export function createGame(
             if (j === i) continue;
             const o = enemies[j];
             if (o.hp <= 0 || o.entrance > 0) continue;
-            const ox = e.x - o.x;
+            const squeeze = comment && o.kind === "comment" ? 0.45 : 1;
+            const ox = (e.x - o.x) * squeeze;
             const oy = e.y - o.y;
             const min = e.r + o.r;
             const dd = ox * ox + oy * oy;
             if (dd > 0 && dd < min * min) {
               const od = Math.sqrt(dd);
-              const push = ((min - od) / min) * 90;
+              const push = ((min - od) / min) * (squeeze < 1 ? 240 : 90);
               sx += (ox / od) * push;
               sy += (oy / od) * push;
             }
@@ -1810,7 +1832,7 @@ export function createGame(
       spawnParticle("sparkle", player.x + rand(-8, 8), player.y + rand(-10, 4), rand(-30, 30), rand(-90, -50), 0.4, big ? 5 : 3.5, big ? PALETTE.gold : PALETTE.sky, 3);
     }
     gems.length = n;
-    if (collected) sfx("gem", { pitch: Math.min(2.2, 1 + 0.045 * gemChain) });
+    if (collected) sfx("gem", { pitch: 2 ** (GEM_LADDER[gemChain % GEM_LADDER.length] / 12) });
 
     n = 0;
     for (let i = 0; i < pickups.length; i += 1) {
@@ -1968,7 +1990,7 @@ export function createGame(
     const ease = 1 - Math.exp(-dt * 4);
     cam.leadX += (lx - cam.leadX) * ease;
     cam.leadY += (ly - cam.leadY) * ease;
-    cam.x = player.x + cam.leadX;
+    cam.x = player.x + cam.leadX - attractShift() / cam.zoom;
     cam.y = player.y + cam.leadY;
 
     screenFlash.alpha = Math.max(0, screenFlash.alpha - screenFlash.decay * dt);
@@ -2264,12 +2286,13 @@ export function createGame(
   let tintColor = "";
   const groundMatrix = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
   /**
-   * The tint over the ground (time of day, red while Reviewer 2 is around, more in phase 2),
-   * quantised so the tile is re-baked only every few seconds. Returns its key; when that
-   * differs from `key`, tintColor holds the new CSS colour.
+   * The tint over the ground (time of day, red while Reviewer 2 is around, more in phase 2).
+   * The daylight steps every 5 s of run time, so the tile is re-baked about 40 times a run
+   * (each step is a shift of about 2 RGB units, invisible). Returns its key; when that differs
+   * from `key`, tintColor holds the new CSS colour.
    */
   const groundTint = (key: number) => {
-    const time = Math.min(t, 240);
+    const time = Math.floor(Math.min(t, 240) / 5) * 5;
     const i = time > DAYLIGHT[1][0] ? 1 : 0;
     const from = DAYLIGHT[i];
     const to = DAYLIGHT[i + 1];
@@ -2561,33 +2584,38 @@ export function createGame(
 
   const drawEnemies = (a: Art) => {
     const sheet = a.sheet;
-    for (let i = 0; i < drawList.length; i += 1) {
-      const e = drawList[i];
-      const p = poses[i];
-      if (e.kind === "boss") {
-        drawBoss(a, e, p);
-        continue;
-      }
-      const set = e.kind === "comment" ? null : sheet.enemies[e.kind];
-      ctx.globalAlpha = p.alpha;
-      place(p.x, p.y - p.lift + p.pivot, p.rot, p.sx, p.sy);
-      stamp(set ? (e.face < 0 ? set.left : set.right) : sheet.comments.sprites[e.variant], -p.pivot);
-      if (e.kind === "explode" && e.hp < e.maxHp * 0.5) {
-        // overheating: a red pulse, stronger as it nears detonation
-        const heat = 1 - e.hp / (e.maxHp * 0.5);
-        ctx.globalAlpha = p.alpha * heat * (0.3 + 0.25 * Math.sin(clock * 12 + e.id));
-        stamp(a.heat.explode, -p.pivot);
-      }
-      if (e.flash > 0) {
-        // capped, so the outline still shows through and a flashing bug never reads as a hole in the sand
-        ctx.globalAlpha = p.alpha * Math.min(0.75, e.flash / 0.06);
-        stamp(set ? set.flash : sheet.comments.flash[e.variant], -p.pivot);
-      }
-      if (e.kind === "explode") {
-        // the fuse fizzles
-        const tip = poseLocal(p, FUSE_TIP.x, FUSE_TIP.y);
+    // Two passes, each back to front: the bugs and Reviewer 2, then the floating comment bubbles,
+    // so a bug never covers a comment's text.
+    for (let pass = 0; pass < 2; pass += 1) {
+      for (let i = 0; i < drawList.length; i += 1) {
+        const e = drawList[i];
+        if ((e.kind === "comment") !== (pass === 1)) continue;
+        const p = poses[i];
+        if (e.kind === "boss") {
+          drawBoss(a, e, p);
+          continue;
+        }
+        const set = e.kind === "comment" ? null : sheet.enemies[e.kind];
         ctx.globalAlpha = p.alpha;
-        blit(starOf(a, PALETTE.gold, clock * 9 + e.id), tip.x, tip.y, 0, 0.45 + 0.2 * Math.sin(clock * 37 + e.id * 2));
+        place(p.x, p.y - p.lift + p.pivot, p.rot, p.sx, p.sy);
+        stamp(set ? (e.face < 0 ? set.left : set.right) : sheet.comments.sprites[e.variant], -p.pivot);
+        if (e.kind === "explode" && e.hp < e.maxHp * 0.5) {
+          // overheating: a red pulse, stronger as it nears detonation
+          const heat = 1 - e.hp / (e.maxHp * 0.5);
+          ctx.globalAlpha = p.alpha * heat * (0.3 + 0.25 * Math.sin(clock * 12 + e.id));
+          stamp(a.heat.explode, -p.pivot);
+        }
+        if (e.flash > 0) {
+          // capped, so the outline still shows through and a flashing bug never reads as a hole in the sand
+          ctx.globalAlpha = p.alpha * Math.min(0.75, e.flash / 0.06);
+          stamp(set ? set.flash : sheet.comments.flash[e.variant], -p.pivot);
+        }
+        if (e.kind === "explode") {
+          // the fuse fizzles
+          const tip = poseLocal(p, FUSE_TIP.x, FUSE_TIP.y);
+          ctx.globalAlpha = p.alpha;
+          blit(starOf(a, PALETTE.gold, clock * 9 + e.id), tip.x, tip.y, 0, 0.45 + 0.2 * Math.sin(clock * 37 + e.id * 2));
+        }
       }
     }
     ctx.globalAlpha = 1;
@@ -3420,6 +3448,7 @@ export function createGame(
   let last = performance.now();
   let raf = 0;
   let disposed = false;
+  let frozen = 0; // real seconds the scene has been paused or ended
   const frame = (now: number) => {
     if (disposed) return;
     const elapsed = Math.max(0, now - last);
@@ -3428,11 +3457,15 @@ export function createGame(
     const t0 = performance.now();
     if (!paused && !ended) advance(realDt);
     const t1 = performance.now();
-    present(realDt);
-    draw();
-    const t2 = performance.now();
     perf.update = average(perf.update, t1 - t0);
-    perf.draw = average(perf.draw, t2 - t1);
+    frozen = paused || ended ? frozen + realDt : 0;
+    // Paused or finished, the scene stops changing once shake, flashes and the camera lead settle (< 1 s): keep its last frame.
+    if (frozen < 1 || dirty) {
+      dirty = false;
+      present(realDt);
+      draw();
+      perf.draw = average(perf.draw, performance.now() - t1);
+    }
     if (elapsed > 0 && elapsed < 250) perf.frame = average(perf.frame, elapsed);
     raf = requestAnimationFrame(frame);
   };
@@ -3656,12 +3689,16 @@ export function createGame(
       pushHud();
     },
     setPaused(next) {
+      if (next && (choosing || ended)) return false;
       paused = next;
       last = performance.now();
+      return true;
     },
     restart() {
       reset("run");
       last = performance.now();
+      // the new score starts from its calm opening layer, not at the last run's intensity
+      audio.setIntensity(0);
       audio.setMusic("run");
       pushHud();
     },
@@ -3669,6 +3706,7 @@ export function createGame(
       disposed = true;
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      canvas.removeEventListener("contextrestored", redraw);
       document.removeEventListener("visibilitychange", onVisibility);
       const w = window as unknown as DebugWindow;
       if (debugHook && w.__survivors === debugHook) delete w.__survivors;

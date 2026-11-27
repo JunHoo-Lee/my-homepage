@@ -237,7 +237,7 @@
 }
 
 .clock span {
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
   font: 700 0.66rem/1 var(--font-mono);
 }
 
@@ -308,7 +308,7 @@
 }
 
 .kills .wide {
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -546,6 +546,16 @@
 
   .bossLabel {
     font-size: 0.66rem;
+  }
+}
+
+/* phones held sideways: an open overlay needs the height, so only the h-index bar stays above it */
+@media (max-height: 500px) and (min-width: 601px) {
+  .frozen .row,
+  .frozen .status,
+  .frozen .boss,
+  .frozen .comboRow {
+    visibility: hidden;
   }
 }
 

@@ -17,6 +17,8 @@ type Props = {
   pops: number;
   muted: boolean;
   touch: boolean;
+  /** A level-up or the pause menu is open over the HUD. */
+  frozen: boolean;
   onToggleMute: () => void;
   onPause: () => void;
 };
@@ -34,7 +36,7 @@ const fill = (value: number, max: number) => ({ transform: `scaleX(${ratio(value
 /** The same as a clip, for fills whose pattern must not be squashed. */
 const clip = (value: number, max: number) => ({ clipPath: `inset(0 ${(1 - ratio(value, max)) * 100}% 0 0)` });
 
-export default function Hud({ hud, hurt, pops, muted, touch, onToggleMute, onPause }: Props) {
+export default function Hud({ hud, hurt, pops, muted, touch, frozen, onToggleMute, onPause }: Props) {
   const ui = useUiSound();
   const remaining = Math.max(0, RUN_LENGTH - hud.time);
   const low = hud.hp < hud.maxHp * 0.3;
@@ -46,7 +48,7 @@ export default function Hud({ hud, hurt, pops, muted, touch, onToggleMute, onPau
   const muteLabel = muted ? "Unmute" : "Mute";
 
   return (
-    <div className={styles.hud}>
+    <div className={`${styles.hud} ${frozen ? styles.frozen : ""}`}>
       <div className={styles.xp} role="meter" aria-label={`${HUD_TERMS.level} ${hud.level}, ${HUD_TERMS.xp}`} aria-valuemin={0} aria-valuemax={hud.xpNext} aria-valuenow={Math.min(hud.xp, hud.xpNext)}>
         <div className={`${styles.xpFill} ${retrigger(hud.level - 1, styles.levelA, styles.levelB)}`} style={fill(hud.xp, hud.xpNext)} />
         <span className={styles.xpLabel}>

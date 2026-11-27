@@ -53,7 +53,7 @@
 
 .label {
   margin: 0.95rem 0 0.4rem;
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
   font: 700 0.66rem/1.2 var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -199,7 +199,7 @@
 }
 
 .confidence {
-  color: color-mix(in srgb, var(--ink) 58%, transparent);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
   font: 700 0.72rem/1 var(--font-mono);
 }
 
@@ -243,7 +243,7 @@
 }
 
 .stats dt {
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
   font: 700 0.6rem/1.2 var(--font-mono);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -448,10 +448,6 @@
     padding: 0.45rem 0.2rem;
   }
 
-  .stats dt {
-    font-size: 0.52rem;
-  }
-
   .stats dd {
     margin: 0 0 0.25rem;
     font-size: 1.15rem;
@@ -472,6 +468,24 @@
   .actions > :is(a, button) {
     flex: 1 1 calc(50% - 0.3rem);
     min-height: 2.5rem;
+  }
+}
+
+/* phones held sideways: the same sticky action bar, with the desktop letter's padding */
+@media (max-height: 500px) and (min-width: 601px) {
+  .backdrop {
+    --overlay-bottom: 0;
+  }
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    margin: 1.1rem -1.5rem -1.35rem;
+    padding: 0.6rem 1.5rem calc(0.7rem + env(safe-area-inset-bottom));
+    border-top: 1.5px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+    border-radius: 0 0 calc(1.1rem - 2px) calc(1.1rem - 2px);
+    background: var(--paper);
   }
 }
 
