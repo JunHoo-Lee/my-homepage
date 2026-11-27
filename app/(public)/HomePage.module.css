@@ -60,6 +60,14 @@
   background: #0f6fa6;
 }
 
+.headerIcons a.gameIcon {
+  background: #d77a2b;
+}
+
+.headerIcons a.gameIcon:hover {
+  background: #b5621d;
+}
+
 .headerIcons svg {
   width: 1.2rem;
   height: 1.2rem;

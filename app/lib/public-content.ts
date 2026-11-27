@@ -5,6 +5,7 @@ import {
   AWARDS,
   EDUCATION,
   NEWS,
+  POSTS,
   PROFILE,
   PUBLICATIONS,
 } from "./data";
@@ -264,6 +265,7 @@ export const PUBLIC_SITE_CONTENT = {
   news: NEWS as NewsItem[],
   publicationSections: PUBLICATION_SECTIONS,
   awards: AWARDS,
+  posts: POSTS,
   academicService: ACADEMIC_SERVICE,
   researchPillars: RESEARCH_PILLARS,
   projects: PROJECTS,

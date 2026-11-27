@@ -16,6 +16,7 @@
     "@react-pdf/renderer": "^4.3.1",
     "@supabase/supabase-js": "^2.87.1",
     "@types/xml2js": "^0.4.14",
+    "cannon-es": "^0.20.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "katex": "^0.16.27",
@@ -28,6 +29,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "tailwind-merge": "^3.4.0",
+    "three": "^0.180.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
@@ -35,6 +37,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.180.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",

@@ -46,6 +46,21 @@ export const EDUCATION = [
     }
 ];
 
+export const POSTS = [
+    {
+        title: "The Chatbot Nobody Trained",
+        href: "/wplm",
+        description: "How a plain-text edit list sets the weights of WPLM, a chatbot that uses infini-gram as its memory.",
+        date: "Nov 2026",
+    },
+    {
+        title: "The Mystery of the Unlearned Parameters",
+        href: "/mysteryofunlearnedparameters",
+        description: "Why huge sparse n-gram tables behave like write-once memory, and what that means for CPU–GPU dual LLMs.",
+        date: "Nov 2026",
+    },
+];
+
 export const LATEST_UPDATE = {
     date: "Sep 2026",
     datetime: "2026-09",

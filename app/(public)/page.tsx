@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { GraduationCap, Github, Mail } from "lucide-react";
+import { Gamepad2, GraduationCap, Github, Mail } from "lucide-react";
 
 import {
   PERSON_JSON_LD,
@@ -13,7 +13,7 @@ import NewsList from "./NewsList";
 import PublicationGallery from "./PublicationGallery";
 import styles from "./HomePage.module.css";
 
-const { awards, education, news, profile, projects, publicationSections } = PUBLIC_SITE_CONTENT;
+const { awards, education, news, posts, profile, projects, publicationSections } = PUBLIC_SITE_CONTENT;
 
 const SELECTED_PUBLICATION_TITLES = publicationSections
   .flatMap((section) => section.items)
@@ -59,6 +59,7 @@ export default function Home() {
           <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ" target="_blank" rel="noreferrer" aria-label="Google Scholar"><GraduationCap aria-hidden="true" /></a>
           <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noreferrer" aria-label="GitHub"><Github aria-hidden="true" /></a>
           <a href={`mailto:${profile.email}`} aria-label="Email"><Mail aria-hidden="true" /></a>
+          <a href="/play" aria-label="Drive mode: explore this page as a game" title="Drive mode" className={styles.gameIcon}><Gamepad2 aria-hidden="true" /></a>
         </nav>
       </header>
 
@@ -101,20 +102,15 @@ export default function Home() {
       <section className={styles.section} id="posts">
         <SectionTitle>Posts</SectionTitle>
         <div className={styles.educationList}>
-          <article>
-            <div>
-              <h3><a href="/wplm">The Chatbot Nobody Trained</a></h3>
-              <p>How a plain-text edit list sets the weights of WPLM, a chatbot that uses infini-gram as its memory.</p>
-            </div>
-            <time>Nov 2026</time>
-          </article>
-          <article>
-            <div>
-              <h3><a href="/mysteryofunlearnedparameters">The Mystery of the Unlearned Parameters</a></h3>
-              <p>Why huge sparse n-gram tables behave like write-once memory, and what that means for CPU–GPU dual LLMs.</p>
-            </div>
-            <time>Nov 2026</time>
-          </article>
+          {posts.map((post) => (
+            <article key={post.href}>
+              <div>
+                <h3><a href={post.href}>{post.title}</a></h3>
+                <p>{post.description}</p>
+              </div>
+              <time>{post.date}</time>
+            </article>
+          ))}
         </div>
       </section>
 

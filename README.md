@@ -12,6 +12,7 @@ publication list, and dedicated project pages for selected papers.
 - `/dsv`: Deep Support Vectors project page
 - `/mysteryofunlearnedparameters`: blog post on CPU–GPU dual LMs (static page under `public/`)
 - `/wplm`: WPLM, a chatbot whose weights were programmed, not trained (static page under `public/wplm`; `/wp-llm` redirects here)
+- `/play`: Drive mode, a three.js + cannon-es world where you drive a toy car around the homepage's sections (opened from the 🎮 icon on the homepage; `?debug` exposes the car's physics body on `window.__drive`)
 
 ## DSV Assets
 
