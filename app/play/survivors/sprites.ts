@@ -93,13 +93,13 @@ function paint(scale: number, x0: number, y0: number, x1: number, y1: number, dr
   return { canvas, w: canvas.width / scale, h: canvas.height / scale, ax: -x0, ay: -y0 };
 }
 
-/** Solid silhouette with the same size and anchor (hit flashes). */
-function silhouette(s: Sprite, color = "#ffffff"): Sprite {
+/** Solid white silhouette with the same size and anchor (hit flashes). */
+function silhouette(s: Sprite): Sprite {
   const canvas = newCanvas(s.canvas.width, s.canvas.height);
   const ctx = canvas.getContext("2d")!;
   ctx.drawImage(s.canvas, 0, 0);
   ctx.globalCompositeOperation = "source-in";
-  ctx.fillStyle = color;
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   return { ...s, canvas };
 }
@@ -179,11 +179,9 @@ function gloss(ctx: Ctx, x: number, y: number, rx: number, ry: number, rot: numb
   ctx.fill();
 }
 
-/** Bold label centred on its ink (not its em box), stroked underneath for contrast. */
-function label(ctx: Ctx, text: string, x: number, y: number, size: number, fill: string, stroke: string, strokeWidth: number, maxWidth = Infinity) {
+/** Bold label centred on its ink (not its em box), optionally stroked underneath for contrast. */
+function label(ctx: Ctx, text: string, x: number, y: number, size: number, fill: string, stroke: string, strokeWidth: number) {
   ctx.font = `bold ${size}px ${FONT}`;
-  const width = ctx.measureText(text).width;
-  if (width > maxWidth) ctx.font = `bold ${(size * maxWidth) / width}px ${FONT}`;
   const m = ctx.measureText(text);
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
@@ -202,7 +200,7 @@ function eye(ctx: Ctx, x: number, y: number, r: number, dir: number, pupil: numb
   dot(ctx, x, y, r, "#ffffff");
   ctx.lineWidth = lineWidth;
   ctx.strokeStyle = line;
-  ctx.stroke();
+  ctx.stroke(); // the circle dot() just filled
   const pr = r * pupil;
   const px = x + dir * (r - pr) * 0.62;
   const py = y + (r - pr) * 0.18;
@@ -242,7 +240,7 @@ function drawNan(ctx: Ctx, dir: number) {
     ctx.beginPath();
     ctx.ellipse(s * 9.2, -0.6, 2.3, 1.3, 0, 0, TAU);
     ctx.fill();
-    const x = s * 4.6 + dir * 1.3;
+    const x = s * 4.6 + dir * 1.8;
     dot(ctx, x, -3.6, 2.2, PALETTE.ink);
     dot(ctx, x - 0.7, -4.4, 0.8, "#ffffff");
   }
@@ -318,20 +316,20 @@ function drawHalluc(ctx: Ctx, dir: number) {
 /** ∇∞ drawn with paths (no font has to have the glyphs). */
 function nablaInfinity(ctx: Ctx, x: number, y: number, color: string, under: string) {
   const nabla = new Path2D();
-  nabla.moveTo(x - 10, y - 3.2);
-  nabla.lineTo(x - 3, y - 3.2);
-  nabla.lineTo(x - 6.5, y + 3.4);
+  nabla.moveTo(x - 11.6, y - 3.8);
+  nabla.lineTo(x - 2.4, y - 3.8);
+  nabla.lineTo(x - 7, y + 4.2);
   nabla.closePath();
   const inf = new Path2D();
   for (let k = 0; k <= 48; k += 1) {
     const a = (k / 48) * TAU;
     const d = 1 + Math.sin(a) ** 2;
-    inf.lineTo(x + 5 + (5.2 * Math.cos(a)) / d, y + (6.4 * Math.sin(a) * Math.cos(a)) / d);
+    inf.lineTo(x + 6.2 + (5.6 * Math.cos(a)) / d, y + (7 * Math.sin(a) * Math.cos(a)) / d);
   }
   inf.closePath();
   for (const [width, color2] of [
-    [4.4, under],
-    [2.1, color],
+    [4.2, under],
+    [1.9, color],
   ] as const) {
     stroke(ctx, nabla, width, color2);
     stroke(ctx, inf, width, color2);
@@ -381,10 +379,10 @@ function drawExplode(ctx: Ctx, dir: number) {
 
   // small cracks with a lit lower edge
   const crack = new Path2D();
-  crack.moveTo(-19.5, -10);
-  crack.lineTo(-16, -8.4);
-  crack.lineTo(-17, -5.6);
-  crack.lineTo(-13.8, -4.2);
+  crack.moveTo(-22.6, -5.6);
+  crack.lineTo(-19.4, -4.2);
+  crack.lineTo(-20.4, -1.6);
+  crack.lineTo(-17.2, -0.4);
   crack.moveTo(8.5, 19.5);
   crack.lineTo(11, 17.2);
   crack.lineTo(12.4, 19.6);
@@ -421,7 +419,7 @@ function drawExplode(ctx: Ctx, dir: number) {
   ctx.strokeStyle = PALETTE.blueDark;
   ctx.stroke();
 
-  nablaInfinity(ctx, 1.5, 9.6, "#ffffff", mix(PALETTE.orange, COOL, 0.55));
+  nablaInfinity(ctx, 1, 9.8, "#ffffff", mix(PALETTE.orange, COOL, 0.55));
 }
 
 /** Reviewer 2's red pen, nib at BOSS_PEN_TIP. */
@@ -432,25 +430,22 @@ function drawPen(ctx: Ctx, baseX: number, baseY: number) {
   ctx.save();
   ctx.translate(baseX, baseY);
   ctx.rotate(angle);
-  // along +x: cap end at 0, nib tip at `length`
-  const nib = new Path2D();
-  nib.moveTo(length - 9, -3.4);
-  nib.lineTo(length, 0);
-  nib.lineTo(length - 9, 3.4);
-  nib.closePath();
-  celBody(ctx, nib, tone("#e9dcc6", PALETTE.ink), 1.2, 1.2);
-  dot(ctx, length - 1.2, 0, 1.3, PALETTE.red);
-  celBody(ctx, roundRectPath(0, -4, length - 8, 8, 3.4), t, 1.5, 2.2, (c) => {
-    c.fillStyle = mix(PALETTE.red, COOL, 0.35);
-    c.fillRect(length - 15, -5, 3, 10);
+  // along +x: rounded end at 0, cone, then the red tip at `length`
+  const cone = new Path2D();
+  cone.moveTo(length - 11, -4.4);
+  cone.lineTo(length - 2.6, -1.8);
+  cone.lineTo(length - 2.6, 1.8);
+  cone.lineTo(length - 11, 4.4);
+  cone.closePath();
+  const tip = roundRectPath(length - 4, -1.8, 4, 3.6, 1.4);
+  stroke(ctx, tip, 2.4, t.line);
+  celBody(ctx, cone, tone("#efe3cc", PALETTE.ink), 1.2, 1.4);
+  ctx.fillStyle = PALETTE.red;
+  ctx.fill(tip);
+  celBody(ctx, roundRectPath(0, -4.8, length - 9, 9.6, 4.2), t, 1.5, 2.4, (c) => {
+    c.fillStyle = t.shade;
+    c.fillRect(length - 17, -6, 3.2, 12);
   });
-  // clip
-  ctx.strokeStyle = "#f4f1ea";
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(4, -2.2);
-  ctx.lineTo(16, -2.2);
-  ctx.stroke();
   ctx.restore();
 }
 
@@ -470,7 +465,7 @@ function drawBoss(ctx: Ctx, dir: number) {
   ctx.beginPath();
   ctx.arc(0, 0, r - 1.6, Math.PI * 1.08, Math.PI * 1.42);
   ctx.stroke();
-  gloss(ctx, -24, -30, 9, 4.4, -0.75, 0.22);
+  gloss(ctx, -22, -40, 7, 3, -0.6, 0.22);
 
   // bushy brows, inner ends low
   for (const s of [-1, 1]) {
@@ -532,9 +527,10 @@ function drawBoss(ctx: Ctx, dir: number) {
   ctx.save();
   ctx.translate(-21, 30);
   ctx.rotate(-0.1);
-  celBody(ctx, roundRectPath(-13, -8.5, 26, 18, 3), tone(PALETTE.paper, "#111111"), 1, 1.6);
-  ctx.fillStyle = PALETTE.red;
-  ctx.fillRect(-13, -8.5, 26, 4);
+  celBody(ctx, roundRectPath(-13, -8.5, 26, 18, 3), tone(PALETTE.paper, "#111111"), 1, 1.6, (c) => {
+    c.fillStyle = PALETTE.red;
+    c.fillRect(-13, -8.5, 26, 4);
+  });
   label(ctx, "R2", 0, 0.4, 9.5, PALETTE.red, PALETTE.paper, 0);
   label(ctx, "Conf: 5", 0, 6.1, 4.6, PALETTE.ink, PALETTE.paper, 0);
   ctx.restore();
@@ -748,16 +744,23 @@ function drawBolt(ctx: Ctx) {
     p.quadraticCurveTo(x - len * 0.45, r, x - len, 0);
     return p;
   };
+  // soft elongated halo, so the bolt glows even on sand
   ctx.save();
-  ctx.shadowColor = rgba(PALETTE.sky, 0.9);
-  ctx.shadowBlur = 5 * ctx.getTransform().a;
+  ctx.translate(-3.5, 0);
+  ctx.scale(1, 0.5);
+  const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, 14);
+  halo.addColorStop(0, rgba(PALETTE.sky, 0.5));
+  halo.addColorStop(0.45, rgba(PALETTE.sky, 0.22));
+  halo.addColorStop(1, rgba(PALETTE.sky, 0));
+  ctx.fillStyle = halo;
+  ctx.fillRect(-14, -14, 28, 28);
+  ctx.restore();
   const outer = ctx.createLinearGradient(-14, 0, 4, 0);
   outer.addColorStop(0, rgba(PALETTE.sky, 0));
   outer.addColorStop(0.5, rgba(PALETTE.sky, 0.85));
   outer.addColorStop(1, PALETTE.blue);
   ctx.fillStyle = outer;
   ctx.fill(drop(14, 4, 0));
-  ctx.restore();
   ctx.fillStyle = PALETTE.blueLight;
   ctx.fill(drop(10, 2.9, 0.4));
   const core = ctx.createLinearGradient(-9, 0, 2, 0);
@@ -823,7 +826,7 @@ function drawAnchor(ctx: Ctx) {
 /** Looped boomerang: a thick green loop arrow, readable while spinning. */
 function drawBoomerang(ctx: Ctx) {
   const t = tone(PALETTE.green);
-  const r = 8;
+  const r = 7.6;
   const a0 = -Math.PI / 2 + 0.75;
   const a1 = -Math.PI / 2 - 0.3 + TAU;
   const arc = new Path2D();
@@ -835,9 +838,9 @@ function drawBoomerang(ctx: Ctx) {
   const nx = Math.cos(a1);
   const ny = Math.sin(a1);
   const head = new Path2D();
-  head.moveTo(ex + tx * 5.2, ey + ty * 5.2);
-  head.lineTo(ex + nx * 5.4 - tx * 0.6, ey + ny * 5.4 - ty * 0.6);
-  head.lineTo(ex - nx * 5.4 - tx * 0.6, ey - ny * 5.4 - ty * 0.6);
+  head.moveTo(ex + tx * 5, ey + ty * 5);
+  head.lineTo(ex + nx * 4.9 - tx * 0.6, ey + ny * 4.9 - ty * 0.6);
+  head.lineTo(ex - nx * 4.9 - tx * 0.6, ey - ny * 4.9 - ty * 0.6);
   head.closePath();
   stroke(ctx, arc, 7.6, t.line);
   stroke(ctx, head, 2.8, t.line);
@@ -872,7 +875,7 @@ function drawGlow(ctx: Ctx, color: string) {
   const core = mix(color, "#ffffff", 0.5);
   for (let i = 0; i <= 12; i += 1) {
     const f = i / 12;
-    const a = 0.66 * Math.exp(-f * f * 2.2) * (1 - f * f) ** 2;
+    const a = 0.45 * Math.exp(-f * f * 2.6) * (1 - f * f) ** 2;
     g.addColorStop(f, rgba(f < 0.25 ? mix(core, color, f / 0.25) : color, Math.round(a * 1000) / 1000));
   }
   ctx.fillStyle = g;
@@ -967,15 +970,29 @@ function contours(spacing: number, indexEvery: number) {
   const step = TILE / cells;
   const side = cells + 3;
   const field = new Float32Array(side * side);
+  // each wave is separable: sin(X + Y) = sin X cos Y + cos X sin Y, so the
+  // grid needs only per-axis tables instead of a sine per sample
+  const sinX = new Float32Array(side);
+  const cosX = new Float32Array(side);
+  const sinY = new Float32Array(side);
+  const cosY = new Float32Array(side);
+  for (const [fx, fy, amp, phase] of LANDSCAPE) {
+    for (let i = 0; i < side; i += 1) {
+      const t = ((i - 1) * step * TAU) / TILE;
+      sinX[i] = amp * Math.sin(fx * t + phase);
+      cosX[i] = amp * Math.cos(fx * t + phase);
+      sinY[i] = Math.sin(fy * t);
+      cosY[i] = Math.cos(fy * t);
+    }
+    for (let j = 0; j < side; j += 1) {
+      for (let i = 0; i < side; i += 1) field[j * side + i] += sinX[i] * cosY[j] + cosX[i] * sinY[j];
+    }
+  }
   let lo = Infinity;
   let hi = -Infinity;
-  for (let j = 0; j < side; j += 1) {
-    for (let i = 0; i < side; i += 1) {
-      const h = lossAt((i - 1) * step, (j - 1) * step).h;
-      field[j * side + i] = h;
-      lo = Math.min(lo, h);
-      hi = Math.max(hi, h);
-    }
+  for (const h of field) {
+    lo = Math.min(lo, h);
+    hi = Math.max(hi, h);
   }
   const minor = new Path2D();
   const major = new Path2D();
@@ -1036,9 +1053,9 @@ function drawGround(): HTMLCanvasElement {
       const { h, gx, gy } = lossAt(((i - 0.5) * TILE) / n, ((j - 0.5) * TILE) / n);
       const k = Math.max(-1, Math.min(1, (-gx - gy) * 22 + h * 0.15));
       const o = (j * (n + 2) + i) * 4;
-      img.data[o] = sand[0] + k * 6;
-      img.data[o + 1] = sand[1] + k * 6;
-      img.data[o + 2] = sand[2] + k * 5;
+      img.data[o] = sand[0] + k * 4.5;
+      img.data[o + 1] = sand[1] + k * 4.5;
+      img.data[o + 2] = sand[2] + k * 4;
       img.data[o + 3] = 255;
     }
   }
@@ -1124,6 +1141,17 @@ function drawGround(): HTMLCanvasElement {
 
 // ------------------------------------------------------------------ sheet
 
+/**
+ * Draws the whole sheet (browser only; about 2 MB of canvas pixels at
+ * pixelRatio 2). Notes for the renderer:
+ * - groundTile is groundTileSize world units wide at 1.5 px per unit: use
+ *   createPattern(tile, "repeat") with
+ *   pattern.setTransform(new DOMMatrix().scale(groundTileSize / tile.width)).
+ * - bolt's anchor is the centre of its round head; the tail trails along -x.
+ * - hostileBolt is meant to be drawn unrotated (a turned ✗ reads as a +).
+ * - glow peaks at about 45% alpha so one additive glow blooms on sand
+ *   instead of clipping to a flat white disc; stack two for a stronger light.
+ */
 export function createSprites(pixelRatio: number): SpriteSheet {
   const scale = Math.min(Math.max(pixelRatio, 1), 2) * 1.5;
   const sprite = (x0: number, y0: number, x1: number, y1: number, draw: (ctx: Ctx) => void) => paint(scale, x0, y0, x1, y1, draw);
@@ -1158,7 +1186,7 @@ export function createSprites(pixelRatio: number): SpriteSheet {
     return sprite(-w / 2 - 6, -COMMENT_H / 2 - 7, w / 2 + 2.5, COMMENT_H / 2 + 10, (ctx) => drawComment(ctx, text, w, size));
   });
 
-  const player = sprite(-19, -24, 19, 18, drawPlayer);
+  const player = sprite(-21, -25, 21, 18, drawPlayer);
 
   return {
     enemies,
@@ -1169,14 +1197,14 @@ export function createSprites(pixelRatio: number): SpriteSheet {
       big: sprite(-9, -11, 9, 11, (ctx) => drawGem(ctx, 7, 9, PALETTE.gold)),
     },
     pickups: {
-      coffee: sprite(-12, -14, 13, 12, drawCoffee),
-      magnet: sprite(-13, -13, 14, 13, drawMegaphone),
+      coffee: sprite(-13, -15.5, 14.5, 12.5, drawCoffee),
+      magnet: sprite(-15, -15, 16, 14, drawMegaphone),
     },
-    bolt: sprite(-17, -7, 8, 7, drawBolt),
+    bolt: sprite(-18.5, -8, 11.5, 8, drawBolt),
     hostileBolt: sprite(-10, -10, 10, 10, drawHostileBolt),
     orb: sprite(-11.5, -11.5, 11.5, 11.5, drawOrb),
     anchor: sprite(-12, -12, 12, 12, drawAnchor),
-    boomerang: sprite(-13, -13, 13, 13, drawBoomerang),
+    boomerang: sprite(-14.5, -14.5, 14.5, 14.5, drawBoomerang),
     shadow: sprite(-32, -12, 32, 12, drawShadow),
     glow: Object.fromEntries(
       (Object.keys(GLOW_TINT) as GlowColor[]).map((key) => [key, sprite(-32, -32, 32, 32, (ctx) => drawGlow(ctx, GLOW_TINT[key]))]),

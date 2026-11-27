@@ -1,0 +1,393 @@
+/* Level-up: "Camera-ready revision · Address one concern", one card per option. */
+
+.backdrop {
+  background: radial-gradient(ellipse at center, rgb(43 43 43 / 30%) 0%, rgb(43 43 43 / 58%) 100%);
+}
+
+.panel {
+  width: min(58rem, 100%);
+  outline: none;
+  text-align: center;
+}
+
+.kicker {
+  display: inline-block;
+  margin: 0;
+  padding: 0.3rem 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 3px 0 var(--ink);
+  color: var(--ink);
+  font: 700 0.72rem/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: drop 320ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+.title {
+  margin: 0.55rem 0 1.2rem;
+  color: #fff;
+  font: 700 2.1rem/1.1 var(--font-paper);
+  text-shadow:
+    0 2px 0 var(--ink),
+    0 0 18px rgb(43 43 43 / 45%);
+  animation: drop 360ms cubic-bezier(0.2, 0.9, 0.3, 1.3) 40ms both;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+  gap: 1rem;
+}
+
+/* ---------------------------------------------------------------- card */
+
+.card {
+  --tile: var(--blue);
+  --tile-edge: color-mix(in srgb, var(--tile) 62%, #000);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "icon badge"
+    "name name"
+    "text text"
+    "flavor flavor"
+    "paper paper";
+  grid-template-rows: auto auto auto 1fr auto;
+  align-items: start;
+  gap: 0.45rem;
+  min-height: 14rem;
+  padding: 1rem 1rem 1.15rem;
+  border: 2px solid var(--ink);
+  border-radius: 1rem;
+  background: var(--paper);
+  box-shadow:
+    0 6px 0 var(--ink),
+    0 18px 40px rgb(0 0 0 / 28%);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  animation: deal 440ms cubic-bezier(0.2, 0.9, 0.3, 1.2) calc(120ms + var(--i) * 85ms) backwards;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-7px) rotate(-0.6deg);
+  box-shadow:
+    0 12px 0 var(--ink),
+    0 28px 48px rgb(0 0 0 / 30%);
+}
+
+.card:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--ink),
+    0 10px 24px rgb(0 0 0 / 25%);
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 4px;
+}
+
+.weapon {
+  --tile: var(--blue);
+}
+
+.passive {
+  --tile: var(--green);
+}
+
+.heal {
+  --tile: var(--red);
+}
+
+.icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid var(--tile-edge);
+  border-radius: 0.85rem;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--tile) 72%, #fff) 0 40%, var(--tile) 40% 100%);
+  box-shadow: 0 3px 0 var(--tile-edge);
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.badge {
+  grid-area: badge;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.new,
+.level {
+  padding: 0.2rem 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font: 800 0.68rem/1 var(--font-ui);
+  letter-spacing: 0.06em;
+}
+
+.new {
+  background: var(--gold);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.level {
+  background: var(--paper);
+  color: var(--tile-edge);
+  border-color: var(--tile-edge);
+}
+
+.pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pips i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.pips .pipOn {
+  background: var(--tile);
+}
+
+.pips .pipNew {
+  background: var(--gold);
+  animation: pip 900ms ease-in-out infinite;
+}
+
+.name {
+  grid-area: name;
+  margin-top: 0.15rem;
+  font: 800 1.08rem/1.2 var(--font-ui);
+}
+
+.text {
+  grid-area: text;
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.flavor {
+  grid-area: flavor;
+  color: color-mix(in srgb, var(--ink) 58%, transparent);
+  font: italic 0.9rem/1.35 var(--font-paper);
+}
+
+.paper {
+  grid-area: paper;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  justify-self: start;
+  max-width: calc(100% - 2.2rem);
+  padding: 0.3rem 0.55rem;
+  border: 1.5px solid color-mix(in srgb, var(--gold) 80%, var(--ink));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--gold) 18%, var(--paper));
+  color: color-mix(in srgb, var(--gold) 45%, var(--ink));
+  font: 700 0.74rem/1.25 var(--font-ui);
+}
+
+.paper svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.paper span {
+  min-width: 0;
+}
+
+.key {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.8rem;
+}
+
+/* paper cards: a gold border with a gleam running around it */
+.isPaper {
+  border-color: color-mix(in srgb, var(--gold) 70%, var(--ink));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, var(--paper)), var(--paper) 45%);
+  box-shadow:
+    0 6px 0 color-mix(in srgb, var(--gold) 55%, var(--ink)),
+    0 0 0 3px color-mix(in srgb, var(--gold) 35%, transparent),
+    0 18px 40px rgb(0 0 0 / 28%);
+}
+
+.isPaper::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  padding: 3px;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 30%, #fff6d0 45%, var(--gold) 50%, #fff6d0 55%, transparent 70%) 0 0 / 300% 100%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: gleam 2.6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gleam {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes deal {
+  from {
+    opacity: 0;
+    transform: translateY(46px) rotate(calc(3deg - var(--i) * 2deg)) scale(0.92);
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes pip {
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+/* ---------------------------------------------------------------- phones */
+
+@media (max-width: 600px) {
+  .backdrop {
+    --overlay-top: 6.6rem;
+
+    background: rgb(43 43 43 / 66%);
+  }
+
+  .kicker {
+    padding: 0.22rem 0.6rem;
+    font-size: 0.64rem;
+  }
+
+  .title {
+    margin: 0.4rem 0 0.75rem;
+    font-size: 1.45rem;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "icon name badge"
+      "icon text text"
+      "icon flavor flavor"
+      "icon paper paper";
+    grid-template-rows: auto;
+    column-gap: 0.7rem;
+    row-gap: 0.2rem;
+    min-height: 0;
+    padding: 0.6rem 0.75rem 0.7rem;
+    box-shadow:
+      0 5px 0 var(--ink),
+      0 12px 28px rgb(0 0 0 / 25%);
+  }
+
+  .icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.7rem;
+    font-size: 1.25rem;
+  }
+
+  .badge {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .pips {
+    display: none;
+  }
+
+  .name {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+
+  .text,
+  .flavor {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  /* one line on phones; the decision letter lists the full venue */
+  .paper {
+    max-width: 100%;
+    margin-top: 0.15rem;
+    padding: 0.18rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .paper span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kicker,
+  .title,
+  .card {
+    animation: fadeIn 200ms ease-out backwards;
+  }
+
+  .card {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:focus-visible,
+  .card:active {
+    transform: none;
+  }
+
+  .isPaper::before,
+  .pips .pipNew {
+    animation: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}

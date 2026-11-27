@@ -1,0 +1,199 @@
+/*
+ * Shared pieces of the Gradient Survivors UI: overlay shell, paper cards,
+ * chunky buttons and key caps. Colours come from PALETTE through the custom
+ * properties SurvivorsClient sets on its root (--ink, --paper, --blue, ...);
+ * outlines are a darker shade of each fill, like the sprites.
+ */
+
+/*
+ * Content taller than the screen scrolls from its top instead of being cut off.
+ * Screens adjust the layout through --overlay-* properties (never by overriding
+ * these declarations, so the order of the CSS modules does not matter).
+ */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: start;
+  justify-items: var(--overlay-justify, center);
+  padding: max(var(--overlay-top, 1rem), env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(var(--overlay-bottom, 1rem), env(safe-area-inset-bottom)) max(var(--overlay-left, 1rem), env(safe-area-inset-left));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  animation: fadeIn 180ms ease-out both;
+}
+
+.overlay > * {
+  margin-block: auto;
+}
+
+/* a sheet of paper with an ink outline and a chunky drop shadow */
+.paper {
+  position: relative;
+  border: 2px solid var(--ink);
+  border-radius: 1.1rem;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow:
+    0 6px 0 var(--ink),
+    0 22px 50px rgb(43 43 43 / 22%);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--blue);
+  font: 700 0.72rem/1.3 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.button {
+  --face: var(--paper);
+  --edge: var(--ink);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 1.05rem;
+  border: 2px solid var(--edge);
+  border-radius: 0.85rem;
+  background: var(--face);
+  box-shadow: 0 4px 0 var(--edge);
+  color: var(--ink);
+  font: 700 0.95rem/1.1 var(--font-ui);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 90ms ease,
+    box-shadow 90ms ease,
+    background-color 120ms ease;
+}
+
+.button svg {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.button:hover {
+  --face: #fff;
+
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--edge);
+}
+
+.button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--edge);
+}
+
+.primary {
+  --face: var(--blue);
+  --edge: color-mix(in srgb, var(--blueDark) 70%, #000);
+
+  color: #fff;
+}
+
+.primary:hover {
+  --face: color-mix(in srgb, var(--blue) 88%, #fff);
+}
+
+.danger {
+  --face: var(--paper);
+  --edge: color-mix(in srgb, var(--red) 70%, #000);
+
+  color: color-mix(in srgb, var(--red) 80%, #000);
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 0.8rem;
+  background: var(--paper);
+  box-shadow: 0 3px 0 var(--ink);
+  color: var(--ink);
+  font-size: 1.15rem;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    transform 90ms ease,
+    box-shadow 90ms ease;
+}
+
+.iconButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.iconButton:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.button:focus-visible,
+.iconButton:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------- key caps */
+
+.key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  height: 1.6em;
+  padding: 0 0.35em;
+  border: 1.5px solid currentColor;
+  border-bottom-width: 3px;
+  border-radius: 0.4em;
+  font: 700 0.72rem/1 var(--font-mono);
+  opacity: 0.85;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .iconButton {
+    transition: none;
+  }
+
+  .button:hover,
+  .button:active,
+  .iconButton:hover,
+  .iconButton:active {
+    transform: none;
+  }
+}

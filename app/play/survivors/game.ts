@@ -19,14 +19,19 @@
 import {
   ENEMY_RADIUS,
   PALETTE,
+  PLAYER_ANTENNA_TIP,
+  PLAYER_VISOR,
   type AudioEngine,
   type EnemyKind,
   type MusicMode,
   type PickupKind,
   type SfxName,
   type SfxOptions,
+  type Sprite,
+  type SpriteSheet,
 } from "./contracts";
 import { REVIEW_COMMENTS, REVIEWER2_DEFEATED, REVIEWER2_ENRAGED, REVIEWER2_QUOTES, TOASTS } from "./lore";
+import { BOSS_PEN_TIP, FUSE_TIP, createSprites } from "./sprites";
 
 // ------------------------------------------------------------------ public API
 
@@ -240,14 +245,14 @@ export function formatTime(seconds: number) {
 
 // ------------------------------------------------------------------ tuning
 
-/** Base stats per kind; hp and speed grow with run time (see makeEnemy). Colours feed the placeholder art and the death pops. */
-const ENEMY: Record<EnemyKind, { hp: number; speed: number; dmg: number; xp: number; color: string; shade: string; label: string }> = {
-  nan: { hp: 4, speed: 52, dmg: 8, xp: 1, color: PALETTE.grey, shade: "#5e6975", label: "NaN" },
-  overfit: { hp: 3, speed: 96, dmg: 6, xp: 1, color: PALETTE.red, shade: "#9e2c2c", label: "fit" },
-  halluc: { hp: 11, speed: 62, dmg: 10, xp: 2, color: PALETTE.purple, shade: "#523a85", label: "?!" },
-  explode: { hp: 42, speed: 38, dmg: 18, xp: 6, color: PALETTE.orange, shade: "#9c5214", label: "∇∞" },
-  comment: { hp: 9, speed: 70, dmg: 9, xp: 2, color: PALETTE.paper, shade: PALETTE.ink, label: "R?" },
-  boss: { hp: 1500, speed: 58, dmg: 24, xp: 0, color: PALETTE.ink, shade: "#111111", label: "R2" },
+/** Base stats per kind; hp and speed grow with run time (see makeEnemy). Colours feed the death pops. */
+const ENEMY: Record<EnemyKind, { hp: number; speed: number; dmg: number; xp: number; color: string }> = {
+  nan: { hp: 4, speed: 52, dmg: 8, xp: 1, color: PALETTE.grey },
+  overfit: { hp: 3, speed: 96, dmg: 6, xp: 1, color: PALETTE.red },
+  halluc: { hp: 11, speed: 62, dmg: 10, xp: 2, color: PALETTE.purple },
+  explode: { hp: 42, speed: 38, dmg: 18, xp: 6, color: PALETTE.orange },
+  comment: { hp: 9, speed: 70, dmg: 9, xp: 2, color: PALETTE.paper },
+  boss: { hp: 1500, speed: 58, dmg: 24, xp: 0, color: PALETTE.ink },
 };
 
 /** "kill" sfx pitch per kind: small bugs pop higher. */
@@ -292,9 +297,12 @@ const TRAUMA_DECAY = 1.6;
 const PUNCH_TIME = 0.15;
 const VICTORY_BEAT = 1;
 const DEATH_BEAT = 0.6;
+/** Lifetime of Reviewer 2's rejections (draw() fades them in as they leave its body). */
+const BOSS_SHOT_LIFE = 4;
 
 const TAU = Math.PI * 2;
-const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+const FONT = '"Helvetica Neue", Arial, sans-serif';
+const clamp =(v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 const easeOutCubic = (p: number) => 1 - (1 - p) ** 3;
 const easeOutBack = (p: number) => 1 + 2.70158 * (p - 1) ** 3 + 1.70158 * (p - 1) ** 2;
@@ -336,7 +344,7 @@ type BulletSource = "bolt" | "anchor" | "boss";
 type Bullet = { src: BulletSource; x: number; y: number; vx: number; vy: number; dmg: number; r: number; life: number; pierce: number; hostile: boolean };
 type Gem = { x: number; y: number; vx: number; vy: number; value: number; pulled: boolean; magnet: boolean; phase: number; age: number };
 type Pickup = { kind: PickupKind; x: number; y: number; age: number; phase: number; pulled: boolean };
-type ParticleKind = "debris" | "spark" | "dust" | "sparkle" | "confetti" | "heal" | "smoke";
+type ParticleKind = "debris" | "spark" | "dust" | "sparkle" | "confetti" | "heal" | "smoke" | "resolved";
 type Particle = {
   kind: ParticleKind;
   x: number;
@@ -363,6 +371,8 @@ type Blast = { x: number; y: number; dmg: number; delay: number };
 type DamageSource = "bolt" | "orb" | "dropout" | "beam" | "wave" | "boomerang" | "blast";
 type BossPhase = "none" | "warning" | "entering" | "fight" | "enraged" | "defeated";
 type Mode = "attract" | "run";
+/** How draw() places an enemy this frame: anchor, height above the ground, rotation, scale, alpha, squash pivot. */
+type Pose = { x: number; y: number; lift: number; rot: number; sx: number; sy: number; alpha: number; pivot: number };
 
 // Sounds that can trigger many times per step play at most once per step.
 const ONCE_PER_STEP = new Set<SfxName>(["hit", "crit", "kill", "orb", "gem", "bossHit", "talk", "explode"]);
@@ -378,15 +388,20 @@ export function createGame(
   let width = 0;
   let height = 0;
   let dpr = 1;
-  let vignette: CanvasGradient | null = null; // low-sanity vignette, rebuilt after a resize
+  // Render caches, baked lazily by draw(): the sprite sheet and its derived art (dropped only
+  // when the pixel ratio changes) and the screen-sized vignettes (dropped on every resize).
+  let art: Art | null = null;
+  let screenArt: ScreenArt | null = null;
 
   const resize = () => {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    if (ratio !== dpr) art = null;
+    dpr = ratio;
     width = canvas.clientWidth || window.innerWidth;
     height = canvas.clientHeight || window.innerHeight;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
-    vignette = null;
+    screenArt = null;
   };
   resize();
   window.addEventListener("resize", resize);
@@ -489,6 +504,7 @@ export function createGame(
    *   dying           > 0 during the death beat; the player has popped (deathTime >= 0 stays set)
    *   levels          card id -> level; weapons are drawn only when their level is > 0
    *   combo           live kill combo (the HUD shows it; optional world flourish)
+   *   levelUpDelay    > 0 during the level-up freeze before the cards show (with `choosing`: cards are up)
    *
    * Camera (cam), resolved by present() just before draw()
    *   x, y            world point at the screen centre (player + look-ahead lead)
@@ -496,12 +512,14 @@ export function createGame(
    *   shakeX, shakeY  screen-space shake offset in CSS px; shakeRot: radians around the screen
    *                   centre (all 0 with reducedMotion or in attract mode)
    *   leadX, leadY    the look-ahead offset; punch: seconds left of the zoom punch
+   *   shakeClock      real seconds; keeps running while the simulation is frozen
    *
    * Screen
    *   screenFlash     { color, alpha }: full-screen tint, alpha already halved for reducedMotion
    *                   (white level-up, red hurt, gold boss defeat)
    *   boss.phase "warning" with boss.warn (seconds until Reviewer 2 lands): pulse the screen edges
-   *   anim.lowSanity  sanity < 30%: heartbeat vignette
+   *   anim.lowSanity  sanity < 30%: heartbeat vignette; heartTimer: real seconds to the next
+   *                   heartbeat sound (0.9 s period), to pulse in sync
    *
    * Player (player, anim)
    *   player.x/y, vx/vy, faceX/faceY (unit vector of the last move), hp/maxHp
@@ -511,6 +529,7 @@ export function createGame(
    *   anim.lean       -1..1 eased horizontal velocity (tilt into the run)
    *   anim.hurt       seconds left of the red hurt tint;  anim.blink: > 0 while the eyes are shut
    *   dust puffs are particles of kind "dust"
+   *   history         recent positions, one per 0.1 s, the last 4 s (the path ACRO rolls back along)
    *
    * Enemies (enemies[]; all alive)
    *   kind, x, y, r (= ENEMY_RADIUS), hp/maxHp, face (+1 moving right, -1 left)
@@ -534,7 +553,8 @@ export function createGame(
    *
    * Weapons and projectiles
    *   bullets[]       src "bolt" (player, blue) | "anchor" (anchor turret) | "boss" (hostile ✗);
-   *                   x, y, vx, vy (rotate to it), r, life (seconds left; fade the last 0.3 s)
+   *                   x, y, vx, vy (rotate to it), r, life (seconds left; fade the last 0.3 s;
+   *                   hostile shots start at BOSS_SHOT_LIFE)
    *   beams[]         attention beam segments; fade with life / max
    *   waves[]         SHOT shockwaves; radius = (t / WAVE_TIME) * maxR
    *   boomerangs[]    x, y, angle (spin);  anchors[]: x, y, age, life (fade in the last 0.5 s)
@@ -549,8 +569,9 @@ export function createGame(
    *
    * Effects
    *   particles[]     kind "debris" (chunk in the enemy colour), "spark" (white additive streak
-   *                   along vx/vy), "dust" (soft puff), "sparkle" (4-point star, additive),
-   *                   "confetti" (spinning paper, rot), "heal" (green plus, floats up), "smoke";
+   *                   along vx/vy), "dust" (soft puff), "sparkle" (4-point star in its colour),
+   *                   "confetti" (spinning paper, rot), "heal" (green plus, floats up), "smoke",
+   *                   "resolved" (green ✓ rising from an addressed reviewer comment);
    *                   plus x, y, life/max (fade), size, color, rot
    *   rings[]         kind "pop" (death) | "blast" (exploding gradient) | "levelup" (pushback) |
    *                   "victory" (deadline) | "impact" (boss landing) | "enrage" | "volley" (boss
@@ -953,6 +974,8 @@ export function createGame(
     ring("pop", e.x, e.y, e.r * 0.5, e.r * 2 + 10, 0.3, color, 2 + size * 1.5);
     burst("debris", e.x, e.y, Math.round(4 + size * 4), 130 + size * 60, 3 + size, color, 0.45);
     burst("spark", e.x, e.y, 2 + Math.round(size * 2), 230, 2, "#ffffff", 0.25, 5);
+    // A reviewer comment, addressed: a green ✓ rises from it (purely visual).
+    if (e.kind === "comment") spawnParticle("resolved", e.x, e.y - 10, 0, -70, 0.8, 1, PALETTE.green, 2.2);
   };
 
   const queueBlast = (x: number, y: number, dmg: number) => {
@@ -1290,7 +1313,7 @@ export function createGame(
       const offset = Math.random() * TAU;
       for (let i = 0; i < n; i += 1) {
         const a = offset + (i * TAU) / n;
-        bullets.push({ src: "boss", x: e.x, y: e.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, dmg: 12, r: 7, life: 4, pierce: 1, hostile: true });
+        bullets.push({ src: "boss", x: e.x, y: e.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, dmg: 12, r: 7, life: BOSS_SHOT_LIFE, pierce: 1, hostile: true });
       }
       ring("volley", e.x, e.y, e.r, e.r + 40, 0.25, PALETTE.red, 4);
       addTrauma(0.08);
@@ -2017,9 +2040,15 @@ export function createGame(
   };
 
   // ---------------------------------------------------------- draw
-  // Placeholder art: flat shapes in the palette. The art pass replaces this
-  // section and reads only the RENDER STATE listed above.
-  const FONT = '"Helvetica Neue", Arial, sans-serif';
+  /*
+   * Art pass. Blits the procedural sprite sheet (./sprites) plus a few sprites
+   * derived from it (bakeArt, end of file), all baked once per pixel ratio.
+   * Every entity is placed with setTransform from one camera matrix (no
+   * save/restore per entity), additive light is batched into a few "lighter"
+   * passes and anything outside the view is culled. Additive light on sand
+   * can only brighten towards white, so coloured halos use normal blending and
+   * the additive passes add the hot cores. Reads only the RENDER STATE above.
+   */
   const fonts = new Map<number, string>();
   /** Cached CSS font strings, so the draw loops do not build a string per entity per frame. */
   const font = (weight: number, px: number) => {
@@ -2031,541 +2060,1291 @@ export function createGame(
     }
     return f;
   };
-  const commentWidths: number[] = [];
-  let speechLinesFor = "";
-  let speechLines: string[] = [];
-  let speechWidth = 0;
+  const NO_DASH: number[] = [];
+  const LANDING_DASH = [10, 8];
+  const FIELD_DASH = [5, 7];
+  const MARGIN_DASH = [3, 7];
+  /** Comment bubbles and damage numbers grow a little when the camera zooms out (phones). */
+  const readable = () => clamp(0.9 / baseZoom(), 1, 1.2);
 
-  const drawEnemy = (e: Enemy) => {
-    const def = ENEMY[e.kind];
-    const spawn = Math.min(1, e.age / SPAWN_IN);
-    const s = Math.max(0.05, easeOutBack(spawn));
-    const rx = e.r * s * (1 + 0.22 * e.squash);
-    const ry = e.r * s * (1 - 0.18 * e.squash);
-    ctx.globalAlpha = spawn * (e.kind === "halluc" ? 0.85 : 1);
-    ctx.beginPath();
-    ctx.ellipse(e.x, e.y, rx, ry, 0, 0, TAU);
-    ctx.fillStyle = e.flash > 0 ? "#ffffff" : def.color;
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = def.shade;
-    ctx.stroke();
-    if (e.flash > 0) return;
-    // eyes look where it walks
-    const er = e.r * 0.2 * s;
-    const ex = e.face * e.r * 0.12 * s;
-    const ey = e.y - e.r * 0.2 * s;
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(e.x - e.r * 0.3 * s + ex, ey, er, 0, TAU);
-    ctx.arc(e.x + e.r * 0.3 * s + ex, ey, er, 0, TAU);
-    ctx.fill();
-    ctx.fillStyle = PALETTE.ink;
-    ctx.beginPath();
-    ctx.arc(e.x - e.r * 0.3 * s + ex + e.face * er * 0.4, ey, er * 0.5, 0, TAU);
-    ctx.arc(e.x + e.r * 0.3 * s + ex + e.face * er * 0.4, ey, er * 0.5, 0, TAU);
-    ctx.fill();
-    if (e.r >= 13) {
-      ctx.fillStyle = "#ffffff";
-      ctx.font = font(800, Math.round(e.r * 0.62));
-      ctx.fillText(def.label, e.x, e.y + e.r * 0.38 * s);
+  // Camera: the world -> device-pixel matrix and the world rectangle on screen (shake included).
+  const cm = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+  const view = { l: 0, r: 0, t: 0, b: 0 };
+  const setCamera = () => {
+    const cos = Math.cos(cam.shakeRot);
+    const sin = Math.sin(cam.shakeRot);
+    const k = cam.zoom * dpr;
+    cm.a = cos * k;
+    cm.b = sin * k;
+    cm.c = -sin * k;
+    cm.d = cos * k;
+    cm.e = dpr * (width / 2 + cam.shakeX) - (cm.a * cam.x + cm.c * cam.y);
+    cm.f = dpr * (height / 2 + cam.shakeY) - (cm.b * cam.x + cm.d * cam.y);
+    const slack = (Math.abs(cam.shakeX) + Math.abs(cam.shakeY)) / cam.zoom;
+    const hw = width / 2 / cam.zoom;
+    const hh = height / 2 / cam.zoom;
+    const ex = Math.abs(cos) * hw + Math.abs(sin) * hh + slack;
+    const ey = Math.abs(sin) * hw + Math.abs(cos) * hh + slack;
+    view.l = cam.x - ex;
+    view.r = cam.x + ex;
+    view.t = cam.y - ey;
+    view.b = cam.y + ey;
+  };
+  const inView = (x: number, y: number, r: number) => x > view.l - r && x < view.r + r && y > view.t - r && y < view.b + r;
+  const worldSpace = () => ctx.setTransform(cm.a, cm.b, cm.c, cm.d, cm.e, cm.f);
+  const screenSpace = () => ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  /** Sets a local frame at world (x, y), rotated by `rot` and scaled by (sx, sy). */
+  const place = (x: number, y: number, rot: number, sx: number, sy: number) => {
+    const tx = cm.a * x + cm.c * y + cm.e;
+    const ty = cm.b * x + cm.d * y + cm.f;
+    if (rot === 0) {
+      ctx.setTransform(cm.a * sx, cm.b * sx, cm.c * sy, cm.d * sy, tx, ty);
+      return;
+    }
+    const cos = Math.cos(rot);
+    const sin = Math.sin(rot);
+    ctx.setTransform((cm.a * cos + cm.c * sin) * sx, (cm.b * cos + cm.d * sin) * sx, (cm.c * cos - cm.a * sin) * sy, (cm.d * cos - cm.b * sin) * sy, tx, ty);
+  };
+  /** Draws a sprite on its anchor in the current frame, shifted `dy` units down. */
+  const stamp = (s: Sprite, dy = 0) => ctx.drawImage(s.canvas, -s.ax, dy - s.ay, s.w, s.h);
+  const blit = (s: Sprite, x: number, y: number, rot: number, scale: number) => {
+    place(x, y, rot, scale, scale);
+    stamp(s);
+  };
+  const pt = { x: 0, y: 0 };
+  /** World position of (u, v) in the frame place(ox, oy, rot, sx, sy) would set (written into pt). */
+  const framePoint = (ox: number, oy: number, rot: number, sx: number, sy: number, u: number, v: number) => {
+    const cos = Math.cos(rot);
+    const sin = Math.sin(rot);
+    pt.x = ox + cos * u * sx - sin * v * sy;
+    pt.y = oy + sin * u * sx + cos * v * sy;
+    return pt;
+  };
+  // Spinning sparkles and debris use pre-rotated frames: rotated blits are slow without a GPU.
+  const STAR_FRAMES = 4; // a four-point star repeats every quarter turn
+  const SHARD_FRAMES = 8;
+  const frameOf = (rot: number, period: number, n: number) => ((Math.round((rot / period) * n) % n) + n) % n;
+  const starOf = (a: Art, color: string, rot: number) => {
+    let frames = a.stars.get(color);
+    if (!frames) {
+      frames = [];
+      for (let i = 0; i < STAR_FRAMES; i += 1) frames.push(bakeStar(a.scale, color, (i / STAR_FRAMES) * (Math.PI / 2)));
+      a.stars.set(color, frames);
+    }
+    return frames[frameOf(rot, Math.PI / 2, STAR_FRAMES)];
+  };
+  const shardOf = (a: Art, color: string, rot: number) => {
+    let frames = a.shards.get(color);
+    if (!frames) {
+      frames = [];
+      for (let i = 0; i < SHARD_FRAMES; i += 1) frames.push(bakeShard(a.scale, color, (i / SHARD_FRAMES) * TAU));
+      a.shards.set(color, frames);
+    }
+    return frames[frameOf(rot, TAU, SHARD_FRAMES)];
+  };
+  const backs = new Map<string, string>();
+  /** The darker back of a confetti colour. */
+  const backOf = (color: string) => {
+    let b = backs.get(color);
+    if (!b) {
+      b = mixHex(color, PALETTE.ink, 0.3);
+      backs.set(color, b);
+    }
+    return b;
+  };
+
+  // ---- enemy poses: idle animation, spawn-in and squash of every visible enemy, back to front
+  const drawList: Enemy[] = [];
+  const poses: Pose[] = [];
+  const byDepth = (p: Enemy, q: Enemy) => p.y - q.y;
+  /** Squash-and-stretch pivot of each kind (its feet), units below the anchor. */
+  const PIVOT: Record<EnemyKind, number> = { nan: 12, overfit: 0, halluc: 0, explode: 22, comment: 0, boss: 46 };
+  /** Ground shadow of each kind: width, drop below the anchor, alpha. */
+  const SHADOW: Record<EnemyKind, readonly [number, number, number]> = {
+    nan: [28, 12, 1],
+    overfit: [24, 13, 0.9],
+    halluc: [26, 18, 0.6],
+    explode: [50, 23, 1],
+    comment: [36, 22, 0.45],
+    boss: [108, 46, 1],
+  };
+  let bossLift = 0;
+  /** World position of a point given relative to an enemy's anchor, in its current pose. */
+  const poseLocal = (p: Pose, x: number, y: number) => framePoint(p.x, p.y - p.lift + p.pivot, p.rot, p.sx, p.sy, x, y - p.pivot);
+  /** 0..1 while Reviewer 2 winds up a volley (its red pen glows). */
+  const bossWindup = () => (boss.enemy && boss.enemy.entrance <= 0 && boss.fireCd < 0.45 ? 1 - Math.max(0, boss.fireCd) / 0.45 : 0);
+
+  const poseEnemies = () => {
+    drawList.length = 0;
+    for (let i = 0; i < enemies.length; i += 1) {
+      const e = enemies[i];
+      if (e.hp > 0 && inView(e.x, e.y, e.kind === "boss" ? 150 : 60)) drawList.push(e);
+    }
+    drawList.sort(byDepth);
+    const big = readable();
+    bossLift = 0;
+    for (let i = 0; i < drawList.length; i += 1) {
+      const e = drawList[i];
+      let p = poses[i];
+      if (!p) {
+        p = { x: 0, y: 0, lift: 0, rot: 0, sx: 1, sy: 1, alpha: 1, pivot: 0 };
+        poses[i] = p;
+      }
+      const spawn = Math.min(1, e.age / SPAWN_IN);
+      const grow = spawn < 1 ? Math.max(0.05, easeOutBack(spawn)) : 1;
+      p.x = e.x;
+      p.y = e.y;
+      p.lift = 0;
+      p.rot = 0;
+      p.alpha = spawn;
+      p.sx = grow * (1 + 0.24 * e.squash);
+      p.sy = grow * (1 - 0.2 * e.squash);
+      p.pivot = PIVOT[e.kind];
+      switch (e.kind) {
+        case "nan": {
+          // a jelly hopping along, squashed on every landing
+          const hop = Math.abs(Math.sin(e.phase));
+          const land = (1 - hop) ** 4;
+          p.lift = hop * 4;
+          p.sx *= 1 + 0.14 * land;
+          p.sy *= 1 - 0.12 * land;
+          break;
+        }
+        case "overfit": {
+          // it memorised every pixel: it vibrates and throbs
+          const throb = 1 + 0.06 * Math.sin(e.phase * 2);
+          p.x += Math.sin(clock * 61 + e.id) * 0.8;
+          p.y += Math.sin(clock * 53 + e.id * 1.7) * 0.8;
+          p.sx *= throb;
+          p.sy *= throb;
+          break;
+        }
+        case "halluc":
+          // floats, and flickers in and out of existence
+          p.lift = 5 + Math.sin(e.phase * 2) * 3;
+          p.alpha *= 0.86 + 0.14 * Math.sin(clock * 2.7 + e.id);
+          break;
+        case "explode": {
+          const swell = 0.03 * Math.sin(e.phase * 2);
+          p.sx *= 1 + swell;
+          p.sy *= 1 - swell;
+          break;
+        }
+        case "comment":
+          p.lift = 7 + Math.sin(e.phase * 1.4) * 2;
+          p.rot = Math.sin(e.phase) * 0.12;
+          p.sx *= big;
+          p.sy *= big;
+          break;
+        case "boss": {
+          // drops in stretched, then hovers and breathes; swells before each volley
+          const falling = e.entrance > 0 ? e.entrance / BOSS_ENTRANCE : 0;
+          const windup = bossWindup();
+          const breathe = 0.02 * Math.sin(clock * 2.4 + 1);
+          p.lift = falling > 0 ? falling * falling * 420 : 2 + 2 * Math.sin(clock * 2.4);
+          p.sx = (1 + 0.05 * e.squash + 0.05 * windup + breathe) * (1 - 0.12 * falling);
+          p.sy = (1 - 0.04 * e.squash + 0.05 * windup - breathe) * (1 + 0.18 * falling);
+          p.rot = boss.phase === "enraged" ? Math.sin(clock * 23) * 0.025 : Math.sin(clock * 1.3) * 0.03;
+          p.alpha = 1;
+          bossLift = p.lift;
+          break;
+        }
+      }
     }
   };
 
-  const drawComment = (e: Enemy) => {
-    const text = REVIEW_COMMENTS[e.variant];
-    ctx.font = font(700, 10);
-    commentWidths[e.variant] ??= ctx.measureText(text).width;
-    const w = commentWidths[e.variant] + 12;
-    const h = 20;
-    const spawn = Math.min(1, e.age / SPAWN_IN);
-    const s = Math.max(0.05, easeOutBack(spawn));
-    ctx.save();
-    ctx.globalAlpha = spawn;
-    ctx.translate(e.x, e.y);
-    ctx.rotate(Math.sin(e.phase) * 0.12);
-    ctx.scale(s * (1 + 0.15 * e.squash), s * (1 - 0.12 * e.squash));
-    ctx.beginPath();
-    ctx.roundRect(-w / 2, -h / 2, w, h, 7);
-    ctx.moveTo(-e.face * 2, h / 2 - 1);
-    ctx.lineTo(-e.face * 10, h / 2 + 7);
-    ctx.lineTo(-e.face * 9, h / 2 - 1);
-    ctx.fillStyle = e.flash > 0 ? "#ffffff" : PALETTE.paper;
-    ctx.fill();
-    ctx.strokeStyle = PALETTE.ink;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = e.flash > 0 ? PALETTE.grey : PALETTE.ink;
-    ctx.fillText(text, 0, 0.5);
-    ctx.restore();
+  // ---- ground: the loss-landscape tile with the light of the day baked in
+  /** Ground tint by run time: [time, r, g, b, alpha], warm afternoon to dusk by 4:00. */
+  const DAYLIGHT = [
+    [0, 255, 196, 120, 0.05],
+    [150, 248, 150, 90, 0.06],
+    [240, 70, 58, 125, 0.13],
+  ] as const;
+  let ground: GroundTile | null = null;
+  let tintColor = "";
+  const groundMatrix = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+  /**
+   * The tint over the ground (time of day, red while Reviewer 2 is around, more in phase 2),
+   * quantised so the tile is re-baked only every few seconds. Returns its key; when that
+   * differs from `key`, tintColor holds the new CSS colour.
+   */
+  const groundTint = (key: number) => {
+    const time = Math.min(t, 240);
+    const i = time > DAYLIGHT[1][0] ? 1 : 0;
+    const from = DAYLIGHT[i];
+    const to = DAYLIGHT[i + 1];
+    const q = clamp((time - from[0]) / (to[0] - from[0]), 0, 1);
+    let r = from[1] + (to[1] - from[1]) * q;
+    let g = from[2] + (to[2] - from[2]) * q;
+    let b = from[3] + (to[3] - from[3]) * q;
+    let alpha = from[4] + (to[4] - from[4]) * q;
+    const rage = !boss.enemy ? 0 : boss.phase === "enraged" ? 0.075 : 0.035;
+    if (rage > 0) {
+      // red over the daylight, folded into one overlay
+      const out = alpha + rage - alpha * rage;
+      r = (r * alpha * (1 - rage) + 214 * rage) / out;
+      g = (g * alpha * (1 - rage) + 69 * rage) / out;
+      b = (b * alpha * (1 - rage) + 69 * rage) / out;
+      alpha = out;
+    }
+    const qr = Math.round(r / 4);
+    const qg = Math.round(g / 4);
+    const qb = Math.round(b / 4);
+    const qa = Math.round(alpha * 400);
+    const next = ((qr * 64 + qg) * 64 + qb) * 512 + qa;
+    if (next !== key) tintColor = `rgba(${Math.min(255, qr * 4)},${qg * 4},${qb * 4},${qa / 400})`;
+    return next;
+  };
+  const drawGround = (a: Art) => {
+    const tile = a.sheet.groundTile;
+    const px = Math.max(64, Math.round(a.sheet.groundTileSize * dpr * baseZoom()));
+    const known = ground && ground.px === px && ground.tile === tile ? ground.key : -1;
+    const key = groundTint(known);
+    if (!ground || key !== known) ground = bakeGround(ctx, tile, px, tintColor, key, ground?.canvas);
+    // tile pixels -> device pixels, through the camera
+    const k = a.sheet.groundTileSize / px;
+    groundMatrix.a = cm.a * k;
+    groundMatrix.b = cm.b * k;
+    groundMatrix.c = cm.c * k;
+    groundMatrix.d = cm.d * k;
+    groundMatrix.e = cm.e;
+    groundMatrix.f = cm.f;
+    if (groundMatrix.b === 0 && Math.abs(groundMatrix.a - 1) < 0.003) {
+      // at rest (no zoom punch, no roll) the tile maps 1:1 onto device pixels: snap it so it blits unfiltered
+      groundMatrix.a = 1;
+      groundMatrix.d = 1;
+      groundMatrix.e = Math.round(cm.e);
+      groundMatrix.f = Math.round(cm.f);
+    }
+    ground.pattern.setTransform(groundMatrix);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = ground.pattern;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
-  const drawBoss = (e: Enemy) => {
-    const falling = e.entrance > 0 ? e.entrance / BOSS_ENTRANCE : 0;
-    const lift = falling * falling * 420;
-    // landing shadow grows as Reviewer 2 drops in
-    ctx.globalAlpha = 0.22 * (1 - falling * 0.6);
-    ctx.fillStyle = PALETTE.ink;
-    ctx.beginPath();
-    ctx.ellipse(e.x, e.y + e.r * 0.85, e.r * (1 - falling * 0.5), e.r * 0.3 * (1 - falling * 0.5), 0, 0, TAU);
-    ctx.fill();
+  // ---- shadows, all in one pass (one texture)
+  const drawShadows = (a: Art) => {
+    const sh = a.sheet.shadow;
+    for (let i = 0; i < drawList.length; i += 1) {
+      const e = drawList[i];
+      const p = poses[i];
+      const s = SHADOW[e.kind];
+      ctx.globalAlpha = (s[2] * p.alpha) / (1 + p.lift * 0.02);
+      blit(sh, e.x, e.y + s[1], 0, ((s[0] / 64) * p.sx) / (1 + p.lift * 0.015));
+    }
+    ctx.globalAlpha = 0.7;
+    for (const g of gems) {
+      if (!g.pulled && inView(g.x, g.y, 10)) blit(sh, g.x, g.y + 6, 0, g.value >= 3 ? 0.22 : 0.17);
+    }
+    for (const p of pickups) {
+      if (!inView(p.x, p.y, 30)) continue;
+      ctx.globalAlpha = 0.8 * pickupBlink(p);
+      blit(sh, p.x, p.y + 12, 0, 0.42);
+    }
+    for (const an of anchors) {
+      if (!inView(an.x, an.y, 30)) continue;
+      ctx.globalAlpha = clamp((an.life - an.age) * 2, 0, 1);
+      blit(sh, an.x, an.y + 11, 0, 0.4);
+    }
+    if (deathTime < 0) {
+      ctx.globalAlpha = 1;
+      blit(sh, player.x, player.y + 14, 0, 0.48 - 0.03 * Math.abs(Math.sin(anim.bob)) * anim.moving);
+    }
     ctx.globalAlpha = 1;
-    const y = e.y - lift;
-    const enraged = boss.phase === "enraged";
-    const squash = e.squash * 0.08;
-    ctx.beginPath();
-    ctx.ellipse(e.x, y, e.r * (1 + squash), e.r * (1 - squash), 0, 0, TAU);
-    ctx.fillStyle = e.flash > 0 ? "#ffffff" : PALETTE.ink;
-    ctx.fill();
-    ctx.lineWidth = enraged ? 5 + Math.sin(clock * 12) * 2 : 4;
-    ctx.strokeStyle = PALETTE.red;
-    ctx.stroke();
-    // glasses and a frown
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(e.x - 16 + e.face * 4, y - 10, 10, 0, TAU);
-    ctx.arc(e.x + 16 + e.face * 4, y - 10, 10, 0, TAU);
-    ctx.fill();
-    ctx.fillStyle = PALETTE.ink;
-    ctx.beginPath();
-    ctx.arc(e.x - 16 + e.face * 8, y - 9, 4, 0, TAU);
-    ctx.arc(e.x + 16 + e.face * 8, y - 9, 4, 0, TAU);
-    ctx.fill();
-    ctx.strokeStyle = enraged ? PALETTE.red : "#ffffff";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(e.x - 28, y - (enraged ? 28 : 24));
-    ctx.lineTo(e.x - 6, y - 20);
-    ctx.moveTo(e.x + 28, y - (enraged ? 28 : 24));
-    ctx.lineTo(e.x + 6, y - 20);
-    ctx.stroke();
-    ctx.fillStyle = "#ffffff";
-    ctx.font = font(800, 20);
-    ctx.fillText("R2", e.x, y + 18);
-    ctx.fillStyle = PALETTE.ink;
-    ctx.font = font(700, 13);
-    ctx.fillText(enraged ? "Reviewer 2 (enraged)" : "Reviewer 2", e.x, y - e.r - 12);
   };
 
-  const drawPlayer = () => {
-    if (deathTime >= 0) return; // popped
-    if (player.iframes > 0 && Math.floor(player.iframes * 20) % 2 === 0) return;
-    const bob = Math.sin(anim.bob) * 2 * anim.moving;
-    const breathe = Math.sin(clock * 3) * 0.03 * (1 - anim.moving);
-    const sx = 1 + 0.2 * anim.squash - breathe;
-    const sy = 1 - 0.16 * anim.squash + breathe;
-    ctx.save();
-    ctx.translate(player.x, player.y + 12);
-    ctx.fillStyle = "rgba(43,43,43,0.14)";
-    ctx.beginPath();
-    ctx.ellipse(0, 3, 14, 5, 0, 0, TAU);
-    ctx.fill();
-    ctx.rotate(anim.lean * 0.12);
-    ctx.scale(sx, sy);
-    ctx.translate(0, -12 - Math.abs(bob));
-    ctx.fillStyle = anim.hurt > 0 ? PALETTE.red : PALETTE.blue;
-    ctx.beginPath();
-    ctx.roundRect(-14, -14, 28, 26, 8);
-    ctx.fill();
-    ctx.strokeStyle = PALETTE.blueDark;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = PALETTE.paper;
-    ctx.beginPath();
-    ctx.roundRect(-10, -10, 20, 12, 5);
-    ctx.fill();
-    ctx.fillStyle = PALETTE.ink;
-    const ex = player.faceX * 3;
-    const ey = player.faceY * 2;
-    if (anim.blink > 0 || anim.hurt > 0.15) {
-      ctx.fillRect(-7 + ex, -4.5 + ey, 6, 1.8);
-      ctx.fillRect(1 + ex, -4.5 + ey, 6, 1.8);
-    } else {
+  // ---- the robot's recent path, plotted like an optimiser trajectory on the contour map
+  const TRAIL_BUCKETS = 4;
+  const drawTrail = () => {
+    const n = history.length;
+    if (n < 2 || deathTime >= 0) return;
+    worldSpace();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = PALETTE.blue;
+    ctx.fillStyle = PALETTE.blue;
+    ctx.lineWidth = 1;
+    // older steps fade out: a thin polyline with a marker per step, one batch per age bucket
+    for (let k = 0; k < TRAIL_BUCKETS; k += 1) {
+      const from = Math.floor((k * (n - 1)) / TRAIL_BUCKETS);
+      const to = Math.floor(((k + 1) * (n - 1)) / TRAIL_BUCKETS);
+      ctx.globalAlpha = 0.08 + 0.28 * ((k + 1) / TRAIL_BUCKETS);
       ctx.beginPath();
-      ctx.arc(-4 + ex, -4 + ey, 2.4, 0, TAU);
-      ctx.arc(4 + ex, -4 + ey, 2.4, 0, TAU);
+      ctx.moveTo(history[from].x, history[from].y + 12);
+      for (let i = from + 1; i <= to; i += 1) ctx.lineTo(history[i].x, history[i].y + 12);
+      ctx.stroke();
+      ctx.beginPath();
+      for (let i = from; i < to; i += 1) {
+        ctx.moveTo(history[i].x + 2.2, history[i].y + 12);
+        ctx.arc(history[i].x, history[i].y + 12, 2.2, 0, TAU);
+      }
       ctx.fill();
     }
-    ctx.strokeStyle = PALETTE.ink;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, -14);
-    ctx.lineTo(0, -21);
-    ctx.stroke();
-    // antenna light: calm blink, frantic red at low sanity
-    const on = anim.lowSanity ? Math.sin(clock * 18) > 0 : Math.sin(clock * 4) > -0.3;
-    ctx.fillStyle = anim.lowSanity ? PALETTE.red : on ? PALETTE.orange : PALETTE.sandDark;
-    ctx.beginPath();
-    ctx.arc(0, -22, anim.lowSanity && on ? 3.8 : 3, 0, TAU);
-    ctx.fill();
-    ctx.restore();
+    ctx.globalAlpha = 1;
   };
 
-  const drawSpeech = () => {
+  // ---- dropout field: a ring of units, a fresh random fifth of them dropped on every tick
+  const NEURONS = 14;
+  let dropoutTick = 0;
+  let lastAuraPulse = 0;
+  const dropped = (k: number) => fract(Math.sin((dropoutTick * 31 + k) * 12.9898) * 43758.5453) < 0.2;
+  const drawDropout = () => {
+    if (!lvl("dropout") || deathTime >= 0) return;
+    if (auraPulse > lastAuraPulse + 0.3) dropoutTick += 1;
+    lastAuraPulse = auraPulse;
+    const r = dropoutRadius();
+    worldSpace();
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, r, 0, TAU);
+    ctx.globalAlpha = 0.07 + 0.07 * auraPulse;
+    ctx.fillStyle = PALETTE.sky;
+    ctx.fill();
+    ctx.globalAlpha = 0.35 + 0.35 * auraPulse;
+    ctx.strokeStyle = PALETTE.blue;
+    ctx.lineWidth = 1.6 + 1.4 * auraPulse;
+    ctx.setLineDash(FIELD_DASH);
+    ctx.lineDashOffset = -clock * 14;
+    ctx.stroke();
+    ctx.setLineDash(NO_DASH);
+    const ring = r * 0.5;
+    const unit = 2.3 + auraPulse;
+    for (let pass = 0; pass < 2; pass += 1) {
+      ctx.beginPath();
+      for (let k = 0; k < NEURONS; k += 1) {
+        if (dropped(k) !== (pass === 1)) continue;
+        const ang = (k / NEURONS) * TAU + clock * 0.25;
+        const x = player.x + Math.cos(ang) * ring;
+        const y = player.y + Math.sin(ang) * ring;
+        ctx.moveTo(x + unit, y);
+        ctx.arc(x, y, unit, 0, TAU);
+      }
+      if (pass === 0) {
+        ctx.globalAlpha = 0.5 + 0.5 * auraPulse;
+        ctx.fillStyle = PALETTE.blue;
+        ctx.fill();
+      } else {
+        ctx.globalAlpha = 0.45;
+        ctx.strokeStyle = PALETTE.grey;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ---- loot: tokens (citations) and pickups
+  /** 1, or a blink that quickens over the last 5 s of a pickup's life. */
+  const pickupBlink = (p: Pickup) => {
+    const u = p.age - (PICKUP_LIFE - 5);
+    return u <= 0 || Math.sin(u * (9 + 1.5 * u)) > -0.2 ? 1 : 0.2;
+  };
+  const pickupHover = (p: Pickup) => 5 + 3 * Math.sin(clock * 3 + p.phase);
+  const drawLoot = (a: Art) => {
+    const sheet = a.sheet;
+    // tokens flying to the player leave a streak, one stroke per colour
+    worldSpace();
+    ctx.lineCap = "round";
+    for (let pass = 0; pass < 2; pass += 1) {
+      const big = pass === 1;
+      let any = false;
+      ctx.beginPath();
+      for (const g of gems) {
+        if (!g.pulled || g.value >= 3 !== big || !inView(g.x, g.y, 30)) continue;
+        ctx.moveTo(g.x, g.y);
+        ctx.lineTo(g.x - g.vx * 0.04, g.y - g.vy * 0.04);
+        any = true;
+      }
+      if (!any) continue;
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = big ? PALETTE.gold : PALETTE.sky;
+      ctx.lineWidth = big ? 4.5 : 3;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // tokens pop in, hover and twinkle
+    for (const g of gems) {
+      if (!inView(g.x, g.y, 14)) continue;
+      const grow = g.age < 0.25 ? Math.max(0.05, easeOutBack(g.age / 0.25)) : 1;
+      const twinkle = 1 + 0.07 * Math.sin(clock * 6 + g.phase);
+      const hover = g.pulled ? 0 : 2 + 1.5 * Math.sin(clock * 3 + g.phase);
+      blit(g.value >= 3 ? sheet.gem.big : sheet.gem.small, g.x, g.y - hover, 0, grow * twinkle);
+    }
+    // pickups hover over a pulsing halo
+    for (const p of pickups) {
+      if (!inView(p.x, p.y, 40)) continue;
+      const fade = pickupBlink(p);
+      const grow = p.age < 0.35 ? Math.max(0.05, easeOutBack(p.age / 0.35)) : 1;
+      const y = p.y - pickupHover(p);
+      ctx.globalAlpha = fade * (0.55 + 0.2 * Math.sin(clock * 4 + p.phase));
+      blit(p.kind === "coffee" ? a.halo.gold : a.halo.red, p.x, y, 0, 0.75 * grow);
+      ctx.globalAlpha = fade;
+      blit(sheet.pickups[p.kind], p.x, y, Math.sin(clock * 2.2 + p.phase) * 0.1, 1.15 * grow);
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ---- template anchors: dropped in from above, recoil on every shot
+  const drawAnchors = (a: Art) => {
+    for (const an of anchors) {
+      if (!inView(an.x, an.y, 30)) continue;
+      const land = Math.min(1, an.age / 0.3);
+      const grow = Math.max(0.05, easeOutBack(land));
+      const drop = (1 - easeOutCubic(land)) * 26;
+      const recoil = Math.max(0, (an.fireCd - 0.43) / 0.12);
+      ctx.globalAlpha = clamp((an.life - an.age) * 2, 0, 1);
+      place(an.x, an.y + 10 - drop, 0, grow * (1 + 0.14 * recoil), grow * (1 - 0.14 * recoil));
+      stamp(a.sheet.anchor, -10);
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ---- enemies and Reviewer 2
+  /** The manga anger mark, for Reviewer 2 in phase 2. */
+  const drawAngerMark = (x: number, y: number, s: number) => {
+    place(x, y, 0.2, s, s);
+    ctx.beginPath();
+    for (let q = 0; q < 4; q += 1) {
+      const qx = q & 1 ? 1 : -1;
+      const qy = q & 2 ? 1 : -1;
+      ctx.moveTo(qx * 2.2, qy * 7.5);
+      ctx.quadraticCurveTo(qx * 2.2, qy * 2.2, qx * 7.5, qy * 2.2);
+    }
+    ctx.lineCap = "round";
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = PALETTE.paper;
+    ctx.stroke();
+    ctx.lineWidth = 3.2;
+    ctx.strokeStyle = PALETTE.red;
+    ctx.stroke();
+  };
+
+  const drawBoss = (a: Art, e: Enemy, p: Pose) => {
+    const set = a.sheet.enemies.boss;
+    const enraged = boss.phase === "enraged";
+    if (e.entrance > 0) {
+      // the landing spot: a red target that tightens as Reviewer 2 drops in
+      const falling = e.entrance / BOSS_ENTRANCE;
+      worldSpace();
+      ctx.globalAlpha = 0.3 + 0.6 * (1 - falling);
+      ctx.strokeStyle = PALETTE.red;
+      ctx.lineWidth = 3;
+      ctx.setLineDash(LANDING_DASH);
+      ctx.lineDashOffset = clock * 60;
+      ctx.beginPath();
+      ctx.ellipse(e.x, e.y + 40, e.r * (0.9 + falling), e.r * 0.36 * (0.9 + falling), 0, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash(NO_DASH);
+    }
+    if (enraged) {
+      ctx.globalAlpha = 0.5 + 0.18 * Math.sin(clock * 5);
+      blit(a.halo.red, e.x, e.y - p.lift, 0, (e.r * 3) / 32);
+    }
+    ctx.globalAlpha = 1;
+    place(p.x, p.y - p.lift + p.pivot, p.rot, p.sx, p.sy);
+    stamp(e.face < 0 ? set.left : set.right, -p.pivot);
+    // rage and the wind-up before a volley flush it red; hits flash it white, capped (it is hit a lot)
+    const red = (enraged ? 0.08 + 0.06 * Math.sin(clock * 6) : 0) + 0.25 * bossWindup();
+    if (red > 0.01) {
+      ctx.globalAlpha = Math.min(0.4, red);
+      stamp(a.heat.boss, -p.pivot);
+    }
+    if (e.flash > 0) {
+      ctx.globalAlpha = 0.3 * Math.min(1, e.flash / 0.05);
+      stamp(set.flash, -p.pivot);
+    }
+    ctx.globalAlpha = 1;
+    if (enraged) {
+      const mark = poseLocal(p, -34, -42);
+      drawAngerMark(mark.x, mark.y, 1.1 + 0.18 * Math.abs(Math.sin(clock * 6)));
+    }
+  };
+
+  const drawEnemies = (a: Art) => {
+    const sheet = a.sheet;
+    for (let i = 0; i < drawList.length; i += 1) {
+      const e = drawList[i];
+      const p = poses[i];
+      if (e.kind === "boss") {
+        drawBoss(a, e, p);
+        continue;
+      }
+      const set = e.kind === "comment" ? null : sheet.enemies[e.kind];
+      ctx.globalAlpha = p.alpha;
+      place(p.x, p.y - p.lift + p.pivot, p.rot, p.sx, p.sy);
+      stamp(set ? (e.face < 0 ? set.left : set.right) : sheet.comments.sprites[e.variant], -p.pivot);
+      if (e.kind === "explode" && e.hp < e.maxHp * 0.5) {
+        // overheating: a red pulse, stronger as it nears detonation
+        const heat = 1 - e.hp / (e.maxHp * 0.5);
+        ctx.globalAlpha = p.alpha * heat * (0.3 + 0.25 * Math.sin(clock * 12 + e.id));
+        stamp(a.heat.explode, -p.pivot);
+      }
+      if (e.flash > 0) {
+        // capped, so the outline still shows through and a flashing bug never reads as a hole in the sand
+        ctx.globalAlpha = p.alpha * Math.min(0.75, e.flash / 0.06);
+        stamp(set ? set.flash : sheet.comments.flash[e.variant], -p.pivot);
+      }
+      if (e.kind === "explode") {
+        // the fuse fizzles
+        const tip = poseLocal(p, FUSE_TIP.x, FUSE_TIP.y);
+        ctx.globalAlpha = p.alpha;
+        blit(starOf(a, PALETTE.gold, clock * 9 + e.id), tip.x, tip.y, 0, 0.45 + 0.2 * Math.sin(clock * 37 + e.id * 2));
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ---- weapons
+  const drawOrbitals = (a: Art) => {
+    const dsv = lvl("dsv");
+    if (dsv && deathTime < 0) {
+      const n = dsvCount();
+      const radius = dsvRadius();
+      // the margin the support vectors ride on
+      worldSpace();
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = PALETTE.blue;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash(MARGIN_DASH);
+      ctx.lineDashOffset = -orbAngle * radius;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, radius, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash(NO_DASH);
+      // each vector trails a few afterimages, oldest first
+      const orb = a.sheet.orb;
+      for (let i = 0; i < n; i += 1) {
+        const base = orbAngle + (i * TAU) / n;
+        for (let k = 4; k >= 0; k -= 1) {
+          const ang = base - k * 0.15;
+          ctx.globalAlpha = k ? 0.3 * (1 - k / 5) : 1;
+          blit(orb, player.x + Math.cos(ang) * radius, player.y + Math.sin(ang) * radius, 0, k ? 0.95 - k * 0.07 : 1);
+        }
+      }
+    }
+    // boomerangs: three fading copies, rotated back, read as motion blur
+    for (const b of boomerangs) {
+      if (!inView(b.x, b.y, 20)) continue;
+      for (let k = 3; k >= 0; k -= 1) {
+        ctx.globalAlpha = k ? 0.42 - k * 0.11 : 1;
+        blit(a.sheet.boomerang, b.x, b.y, b.angle - k * 0.42, 1);
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  const drawShots = (a: Art) => {
+    const glow = a.sheet.glow;
+    // light under the player's shots (one additive pass)
+    ctx.globalCompositeOperation = "lighter";
+    for (const b of bullets) {
+      if (b.hostile || !inView(b.x, b.y, 24)) continue;
+      ctx.globalAlpha = Math.min(1, b.life / 0.3) * 0.8;
+      blit(b.src === "anchor" ? glow.orange : glow.blue, b.x, b.y, 0, 0.5);
+    }
+    ctx.globalCompositeOperation = "source-over";
+    for (const b of bullets) {
+      if (b.hostile || !inView(b.x, b.y, 24)) continue;
+      const fade = Math.min(1, b.life / 0.3);
+      const rot = Math.atan2(b.vy, b.vx);
+      const sprite = b.src === "anchor" ? a.anchorBolt : a.sheet.bolt;
+      // a stretched, faded copy behind it reads as a short trail
+      ctx.globalAlpha = fade * 0.35;
+      place(b.x - b.vx * 0.018, b.y - b.vy * 0.018, rot, 1.7, 0.75);
+      stamp(sprite);
+      ctx.globalAlpha = fade;
+      place(b.x, b.y, rot, 1, 1);
+      stamp(sprite);
+    }
+    // Reviewer 2's rejections: a pulsing red danger halo; never rotated (a turned ✗ reads as +).
+    // They grow in as they leave its outline, so a fresh volley does not cover its face.
+    const r2 = boss.enemy;
+    for (const b of bullets) {
+      if (!b.hostile || !inView(b.x, b.y, 24)) continue;
+      const out = r2 ? (Math.hypot(b.x - r2.x, b.y - r2.y) - r2.r * 0.6) / (r2.r * 0.5) : 1;
+      const grow = clamp(Math.max(out, (BOSS_SHOT_LIFE - b.life) / 0.5), 0, 1);
+      const fade = Math.min(1, b.life / 0.3, grow);
+      const pulse = 0.5 + 0.5 * Math.sin(clock * 11 + Math.atan2(b.vy, b.vx) * 3);
+      const size = 0.4 + 0.6 * grow;
+      ctx.globalAlpha = fade * (0.5 + 0.3 * pulse);
+      blit(a.halo.red, b.x, b.y, 0, (0.42 + 0.08 * pulse) * size);
+      ctx.globalAlpha = fade;
+      blit(a.sheet.hostileBolt, b.x, b.y, 0, (1 + 0.08 * pulse) * size);
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ---- player
+  const antenna = { x: 0, y: 0, on: false, alarm: false };
+  /** Pupils, blinks and moods inside the visor; the frame's anchor is `dy` units down. */
+  const drawFace = (dy: number, happy: boolean) => {
+    const cx = PLAYER_VISOR.x;
+    const cy = PLAYER_VISOR.y + dy;
+    const lx = player.faceX * 2.6;
+    const ly = player.faceY * 1.5;
+    ctx.fillStyle = PALETTE.ink;
+    ctx.strokeStyle = PALETTE.ink;
+    ctx.lineWidth = 1.7;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    if (happy) {
+      // ^ ^
+      for (let s = -1; s <= 1; s += 2) {
+        ctx.moveTo(cx + s * 4.6 - 2.6, cy + 1);
+        ctx.lineTo(cx + s * 4.6, cy - 1.6);
+        ctx.lineTo(cx + s * 4.6 + 2.6, cy + 1);
+      }
+      ctx.stroke();
+    } else if (anim.hurt > 0.12) {
+      // > <
+      for (let s = -1; s <= 1; s += 2) {
+        ctx.moveTo(cx + s * 7, cy - 2.2);
+        ctx.lineTo(cx + s * 3.4, cy);
+        ctx.lineTo(cx + s * 7, cy + 2.2);
+      }
+      ctx.stroke();
+    } else if (anim.blink > 0) {
+      for (let s = -1; s <= 1; s += 2) {
+        ctx.moveTo(cx + s * 7 + lx, cy + ly);
+        ctx.lineTo(cx + s * 2.6 + lx, cy + ly);
+      }
+      ctx.stroke();
+    } else {
+      const r = anim.lowSanity ? 1.9 : 2.5;
+      for (let s = -1; s <= 1; s += 2) {
+        ctx.moveTo(cx + s * 4.6 + lx + r, cy + ly);
+        ctx.arc(cx + s * 4.6 + lx, cy + ly, r, 0, TAU);
+      }
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      for (let s = -1; s <= 1; s += 2) {
+        const gx = cx + s * 4.6 + lx - r * 0.35;
+        const gy = cy + ly - r * 0.4;
+        ctx.moveTo(gx + r * 0.32, gy);
+        ctx.arc(gx, gy, r * 0.32, 0, TAU);
+      }
+      ctx.fill();
+    }
+    if (anim.lowSanity) {
+      // a sweat drop slides down the side of the head
+      const y = dy - 15 + ((clock * 9) % 7);
+      ctx.beginPath();
+      ctx.moveTo(13, y - 3.4);
+      ctx.quadraticCurveTo(15.6, y + 0.6, 13, y + 1.8);
+      ctx.quadraticCurveTo(10.4, y + 0.6, 13, y - 3.4);
+      ctx.fillStyle = "#bfe0f7";
+      ctx.fill();
+      ctx.lineWidth = 0.9;
+      ctx.strokeStyle = PALETTE.blueDark;
+      ctx.stroke();
+    }
+  };
+
+  const drawPlayer = (a: Art) => {
+    const sheet = a.sheet;
+    if (deathTime >= 0) {
+      if (dying > 0) {
+        // popped: its ghost drifts up during the death beat
+        const q = 1 - dying / DEATH_BEAT;
+        ctx.globalAlpha = 0.6 * (1 - q);
+        blit(sheet.player.flash, player.x, player.y - 4 - q * 36, Math.sin(q * 8) * 0.15, 1 + 0.2 * q);
+        ctx.globalAlpha = 1;
+      }
+      return;
+    }
+    const happy = choosing || levelUpDelay > 0 || victory > 0;
+    if (happy) {
+      // a halo and a sunburst behind the player; the rays turn in real time while the world is frozen
+      const gold = victory > 0;
+      ctx.globalAlpha = 0.9;
+      blit(gold ? a.halo.gold : a.halo.blue, player.x, player.y - 4, 0, 1.6);
+      ctx.globalAlpha = gold ? 0.8 : 0.7;
+      blit(gold ? a.rays.gold : a.rays.blue, player.x, player.y - 4, shakeClock * 0.5, 1.4);
+    }
+    // i-frames flicker white instead of fading: the robot stays visible inside a swarm
+    const blink = player.iframes > 0 && Math.floor(player.iframes * 18) % 2 === 0;
+    const hop = Math.abs(Math.sin(anim.bob)) * 2.6 * anim.moving;
+    const breathe = Math.sin(clock * 3) * 0.035 * (1 - anim.moving);
+    const sx = 1 + 0.2 * anim.squash - breathe;
+    const sy = 1 - 0.16 * anim.squash + breathe;
+    const rot = anim.lean * 0.12;
+    const pivot = 13;
+    const fy = player.y - hop + pivot;
+    place(player.x, fy, rot, sx, sy);
+    ctx.globalAlpha = 0.9;
+    stamp(a.rim, -pivot);
+    ctx.globalAlpha = 1;
+    stamp(sheet.player.body, -pivot);
+    if (anim.hurt > 0) {
+      ctx.globalAlpha = Math.min(1, anim.hurt / 0.3) * 0.45;
+      stamp(a.heat.player, -pivot);
+    }
+    if (blink) {
+      ctx.globalAlpha = 0.55;
+      stamp(sheet.player.flash, -pivot);
+    }
+    ctx.globalAlpha = 1;
+    drawFace(-pivot, happy);
+    // the antenna light: a calm blink, frantic red at low sanity
+    const alarm = anim.lowSanity;
+    const on = alarm ? Math.sin(clock * 18) > 0 : Math.sin(clock * 3.2) > -0.4;
+    const tx = PLAYER_ANTENNA_TIP.x;
+    const ty = PLAYER_ANTENNA_TIP.y - pivot;
+    ctx.beginPath();
+    ctx.arc(tx, ty, alarm && on ? 3.6 : 3, 0, TAU);
+    ctx.fillStyle = alarm ? (on ? PALETTE.red : "#8e3b3b") : on ? PALETTE.gold : "#b48f52";
+    ctx.fill();
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = "#3d2a12";
+    ctx.stroke();
+    if (on) {
+      ctx.beginPath();
+      ctx.arc(tx - 1, ty - 1, 0.9, 0, TAU);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+    }
+    framePoint(player.x, fy, rot, sx, sy, tx, ty);
+    antenna.x = pt.x;
+    antenna.y = pt.y;
+    antenna.on = on;
+    antenna.alarm = alarm;
+  };
+
+  // ---- light passes
+  /** Under the middle layer: fuses, Reviewer 2's aura and pen, pickups, token glints, support vectors. */
+  const drawLowLights = (a: Art) => {
+    const glow = a.sheet.glow;
+    for (let i = 0; i < drawList.length; i += 1) {
+      const e = drawList[i];
+      const p = poses[i];
+      if (e.kind === "explode") {
+        const tip = poseLocal(p, FUSE_TIP.x, FUSE_TIP.y);
+        ctx.globalAlpha = p.alpha * (0.65 + 0.35 * Math.sin(clock * 41 + e.id));
+        blit(glow.orange, tip.x, tip.y, 0, 0.4);
+      } else if (e.kind === "boss") {
+        if (boss.phase === "enraged") {
+          ctx.globalAlpha = 0.35 + 0.15 * Math.sin(clock * 5);
+          blit(glow.red, p.x, p.y - p.lift, 0, (e.r * 2.4) / 32);
+        }
+        const windup = bossWindup();
+        if (windup > 0) {
+          const tip = poseLocal(p, BOSS_PEN_TIP.x, BOSS_PEN_TIP.y);
+          ctx.globalAlpha = windup;
+          blit(glow.red, tip.x, tip.y, 0, 0.35 + 0.5 * windup);
+          blit(glow.white, tip.x, tip.y, 0, 0.25 * windup);
+        }
+      }
+    }
+    for (const p of pickups) {
+      if (!inView(p.x, p.y, 40)) continue;
+      ctx.globalAlpha = pickupBlink(p) * (0.6 + 0.25 * Math.sin(clock * 4 + p.phase));
+      blit(p.kind === "coffee" ? glow.gold : glow.red, p.x, p.y - pickupHover(p), 0, 0.75);
+    }
+    // now and then a glint on a resting token
+    for (const g of gems) {
+      const glint = Math.sin(clock * 2.1 + g.phase * 7);
+      if (glint < 0.94 || g.pulled || !inView(g.x, g.y, 10)) continue;
+      ctx.globalAlpha = (glint - 0.94) / 0.06;
+      blit(a.sheet.spark, g.x - 2, g.y - 7 - 1.5 * Math.sin(clock * 3 + g.phase), 0, 0.55);
+    }
+    if (lvl("dsv") && deathTime < 0) {
+      ctx.globalAlpha = 0.7;
+      for (let i = 0; i < dsvCount(); i += 1) {
+        const o = dsvOrb(i);
+        blit(glow.blue, o.x, o.y, 0, 0.5);
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  /** Over everything: the antenna, beam cores, flashes and sparks. */
+  const drawHighLights = (a: Art) => {
+    if (antenna.on && deathTime < 0) {
+      ctx.globalAlpha = antenna.alarm ? 0.9 : 0.6;
+      blit(antenna.alarm ? a.sheet.glow.red : a.sheet.glow.gold, antenna.x, antenna.y, 0, antenna.alarm ? 0.42 : 0.3);
+      ctx.globalAlpha = 1;
+    }
+    drawBeams(a, true);
+    drawRings(a, true);
+    drawParticles(a, true);
+  };
+
+  // ---- effects
+  /** Attention beams: a blue body (normal blend) under a white-hot core with motes (additive). */
+  const drawBeams = (a: Art, light: boolean) => {
+    for (const b of beams) {
+      const k = b.life / b.max;
+      const w = b.width * (0.75 + 0.5 * k);
+      const dx = b.x2 - b.x1;
+      const dy = b.y2 - b.y1;
+      const len = Math.hypot(dx, dy) || 1;
+      // it leaves from the robot's edge, not through its face
+      const x0 = b.x1 + (dx / len) * 15;
+      const y0 = b.y1 + (dy / len) * 15;
+      worldSpace();
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(b.x2, b.y2);
+      if (!light) {
+        ctx.globalAlpha = 0.35 * k;
+        ctx.strokeStyle = PALETTE.sky;
+        ctx.lineWidth = w * 2.6;
+        ctx.stroke();
+        ctx.globalAlpha = 0.75 * k;
+        ctx.strokeStyle = PALETTE.blue;
+        ctx.lineWidth = w * 1.15;
+        ctx.stroke();
+        continue;
+      }
+      ctx.globalAlpha = k;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = w * 0.5;
+      ctx.stroke();
+      const seed = b.x2 * 0.37 + b.y2 * 0.61;
+      for (let i = 0; i < 8; i += 1) {
+        const f = fract(seed + i * 0.618);
+        const side = (fract(seed * 1.7 + i * 0.37) - 0.5) * w * (0.6 + 2.2 * (1 - k));
+        blit(a.sheet.spark, x0 + (b.x2 - x0) * f - (dy / len) * side, y0 + (b.y2 - y0) * f + (dx / len) * side, 0, 0.6 * k + 0.25);
+      }
+      blit(a.sheet.glow.white, x0, y0, 0, 0.6 * k);
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  /** SHOT shockwaves: a soft lit disc inside a double ring. */
+  const drawWaves = (a: Art) => {
+    for (const w of waves) {
+      const p = Math.min(1, w.t / WAVE_TIME);
+      const r = p * w.maxR;
+      if (r < 1 || !inView(w.x, w.y, r + 10)) continue;
+      const k = 1 - p;
+      ctx.globalAlpha = k * 0.9;
+      blit(a.ripple.orange, w.x, w.y, 0, r / 32);
+      worldSpace();
+      ctx.globalAlpha = k;
+      ctx.strokeStyle = PALETTE.orange;
+      ctx.lineWidth = 2 + 5 * k;
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, r, 0, TAU);
+      ctx.stroke();
+      ctx.globalAlpha = k * 0.7;
+      ctx.strokeStyle = PALETTE.gold;
+      ctx.lineWidth = 1 + 2.5 * k;
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, r * 0.84, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  /** Rings: death pops, blasts with a fireball, the level-up pushback; `light` adds their flashes. */
+  const drawRings = (a: Art, light: boolean) => {
+    const glow = a.sheet.glow;
+    for (const r of rings) {
+      if (r.t < 0) continue;
+      const p = Math.min(1, r.t / r.dur);
+      const radius = Math.max(0, r.r0 + (r.r1 - r.r0) * easeOutCubic(p));
+      if (!inView(r.x, r.y, radius + 30)) continue;
+      const k = 1 - p;
+      const fireball = r.kind === "blast" && r.color === PALETTE.orange;
+      if (light) {
+        let flash: Sprite | null = null;
+        let size = 0;
+        if (fireball) {
+          flash = glow.gold;
+          size = BLAST_R * 1.6;
+        } else if (r.kind === "impact") {
+          flash = glow.white;
+          size = 160;
+        } else if (r.kind === "victory" || (r.kind === "boss" && r.color === PALETTE.gold)) {
+          flash = glow.gold;
+          size = 200;
+        } else if (r.kind === "revive") {
+          flash = glow.cyan;
+          size = 110;
+        } else if (r.kind === "enrage") {
+          flash = glow.red;
+          size = 140;
+        }
+        if (flash && p < 0.5) {
+          ctx.globalAlpha = (1 - p / 0.5) ** 2;
+          blit(flash, r.x, r.y, 0, size / 32);
+        }
+        continue;
+      }
+      if (fireball && p < 0.6) {
+        ctx.globalAlpha = 1 - p / 0.6;
+        blit(a.halo.orange, r.x, r.y, 0, (radius * 1.1) / 32);
+      }
+      // the big rings light up their inside
+      const inner = r.kind === "levelup" || r.kind === "revive" ? a.ripple.blue : r.kind === "victory" || (r.kind === "boss" && r.color === PALETTE.gold) ? a.ripple.gold : null;
+      if (inner && radius > 4) {
+        ctx.globalAlpha = k * 0.9;
+        blit(inner, r.x, r.y, 0, radius / 32);
+      }
+      worldSpace();
+      if ((r.kind === "pop" && p < 0.35) || (fireball && p < 0.3)) {
+        // a quick paper-white poof inside a pop; the flash disc of an explosion
+        ctx.globalAlpha = fireball ? 1 - p / 0.3 : (1 - p / 0.35) * 0.75;
+        ctx.fillStyle = PALETTE.paper;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, radius * (fireball ? 0.8 : 0.7), 0, TAU);
+        ctx.fill();
+      }
+      ctx.globalAlpha = k;
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = r.width * (1 - p * 0.6);
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, radius, 0, TAU);
+      ctx.stroke();
+      if (r.kind === "levelup" || r.kind === "victory") {
+        ctx.globalAlpha = k * 0.8;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = r.width * 0.4 * k;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, radius * 0.9, 0, TAU);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  /** A spark fast enough to draw as a streak (slow ones become little stars). */
+  const streaking = (p: Particle) => Math.abs(p.vx) + Math.abs(p.vy) > 40;
+  /** The level-up burst waits, unborn, while the cards are up: it bursts out after the pick. */
+  const unborn = (p: Particle) => p.life === p.max && (choosing || levelUpDelay > 0);
+  const sparkPath = () => {
+    ctx.beginPath();
+    for (const p of particles) {
+      if (p.kind !== "spark" || !streaking(p) || unborn(p) || !inView(p.x, p.y, 20)) continue;
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - p.vx * 0.035, p.y - p.vy * 0.035);
+    }
+  };
+  /** Particles; `light` draws the additive white cores of the spark streaks. */
+  const drawParticles = (a: Art, light: boolean) => {
+    worldSpace();
+    ctx.lineCap = "round";
+    sparkPath();
+    if (light) {
+      ctx.globalAlpha = 0.85;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      return;
+    }
+    // warm underlay so the streaks also read on sand
+    ctx.globalAlpha = 0.9;
+    ctx.strokeStyle = SPARK_UNDER;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    for (const p of particles) {
+      if (unborn(p) || !inView(p.x, p.y, 24)) continue;
+      const f = p.life / p.max;
+      switch (p.kind) {
+        case "debris":
+          ctx.globalAlpha = Math.min(1, f * 3);
+          blit(shardOf(a, p.color, p.rot), p.x, p.y, 0, (p.size / 6) * (0.55 + 0.45 * f));
+          break;
+        case "confetti": {
+          // spinning paper: its width follows the flip, the back is darker
+          const flip = Math.cos(p.rot * 1.4);
+          ctx.globalAlpha = Math.min(1, f * 3);
+          place(p.x, p.y, p.rot * 0.45, 1.5, 1.5);
+          ctx.fillStyle = flip > 0 ? p.color : backOf(p.color);
+          ctx.fillRect(-p.size * 0.5 * Math.abs(flip), -p.size * 0.32, p.size * Math.abs(flip), p.size * 0.64);
+          break;
+        }
+        case "dust":
+          ctx.globalAlpha = f * 0.7;
+          blit(a.puff, p.x, p.y, 0, (p.size * (1.7 - 0.7 * f)) / 16);
+          break;
+        case "smoke":
+          // rises after the flash, then thins out
+          ctx.globalAlpha = Math.min(1, (1 - f) * 4) * f * 0.5;
+          blit(a.smoke, p.x, p.y, 0, (p.size * (2 - f)) / 16);
+          break;
+        case "heal":
+          ctx.globalAlpha = Math.min(1, f * 2);
+          blit(a.plus, p.x, p.y, 0, p.size / 7);
+          break;
+        case "sparkle":
+          ctx.globalAlpha = Math.min(1, f * 2);
+          blit(starOf(a, p.color, p.rot * 0.3), p.x, p.y, 0, (p.size / 6) * (0.5 + 0.5 * f));
+          break;
+        case "spark":
+          if (streaking(p)) break;
+          ctx.globalAlpha = f;
+          blit(starOf(a, p.color, p.rot), p.x, p.y, 0, p.size / 6);
+          break;
+        case "resolved": {
+          // an addressed reviewer comment: a green ✓ pops and rises
+          const age = p.max - p.life;
+          ctx.globalAlpha = Math.min(1, f * 3);
+          blit(a.check, p.x, p.y, Math.sin(age * 14) * 0.25 * Math.max(0, 1 - age * 3), Math.max(0.05, easeOutBack(Math.min(1, age / 0.2))));
+          break;
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  const critLabels = new Map<string, string>();
+  /** Damage numbers pop in; crits are gold, bigger, outlined in ink and shout "!". */
+  const drawNumbers = () => {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    const big = readable();
+    let current = "";
+    for (const text of texts) {
+      if (!inView(text.x, text.y, 40)) continue;
+      const age = text.max - text.life;
+      let s: number;
+      let rot = 0;
+      if (text.crit) {
+        const q = Math.min(1, age / 0.16);
+        s = 1 + 0.9 * (1 - easeOutCubic(q));
+        rot = -0.12 * (1 - q);
+      } else {
+        s = Math.max(0.05, easeOutBack(Math.min(1, age / 0.12)));
+      }
+      const f = font(800, text.size);
+      if (f !== current) {
+        ctx.font = f;
+        current = f;
+      }
+      let label = text.text;
+      if (text.crit) {
+        let shout = critLabels.get(text.text);
+        if (!shout) {
+          shout = `${text.text}!`;
+          critLabels.set(text.text, shout);
+        }
+        label = shout;
+      }
+      ctx.globalAlpha = Math.min(1, text.life * 4);
+      place(text.x, text.y, rot, s * big, s * big);
+      ctx.lineWidth = text.crit ? 5 : 3.4;
+      ctx.strokeStyle = text.crit ? PALETTE.ink : PALETTE.paper;
+      ctx.strokeText(label, 0, 0);
+      ctx.fillStyle = text.crit ? PALETTE.gold : text.color;
+      ctx.fillText(label, 0, 0);
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ---- Reviewer 2's speech bubble (typewriter)
+  const SPEECH_LINE = 16;
+  const speechLines: string[] = [];
+  let speechFor = "";
+  let speechWidth = 0;
+  const drawSpeech = (a: Art) => {
     if (!speech.visible) return;
-    ctx.font = font(600, 13);
-    if (speechLinesFor !== speech.text) {
-      // Wrap the whole line once, so the bubble keeps its size while typing.
-      speechLinesFor = speech.text;
-      speechLines = [];
+    ctx.font = font(700, 13);
+    if (speechFor !== speech.text) {
+      // wrap the whole line once, so the bubble keeps its size while it types
+      speechFor = speech.text;
+      speechLines.length = 0;
       let line = "";
       for (const word of speech.text.split(" ")) {
         const next = line ? `${line} ${word}` : word;
-        if (line && ctx.measureText(next).width > 210) {
+        if (line && ctx.measureText(next).width > 220) {
           speechLines.push(line);
           line = word;
         } else line = next;
       }
       speechLines.push(line);
-      speechWidth = Math.max(...speechLines.map((l) => ctx.measureText(l).width));
+      speechWidth = 0;
+      for (const l of speechLines) speechWidth = Math.max(speechWidth, ctx.measureText(l).width);
     }
-    const pop = easeOutBack(Math.min(1, speech.age / 0.15));
-    const w = speechWidth + 20;
-    const h = speechLines.length * 16 + 12;
-    ctx.save();
-    ctx.translate(speech.x, speech.y - (speech.final ? 8 : 26));
-    ctx.scale(pop, pop);
+    const k = Math.min(1.3, 1 / baseZoom());
+    const w = speechWidth + 28;
+    const h = speechLines.length * SPEECH_LINE + 14;
+    const gap = 13;
+    const final = speech.final;
+    const angry = boss.phase === "enraged" && !final;
+    // the tail points at the top of Reviewer 2 (riding its bob) or where it fell;
+    // the bubble slides along to stay on screen
+    let tipX = speech.x;
+    let tipY = speech.y - (final ? 2 : 6 + bossLift);
+    const half = (w / 2 + 10) * k;
+    const cx = clamp(tipX, view.l + half, view.r - half);
+    const top = tipY - (gap + h) * k;
+    if (top < view.t + 10 * k) tipY += view.t + 10 * k - top;
+    if (angry && !options.reducedMotion) tipX += Math.sin(clock * 47) * 0.8;
+    const pop = Math.max(0.05, easeOutBack(Math.min(1, speech.age / 0.16)));
+    place(tipX, tipY, 0, k * pop, k * pop);
+    const bx = (cx - tipX) / k - w / 2;
+    const by = -gap - h;
+    const base = clamp(0, bx + 18, bx + w - 18);
     ctx.beginPath();
-    ctx.roundRect(-w / 2, -h - 8, w, h, 10);
-    ctx.moveTo(-6, -9);
+    ctx.roundRect(bx, by, w, h, 11);
+    // the tail winds the same way as the rounded rectangle, so their overlap stays filled
+    ctx.moveTo(base + 7, -gap - 3);
     ctx.lineTo(0, 0);
-    ctx.lineTo(6, -9);
-    ctx.fillStyle = speech.final ? PALETTE.paper : "#ffffff";
-    ctx.fill();
-    ctx.strokeStyle = boss.phase === "enraged" && !speech.final ? PALETTE.red : PALETTE.ink;
-    ctx.lineWidth = 2;
+    ctx.lineTo(base - 7, -gap - 3);
+    ctx.closePath();
+    // stroked at twice the width, then filled: one clean outline around bubble and tail
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = angry ? PALETTE.red : final ? GOLD_LINE : PALETTE.ink;
     ctx.stroke();
+    ctx.fillStyle = PALETTE.paper;
+    ctx.fill();
+    // the text typed so far, with a blinking caret
     ctx.fillStyle = PALETTE.ink;
     ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    const tx = bx + 16;
+    const ty = by + 7 + SPEECH_LINE / 2;
     let left = speech.shown;
+    let part = "";
+    let row = 0;
     for (let i = 0; i < speechLines.length && left > 0; i += 1) {
       const line = speechLines[i];
-      ctx.fillText(line.slice(0, left), -speechWidth / 2, -h - 8 + 14 + i * 16);
+      part = left >= line.length ? line : line.slice(0, left);
+      row = i;
+      ctx.fillText(part, tx, ty + i * SPEECH_LINE);
       left -= line.length + 1;
     }
-    ctx.textAlign = "center";
-    ctx.restore();
+    if (speech.shown < speech.text.length && Math.sin(clock * 18) > -0.3) {
+      ctx.fillRect(tx + ctx.measureText(part).width + 1, ty + row * SPEECH_LINE - 6, 1.8, 12);
+    }
+    // the reviewer's avatar on the corner; a ✓ once the score is raised
+    const badge = a.badge;
+    ctx.drawImage(badge.canvas, bx + 3 - badge.w * 0.45, by + 3 - badge.h * 0.45, badge.w * 0.9, badge.h * 0.9);
+    if (final) ctx.drawImage(a.check.canvas, bx + w - 3 - a.check.w * 0.45, by + 3 - a.check.h * 0.45, a.check.w * 0.9, a.check.h * 0.9);
   };
 
-  const drawParticles = (additive: boolean) => {
-    for (let i = 0; i < particles.length; i += 1) {
-      const p = particles[i];
-      const glow = p.kind === "spark" || p.kind === "sparkle";
-      if (glow !== additive) continue;
-      const f = p.life / p.max;
-      ctx.globalAlpha = p.kind === "confetti" ? Math.min(1, f * 3) : f;
-      ctx.fillStyle = p.color;
-      switch (p.kind) {
-        case "spark":
-          ctx.strokeStyle = p.color;
-          ctx.lineWidth = p.size;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x - p.vx * 0.04, p.y - p.vy * 0.04);
-          ctx.stroke();
-          break;
-        case "sparkle": {
-          const s = p.size * (0.6 + 0.4 * f);
-          ctx.fillRect(p.x - s, p.y - s * 0.2, s * 2, s * 0.4);
-          ctx.fillRect(p.x - s * 0.2, p.y - s, s * 0.4, s * 2);
-          break;
-        }
-        case "confetti": {
-          const w = p.size * Math.abs(Math.cos(p.rot));
-          ctx.fillRect(p.x - w / 2, p.y - p.size * 0.3, w, p.size * 0.6);
-          break;
-        }
-        case "heal":
-          ctx.fillRect(p.x - p.size / 2, p.y - p.size * 0.15, p.size, p.size * 0.3);
-          ctx.fillRect(p.x - p.size * 0.15, p.y - p.size / 2, p.size * 0.3, p.size);
-          break;
-        case "dust":
-        case "smoke": {
-          ctx.globalAlpha = f * (p.kind === "smoke" ? 0.25 : 0.5);
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * (1.6 - f * 0.6), 0, TAU);
-          ctx.fill();
-          break;
-        }
-        default:
-          ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-      }
+  // ---- screen space
+  const marker = { x: 0, y: 0, angle: 0 };
+  /** Where an off-screen world point meets the screen edge (inset px), into marker; false while visible. */
+  const offscreen = (x: number, y: number, inset: number, slack: number) => {
+    const dx = (x - cam.x) * cam.zoom;
+    const dy = (y - cam.y) * cam.zoom;
+    if (Math.abs(dx) < width / 2 + slack && Math.abs(dy) < height / 2 + slack) return false;
+    const k = Math.min((width / 2 - inset) / Math.max(1e-6, Math.abs(dx)), (height / 2 - inset) / Math.max(1e-6, Math.abs(dy)));
+    marker.x = width / 2 + dx * k;
+    marker.y = height / 2 + dy * k;
+    marker.angle = Math.atan2(dy, dx);
+    return true;
+  };
+
+  /** Arrows at the screen edge towards off-screen pickups and Reviewer 2. */
+  const drawMarkers = (a: Art) => {
+    ctx.lineJoin = "round";
+    for (const p of pickups) {
+      if (!offscreen(p.x, p.y, 26, 6)) continue;
+      const c = Math.cos(marker.angle);
+      const s = Math.sin(marker.angle);
+      ctx.globalAlpha = pickupBlink(p);
+      ctx.setTransform(dpr * c, dpr * s, -dpr * s, dpr * c, dpr * marker.x, dpr * marker.y);
+      ctx.beginPath();
+      ctx.moveTo(19, 0);
+      ctx.lineTo(10, -6.5);
+      ctx.lineTo(10, 6.5);
+      ctx.closePath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = PALETTE.ink;
+      ctx.stroke();
+      ctx.fillStyle = p.kind === "coffee" ? PALETTE.orange : PALETTE.red;
+      ctx.fill();
+      ctx.setTransform(dpr, 0, 0, dpr, dpr * marker.x, dpr * marker.y);
+      ctx.beginPath();
+      ctx.arc(0, 0, 12.5, 0, TAU);
+      ctx.fillStyle = PALETTE.paper;
+      ctx.fill();
+      ctx.stroke();
+      const icon = a.sheet.pickups[p.kind];
+      ctx.drawImage(icon.canvas, -icon.ax * 0.62, -icon.ay * 0.62, icon.w * 0.62, icon.h * 0.62);
+    }
+    const b = boss.enemy;
+    if (b && b.entrance <= 0 && offscreen(b.x, b.y, 34, -b.r * cam.zoom * 0.5)) {
+      const c = Math.cos(marker.angle);
+      const s = Math.sin(marker.angle);
+      const pulse = 1 + 0.1 * Math.sin(clock * 9);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(dpr * c * pulse, dpr * s * pulse, -dpr * s * pulse, dpr * c * pulse, dpr * marker.x, dpr * marker.y);
+      ctx.beginPath();
+      ctx.moveTo(30, 0);
+      ctx.lineTo(13, -14);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(13, 14);
+      ctx.closePath();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = PALETTE.ink;
+      ctx.stroke();
+      ctx.fillStyle = PALETTE.red;
+      ctx.fill();
+      const badge = a.badge;
+      ctx.setTransform(dpr * pulse, 0, 0, dpr * pulse, dpr * marker.x, dpr * marker.y);
+      ctx.drawImage(badge.canvas, -badge.ax * 1.4, -badge.ay * 1.4, badge.w * 1.4, badge.h * 1.4);
     }
     ctx.globalAlpha = 1;
   };
 
-  const drawScreenFx = () => {
-    if (boss.phase === "warning") {
-      const pulse = 0.5 + 0.5 * Math.sin(clock * 12);
-      ctx.globalAlpha = 0.25 + 0.4 * pulse;
-      ctx.strokeStyle = PALETTE.red;
-      ctx.lineWidth = 20;
-      ctx.strokeRect(0, 0, width, height);
+  const drawScreen = (a: Art, s: ScreenArt) => {
+    screenSpace();
+    // warm vignette: stronger behind the title screen, at dusk and in slow motion
+    ctx.globalAlpha = mode === "attract" ? 1 : Math.min(1, 0.62 + 0.25 * (t / RUN_LENGTH) + 0.6 * (1 - timeScale));
+    ctx.drawImage(s.vignette, 0, 0, width, height);
+    // red edges: a heartbeat in sync with its sound at low sanity, a siren while Reviewer 2 is on the way
+    let red = 0;
+    if (anim.lowSanity && deathTime < 0) {
+      const since = 0.9 - heartTimer;
+      red = 0.4 + 0.6 * Math.exp(-since * 10) + (since > 0.2 ? 0.4 * Math.exp(-(since - 0.2) * 10) : 0);
     }
-    if (anim.lowSanity) {
-      if (!vignette) {
-        vignette = ctx.createRadialGradient(width / 2, height / 2, Math.min(width, height) * 0.35, width / 2, height / 2, Math.hypot(width, height) / 2);
-        vignette.addColorStop(0, "rgba(214,69,69,0)");
-        vignette.addColorStop(1, "rgba(214,69,69,0.55)");
-      }
-      ctx.globalAlpha = 0.55 + 0.35 * Math.sin(clock * 7);
-      ctx.fillStyle = vignette;
-      ctx.fillRect(0, 0, width, height);
+    if (boss.phase === "warning") red = Math.max(red, (0.3 + 0.4 * (1 - boss.warn / BOSS_WARNING)) * (0.6 + 0.4 * Math.sin(clock * 10)));
+    if (options.reducedMotion) red *= 0.5;
+    if (screenFlash.alpha > 0 && screenFlash.color === PALETTE.red) red = Math.max(red, screenFlash.alpha * 2.5);
+    if (red > 0) {
+      ctx.globalAlpha = Math.min(1, red);
+      ctx.drawImage(s.redEdge, 0, 0, width, height);
     }
+    // full-screen flashes (already halved for reduced motion); red ones mostly live on the edges
     if (screenFlash.alpha > 0) {
-      ctx.globalAlpha = screenFlash.alpha;
+      ctx.globalAlpha = screenFlash.color === PALETTE.red ? screenFlash.alpha * 0.45 : screenFlash.alpha;
       ctx.fillStyle = screenFlash.color;
       ctx.fillRect(0, 0, width, height);
     }
     ctx.globalAlpha = 1;
-
-    // off-screen Reviewer 2 arrow
-    const b = boss.enemy;
-    if (!b) return;
-    const vx = (b.x - cam.x) * cam.zoom;
-    const vy = (b.y - cam.y) * cam.zoom;
-    if (Math.abs(vx) < width / 2 - 20 && Math.abs(vy) < height / 2 - 20) return;
-    const a = Math.atan2(vy, vx);
-    const k = Math.min((width / 2 - 34) / Math.abs(Math.cos(a) || 1e-6), (height / 2 - 34) / Math.abs(Math.sin(a) || 1e-6));
-    ctx.save();
-    ctx.translate(width / 2 + Math.cos(a) * k, height / 2 + Math.sin(a) * k);
-    ctx.rotate(a);
-    ctx.fillStyle = PALETTE.red;
-    ctx.beginPath();
-    ctx.moveTo(14, 0);
-    ctx.lineTo(-8, -10);
-    ctx.lineTo(-8, 10);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+    drawMarkers(a);
   };
 
   const draw = () => {
-    const z = cam.zoom;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const a = (art ??= bakeArt(dpr));
+    const s = (screenArt ??= bakeScreenArt(width, height));
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = PALETTE.sand;
-    ctx.fillRect(0, 0, width, height);
-
-    // world transform: screen centre, shake, zoom, camera
-    ctx.translate(width / 2 + cam.shakeX, height / 2 + cam.shakeY);
-    ctx.rotate(cam.shakeRot);
-    ctx.scale(z, z);
-    ctx.translate(-cam.x, -cam.y);
-    const halfW = width / 2 / z + 40;
-    const halfH = height / 2 / z + 40;
-    const left = cam.x - halfW;
-    const right = cam.x + halfW;
-    const top = cam.y - halfH;
-    const bottom = cam.y + halfH;
-    const visible = (x: number, y: number, r: number) => x > left - r && x < right + r && y > top - r && y < bottom + r;
-
-    // dot grid
-    const spacing = 40;
-    ctx.fillStyle = PALETTE.sandDark;
-    for (let x = Math.floor(left / spacing) * spacing; x < right; x += spacing) {
-      for (let y = Math.floor(top / spacing) * spacing; y < bottom; y += spacing) ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
-    }
-
-    // dropout aura
-    if (lvl("dropout")) {
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, dropoutRadius(), 0, TAU);
-      ctx.fillStyle = `rgba(38,115,189,${0.06 + auraPulse * 0.08})`;
-      ctx.fill();
-      ctx.setLineDash([6, 8]);
-      ctx.strokeStyle = "rgba(38,115,189,0.35)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // pickups: coffee and the viral thread, blinking before they expire
-    for (const p of pickups) {
-      if (!visible(p.x, p.y, 30)) continue;
-      if (PICKUP_LIFE - p.age < 5 && Math.floor(clock * 8) % 2 === 0) continue;
-      const y = p.y + Math.sin(clock * 3 + p.phase) * 3;
-      const coffee = p.kind === "coffee";
-      ctx.globalAlpha = 0.25 + 0.1 * Math.sin(clock * 5 + p.phase);
-      ctx.fillStyle = coffee ? PALETTE.orange : PALETTE.red;
-      ctx.beginPath();
-      ctx.arc(p.x, y, 18, 0, TAU);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = PALETTE.paper;
-      ctx.strokeStyle = PALETTE.ink;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(p.x - 10, y - 10, 20, 20, 6);
-      ctx.fill();
-      ctx.stroke();
-      ctx.font = font(800, 13);
-      ctx.fillStyle = coffee ? PALETTE.orange : PALETTE.red;
-      ctx.fillText(coffee ? "☕" : "📣", p.x, y + 1);
-    }
-
-    // tokens: twinkle, and a streak while flying to the player
-    for (let pass = 0; pass < 2; pass += 1) {
-      const big = pass === 1;
-      ctx.strokeStyle = big ? PALETTE.gold : PALETTE.sky;
-      ctx.globalAlpha = 0.4;
-      ctx.lineWidth = big ? 5 : 3.5;
-      ctx.beginPath();
-      for (const g of gems) {
-        if (g.value >= 3 !== big || !g.pulled || !visible(g.x, g.y, 30)) continue;
-        ctx.moveTo(g.x, g.y);
-        ctx.lineTo(g.x - g.vx * 0.05, g.y - g.vy * 0.05);
-      }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = big ? PALETTE.gold : PALETTE.sky;
-      ctx.beginPath();
-      for (const g of gems) {
-        if (g.value >= 3 !== big || !visible(g.x, g.y, 10)) continue;
-        const s = (big ? 7 : 5) * (1 + 0.16 * Math.sin(clock * 6 + g.phase)) * Math.min(1, 0.3 + g.age / 0.15);
-        ctx.moveTo(g.x, g.y - s);
-        ctx.lineTo(g.x + s * 0.75, g.y);
-        ctx.lineTo(g.x, g.y + s);
-        ctx.lineTo(g.x - s * 0.75, g.y);
-        ctx.closePath();
-      }
-      ctx.fill();
-    }
-
-    // anchors
-    for (const anchor of anchors) {
-      ctx.globalAlpha = Math.min(1, (anchor.life - anchor.age) * 2, anchor.age * 6);
-      ctx.fillStyle = PALETTE.orange;
-      ctx.beginPath();
-      ctx.roundRect(anchor.x - 11, anchor.y - 11, 22, 22, 5);
-      ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "700 11px ui-monospace, monospace";
-      ctx.fillText("[_]", anchor.x, anchor.y + 1);
-    }
-    ctx.globalAlpha = 1;
-
-    // shockwaves
-    for (const wave of waves) {
-      const p = wave.t / WAVE_TIME;
-      ctx.beginPath();
-      ctx.arc(wave.x, wave.y, p * wave.maxR, 0, TAU);
-      ctx.strokeStyle = PALETTE.orange;
-      ctx.globalAlpha = 1 - p;
-      ctx.lineWidth = 6;
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-
-    // enemies
-    for (const e of enemies) {
-      if (e.hp <= 0 || !visible(e.x, e.y, e.kind === "boss" ? 480 : 60)) continue;
-      if (e.kind === "boss") drawBoss(e);
-      else if (e.kind === "comment") drawComment(e);
-      else drawEnemy(e);
-    }
-    ctx.globalAlpha = 1;
-
-    drawPlayer();
-
-    // bullets
-    for (const b of bullets) {
-      if (b.life <= 0 || !visible(b.x, b.y, 10)) continue;
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, TAU);
-      ctx.fillStyle = b.hostile ? PALETTE.red : b.src === "anchor" ? PALETTE.orange : PALETTE.blue;
-      ctx.fill();
-      if (b.hostile) {
-        ctx.fillStyle = "#ffffff";
-        ctx.font = font(800, 8);
-        ctx.fillText("✗", b.x, b.y + 0.5);
-      }
-    }
-
-    // attention beams
-    ctx.lineCap = "round";
-    for (const beam of beams) {
-      ctx.globalAlpha = beam.life / beam.max;
-      ctx.strokeStyle = PALETTE.blueLight;
-      ctx.lineWidth = beam.width;
-      ctx.beginPath();
-      ctx.moveTo(beam.x1, beam.y1);
-      ctx.lineTo(beam.x2, beam.y2);
-      ctx.stroke();
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = beam.width * 0.35;
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-    ctx.lineCap = "butt";
-
-    // boomerangs
-    ctx.fillStyle = PALETTE.green;
-    for (const boom of boomerangs) {
-      ctx.save();
-      ctx.translate(boom.x, boom.y);
-      ctx.rotate(boom.angle);
-      ctx.fillRect(-12, -3.5, 24, 7);
-      ctx.fillRect(-3.5, -12, 7, 24);
-      ctx.restore();
-    }
-
-    // DSV support vectors
-    if (lvl("dsv")) {
-      for (let i = 0; i < dsvCount(); i += 1) {
-        const { x, y } = dsvOrb(i);
-        ctx.beginPath();
-        ctx.arc(x, y, 9, 0, TAU);
-        ctx.fillStyle = PALETTE.blue;
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "#ffffff";
-        ctx.stroke();
-      }
-    }
-
-    // rings
-    for (const r of rings) {
-      if (r.t < 0) continue;
-      const p = r.t / r.dur;
-      ctx.globalAlpha = 1 - p;
-      ctx.strokeStyle = r.color;
-      ctx.lineWidth = r.width * (1 - p * 0.6);
-      ctx.beginPath();
-      ctx.arc(r.x, r.y, Math.max(0, r.r0 + (r.r1 - r.r0) * easeOutCubic(p)), 0, TAU);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-
-    drawParticles(false);
+    setCamera();
+    drawGround(a);
+    poseEnemies();
+    drawShadows(a);
+    drawTrail();
+    drawDropout();
+    drawLoot(a);
+    drawAnchors(a);
+    drawEnemies(a);
     ctx.globalCompositeOperation = "lighter";
-    drawParticles(true);
+    drawLowLights(a);
     ctx.globalCompositeOperation = "source-over";
-
-    // damage numbers
-    ctx.lineJoin = "round";
-    for (const text of texts) {
-      const age = text.max - text.life;
-      const pop = text.crit ? 1 + 0.6 * Math.max(0, 1 - age / 0.12) : 1;
-      ctx.globalAlpha = Math.min(1, text.life * 3);
-      ctx.font = font(800, Math.round(text.size * pop));
-      ctx.lineWidth = text.crit ? 4 : 3;
-      ctx.strokeStyle = text.crit ? PALETTE.ink : "rgba(255,255,255,0.9)";
-      const label = text.crit ? `${text.text}!` : text.text;
-      ctx.strokeText(label, text.x, text.y);
-      ctx.fillStyle = text.crit ? PALETTE.gold : text.color;
-      ctx.fillText(label, text.x, text.y);
-    }
-    ctx.globalAlpha = 1;
-
-    drawSpeech();
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawScreenFx();
+    drawOrbitals(a);
+    drawShots(a);
+    drawPlayer(a);
+    drawBeams(a, false);
+    drawWaves(a);
+    drawRings(a, false);
+    drawParticles(a, false);
+    ctx.globalCompositeOperation = "lighter";
+    drawHighLights(a);
+    ctx.globalCompositeOperation = "source-over";
+    drawNumbers();
+    drawSpeech(a);
+    drawScreen(a, s);
   };
 
   // ---------------------------------------------------------- loop
@@ -2890,5 +3669,375 @@ export function createGame(
       const w = window as unknown as DebugWindow;
       if (debugHook && w.__survivors === debugHook) delete w.__survivors;
     },
+  };
+}
+
+// ------------------------------------------------------------------ baked art
+// Sprites derived from the sheet, baked once per pixel ratio (browser only).
+
+type Art = {
+  sheet: SpriteSheet;
+  /** Device px per world unit of the baked sprites (the sheet's density). */
+  scale: number;
+  /** Red silhouettes: the bomb overheating, Reviewer 2 enraged or winding up, the player hurt. */
+  heat: { explode: Sprite; boss: Sprite; player: Sprite };
+  /** Soft white rim behind the player, so it pops on any background. */
+  rim: Sprite;
+  /** Template-anchor shot: the bolt in orange. */
+  anchorBolt: Sprite;
+  /** Tinted soft discs for normal blending (additive light washes out to white on sand). */
+  halo: Record<"red" | "gold" | "orange" | "blue", Sprite>;
+  /** Soft rings that light the inside of shockwaves and of the big rings. */
+  ripple: Record<"orange" | "gold" | "blue", Sprite>;
+  /** Sunburst behind the player: blue for a level-up, gold at the deadline. */
+  rays: { blue: Sprite; gold: Sprite };
+  puff: Sprite;
+  smoke: Sprite;
+  plus: Sprite;
+  /** Green ✓ left by an addressed reviewer comment. */
+  check: Sprite;
+  /** Red "R2" avatar for the off-screen marker and the speech bubble. */
+  badge: Sprite;
+  /** Sparkles and debris shards per colour, pre-rotated frames baked on first use. */
+  stars: Map<string, Sprite[]>;
+  shards: Map<string, Sprite[]>;
+};
+
+/** Screen-sized overlays, rebuilt after every resize. */
+type ScreenArt = { vignette: HTMLCanvasElement; redEdge: HTMLCanvasElement };
+
+/** The ground tile at screen density with its tint baked in; `key` identifies the tint. */
+type GroundTile = { canvas: HTMLCanvasElement; pattern: CanvasPattern; tile: HTMLCanvasElement; px: number; key: number };
+
+const SPARK_UNDER = "#f2b33d";
+const GOLD_LINE = "#b8892a";
+const COOL = "#24193b";
+
+const fract = (v: number) => v - Math.floor(v);
+const rgbOf = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+const rgba = (hex: string, a: number) => `rgba(${rgbOf(hex).join(",")},${a})`;
+/** Linear blend of two #rrggbb colours. */
+const mixHex = (a: string, b: string, t: number) => {
+  const x = rgbOf(a);
+  const y = rgbOf(b);
+  return `#${x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join("")}`;
+};
+
+function newCanvas(w: number, h: number) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.ceil(w));
+  canvas.height = Math.max(1, Math.ceil(h));
+  return canvas;
+}
+
+/** A sprite covering [x0, x1] x [y0, y1] world units at `scale` px per unit; `paint` draws around the anchor. */
+function bake(scale: number, x0: number, y0: number, x1: number, y1: number, paint: (g: CanvasRenderingContext2D) => void): Sprite {
+  const canvas = newCanvas((x1 - x0) * scale, (y1 - y0) * scale);
+  const g = canvas.getContext("2d")!;
+  g.setTransform(scale, 0, 0, scale, -x0 * scale, -y0 * scale);
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  paint(g);
+  return { canvas, w: canvas.width / scale, h: canvas.height / scale, ax: -x0, ay: -y0 };
+}
+
+/** The sprite's silhouette in one colour (same size and anchor). */
+function silhouette(s: Sprite, color: string): Sprite {
+  const canvas = newCanvas(s.canvas.width, s.canvas.height);
+  const g = canvas.getContext("2d")!;
+  g.drawImage(s.canvas, 0, 0);
+  g.globalCompositeOperation = "source-in";
+  g.fillStyle = color;
+  g.fillRect(0, 0, canvas.width, canvas.height);
+  return { ...s, canvas };
+}
+
+/** A white silhouette grown by 2 units, with a softer edge beyond: a rim light. */
+function dilate(s: Sprite, scale: number): Sprite {
+  const pad = 4;
+  const canvas = newCanvas(s.canvas.width + pad * 2 * scale, s.canvas.height + pad * 2 * scale);
+  const g = canvas.getContext("2d")!;
+  for (const [radius, alpha] of [
+    [3.4, 0.3],
+    [2, 1],
+  ]) {
+    g.globalAlpha = alpha;
+    for (let i = 0; i < 16; i += 1) {
+      const a = (i / 16) * TAU;
+      g.drawImage(s.canvas, (pad + Math.cos(a) * radius) * scale, (pad + Math.sin(a) * radius) * scale);
+    }
+  }
+  return { canvas, w: canvas.width / scale, h: canvas.height / scale, ax: s.ax + pad, ay: s.ay + pad };
+}
+
+/** A teardrop bolt along +x with a white-hot core (anchor = head centre), like the sheet's bolt. */
+function bakeBolt(scale: number, color: string, light: string): Sprite {
+  const drop = (len: number, r: number, x: number) => {
+    const p = new Path2D();
+    p.moveTo(x - len, 0);
+    p.quadraticCurveTo(x - len * 0.45, -r, x, -r);
+    p.arc(x, 0, r, -Math.PI / 2, Math.PI / 2);
+    p.quadraticCurveTo(x - len * 0.45, r, x - len, 0);
+    return p;
+  };
+  return bake(scale, -16, -6, 6, 6, (g) => {
+    const outer = g.createLinearGradient(-14, 0, 4, 0);
+    outer.addColorStop(0, rgba(color, 0));
+    outer.addColorStop(0.5, rgba(color, 0.85));
+    outer.addColorStop(1, color);
+    g.fillStyle = outer;
+    g.fill(drop(14, 4, 0));
+    g.fillStyle = light;
+    g.fill(drop(10, 2.9, 0.4));
+    const core = g.createLinearGradient(-9, 0, 2, 0);
+    core.addColorStop(0, "rgba(255,255,255,0)");
+    core.addColorStop(1, "#ffffff");
+    g.fillStyle = core;
+    g.fill(drop(9, 1.9, 0.8));
+  });
+}
+
+/** A soft disc, 32 units in radius, at 1 px per unit: smooth gradients scale up cleanly. */
+function bakeHalo(color: string, peak: number): Sprite {
+  return bake(1, -32, -32, 32, 32, (g) => {
+    const grad = g.createRadialGradient(0, 0, 0, 0, 0, 32);
+    for (let i = 0; i <= 8; i += 1) {
+      const f = i / 8;
+      grad.addColorStop(f, rgba(color, Math.round(peak * (1 - f * f) ** 2 * 1000) / 1000));
+    }
+    g.fillStyle = grad;
+    g.fillRect(-32, -32, 64, 64);
+  });
+}
+
+/** A soft ring, 32 units in radius, brightest just inside its edge. */
+function bakeRipple(color: string): Sprite {
+  return bake(2, -32, -32, 32, 32, (g) => {
+    const grad = g.createRadialGradient(0, 0, 0, 0, 0, 32);
+    grad.addColorStop(0, rgba(color, 0));
+    grad.addColorStop(0.55, rgba(color, 0.04));
+    grad.addColorStop(0.86, rgba(color, 0.28));
+    grad.addColorStop(0.95, rgba(color, 0.5));
+    grad.addColorStop(1, rgba(color, 0));
+    g.fillStyle = grad;
+    g.fillRect(-32, -32, 64, 64);
+  });
+}
+
+/** Twelve tapered rays, 64 units long, fading outwards. */
+function bakeRays(color: string): Sprite {
+  return bake(2, -64, -64, 64, 64, (g) => {
+    const grad = g.createRadialGradient(0, 0, 4, 0, 0, 64);
+    grad.addColorStop(0, rgba(color, 0.7));
+    grad.addColorStop(0.5, rgba(color, 0.25));
+    grad.addColorStop(1, rgba(color, 0));
+    g.fillStyle = grad;
+    g.beginPath();
+    for (let i = 0; i < 12; i += 1) {
+      const a = (i / 12) * TAU;
+      const half = i % 2 ? 0.07 : 0.12;
+      g.moveTo(0, 0);
+      g.lineTo(Math.cos(a - half) * 64, Math.sin(a - half) * 64);
+      g.lineTo(Math.cos(a + half) * 64, Math.sin(a + half) * 64);
+      g.closePath();
+    }
+    g.fill();
+  });
+}
+
+/** A soft round puff, 16 units in radius (dust, smoke). */
+function bakePuff(color: string, peak: number): Sprite {
+  return bake(2, -16, -16, 16, 16, (g) => {
+    const grad = g.createRadialGradient(0, 0, 0, 0, 0, 16);
+    grad.addColorStop(0, rgba(color, peak));
+    grad.addColorStop(0.55, rgba(color, peak * 0.75));
+    grad.addColorStop(1, rgba(color, 0));
+    g.fillStyle = grad;
+    g.fillRect(-16, -16, 32, 32);
+  });
+}
+
+/** Green plus with a white outline (heal particles). */
+function bakePlus(scale: number): Sprite {
+  return bake(scale, -6, -6, 6, 6, (g) => {
+    g.beginPath();
+    g.moveTo(-3.6, 0);
+    g.lineTo(3.6, 0);
+    g.moveTo(0, -3.6);
+    g.lineTo(0, 3.6);
+    g.lineWidth = 4.6;
+    g.strokeStyle = "#ffffff";
+    g.stroke();
+    g.lineWidth = 2.5;
+    g.strokeStyle = PALETTE.green;
+    g.stroke();
+  });
+}
+
+/** Green badge with a white check mark: a reviewer concern, addressed. */
+function bakeCheck(scale: number): Sprite {
+  return bake(scale, -10, -10, 10, 10, (g) => {
+    g.beginPath();
+    g.arc(0, 0, 8, 0, TAU);
+    g.lineWidth = 3.2;
+    g.strokeStyle = mixHex(PALETTE.green, COOL, 0.45);
+    g.stroke();
+    g.fillStyle = PALETTE.green;
+    g.fill();
+    g.beginPath();
+    g.arc(0, 0, 5.6, Math.PI * 1.05, Math.PI * 1.45);
+    g.lineWidth = 1.4;
+    g.strokeStyle = "rgba(255,255,255,0.5)";
+    g.stroke();
+    g.beginPath();
+    g.moveTo(-3.8, 0.3);
+    g.lineTo(-1.1, 3);
+    g.lineTo(4, -2.8);
+    g.lineWidth = 2.4;
+    g.strokeStyle = "#ffffff";
+    g.stroke();
+  });
+}
+
+/** Reviewer 2's avatar: a red disc with "R2", ringed in paper and ink. */
+function bakeBadge(scale: number): Sprite {
+  return bake(scale, -11, -11, 11, 11, (g) => {
+    g.beginPath();
+    g.arc(0, 0, 9.2, 0, TAU);
+    g.fillStyle = PALETTE.red;
+    g.fill();
+    g.lineWidth = 2;
+    g.strokeStyle = PALETTE.paper;
+    g.stroke();
+    g.beginPath();
+    g.arc(0, 0, 10.4, 0, TAU);
+    g.lineWidth = 1.2;
+    g.strokeStyle = PALETTE.ink;
+    g.stroke();
+    g.font = `800 9px ${FONT}`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillStyle = "#ffffff";
+    g.fillText("R2", 0, 0.6);
+  });
+}
+
+/** A four-point star in `color`, turned by `angle`, with a white core and a darker edge so it reads on sand. */
+function bakeStar(scale: number, color: string, angle: number): Sprite {
+  const star = (g: CanvasRenderingContext2D, r: number, waist: number) => {
+    g.beginPath();
+    g.moveTo(0, -r);
+    g.quadraticCurveTo(waist, -waist, r, 0);
+    g.quadraticCurveTo(waist, waist, 0, r);
+    g.quadraticCurveTo(-waist, waist, -r, 0);
+    g.quadraticCurveTo(-waist, -waist, 0, -r);
+  };
+  return bake(scale, -8, -8, 8, 8, (g) => {
+    g.rotate(angle);
+    star(g, 7.4, 1.3);
+    g.lineWidth = 1.4;
+    g.strokeStyle = mixHex(color, COOL, 0.35);
+    g.stroke();
+    g.fillStyle = color;
+    g.fill();
+    star(g, 3.6, 0.7);
+    g.fillStyle = "#ffffff";
+    g.fill();
+  });
+}
+
+/** A small outlined shard of a popped bug, turned by `angle`. */
+function bakeShard(scale: number, color: string, angle: number): Sprite {
+  return bake(scale, -6, -6, 6, 6, (g) => {
+    g.rotate(angle);
+    g.beginPath();
+    g.moveTo(-4.2, -2.4);
+    g.lineTo(3.6, -3.6);
+    g.lineTo(1.6, 3.9);
+    g.closePath();
+    g.lineWidth = 2;
+    g.strokeStyle = mixHex(color, COOL, 0.45);
+    g.stroke();
+    g.fillStyle = color;
+    g.fill();
+    g.beginPath();
+    g.moveTo(-2.4, -1.9);
+    g.lineTo(1.9, -2.6);
+    g.lineWidth = 1.1;
+    g.strokeStyle = "rgba(255,255,255,0.55)";
+    g.stroke();
+  });
+}
+
+/**
+ * The ground tile resampled to `px` device pixels (through a repeating pattern, so the edges
+ * stay seamless) with `tint` laid over it. At rest it then blits 1:1, without filtering.
+ * Re-bakes draw into the previous canvas when it has the right size.
+ */
+function bakeGround(ctx: CanvasRenderingContext2D, tile: HTMLCanvasElement, px: number, tint: string, key: number, reuse?: HTMLCanvasElement): GroundTile {
+  const canvas = reuse && reuse.width === px ? reuse : newCanvas(px, px);
+  const g = canvas.getContext("2d")!;
+  const source = g.createPattern(tile, "repeat")!;
+  source.setTransform(new DOMMatrix().scale(px / tile.width));
+  g.fillStyle = source;
+  g.fillRect(0, 0, px, px);
+  g.fillStyle = tint;
+  g.fillRect(0, 0, px, px);
+  return { canvas, pattern: ctx.createPattern(canvas, "repeat")!, tile, px, key };
+}
+
+function bakeArt(ratio: number): Art {
+  const sheet = createSprites(ratio);
+  const scale = sheet.player.body.canvas.width / sheet.player.body.w;
+  return {
+    sheet,
+    scale,
+    heat: {
+      explode: silhouette(sheet.enemies.explode.flash, PALETTE.red),
+      boss: silhouette(sheet.enemies.boss.flash, PALETTE.red),
+      player: silhouette(sheet.player.flash, PALETTE.red),
+    },
+    rim: dilate(sheet.player.flash, scale),
+    anchorBolt: bakeBolt(scale, PALETTE.orange, mixHex(PALETTE.orange, "#ffffff", 0.45)),
+    halo: { red: bakeHalo(PALETTE.red, 0.55), gold: bakeHalo(PALETTE.gold, 0.5), orange: bakeHalo(PALETTE.orange, 0.6), blue: bakeHalo(PALETTE.sky, 0.45) },
+    ripple: { orange: bakeRipple(PALETTE.orange), gold: bakeRipple(PALETTE.gold), blue: bakeRipple(PALETTE.sky) },
+    rays: { blue: bakeRays(PALETTE.blueLight), gold: bakeRays(PALETTE.gold) },
+    puff: bakePuff("#fffaf0", 0.9),
+    smoke: bakePuff("#4a4458", 0.55),
+    plus: bakePlus(scale),
+    check: bakeCheck(scale),
+    badge: bakeBadge(scale),
+    stars: new Map(),
+    shards: new Map(),
+  };
+}
+
+/** An elliptical radial gradient over the screen at quarter resolution; stops are in half-axis units. */
+function edgeGlow(width: number, height: number, color: string, stops: [number, number][]) {
+  const canvas = newCanvas(Math.max(8, width / 4), Math.max(8, height / 4));
+  const g = canvas.getContext("2d")!;
+  g.setTransform(canvas.width / 2, 0, 0, canvas.height / 2, canvas.width / 2, canvas.height / 2);
+  const grad = g.createRadialGradient(0, 0, 0, 0, 0, Math.SQRT2);
+  for (const [at, alpha] of stops) grad.addColorStop(at / Math.SQRT2, rgba(color, alpha));
+  g.fillStyle = grad;
+  g.fillRect(-1, -1, 2, 2);
+  return canvas;
+}
+
+function bakeScreenArt(width: number, height: number): ScreenArt {
+  return {
+    vignette: edgeGlow(width, height, "#5a3b1e", [
+      [0.5, 0],
+      [1, 0.14],
+      [Math.SQRT2, 0.42],
+    ]),
+    redEdge: edgeGlow(width, height, PALETTE.red, [
+      [0.55, 0],
+      [1, 0.32],
+      [Math.SQRT2, 0.85],
+    ]),
   };
 }
