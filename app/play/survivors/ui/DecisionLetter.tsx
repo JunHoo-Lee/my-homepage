@@ -23,6 +23,8 @@ type Props = {
   onResubmit: () => void;
 };
 
+/** The letter gets a moment before anything on it reacts (R, or a stray tap on Resubmit or a link). */
+export const RESUBMIT_GUARD_MS = 700;
 const COUNT_MS = 1100;
 /** The stamp lands at about 1.03 s (see .stamp in decision.module.css); counting starts by then at the latest. */
 const LANDED_FALLBACK_MS = 1600;
@@ -70,19 +72,25 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   const ui = useUiSound();
   const letterRef = useRef<HTMLElement>(null);
   const [landed, setLanded] = useState(false);
+  /** The buttons and links stay inert until the letter could be read: a blind tap must not skip it. */
+  const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const progress = easeOut(useCountUp(landed, motion));
   const counted = progress >= 1;
 
   const decision = DECISIONS[result.grade];
-  const reviews = reviewsFor({
-    time: result.time,
-    level: result.level,
-    kills: result.kills,
-    maxCombo: result.maxCombo,
-    bossDefeated: result.bossDefeated,
-    runLength: RUN_LENGTH,
-  });
+  // a desk-rejected paper never reaches a reviewer
+  const reviews =
+    result.grade === "DeskReject"
+      ? []
+      : reviewsFor({
+          time: result.time,
+          level: result.level,
+          kills: result.kills,
+          maxCombo: result.maxCombo,
+          bossDefeated: result.bossDefeated,
+          runLength: RUN_LENGTH,
+        });
   const reviewer2 = reviews.find((review) => review.reviewer === "Reviewer 2");
   const papers = result.build.filter((card) => card.paper);
 
@@ -91,7 +99,11 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   useEffect(() => {
     letterRef.current?.focus({ preventScroll: true });
     const timer = window.setTimeout(() => setLanded(true), LANDED_FALLBACK_MS);
-    return () => window.clearTimeout(timer);
+    const armed = window.setTimeout(() => setReady(true), RESUBMIT_GUARD_MS);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(armed);
+    };
   }, []);
 
   useEffect(() => {
@@ -109,7 +121,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   const share = async () => {
     ui.play("click");
     const score = reviewer2 ? `Reviewer 2 gave me a ${reviewer2.score} (confidence ${reviewer2.confidence}). ` : "";
-    const text = `${SCREENS.title} · Decision: ${decision.title}. ${score}Survived ${formatTime(result.time)}, ${result.kills} ${HUD_TERMS.kills}.`;
+    const text = `${SCREENS.title} · Decision: ${decision.title}. ${score}Survived ${formatTime(result.time)}, ${result.kills} ${HUD_TERMS.killsLabel(result.kills)}.`;
     const url = `${window.location.origin}/play/survivors`;
     try {
       if (navigator.share) {
@@ -141,10 +153,10 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
         aria-describedby="gs-meta"
         tabIndex={-1}
       >
-        <header className={styles.head}>
+        <header className={`${styles.head} ${styles[result.grade]}`}>
           <p className={kit.eyebrow}>
             <StampIcon className={styles.eyebrowIcon} />
-            Decision · Submission #{submission ?? "—"}
+            {SCREENS.decisionKicker(submission)}
           </p>
           <h2 id="gs-decision" className={styles.title}>
             {decision.title}
@@ -161,14 +173,16 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           <p id="gs-meta">{decision.metaReview}</p>
         </section>
 
-        <section>
-          <h3 className={styles.label}>Reviews</h3>
-          <ol className={styles.reviews}>
-            {reviews.map((review) => (
-              <ReviewRow key={review.reviewer} review={review} />
-            ))}
-          </ol>
-        </section>
+        {reviews.length ? (
+          <section>
+            <h3 className={styles.label}>Reviews</h3>
+            <ol className={styles.reviews}>
+              {reviews.map((review) => (
+                <ReviewRow key={review.reviewer} review={review} />
+              ))}
+            </ol>
+          </section>
+        ) : null}
 
         <dl className={styles.stats}>
           {stats.map((stat) => (
@@ -183,12 +197,12 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           <p className={`${styles.best} ${styles.newBest} ${counted ? styles.shown : ""}`}>New personal best!</p>
         ) : best ? (
           <p className={styles.best}>
-            Personal best: {DECISIONS[best.grade].title} · {formatTime(best.time)} · {best.kills.toLocaleString("en-US")} {HUD_TERMS.kills}
+            Personal best: {DECISIONS[best.grade].title} · {formatTime(best.time)} · {best.kills.toLocaleString("en-US")} {HUD_TERMS.killsLabel(best.kills)}
           </p>
         ) : null}
 
         {papers.length ? (
-          <section className={styles.papers}>
+          <section className={styles.papers} inert={!ready}>
             <h3 className={styles.label}>Papers in your build</h3>
             <ul>
               {papers.map((card) => (
@@ -206,7 +220,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           </section>
         ) : null}
 
-        <div className={`${kit.actions} ${styles.actions}`}>
+        <div className={`${kit.actions} ${styles.actions}`} inert={!ready}>
           <button type="button" className={`${kit.button} ${kit.primary}`} onClick={onResubmit} aria-keyshortcuts="R" {...ui.hover}>
             <RestartIcon />
             Resubmit
@@ -220,10 +234,10 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
             <ShareIcon />
             <span aria-live="polite">{copied ? "Copied!" : "Share"}</span>
           </button>
-          <Link className={kit.button} href="/play" onClick={() => ui.play("click")} {...ui.hover}>
+          <Link className={kit.button} href="/play" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Other games
           </Link>
-          <Link className={kit.button} href="/" onClick={() => ui.play("click")} {...ui.hover}>
+          <Link className={kit.button} href="/" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Classic view
           </Link>
         </div>

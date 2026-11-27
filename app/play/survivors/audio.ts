@@ -360,12 +360,17 @@ const SFX: Record<SfxName, (v: Voice) => void> = {
     v.noise({ dur: 0.08, gain: 0.7, lp: 500 });
   },
 
-  // lub-dub: two low sine thumps, with a triangle overtone so small speakers hear them
+  // lub-dub: two low sine thumps with a triangle overtone, and on each beat a short mid-band knock
+  // (a triangle blip and a click of noise around 1 kHz): the knock is what phone speakers can play
   heartbeat: (v) => {
     v.tone({ f: 75, to: 55, dur: 0.15, gain: 0.54, attack: 0.006 });
     v.tone({ wave: "triangle", f: 140, to: 100, dur: 0.09, gain: 0.22, lp: 400 });
+    v.tone({ wave: "triangle", f: 440, to: 330, dur: 0.05, gain: 0.25 });
+    v.noise({ dur: 0.02, gain: 0.2, bp: 1000, q: 1 });
     v.tone({ f: 70, to: 50, at: 0.18, dur: 0.17, gain: 0.39, attack: 0.006 });
     v.tone({ wave: "triangle", f: 130, to: 95, at: 0.18, dur: 0.09, gain: 0.15, lp: 400 });
+    v.tone({ wave: "triangle", f: 440, to: 330, at: 0.18, dur: 0.05, gain: 0.18 });
+    v.noise({ at: 0.18, dur: 0.02, gain: 0.14, bp: 1000, q: 1 });
   },
 
   // attention beam: a rising saw through a sweeping bandpass, plus hiss
@@ -472,9 +477,6 @@ const SFX: Record<SfxName, (v: Voice) => void> = {
     v.noise({ at: 0.13, dur: 0.05, gain: 0.08, hp: 5000 });
   },
 };
-
-/** Every sound effect name; the SFX table's type guarantees none is missing. */
-export const SFX_NAMES = Object.keys(SFX) as SfxName[];
 
 /** Shared by renderSfx and the live engine (which passes a wobbled pitch without allocating). */
 function scheduleSfx(ctx: BaseAudioContext, dest: AudioNode, name: SfxName, when: number, pitch: number, volume: number, pan: number) {
@@ -1260,9 +1262,12 @@ export function createAudio(initial?: Partial<AudioSettings>): AudioEngine & { r
     },
 
     resume() {
-      if (!ctx || !paused) return;
+      if (!ctx) return;
+      // also retries a context the system suspended (an interruption) while the engine ran
+      const wasPaused = paused;
       paused = false;
       resumeContext();
+      if (!wasPaused) return;
       lastTick = ctx.currentTime;
       startTimer();
     },

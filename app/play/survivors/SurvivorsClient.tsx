@@ -7,7 +7,7 @@ import { PALETTE, type AudioEngine, type AudioSettings } from "./contracts";
 import { createGame, type Card, type GameHandle, type Hud as HudState, type PaperLink, type RunResult } from "./game";
 import { TOASTS, submissionId } from "./lore";
 import styles from "./survivors.module.css";
-import DecisionLetter from "./ui/DecisionLetter";
+import DecisionLetter, { RESUBMIT_GUARD_MS } from "./ui/DecisionLetter";
 import Hud from "./ui/Hud";
 import LevelUp from "./ui/LevelUp";
 import PauseMenu from "./ui/PauseMenu";
@@ -21,10 +21,14 @@ type Phase = "title" | "playing" | "levelup" | "paused" | "end";
 /** The palette as custom properties (--ink, --paper, --blue, ...) for every UI stylesheet. */
 const PALETTE_VARS = Object.fromEntries(Object.entries(PALETTE).map(([name, value]) => [`--${name}`, value])) as CSSProperties;
 
-/** Players are mid-movement when the cards appear: picks are ignored this long. */
+/** Players are mid-movement when the cards appear: each card ignores picks this long after it is dealt. */
 const PICK_GUARD_MS = 250;
-/** The decision letter gets a moment before R resubmits. */
-const RESUBMIT_GUARD_MS = 700;
+/** Card-to-card delay of the deal animation (.card in ui/levelup.module.css); reduced motion deals them all at once. */
+const DEAL_STAGGER_MS = 85;
+/** Combo milestones: a newer one replaces an older one still on screen. */
+const COMBO_TOASTS = new Set(Object.values(TOASTS.combo));
+/** How long a settings change keeps the audio of the (otherwise silent) pause menu awake for a preview. */
+const PREVIEW_MS = 700;
 /** A Tab press this recent means a focus change came from the keyboard (plays "hover"). */
 const TAB_FOCUS_MS = 150;
 /** Touch joystick radius in CSS px. */
@@ -62,8 +66,10 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
   const tabAtRef = useRef(-Infinity);
   const toastIdRef = useRef(0);
   const runsRef = useRef(0);
+  /** Timers of the pause-menu sound preview. */
+  const previewRef = useRef({ sound: 0, sleep: 0 });
 
-  const [phase, setPhase] = useState<Phase>("title");
+  const [phase, setPhaseState] = useState<Phase>("title");
   const [view, setView] = useState<HudView>(NO_HUD);
   const [cards, setCards] = useState<Card[]>([]);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -79,10 +85,21 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
   const [hidden, setHidden] = useState(false);
   const [stick, setStick] = useState<{ x: number; y: number } | null>(null);
 
+  /**
+   * Switches the UI phase. phaseRef follows at once: the game calls back from its own animation
+   * frame and input arrives between renders, so both read the ref, never a phase from a closure.
+   */
+  const setPhase = useCallback((next: Phase) => {
+    phaseRef.current = next;
+    setPhaseState(next);
+  }, []);
+
   const pushToast = useCallback((text: string) => {
     toastIdRef.current += 1;
     const id = toastIdRef.current;
-    setToasts((list) => [...list.slice(-2), { id, text }]);
+    // two at most, so landscape phones keep the area under the player clear
+    const milestone = COMBO_TOASTS.has(text);
+    setToasts((list) => [...list.filter((toast) => !(milestone && COMBO_TOASTS.has(toast.text))).slice(-1), { id, text }]);
   }, []);
 
   /** Drops an active touch joystick (an overlay is about to cover the canvas). */
@@ -130,7 +147,7 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
         onToast: pushToast,
         onAutoPause: () => {
           releaseStick();
-          setPhase((current) => (current === "playing" ? "paused" : current));
+          if (phaseRef.current === "playing") setPhase("paused");
         },
         onBossWarning: () => setBanner((id) => id + 1),
       },
@@ -139,18 +156,24 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
     gameRef.current = game;
     audioRef.current = audio;
 
-    // WebAudio may only start inside a user gesture: unlock on the first one, then play the title
-    // music (a beat later, so a click on "Start review" goes straight to the run music).
+    // WebAudio may only start inside a user gesture, so every gesture (re)wakes it: the first one
+    // unlocks it, later ones recover from an interruption (a call, Siri, another app) that left it
+    // suspended mid-run; unlock() costs nothing while it runs or while the engine is paused. Until
+    // the first unlock, a gesture also queues the title music (a beat later, so a click on
+    // "Start review" goes straight to the run music).
     let titleTimer = 0;
-    const unlock = () => {
+    let titleQueued = false;
+    const onGesture = () => {
       audio.unlock();
+      if (titleQueued) return;
+      titleQueued = audio.unlocked;
       window.clearTimeout(titleTimer);
       titleTimer = window.setTimeout(() => {
         if (phaseRef.current === "title") audio.setMusic("title");
       }, 150);
-      if (audio.unlocked) for (const type of GESTURES) window.removeEventListener(type, unlock);
     };
-    for (const type of GESTURES) window.addEventListener(type, unlock);
+    for (const type of GESTURES) window.addEventListener(type, onGesture);
+    const preview = previewRef.current;
 
     const onVisibility = () => setHidden(document.hidden);
     document.addEventListener("visibilitychange", onVisibility);
@@ -167,17 +190,18 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(titleTimer);
-      for (const type of GESTURES) window.removeEventListener(type, unlock);
+      window.clearTimeout(preview.sound);
+      window.clearTimeout(preview.sleep);
+      for (const type of GESTURES) window.removeEventListener(type, onGesture);
       document.removeEventListener("visibilitychange", onVisibility);
       game.dispose();
       audio.dispose();
       gameRef.current = null;
       audioRef.current = null;
     };
-  }, [paperLinks, pushToast, releaseStick]);
+  }, [paperLinks, pushToast, releaseStick, setPhase]);
 
   useEffect(() => {
-    phaseRef.current = phase;
     if (phase === "playing") canvasRef.current?.focus({ preventScroll: true });
   }, [phase]);
 
@@ -205,6 +229,17 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
     const next = audio.getSettings();
     saveAudioSettings(next);
     setSettings(next);
+    if (phaseRef.current !== "paused") return;
+    // The pause menu is silent: wake the audio for a moment so the new mix can be heard. One preview
+    // sound once the context is up and the slider has settled (the score plays along), then sleep again.
+    const preview = previewRef.current;
+    audio.resume();
+    window.clearTimeout(preview.sound);
+    preview.sound = window.setTimeout(() => audioRef.current?.sfx(patch.sfx !== undefined ? "pick" : "click"), 80);
+    window.clearTimeout(preview.sleep);
+    preview.sleep = window.setTimeout(() => {
+      if (phaseRef.current === "paused") audioRef.current?.suspend();
+    }, PREVIEW_MS);
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -212,7 +247,8 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
     if (!audio) return;
     const muted = !audio.getSettings().muted;
     updateSettings({ muted });
-    if (!muted) audio.sfx("click");
+    // the pause menu plays its own preview
+    if (!muted && phaseRef.current !== "paused") audio.sfx("click");
   }, [updateSettings]);
 
   const start = useCallback(() => {
@@ -232,36 +268,44 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
     setSubmission(id);
     setPhase("playing");
     pushToast(TOASTS.runStart(id));
-  }, [submission, pushToast]);
+  }, [submission, pushToast, setPhase]);
 
-  const pick = useCallback((card: Card) => {
-    if (performance.now() - overlayAtRef.current < PICK_GUARD_MS) return;
-    gameRef.current?.choose(card.id);
-    audioRef.current?.sfx("pick");
-    setCards([]);
-    setPhase("playing");
-  }, []);
+  const pick = useCallback(
+    (card: Card) => {
+      const index = cards.indexOf(card);
+      if (index < 0 || phaseRef.current !== "levelup") return;
+      // every card gets the whole guard from the moment it is dealt
+      if (performance.now() - overlayAtRef.current < PICK_GUARD_MS + (motion ? index * DEAL_STAGGER_MS : 0)) return;
+      gameRef.current?.choose(card.id);
+      audioRef.current?.sfx("pick");
+      setCards([]);
+      setPhase("playing");
+    },
+    [cards, motion, setPhase],
+  );
 
   const pause = useCallback(() => {
-    if (phase !== "playing") return;
+    // the game has the last word: it refuses once a level-up or the decision is on its way
+    if (phaseRef.current !== "playing" || !gameRef.current?.setPaused(true)) return;
     releaseStick();
-    gameRef.current?.setPaused(true);
     audioRef.current?.sfx("click");
     setPhase("paused");
-  }, [phase, releaseStick]);
+  }, [releaseStick, setPhase]);
 
   const resume = useCallback(() => {
-    if (phase !== "paused") return;
+    if (phaseRef.current !== "paused") return;
     gameRef.current?.setPaused(false);
     setPhase("playing");
     // the audio context needs a moment to wake up before it plays anything
     window.setTimeout(() => audioRef.current?.sfx("click"), 80);
-  }, [phase]);
+  }, [setPhase]);
 
   /** "Resubmit" on the letter and "Withdraw & resubmit" in the pause menu. */
   const resubmit = useCallback(() => {
-    audioRef.current?.sfx("click");
+    // from the pause menu the audio is still asleep: click once it has woken up
+    const wake = phaseRef.current === "paused" ? 80 : 0;
     start();
+    window.setTimeout(() => audioRef.current?.sfx("click"), wake);
   }, [start]);
 
   // ------------------------------------------------------------ keyboard
@@ -293,7 +337,8 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
         toggleMute();
         return;
       }
-      if (phase === "levelup") {
+      const current = phaseRef.current;
+      if (current === "levelup") {
         const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code);
         const card = digit ? cards[Number(digit[1]) - 1] : undefined;
         if (card) {
@@ -303,15 +348,15 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
         return;
       }
       if (event.code === "Escape" || event.code === "KeyP") {
-        if (phase === "playing") pause();
-        else if (phase === "paused") resume();
+        if (current === "playing") pause();
+        else if (current === "paused") resume();
         return;
       }
-      if (phase === "title" && (event.code === "Enter" || event.code === "Space") && !isInteractive(event.target)) {
+      if (current === "title" && (event.code === "Enter" || event.code === "Space") && !isInteractive(event.target)) {
         event.preventDefault();
         start();
       }
-      if (phase === "end" && event.code === "KeyR" && performance.now() - overlayAtRef.current > RESUBMIT_GUARD_MS) {
+      if (current === "end" && event.code === "KeyR" && performance.now() - overlayAtRef.current > RESUBMIT_GUARD_MS) {
         event.preventDefault();
         resubmit();
       }
@@ -331,11 +376,11 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
       window.removeEventListener("keyup", onUp);
       window.removeEventListener("blur", onBlur);
     };
-  }, [cards, phase, pick, pause, resume, resubmit, start, toggleMute]);
+  }, [cards, pick, pause, resume, resubmit, start, toggleMute]);
 
   // ------------------------------------------------------------ touch joystick
   const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
-    if (event.pointerType === "mouse" || phase !== "playing" || stickRef.current) return;
+    if (event.pointerType === "mouse" || phaseRef.current !== "playing" || stickRef.current) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     stickRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
     setStick({ x: event.clientX, y: event.clientY });
@@ -393,7 +438,7 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
             onPointerCancel={onPointerUp}
           />
           {inRun && view.hud ? (
-            <Hud hud={view.hud} hurt={view.hurt} pops={view.pops} muted={settings.muted} touch={touch} onToggleMute={toggleMute} onPause={pause} />
+            <Hud hud={view.hud} hurt={view.hurt} pops={view.pops} muted={settings.muted} touch={touch} frozen={frozen} onToggleMute={toggleMute} onPause={pause} />
           ) : null}
         </div>
 

@@ -76,7 +76,7 @@ export const TOASTS = {
   runStart: (id: number) => `Submission #${id} received. Good luck.`,
   bossWarning: "⚠ Reviewer 2 has been assigned to your paper",
   bossSpawn: "Reviewer 2 has entered the chat",
-  bossDefeated: "Reviewer 2 raised their score! Strong accept 🏆",
+  bossDefeated: "Reviewer 2 raised their score to 6. Weak accept! 🏆",
   revive: "ACRO rollback: retracted 3 s, resuming ⟲",
   magnet: "Your thread went viral: citations incoming 📣",
   coffee: "☕ Coffee break: +30 sanity",
@@ -96,21 +96,31 @@ export const HUD_TERMS = {
   level: "h-index",
   xp: "citations",
   kills: "concerns addressed",
+  /** The kill counter's label for a count of n ("1 concern addressed"). */
+  killsLabel: (n: number) => (n === 1 ? "concern addressed" : "concerns addressed"),
   timer: "AoE",
   bossIn: (time: string) => `Reviewer 2 assigned in ${time}`,
   bossActive: "Reviewer 2 is reviewing",
-  afterBoss: "until camera-ready",
+  afterBoss: "until reviews are final",
+  bossBar: "Reviewer 2 · Score 3 · Confidence 5",
 } as const;
 
 export const SCREENS = {
+  /** The title card is the first page of a paper under review. */
+  runningHead: "Under double-blind review · Do not distribute",
   titleKicker: (id: number) => `Submission #${id} · Track: Survival`,
   title: "Gradient Survivors",
+  authors: "Anonymous Author(s)",
   pitch:
     "You are a tiny model under peer review. NaNs, overfitting, hallucinations and reviewer comments swarm in. At 2:30 Reviewer 2 is assigned to your paper. Survive until the 5:00 AoE deadline to get accepted.",
-  levelUpKicker: "Camera-ready revision",
+  controlsCaption: "Table 1: Controls.",
+  bestSoFar: "Best decision so far",
+  levelUpKicker: "Rebuttal period",
   levelUpTitle: "Address one concern",
+  pausedKicker: (id: number | null) => `Submission #${id ?? "—"} · Status: under review`,
   paused: "Paused: coffee break ☕",
   withdraw: "Withdraw & resubmit",
+  decisionKicker: (id: number | null) => `Decision · Submission #${id ?? "—"}`,
 } as const;
 
 export type DecisionId = "DeskReject" | "Reject" | "Borderline" | "Accept" | "Oral";
@@ -120,7 +130,7 @@ export const DECISIONS: Record<DecisionId, { stamp: string; title: string; metaR
   DeskReject: {
     stamp: "DESK REJECT",
     title: "Desk reject",
-    metaReview: "The submission did not survive the formatting check. Please read the call for papers.",
+    metaReview: "Desk rejected before any reviewer opened the PDF: it did not survive the formatting check. Please read the call for papers.",
   },
   Reject: {
     stamp: "REJECTED",
