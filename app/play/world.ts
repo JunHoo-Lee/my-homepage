@@ -439,7 +439,7 @@ export function createWorld(
   const padMaterial = mat(COLORS.pad, { roughness: 0.5, emissive: new THREE.Color(COLORS.accent), emissiveIntensity: 0.15 });
   const padRings: THREE.Mesh[] = [];
   content.links.forEach((link, index) => {
-    const x = -9 + index * 6;
+    const x = (index - (content.links.length - 1) / 2) * 5.5;
     const z = -5;
     const pad = new THREE.Mesh(padGeometry, padMaterial);
     pad.position.set(x, 0.06, z);

@@ -54,8 +54,9 @@ function buildContent(): PlayContent {
     },
     links: [
       { id: "cv", label: "CV", href: "/cv.pdf", external: true },
-      { id: "scholar", label: "Scholar", href: "https://scholar.google.com/citations?user=CvvfGxkAAAAJ", external: true },
-      { id: "github", label: "GitHub", href: "https://github.com/JunHoo-Lee", external: true },
+      { id: "scholar", label: "Scholar", href: profile.scholar, external: true },
+      { id: "github", label: "GitHub", href: profile.github, external: true },
+      { id: "linkedin", label: "LinkedIn", href: profile.linkedin, external: true },
       { id: "email", label: "Email", href: `mailto:${profile.email}`, external: false },
     ],
     publications,
