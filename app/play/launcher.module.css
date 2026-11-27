@@ -172,59 +172,72 @@
   font-size: 0.95rem;
 }
 
-/* drive art */
-.car {
-  position: absolute;
-  left: 42%;
-  top: 48%;
-  width: 3.4rem;
-  height: 1.8rem;
-  border-radius: 0.4rem;
-  background: #2673bd;
-  transform: rotate(-18deg);
-  animation: bob 1.4s ease-in-out infinite;
+/* explore art: a little voxel island under a beam of light */
+.explore {
+  background: linear-gradient(180deg, #7fb8ee 0%, #cfe6f7 62%, #3f8fd8 62%, #2f77bd 100%);
 }
 
-.car::after {
+.isle,
+.hill,
+.tree,
+.beam,
+.sunDisc {
+  position: absolute;
+}
+
+.isle {
+  left: 14%;
+  right: 14%;
+  top: 52%;
+  height: 1.5rem;
+  background: #5fa844;
+  box-shadow: 0 0.75rem 0 #8a5a3a, 1.5rem 0.75rem 0 #8a5a3a, -1.5rem 0.75rem 0 #e6d59a;
+}
+
+.hill {
+  left: 56%;
+  top: 26%;
+  width: 3rem;
+  height: 3rem;
+  background: #8b8f96;
+  box-shadow: 0 -0.75rem 0 -0.75rem #f2f6fb, inset 0 0.75rem 0 #f2f6fb;
+}
+
+.tree {
+  left: 26%;
+  top: 22%;
+  width: 2.25rem;
+  height: 1.5rem;
+  background: #3f8a3a;
+  box-shadow: 0 -0.75rem 0 -0.4rem #3f8a3a;
+}
+
+.tree::after {
   content: "";
   position: absolute;
-  left: 0.7rem;
-  top: 0.3rem;
-  width: 1.5rem;
-  height: 1.2rem;
-  border-radius: 0.25rem;
-  background: #f7f3ea;
+  left: 0.75rem;
+  top: 1.5rem;
+  width: 0.75rem;
+  height: 1.5rem;
+  background: #6b4a2b;
 }
 
-.pad {
-  position: absolute;
-  width: 3rem;
-  height: 1.4rem;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  background: #2f8fd8;
+.beam {
+  left: 66%;
+  top: 0;
+  width: 0.4rem;
+  height: 26%;
+  background: linear-gradient(180deg, transparent, #7df3ff);
+  animation: bob 1.8s ease-in-out infinite;
 }
 
-.p1 {
-  left: 14%;
-  top: 30%;
-}
-
-.p2 {
-  left: 70%;
-  top: 70%;
-}
-
-.slab {
-  position: absolute;
-  left: 72%;
-  top: 14%;
-  width: 2.6rem;
-  height: 3.4rem;
-  border-top: 0.5rem solid #2673bd;
-  border-radius: 0.2rem;
-  background: #fffdf8;
-  box-shadow: 0.4rem 0.4rem 0 rgb(0 0 0 / 10%);
+.sunDisc {
+  left: 10%;
+  top: 12%;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: #ffe9a8;
+  box-shadow: 0 0 0 0.4rem rgb(255 233 168 / 35%);
 }
 
 @keyframes bob {
@@ -242,7 +255,7 @@
 @media (prefers-reduced-motion: reduce) {
   .robot,
   .bug,
-  .car {
+  .beam {
     animation: none;
   }
 }

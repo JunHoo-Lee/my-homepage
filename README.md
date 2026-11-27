@@ -14,7 +14,7 @@ publication list, and dedicated project pages for selected papers.
 - `/wplm`: WPLM, a chatbot whose weights were programmed, not trained (static page under `public/wplm`; `/wp-llm` redirects here)
 - `/play/survivors`: Gradient Survivors, the default game behind the 🎮 icon on the homepage: a 5-minute survivors-like on a 2D canvas (NaN/Overfit/Hallucination bugs, Reviewer 2 boss at 2:30, upgrade cards built on my papers: DSV, SHOT, Template Infilling, ACRO, CSF, DSF, RHD, RobotUse and ReWorld; `?debug` exposes state on `window.__survivors`)
 - `/play`: game picker, linked from each game as "Other games"
-- `/play/drive`: Drive mode, a three.js + cannon-es world where you drive a toy car around the homepage's sections (`?debug` exposes the car's physics body on `window.__drive`)
+- `/play/explore`: Paperlands, a three.js voxel island (procedural terrain, textures and sound, no asset files) where each homepage section is a landmark and each first-author paper a shrine; mine/place blocks, day-night cycle, map with fast travel, touch controls (`?debug` exposes state on `window.__explore`; `/play/drive` redirects here)
 
 ## DSV Assets
 
