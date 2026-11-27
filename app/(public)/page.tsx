@@ -47,20 +47,23 @@ export default function Home() {
         <Image
           alt="Junhoo Lee"
           className={styles.profileImage}
-          height={200}
+          height={160}
           priority
-          sizes="(max-width: 640px) 160px, 200px"
+          sizes="(max-width: 700px) 112px, 136px"
           src="/myface.jpeg"
-          width={200}
+          width={160}
         />
-        <h1>{profile.name}</h1>
-        <nav className={styles.headerIcons} aria-label="Profile links">
-          <a href="/cv.pdf" target="_blank" rel="noreferrer" aria-label="Curriculum vitae"><strong>CV</strong></a>
-          <a href="https://scholar.google.com/citations?user=CvvfGxkAAAAJ" target="_blank" rel="noreferrer" aria-label="Google Scholar"><GraduationCap aria-hidden="true" /></a>
-          <a href="https://github.com/JunHoo-Lee" target="_blank" rel="noreferrer" aria-label="GitHub"><Github aria-hidden="true" /></a>
-          <a href="https://www.linkedin.com/in/junhoo-lee-8483b62a5/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin aria-hidden="true" /></a>
-          <a href={`mailto:${profile.email}`} aria-label="Email"><Mail aria-hidden="true" /></a>
-        </nav>
+        <div className={styles.profileIntro}>
+          <h1>{profile.name}</h1>
+          <p className={styles.profileRole}>{profile.role} · {profile.affiliation}</p>
+          <nav className={styles.headerIcons} aria-label="Profile links">
+            <a href="/cv.pdf" target="_blank" rel="noreferrer" aria-label="Curriculum vitae"><strong>CV</strong></a>
+            <a href={profile.scholar} target="_blank" rel="noreferrer" aria-label="Google Scholar"><GraduationCap aria-hidden="true" /></a>
+            <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub"><Github aria-hidden="true" /></a>
+            <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin aria-hidden="true" /></a>
+            <a href={`mailto:${profile.email}`} aria-label="Email"><Mail aria-hidden="true" /></a>
+          </nav>
+        </div>
       </header>
 
       <section className={styles.section} id="about">

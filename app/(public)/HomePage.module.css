@@ -5,53 +5,64 @@
   border-radius: 0.625rem;
   background: #fff;
   box-shadow: 0 0 1.25rem rgb(0 0 0 / 10%);
-  padding: 1.25rem;
+  padding: 2.25rem 1.75rem 1.5rem;
   color: #333;
   font-family: var(--font-home-heading), sans-serif;
 }
 
 .profileHeader {
-  position: relative;
-  margin-bottom: 0.625rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  margin: 0.5rem 1.25rem 1.75rem;
 }
 
 .profileImage {
   display: block;
-  width: 12.5rem;
-  height: 12.5rem;
-  margin: 0 auto;
+  flex: 0 0 auto;
+  width: 8.5rem;
+  height: 8.5rem;
   border-radius: 50%;
   box-shadow: 0 0 0.625rem rgb(0 0 0 / 10%);
   object-fit: cover;
   object-position: center;
 }
 
+.profileIntro {
+  min-width: 0;
+}
+
 .profileHeader h1 {
-  width: fit-content;
-  margin: 0 auto 0.625rem;
+  margin: 0;
   color: #333;
-  font-size: 2.25rem;
+  font-size: 1.8rem;
   font-weight: 700;
+  line-height: 1.2;
+}
+
+.profileRole {
+  margin: 0.3rem 0 0.8rem;
+  color: #666;
+  font-family: var(--font-home-body), sans-serif;
+  font-size: 0.95rem;
 }
 
 .headerIcons {
-  position: absolute;
-  top: 0.625rem;
-  right: 0.625rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .headerIcons a {
   display: flex;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: var(--public-accent);
   color: #fff;
-  margin: 0 0 0.625rem 0.625rem;
-  font-size: 1.125rem;
+  font-size: 1rem;
   text-decoration: none;
   transition: background-color 0.3s ease;
 }
@@ -67,7 +78,7 @@
 
 .section {
   min-width: 0;
-  margin: 0 1.25rem 1.875rem;
+  margin: 0 1.25rem 2.25rem;
   scroll-margin-top: 1rem;
 }
 
@@ -80,7 +91,7 @@
 .sectionTitle {
   margin: 0 0 0.9375rem;
   color: #333;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
@@ -210,7 +221,7 @@
 .publicationHeading h1,
 .publicationHeading h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
@@ -372,19 +383,28 @@
     padding: 1.25rem 0.2rem;
   }
 
+  .profileHeader {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-inline: 1rem;
+    text-align: center;
+  }
+
   .profileImage {
-    width: 10rem;
-    height: 10rem;
+    width: 7rem;
+    height: 7rem;
+  }
+
+  .profileHeader h1 {
+    font-size: 1.75rem;
+  }
+
+  .profileRole {
+    margin-bottom: 0.65rem;
   }
 
   .headerIcons {
-    position: static;
-    display: flex;
     justify-content: center;
-  }
-
-  .headerIcons a {
-    margin: 0.5rem 0.3rem 0;
   }
 
   .section {
