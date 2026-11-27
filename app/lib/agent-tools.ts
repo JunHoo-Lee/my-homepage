@@ -38,7 +38,7 @@ export const SITE_PAGES: SitePage[] = [
   { path: "/dsf", title: "Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors", kind: "project", description: "NeurIPS 2026. Uncover a generative signal inside a model trained to discriminate." },
   { path: "/backdoor", title: "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse", kind: "project", description: "NeurIPS 2026. Why malicious behavior can survive knowledge transfer on clean data." },
   ...POSTS.map((p) => ({ path: p.href, title: p.title, kind: "post" as const, description: `${p.date}. ${p.description}` })),
-  { path: "/play", title: "Games", kind: "game", description: "Small browser games built around the homepage and its papers (Gradient Survivors, Drive mode)." },
+  { path: "/play", title: "Games", kind: "game", description: "Small browser games built around the homepage and its papers (Gradient Survivors, Paperlands)." },
 ];
 
 type Pub = (typeof PUBLICATIONS)[number]["items"][number];
