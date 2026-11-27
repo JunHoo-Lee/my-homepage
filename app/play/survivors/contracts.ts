@@ -213,4 +213,9 @@ export type CardIconId =
   | "mixed"
   | "anyway"
   | "acro"
+  | "csf"
+  | "rhd"
+  | "dsf"
+  | "robotuse"
+  | "reworld"
   | "checkpoint";
