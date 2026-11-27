@@ -1,164 +1,276 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 
-import { createAudio } from "./audio";
-import { BOSS_TIME, RUN_LENGTH, createGame, formatTime, type Card, type GameHandle, type Grade, type Hud, type PaperLink, type RunResult } from "./game";
+import { DEFAULT_AUDIO_SETTINGS, createAudio } from "./audio";
+import { PALETTE, type AudioEngine, type AudioSettings } from "./contracts";
+import { createGame, type Card, type GameHandle, type Hud as HudState, type PaperLink, type RunResult } from "./game";
+import { TOASTS, submissionId } from "./lore";
 import styles from "./survivors.module.css";
-
-const BEST_KEY = "gradient-survivors-best";
-
-type Best = { time: number; kills: number; grade: Grade };
-
-const GRADE_COPY: Record<Grade, { title: string; line: string }> = {
-  DeskReject: { title: "Desk reject 📄", line: "The submission did not survive the formatting check." },
-  Oral: { title: "Accepted · Oral 🏆", line: "You outlasted the review and defeated Reviewer 2." },
-  Accept: { title: "Accepted ✅", line: "You survived the full review period." },
-  Borderline: { title: "Borderline 🤔", line: "Reviewer 2 showed up and things got heated." },
-  Reject: { title: "Rejected 📉", line: "The bugs overwhelmed the model. Resubmit?" },
-};
-
-const GRADE_RANK: Record<Grade, number> = { DeskReject: 0, Reject: 1, Borderline: 2, Accept: 3, Oral: 4 };
-
-function readBest(): Best | null {
-  try {
-    const raw = window.localStorage.getItem(BEST_KEY);
-    return raw ? (JSON.parse(raw) as Best) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveBest(result: RunResult): Best | null {
-  const previous = readBest();
-  const current: Best = { time: result.time, kills: result.kills, grade: result.grade };
-  const better =
-    !previous ||
-    GRADE_RANK[current.grade] > GRADE_RANK[previous.grade] ||
-    (GRADE_RANK[current.grade] === GRADE_RANK[previous.grade] && (current.time > previous.time || (current.time === previous.time && current.kills > previous.kills)));
-  if (!better) return previous;
-  try {
-    window.localStorage.setItem(BEST_KEY, JSON.stringify(current));
-  } catch {
-    // storage unavailable: best score lasts for this page view only
-  }
-  return current;
-}
+import DecisionLetter from "./ui/DecisionLetter";
+import Hud from "./ui/Hud";
+import LevelUp from "./ui/LevelUp";
+import PauseMenu from "./ui/PauseMenu";
+import { readAudioSettings, readBest, recordBest, saveAudioSettings, type Best } from "./ui/records";
+import { UiSoundContext, type UiSound } from "./ui/sound";
+import TitleCard from "./ui/TitleCard";
+import { BossBanner, Toasts, type Toast } from "./ui/Toasts";
 
 type Phase = "title" | "playing" | "levelup" | "paused" | "end";
+
+/** The palette as custom properties (--ink, --paper, --blue, ...) for every UI stylesheet. */
+const PALETTE_VARS = Object.fromEntries(Object.entries(PALETTE).map(([name, value]) => [`--${name}`, value])) as CSSProperties;
+
+/** Players are mid-movement when the cards appear: picks are ignored this long. */
+const PICK_GUARD_MS = 250;
+/** The decision letter gets a moment before R resubmits. */
+const RESUBMIT_GUARD_MS = 700;
+/** A Tab press this recent means a focus change came from the keyboard (plays "hover"). */
+const TAB_FOCUS_MS = 150;
+/** Touch joystick radius in CSS px. */
+const STICK = 48;
+/** Gestures that may unlock WebAudio. */
+const GESTURES = ["pointerdown", "keydown", "touchend"] as const;
+
+const DIRS: Record<string, [number, number]> = {
+  KeyW: [0, -1],
+  ArrowUp: [0, -1],
+  KeyS: [0, 1],
+  ArrowDown: [0, 1],
+  KeyA: [-1, 0],
+  ArrowLeft: [-1, 0],
+  KeyD: [1, 0],
+  ArrowRight: [1, 0],
+};
+
+/** The HUD plus counters that restart its shake (sanity drops) and pop (combo increases) animations. */
+type HudView = { hud: HudState | null; hurt: number; pops: number };
+const NO_HUD: HudView = { hud: null, hurt: 0, pops: 0 };
+
+const isInteractive = (target: EventTarget | null) => target instanceof Element && target.closest("button, a, input, select, textarea") !== null;
 
 export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<string, PaperLink> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<GameHandle | null>(null);
+  const audioRef = useRef<AudioEngine | null>(null);
+  const phaseRef = useRef<Phase>("title");
   const keysRef = useRef(new Set<string>());
   const knobRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef<{ id: number; x: number; y: number } | null>(null);
+  /** When the current overlay opened (input guards). */
+  const overlayAtRef = useRef(0);
+  const tabAtRef = useRef(-Infinity);
+  const toastIdRef = useRef(0);
+  const runsRef = useRef(0);
 
   const [phase, setPhase] = useState<Phase>("title");
-  const [hud, setHud] = useState<Hud | null>(null);
+  const [view, setView] = useState<HudView>(NO_HUD);
   const [cards, setCards] = useState<Card[]>([]);
   const [result, setResult] = useState<RunResult | null>(null);
   const [best, setBest] = useState<Best | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [newBest, setNewBest] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  /** Id of the Reviewer 2 warning banner on screen, 0 for none. */
+  const [banner, setBanner] = useState(0);
+  const [settings, setSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
+  const [submission, setSubmission] = useState<number | null>(null);
   const [touch, setTouch] = useState(false);
-  const [shared, setShared] = useState(false);
+  const [motion, setMotion] = useState(true);
+  const [hidden, setHidden] = useState(false);
   const [stick, setStick] = useState<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    // Browser-only state, read after hydration so server and client markup match.
-    const id = requestAnimationFrame(() => {
-      setTouch(window.matchMedia("(pointer: coarse)").matches);
-      setBest(readBest());
-    });
-    return () => cancelAnimationFrame(id);
+  const pushToast = useCallback((text: string) => {
+    toastIdRef.current += 1;
+    const id = toastIdRef.current;
+    setToasts((list) => [...list.slice(-2), { id, text }]);
   }, []);
 
-  useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 2600);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+  /** Drops an active touch joystick (an overlay is about to cover the canvas). */
+  const releaseStick = useCallback(() => {
+    if (!stickRef.current) return;
+    stickRef.current = null;
+    setStick(null);
+    gameRef.current?.setMove(0, 0);
+  }, []);
 
-  // ------------------------------------------------------------ game
+  // ------------------------------------------------------------ game + audio
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const audio = createAudio();
-    const game = createGame(canvas, paperLinks, {
-      onHud: setHud,
-      onLevelUp: (next) => {
-        setCards(next);
-        setPhase("levelup");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const audio = createAudio(readAudioSettings());
+    // starts in attract mode: a silent demo behind the title card
+    const game = createGame(
+      canvas,
+      paperLinks,
+      {
+        onHud: (hud) =>
+          setView((prev) => ({
+            hud,
+            hurt: prev.hud && hud.hp < prev.hud.hp ? prev.hurt + 1 : prev.hurt,
+            pops: prev.hud && hud.combo > prev.hud.combo ? prev.pops + 1 : prev.pops,
+          })),
+        onLevelUp: (next) => {
+          releaseStick();
+          overlayAtRef.current = performance.now();
+          setCards(next);
+          setPhase("levelup");
+        },
+        onEnd: (next) => {
+          releaseStick();
+          const record = recordBest(next);
+          overlayAtRef.current = performance.now();
+          setResult(next);
+          setBest(record.best);
+          setNewBest(record.improved);
+          setBanner(0);
+          setToasts([]);
+          setPhase("end");
+        },
+        onToast: pushToast,
+        onAutoPause: () => {
+          releaseStick();
+          setPhase((current) => (current === "playing" ? "paused" : current));
+        },
+        onBossWarning: () => setBanner((id) => id + 1),
       },
-      onEnd: (next) => {
-        setResult(next);
-        setBest(saveBest(next));
-        setShared(false);
-        setPhase("end");
-      },
-      onToast: setToast,
-      onAutoPause: () => setPhase((current) => (current === "playing" ? "paused" : current)),
-      onBossWarning: () => {},
-    }, {
-      audio,
-      reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    });
-    game.setPaused(true);
+      { audio, reducedMotion },
+    );
     gameRef.current = game;
+    audioRef.current = audio;
+
+    // WebAudio may only start inside a user gesture: unlock on the first one, then play the title
+    // music (a beat later, so a click on "Start review" goes straight to the run music).
+    let titleTimer = 0;
+    const unlock = () => {
+      audio.unlock();
+      window.clearTimeout(titleTimer);
+      titleTimer = window.setTimeout(() => {
+        if (phaseRef.current === "title") audio.setMusic("title");
+      }, 150);
+      if (audio.unlocked) for (const type of GESTURES) window.removeEventListener(type, unlock);
+    };
+    for (const type of GESTURES) window.addEventListener(type, unlock);
+
+    const onVisibility = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // browser-only state, read after hydration so the server and client markup match
+    const frame = requestAnimationFrame(() => {
+      setTouch(window.matchMedia("(pointer: coarse)").matches);
+      setMotion(!reducedMotion);
+      setBest(readBest());
+      setSettings(audio.getSettings());
+      setSubmission(submissionId());
+    });
+
     return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(titleTimer);
+      for (const type of GESTURES) window.removeEventListener(type, unlock);
+      document.removeEventListener("visibilitychange", onVisibility);
       game.dispose();
       audio.dispose();
       gameRef.current = null;
+      audioRef.current = null;
     };
-  }, [paperLinks]);
+  }, [paperLinks, pushToast, releaseStick]);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+    if (phase === "playing") canvasRef.current?.focus({ preventScroll: true });
+  }, [phase]);
+
+  // Silent while paused (a beat later, so the pause click is heard) and in hidden tabs.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (hidden) {
+      audio.suspend();
+      return;
+    }
+    if (phase !== "paused") {
+      audio.resume();
+      return;
+    }
+    const timer = window.setTimeout(() => audio.suspend(), 120);
+    return () => window.clearTimeout(timer);
+  }, [phase, hidden]);
+
+  // ------------------------------------------------------------ actions
+  const updateSettings = useCallback((patch: Partial<AudioSettings>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.setSettings(patch);
+    const next = audio.getSettings();
+    saveAudioSettings(next);
+    setSettings(next);
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const muted = !audio.getSettings().muted;
+    updateSettings({ muted });
+    if (!muted) audio.sfx("click");
+  }, [updateSettings]);
 
   const start = useCallback(() => {
-    gameRef.current?.restart();
-    gameRef.current?.setPaused(false);
-    setResult(null);
+    const game = gameRef.current;
+    if (!game) return;
+    runsRef.current += 1;
+    // the first run keeps the number from the title page; every resubmission gets a new one
+    const id = runsRef.current === 1 && submission ? submission : submissionId();
+    // reset before restart(): it pushes the first HUD of the new run right away
+    setView(NO_HUD);
     setCards([]);
+    setResult(null);
+    setBanner(0);
+    setToasts([]);
+    audioRef.current?.unlock();
+    game.restart();
+    setSubmission(id);
     setPhase("playing");
-    canvasRef.current?.focus();
-  }, []);
+    pushToast(TOASTS.runStart(id));
+  }, [submission, pushToast]);
 
   const pick = useCallback((card: Card) => {
+    if (performance.now() - overlayAtRef.current < PICK_GUARD_MS) return;
     gameRef.current?.choose(card.id);
+    audioRef.current?.sfx("pick");
     setCards([]);
     setPhase("playing");
   }, []);
 
-  const togglePause = useCallback(() => {
-    setPhase((current) => {
-      if (current === "playing") {
-        gameRef.current?.setPaused(true);
-        return "paused";
-      }
-      if (current === "paused") {
-        gameRef.current?.setPaused(false);
-        return "playing";
-      }
-      return current;
-    });
-  }, []);
+  const pause = useCallback(() => {
+    if (phase !== "playing") return;
+    releaseStick();
+    gameRef.current?.setPaused(true);
+    audioRef.current?.sfx("click");
+    setPhase("paused");
+  }, [phase, releaseStick]);
+
+  const resume = useCallback(() => {
+    if (phase !== "paused") return;
+    gameRef.current?.setPaused(false);
+    setPhase("playing");
+    // the audio context needs a moment to wake up before it plays anything
+    window.setTimeout(() => audioRef.current?.sfx("click"), 80);
+  }, [phase]);
+
+  /** "Resubmit" on the letter and "Withdraw & resubmit" in the pause menu. */
+  const resubmit = useCallback(() => {
+    audioRef.current?.sfx("click");
+    start();
+  }, [start]);
 
   // ------------------------------------------------------------ keyboard
   useEffect(() => {
-    const dirs: Record<string, [number, number]> = {
-      KeyW: [0, -1],
-      ArrowUp: [0, -1],
-      KeyS: [0, 1],
-      ArrowDown: [0, 1],
-      KeyA: [-1, 0],
-      ArrowLeft: [-1, 0],
-      KeyD: [1, 0],
-      ArrowRight: [1, 0],
-    };
     const sync = () => {
       let x = 0;
       let y = 0;
       for (const code of keysRef.current) {
-        const dir = dirs[code];
+        const dir = DIRS[code];
         if (dir) {
           x += dir[0];
           y += dir[1];
@@ -167,25 +279,41 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
       gameRef.current?.setMove(x, y);
     };
     const onDown = (event: KeyboardEvent) => {
-      if (dirs[event.code]) {
+      if (event.code === "Tab") tabAtRef.current = performance.now();
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      // arrow keys belong to the volume sliders while one has focus
+      if (DIRS[event.code] && !(event.target instanceof HTMLInputElement)) {
         event.preventDefault();
         keysRef.current.add(event.code);
         sync();
         return;
       }
+      if (event.repeat) return;
+      if (event.code === "KeyM") {
+        toggleMute();
+        return;
+      }
       if (phase === "levelup") {
-        const index = Number(event.key) - 1;
-        if (index >= 0 && index < cards.length) pick(cards[index]);
+        const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code);
+        const card = digit ? cards[Number(digit[1]) - 1] : undefined;
+        if (card) {
+          event.preventDefault();
+          pick(card);
+        }
         return;
       }
       if (event.code === "Escape" || event.code === "KeyP") {
-        event.preventDefault();
-        togglePause();
+        if (phase === "playing") pause();
+        else if (phase === "paused") resume();
         return;
       }
-      if ((phase === "title" || phase === "end") && (event.code === "Enter" || event.code === "Space" || event.code === "KeyR")) {
+      if (phase === "title" && (event.code === "Enter" || event.code === "Space") && !isInteractive(event.target)) {
         event.preventDefault();
         start();
+      }
+      if (phase === "end" && event.code === "KeyR" && performance.now() - overlayAtRef.current > RESUBMIT_GUARD_MS) {
+        event.preventDefault();
+        resubmit();
       }
     };
     const onUp = (event: KeyboardEvent) => {
@@ -203,17 +331,16 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
       window.removeEventListener("keyup", onUp);
       window.removeEventListener("blur", onBlur);
     };
-  }, [cards, phase, pick, start, togglePause]);
+  }, [cards, phase, pick, pause, resume, resubmit, start, toggleMute]);
 
   // ------------------------------------------------------------ touch joystick
-  const STICK = 48;
-  const onPointerDown = (event: React.PointerEvent) => {
-    if (event.pointerType === "mouse" || phase !== "playing") return;
+  const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (event.pointerType === "mouse" || phase !== "playing" || stickRef.current) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     stickRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
     setStick({ x: event.clientX, y: event.clientY });
   };
-  const onPointerMove = (event: React.PointerEvent) => {
+  const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
     const origin = stickRef.current;
     if (!origin || origin.id !== event.pointerId) return;
     let dx = event.clientX - origin.x;
@@ -224,222 +351,70 @@ export default function SurvivorsClient({ paperLinks }: { paperLinks: Record<str
       dy = (dy / d) * STICK;
     }
     if (knobRef.current) knobRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
-    const dead = d < 6 ? 0 : 1;
-    gameRef.current?.setMove((dx / STICK) * dead, (dy / STICK) * dead);
+    const live = d < 6 ? 0 : 1;
+    gameRef.current?.setMove((dx / STICK) * live, (dy / STICK) * live);
   };
-  const onPointerUp = (event: React.PointerEvent) => {
+  const onPointerUp = (event: PointerEvent<HTMLCanvasElement>) => {
     if (stickRef.current?.id !== event.pointerId) return;
-    stickRef.current = null;
-    setStick(null);
-    gameRef.current?.setMove(0, 0);
+    releaseStick();
   };
 
-  const share = async () => {
-    if (!result) return;
-    const text = `Gradient Survivors: ${GRADE_COPY[result.grade].title} — survived ${formatTime(result.time)}, ${result.kills} bugs squashed (Lv ${result.level}).`;
-    const url = `${window.location.origin}/play/survivors`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Gradient Survivors", text, url });
-      } else {
-        await navigator.clipboard.writeText(`${text} ${url}`);
-        setShared(true);
-      }
-    } catch {
-      // share sheet dismissed
-    }
-  };
+  // ------------------------------------------------------------ UI sounds
+  const ui = useMemo<UiSound>(
+    () => ({
+      play: (name) => audioRef.current?.sfx(name),
+      hover: {
+        onPointerEnter: (event) => {
+          if (event.pointerType === "mouse") audioRef.current?.sfx("hover");
+        },
+        onFocus: () => {
+          if (performance.now() - tabAtRef.current < TAB_FOCUS_MS) audioRef.current?.sfx("hover");
+        },
+      },
+    }),
+    [],
+  );
 
-  const hpPct = hud ? (hud.hp / hud.maxHp) * 100 : 100;
-  const xpPct = hud ? Math.min(100, (hud.xp / hud.xpNext) * 100) : 0;
-  const papersInBuild = result?.build.filter((card) => card.paper) ?? [];
+  const inRun = phase === "playing" || phase === "levelup" || phase === "paused";
+  const frozen = phase === "levelup" || phase === "paused";
 
   return (
-    <div className={styles.root}>
-      <canvas
-        ref={canvasRef}
-        className={styles.canvas}
-        tabIndex={0}
-        aria-label="Gradient Survivors game area"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      />
-
-      {phase !== "title" && hud ? (
-        <div className={styles.hud}>
-          <div className={styles.xpBar} aria-label={`Level ${hud.level}`}>
-            <div className={styles.xpFill} style={{ width: `${xpPct}%` }} />
-            <span>Lv {hud.level}</span>
-          </div>
-          <div className={styles.hudRow}>
-            <div className={styles.hpBox}>
-              <div className={styles.hpBar}>
-                <div className={styles.hpFill} style={{ width: `${hpPct}%` }} />
-              </div>
-              <span>
-                {hud.hp}/{hud.maxHp}
-                {hud.revives ? ` · ⟲${hud.revives}` : ""}
-              </span>
-            </div>
-            <div className={styles.timer}>
-              <strong>{formatTime(RUN_LENGTH - hud.time)}</strong>
-              <span>{hud.time < BOSS_TIME ? `Reviewer 2 in ${formatTime(BOSS_TIME - hud.time)}` : "until acceptance"}</span>
-            </div>
-            <div className={styles.hudRight}>
-              <span className={styles.kills}>🐛 {hud.kills}</span>
-              <button type="button" className={styles.iconButton} onClick={togglePause} aria-label="Pause">
-                ❚❚
-              </button>
-            </div>
-          </div>
-          {hud.boss ? (
-            <div className={styles.bossBar} aria-label="Reviewer 2 health">
-              <div className={styles.bossFill} style={{ width: `${(hud.boss.hp / hud.boss.maxHp) * 100}%` }} />
-              <span>Reviewer 2</span>
-            </div>
+    <UiSoundContext.Provider value={ui}>
+      <div className={styles.root} style={PALETTE_VARS}>
+        <div className={styles.stage} inert={phase !== "playing"}>
+          <canvas
+            ref={canvasRef}
+            className={styles.canvas}
+            tabIndex={0}
+            aria-label="Gradient Survivors game area"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+          />
+          {inRun && view.hud ? (
+            <Hud hud={view.hud} hurt={view.hurt} pops={view.pops} muted={settings.muted} touch={touch} onToggleMute={toggleMute} onPause={pause} />
           ) : null}
         </div>
-      ) : null}
 
-      {toast ? (
-        <div className={styles.toast} role="status">
-          {toast}
-        </div>
-      ) : null}
+        {inRun && banner ? <BossBanner key={banner} frozen={frozen} onDone={() => setBanner(0)} /> : null}
+        <Toasts toasts={toasts} frozen={frozen} onDone={(id) => setToasts((list) => list.filter((toast) => toast.id !== id))} />
 
-      {stick ? (
-        <div className={styles.stick} style={{ left: stick.x, top: stick.y }} aria-hidden="true">
-          <div ref={knobRef} className={styles.knob} />
-        </div>
-      ) : null}
-
-      {phase === "title" ? (
-        <div className={styles.overlay}>
-          <div className={styles.card}>
-            <p className={styles.eyebrow}>A 5-minute survival game</p>
-            <h1 className={styles.title}>Gradient Survivors</h1>
-            <p>
-              You are a tiny model under review. Bugs swarm in — <b>NaN</b>, <b>Overfit</b>, <b>Hallucination</b> — and at 2:30 <b>Reviewer 2</b> arrives.
-              Survive five minutes to get accepted.
-            </p>
-            <ul className={styles.rules}>
-              <li>{touch ? "Drag anywhere to move" : "Move with WASD or the arrow keys"}. Attacks fire on their own.</li>
-              <li>Collect tokens to level up, then pick an upgrade. Some upgrades are my papers.</li>
-              <li>Esc pauses. {touch ? "" : "Number keys pick cards."}</li>
-            </ul>
-            {best ? (
-              <p className={styles.best}>
-                Your best: {GRADE_COPY[best.grade].title} · {formatTime(best.time)} · {best.kills} bugs
-              </p>
-            ) : null}
-            <div className={styles.actions}>
-              <button type="button" className={`${styles.button} ${styles.primary}`} onClick={start} autoFocus>
-                Start run {touch ? "" : <kbd>Enter</kbd>}
-              </button>
-              <Link className={styles.button} href="/play">
-                Other games
-              </Link>
-            </div>
+        {stick ? (
+          <div className={styles.stick} style={{ left: stick.x, top: stick.y }} aria-hidden="true">
+            <div ref={knobRef} className={styles.knob} />
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      {phase === "levelup" ? (
-        <div className={styles.overlay}>
-          <div className={styles.levelUp}>
-            <p className={styles.eyebrow}>Level up</p>
-            <h2>Choose an upgrade</h2>
-            <div className={styles.cards}>
-              {cards.map((card, index) => (
-                <button key={card.id} type="button" className={`${styles.upgrade} ${card.paper ? styles.paperCard : ""}`} onClick={() => pick(card)}>
-                  <span className={styles.cardTop}>
-                    <span className={styles.icon}>{card.icon}</span>
-                    <span className={styles.level}>{card.level === 1 ? "NEW" : `Lv ${card.level}`}</span>
-                  </span>
-                  <strong>{card.name}</strong>
-                  <span className={styles.cardText}>{card.text}</span>
-                  {card.paper ? <span className={styles.paperTag}>📄 {card.paper.label}</span> : null}
-                  {!touch ? <kbd className={styles.cardKey}>{index + 1}</kbd> : null}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {phase === "paused" ? (
-        <div className={styles.overlay}>
-          <div className={styles.card}>
-            <h2 className={styles.title}>Paused</h2>
-            <div className={styles.actions}>
-              <button type="button" className={`${styles.button} ${styles.primary}`} onClick={togglePause} autoFocus>
-                Resume
-              </button>
-              <button type="button" className={styles.button} onClick={start}>
-                Restart
-              </button>
-              <Link className={styles.button} href="/play">
-                Quit
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {phase === "end" && result ? (
-        <div className={styles.overlay}>
-          <div className={styles.card}>
-            <p className={styles.eyebrow}>Decision</p>
-            <h2 className={styles.title}>{GRADE_COPY[result.grade].title}</h2>
-            <p>{GRADE_COPY[result.grade].line}</p>
-            <dl className={styles.stats}>
-              <div>
-                <dt>Survived</dt>
-                <dd>{formatTime(result.time)}</dd>
-              </div>
-              <div>
-                <dt>Bugs</dt>
-                <dd>{result.kills}</dd>
-              </div>
-              <div>
-                <dt>Level</dt>
-                <dd>{result.level}</dd>
-              </div>
-            </dl>
-            {best ? (
-              <p className={styles.best}>
-                Best: {GRADE_COPY[best.grade].title} · {formatTime(best.time)} · {best.kills} bugs
-              </p>
-            ) : null}
-            {papersInBuild.length ? (
-              <div className={styles.papers}>
-                <p>Papers in your build</p>
-                {papersInBuild.map((card) => (
-                  <a key={card.id} href={card.paper!.href}>
-                    {card.icon} {card.name} → {card.paper!.label}
-                  </a>
-                ))}
-              </div>
-            ) : null}
-            <div className={styles.actions}>
-              <button type="button" className={`${styles.button} ${styles.primary}`} onClick={start} autoFocus>
-                Resubmit {touch ? "" : <kbd>R</kbd>}
-              </button>
-              <button type="button" className={styles.button} onClick={share}>
-                {shared ? "Copied!" : "Share"}
-              </button>
-              <Link className={styles.button} href="/play">
-                Other games
-              </Link>
-              <Link className={styles.button} href="/">
-                Classic view
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </div>
+        {phase === "title" ? (
+          <TitleCard submission={submission} best={best} touch={touch} muted={settings.muted} motion={motion} onToggleMute={toggleMute} onStart={start} />
+        ) : null}
+        {phase === "levelup" ? <LevelUp cards={cards} touch={touch} onPick={pick} /> : null}
+        {phase === "paused" ? <PauseMenu submission={submission} settings={settings} touch={touch} onSettings={updateSettings} onResume={resume} onRestart={resubmit} /> : null}
+        {phase === "end" && result ? (
+          <DecisionLetter result={result} submission={submission} best={best} newBest={newBest} motion={motion} touch={touch} onResubmit={resubmit} />
+        ) : null}
+      </div>
+    </UiSoundContext.Provider>
   );
 }

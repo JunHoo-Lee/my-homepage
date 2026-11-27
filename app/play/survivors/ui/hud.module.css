@@ -1,0 +1,577 @@
+/* In-run HUD: h-index bar, sanity, AoE deadline, concerns addressed, combo, Reviewer 2. */
+
+.hud {
+  --outline:
+    0 1px 0 var(--ink), 0 -1px 0 var(--ink), 1px 0 0 var(--ink), -1px 0 0 var(--ink), 1px 1px 0 var(--ink), -1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink), -1px -1px 0 var(--ink);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: max(0.55rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) 0 max(0.75rem, env(safe-area-inset-left));
+  color: var(--ink);
+  font-family: var(--font-ui);
+  pointer-events: none;
+}
+
+.wide {
+  display: inline;
+}
+
+/* ---------------------------------------------------------------- h-index (XP) */
+
+.xp {
+  position: relative;
+  height: 1.15rem;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+/* fills are full-width and scaled from the left */
+.xpFill,
+.trail,
+.fill,
+.bossFill {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 50%;
+}
+
+.xpFill {
+  background: linear-gradient(to bottom, var(--blueLight) 0 38%, var(--blue) 38% 100%);
+  transition: transform 160ms ease-out;
+}
+
+.xpLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.7rem;
+  color: #fff;
+  font: 800 0.68rem/1 var(--font-ui);
+  letter-spacing: 0.02em;
+  text-shadow: var(--outline);
+  white-space: nowrap;
+}
+
+.levelA {
+  animation: levelA 600ms ease-out;
+}
+
+.levelB {
+  animation: levelB 600ms ease-out;
+}
+
+@keyframes levelA {
+  from {
+    filter: brightness(1.8) saturate(0.6);
+  }
+}
+
+@keyframes levelB {
+  from {
+    filter: brightness(1.8) saturate(0.6);
+  }
+}
+
+/* ---------------------------------------------------------------- main row */
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+}
+
+/* sanity (HP) */
+.sanity {
+  display: grid;
+  gap: 0.25rem;
+  width: min(12.5rem, 100%);
+}
+
+.sanityHead {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  min-height: 1rem;
+  color: #fff;
+  font: 800 0.72rem/1 var(--font-ui);
+  letter-spacing: 0.05em;
+  text-shadow: var(--outline);
+  text-transform: uppercase;
+}
+
+/* tiny phones clip the label rather than run into the clock */
+.sanityLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.revives {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.1rem;
+  margin-left: auto;
+  color: var(--gold);
+  font-size: 0.85rem;
+}
+
+.revives svg {
+  filter: drop-shadow(0 1px 0 var(--ink)) drop-shadow(0 -1px 0 var(--ink)) drop-shadow(1px 0 0 var(--ink)) drop-shadow(-1px 0 0 var(--ink));
+}
+
+.bar {
+  position: relative;
+  height: 1.1rem;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.barText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 0.55rem;
+  color: #fff;
+  font: 800 0.68rem/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--outline);
+}
+
+/* the damage trail lags behind the bar */
+.trail {
+  background: color-mix(in srgb, var(--gold) 55%, #fff);
+  transition: transform 420ms ease-in 320ms;
+}
+
+.fill {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--red) 55%, #fff) 0 36%, var(--red) 36% 100%);
+  transition: transform 110ms ease-out;
+}
+
+.low .sanityHead {
+  color: color-mix(in srgb, var(--red) 40%, #fff);
+}
+
+.low .bar {
+  animation: lowPulse 900ms ease-in-out infinite;
+}
+
+@keyframes lowPulse {
+  50% {
+    border-color: var(--red);
+    box-shadow:
+      0 2px 0 var(--ink),
+      0 0 0 4px color-mix(in srgb, var(--red) 40%, transparent);
+  }
+}
+
+.shakeA {
+  animation: shakeA 320ms ease-out;
+}
+
+.shakeB {
+  animation: shakeB 320ms ease-out;
+}
+
+@keyframes shakeA {
+  20% {
+    transform: translate(-4px, 1px) rotate(-1.5deg);
+  }
+
+  45% {
+    transform: translate(3px, -1px) rotate(1deg);
+  }
+
+  70% {
+    transform: translate(-2px, 0);
+  }
+}
+
+@keyframes shakeB {
+  20% {
+    transform: translate(-4px, 1px) rotate(-1.5deg);
+  }
+
+  45% {
+    transform: translate(3px, -1px) rotate(1deg);
+  }
+
+  70% {
+    transform: translate(-2px, 0);
+  }
+}
+
+/* the AoE deadline */
+.clock {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  padding: 0.2rem 0.75rem 0.25rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.85rem;
+  background: var(--paper);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.clock strong {
+  font: 800 1.6rem/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.clock span {
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  font: 700 0.66rem/1 var(--font-mono);
+}
+
+.urgent strong {
+  color: var(--red);
+}
+
+.urgent {
+  border-color: color-mix(in srgb, var(--red) 70%, var(--ink));
+}
+
+.tickA {
+  animation: tickA 1s ease-out;
+}
+
+.tickB {
+  animation: tickB 1s ease-out;
+}
+
+@keyframes tickA {
+  0% {
+    transform: scale(1.14);
+  }
+
+  25% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tickB {
+  0% {
+    transform: scale(1.14);
+  }
+
+  25% {
+    transform: scale(1);
+  }
+}
+
+/* concerns addressed + buttons */
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.kills {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.5rem;
+  padding: 0 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.8rem;
+  background: var(--paper);
+  box-shadow: 0 3px 0 var(--ink);
+  font: 800 1rem/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kills svg {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--green);
+}
+
+.kills .wide {
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.status {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.45rem auto 0;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
+  font: 700 0.72rem/1.2 var(--font-ui);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusBoss {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------- Reviewer 2 */
+
+.boss {
+  position: relative;
+  width: min(30rem, 100%);
+  height: 1.45rem;
+  margin: 0.45rem auto 0;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 30%, var(--paper));
+  box-shadow: 0 3px 0 var(--ink);
+  animation: bossIn 420ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+.bossFill {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--red) 60%, #fff) 0 36%, var(--red) 36% 100%);
+  transition: clip-path 140ms ease-out;
+}
+
+.bossLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: #fff;
+  font: 800 0.72rem/1 var(--font-ui);
+  letter-spacing: 0.02em;
+  text-shadow: var(--outline);
+  white-space: nowrap;
+}
+
+.bossLabel svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  filter: drop-shadow(0 1px 0 var(--ink)) drop-shadow(0 -1px 0 var(--ink)) drop-shadow(1px 0 0 var(--ink)) drop-shadow(-1px 0 0 var(--ink));
+}
+
+/* phase 2: the rebuttal made it worse */
+.enraged {
+  animation:
+    bossIn 420ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both,
+    enraged 700ms ease-in-out infinite;
+}
+
+.enraged .bossFill {
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 7px, rgb(43 43 43 / 22%) 7px 14px) 0 0 / 20px 20px,
+    linear-gradient(to bottom, color-mix(in srgb, var(--red) 60%, #fff) 0 36%, var(--red) 36% 100%);
+  animation: march 500ms linear infinite;
+}
+
+@keyframes bossIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scaleX(0.6);
+  }
+}
+
+@keyframes enraged {
+  50% {
+    box-shadow:
+      0 3px 0 var(--ink),
+      0 0 0 4px color-mix(in srgb, var(--red) 45%, transparent);
+  }
+}
+
+@keyframes march {
+  to {
+    background-position:
+      20px 0,
+      0 0;
+  }
+}
+
+/* ---------------------------------------------------------------- combo */
+
+.comboRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.45rem;
+}
+
+.combo {
+  --c: var(--blue);
+  --edge: color-mix(in srgb, var(--c) 60%, #000);
+
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  overflow: hidden;
+  padding: 0.25rem 0.75rem 0.35rem;
+  border: 2px solid var(--edge);
+  border-radius: 999px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--c) 70%, #fff) 0 38%, var(--c) 38% 100%);
+  box-shadow: 0 3px 0 var(--edge);
+  color: #fff;
+  font: 800 0.78rem/1 var(--font-ui);
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 var(--edge);
+  text-transform: uppercase;
+  transform-origin: 100% 50%;
+  animation: comboIn 220ms cubic-bezier(0.2, 0.9, 0.3, 1.5) both;
+}
+
+.combo b {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.tier1 {
+  --c: var(--orange);
+}
+
+.tier2 {
+  --c: var(--red);
+}
+
+.tier3 {
+  --c: var(--purple);
+
+  box-shadow:
+    0 3px 0 var(--edge),
+    0 0 0 3px color-mix(in srgb, var(--gold) 70%, transparent);
+}
+
+/* how long until the combo drops */
+.drain {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: rgb(255 255 255 / 75%);
+  transform: scaleX(var(--left));
+  transform-origin: 0 50%;
+  transition: transform 100ms linear;
+}
+
+.popA {
+  animation: popA 170ms ease-out;
+}
+
+.popB {
+  animation: popB 170ms ease-out;
+}
+
+@keyframes popA {
+  40% {
+    transform: scale(1.16) rotate(-2deg);
+  }
+}
+
+@keyframes popB {
+  40% {
+    transform: scale(1.16) rotate(2deg);
+  }
+}
+
+@keyframes comboIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+/* ---------------------------------------------------------------- phones */
+
+@media (max-width: 600px) {
+  .wide {
+    display: none !important;
+  }
+
+  /* the sanity bar gives way so the buttons never push into the clock */
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.4rem;
+  }
+
+  .clock {
+    padding: 0.2rem 0.5rem 0.25rem;
+  }
+
+  .clock strong {
+    font-size: 1.3rem;
+  }
+
+  .right {
+    gap: 0.3rem;
+  }
+
+  .kills {
+    min-height: 2.25rem;
+    padding: 0 0.45rem;
+    font-size: 0.9rem;
+  }
+
+  .right button {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .status {
+    font-size: 0.68rem;
+  }
+
+  .bossLabel {
+    font-size: 0.66rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shakeA,
+  .shakeB,
+  .tickA,
+  .tickB,
+  .popA,
+  .popB,
+  .levelA,
+  .levelB,
+  .low .bar,
+  .enraged,
+  .enraged .bossFill {
+    animation: none;
+  }
+
+  .boss,
+  .combo {
+    animation: fadeIn 200ms ease-out both;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
