@@ -68,6 +68,7 @@ export function PublicationEntries({
           <div className={styles.paperLinks}>
             {publication.resolvedPaperLink ? <SmartLink href={publication.resolvedPaperLink}>paper</SmartLink> : null}
             {publication.resolvedProjectLink ? <SmartLink href={publication.resolvedProjectLink}>project page</SmartLink> : null}
+            {publication.gameLink ? <SmartLink href={publication.gameLink}>game</SmartLink> : null}
             {publication.codeLink ? <SmartLink href={publication.codeLink}>code</SmartLink> : null}
           </div>
         </article>

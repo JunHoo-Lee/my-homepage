@@ -6,6 +6,8 @@ export type Publication = {
     link?: string;
     paperLink?: string;
     projectLink?: string;
+    /** A playable version of the paper under /play. */
+    gameLink?: string;
     codeLink?: string;
     codeLabel?: string;
     presentation?: string;
@@ -343,6 +345,7 @@ export const PUBLICATIONS: PublicationSection[] = [
             {
                 "title": "Discriminative Score Function: Turning Pretrained Models into Functional Generative Priors",
                 "projectLink": "/dsf",
+                "gameLink": "/play/dsf",
                 "paperLink": "/dsf/assets/dsf-paper.pdf",
                 "authors": [
                     "Junhoo Lee",
@@ -359,6 +362,7 @@ export const PUBLICATIONS: PublicationSection[] = [
             {
                 "title": "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse",
                 "projectLink": "/backdoor",
+                "gameLink": "/play/backdoor",
                 "paperLink": "/backdoor/assets/backdoor-paper.pdf",
                 "authors": [
                     "Junhoo Lee*",

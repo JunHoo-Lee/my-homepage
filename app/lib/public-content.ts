@@ -19,6 +19,7 @@ export type Publication = {
   year: string;
   link?: string;
   projectLink?: string;
+  gameLink?: string;
   paperLink?: string;
   codeLink?: string;
   codeLabel?: string;

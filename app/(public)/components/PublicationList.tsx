@@ -66,9 +66,10 @@ export default function PublicationList({ publications }: { publications: Public
                             </p>
                         </div>
 
-                        {(projectLink || paperLink || publication.codeLink) && (
+                        {(projectLink || paperLink || publication.codeLink || publication.gameLink) && (
                             <div className="publication-links" aria-label={`Resources for ${publication.title}`}>
                                 {projectLink && <ResourceLink href={projectLink}>Project</ResourceLink>}
+                                {publication.gameLink && <ResourceLink href={publication.gameLink}>Game</ResourceLink>}
                                 {paperLink && <ResourceLink href={paperLink}>Paper</ResourceLink>}
                                 {publication.codeLink && <ResourceLink href={publication.codeLink}>Code</ResourceLink>}
                             </div>
