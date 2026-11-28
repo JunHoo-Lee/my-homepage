@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type AnimationEvent } from "react";
 import { RUN_LENGTH, formatTime, type RunResult } from "../game";
 import { CardIcon, Reviewer2Icon, RestartIcon, ShareIcon, StampIcon, isCardIconId } from "../icons";
 import { DECISIONS, HUD_TERMS, SCREENS, TOASTS, reviewsFor, type Review } from "../lore";
+import { SHARE_PAPERS, sharePath, shareText, type ShareData } from "../share";
 import styles from "./decision.module.css";
 import kit from "./kit.module.css";
 import type { Best } from "./records";
@@ -91,7 +92,6 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           bossDefeated: result.bossDefeated,
           runLength: RUN_LENGTH,
         });
-  const reviewer2 = reviews.find((review) => review.reviewer === "Reviewer 2");
   const papers = result.build.filter((card) => card.paper);
 
   // focus the letter itself, so screen readers announce the decision first;
@@ -118,20 +118,49 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
     setLanded(true);
   };
 
-  const share = async () => {
-    ui.play("click");
-    const score = reviewer2 ? `Reviewer 2 gave me a ${reviewer2.score} (confidence ${reviewer2.confidence}). ` : "";
-    const text = `${SCREENS.title} · Decision: ${decision.title}. ${score}Survived ${formatTime(result.time)}, ${result.kills} ${HUD_TERMS.killsLabel(result.kills)}.`;
-    const url = `${window.location.origin}/play/survivors`;
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareData: ShareData = {
+    grade: result.grade,
+    time: result.time,
+    kills: result.kills,
+    level: result.level,
+    maxCombo: result.maxCombo,
+    bossDefeated: result.bossDefeated,
+    submission: submission ?? 1000,
+    papers: result.build.filter((card) => card.id in SHARE_PAPERS).map((card) => card.id),
+  };
+  const text = shareText(shareData);
+  const shareUrl = () => `${window.location.origin}${sharePath(shareData)}`;
+  const enc = encodeURIComponent;
+
+  const copy = async (value: string) => {
     try {
-      if (navigator.share) {
-        await navigator.share({ title: SCREENS.title, text, url });
-        return;
-      }
-      await navigator.clipboard.writeText(`${text} ${url}`);
+      await navigator.clipboard.writeText(value);
       setCopied(true);
     } catch {
-      // share sheet dismissed or clipboard blocked
+      // clipboard blocked
+    }
+  };
+  const toggleShare = () => {
+    ui.play("click");
+    setShareOpen((open) => !open);
+  };
+  const openShare = (href: string) => {
+    ui.play("click");
+    window.open(href, "_blank", "noopener,noreferrer");
+  };
+  const shareX = () => openShare(`https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(shareUrl())}`);
+  // LinkedIn only takes a URL (the letter image comes from its preview); the post text goes to the clipboard
+  const shareLinkedIn = () => {
+    void copy(`${text}\n${shareUrl()}`);
+    openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl())}`);
+  };
+  const shareNative = async () => {
+    ui.play("click");
+    try {
+      await navigator.share({ title: SCREENS.title, text, url: shareUrl() });
+    } catch {
+      // share sheet dismissed
     }
   };
 
@@ -220,6 +249,32 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           </section>
         ) : null}
 
+        {shareOpen ? (
+          <section id="gs-share" className={styles.share} aria-label="Share this decision">
+            <pre className={styles.shareText}>{text}</pre>
+            <div className={styles.shareButtons}>
+              <button type="button" className={kit.button} onClick={shareX} {...ui.hover}>
+                Post on X
+              </button>
+              <button type="button" className={kit.button} onClick={shareLinkedIn} {...ui.hover}>
+                LinkedIn
+              </button>
+              <button type="button" className={kit.button} onClick={() => { ui.play("click"); void copy(`${text}\n${shareUrl()}`); }} {...ui.hover}>
+                <span aria-live="polite">{copied ? "Copied!" : "Copy text + link"}</span>
+              </button>
+              <a className={kit.button} href={`${sharePath(shareData)}/opengraph-image`} download={`gradient-survivors-${shareData.submission}.png`} onClick={() => ui.play("click")} {...ui.hover}>
+                Save image
+              </a>
+              {typeof navigator !== "undefined" && "share" in navigator ? (
+                <button type="button" className={kit.button} onClick={shareNative} {...ui.hover}>
+                  More…
+                </button>
+              ) : null}
+            </div>
+            <p className={styles.shareHint}>The link previews as this decision letter on X and LinkedIn. For LinkedIn, the post text is copied, so paste it in.</p>
+          </section>
+        ) : null}
+
         <div className={`${kit.actions} ${styles.actions}`} inert={!ready}>
           <button type="button" className={`${kit.button} ${kit.primary}`} onClick={onResubmit} aria-keyshortcuts="R" {...ui.hover}>
             <RestartIcon />
@@ -230,9 +285,9 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
               </span>
             )}
           </button>
-          <button type="button" className={kit.button} onClick={share} {...ui.hover}>
+          <button type="button" className={kit.button} onClick={toggleShare} aria-expanded={shareOpen} aria-controls="gs-share" {...ui.hover}>
             <ShareIcon />
-            <span aria-live="polite">{copied ? "Copied!" : "Share"}</span>
+            Share
           </button>
           <Link className={kit.button} href="/play" prefetch={false} onClick={() => ui.play("click")} {...ui.hover}>
             Other games

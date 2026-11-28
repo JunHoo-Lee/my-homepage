@@ -12,6 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${SITE_URL}/dsv`, changeFrequency: "yearly", priority: 0.8 },
         { url: `${SITE_URL}/any-way-meta-learning`, changeFrequency: "yearly", priority: 0.7 },
         { url: `${SITE_URL}/shot`, changeFrequency: "yearly", priority: 0.7 },
+        { url: `${SITE_URL}/dsf`, changeFrequency: "yearly", priority: 0.8 },
+        { url: `${SITE_URL}/backdoor`, changeFrequency: "yearly", priority: 0.8 },
         { url: `${SITE_URL}/mysteryofunlearnedparameters`, changeFrequency: "monthly", priority: 0.8 },
         { url: `${SITE_URL}/wplm`, changeFrequency: "monthly", priority: 0.8 },
         { url: `${SITE_URL}/dsf`, changeFrequency: "yearly", priority: 0.8 },

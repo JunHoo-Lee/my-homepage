@@ -56,18 +56,3 @@ export type PlayContent = {
   news: PlayNews[];
   awards: PlayAward[];
 };
-
-export type InputState = {
-  forward: boolean;
-  backward: boolean;
-  left: boolean;
-  right: boolean;
-  brake: boolean;
-};
-
-export type WorldStats = {
-  pinsDown: number;
-  pinsTotal: number;
-  cratesMoved: number;
-  cratesTotal: number;
-};

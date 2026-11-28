@@ -518,3 +518,33 @@
     opacity: 0;
   }
 }
+
+/* ---------------------------------------------------------------- share panel */
+
+.share {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border: 2px dashed color-mix(in srgb, var(--ink) 30%, transparent);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--sand) 45%, var(--paper));
+}
+
+.shareText {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-paper);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.shareButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.shareHint {
+  margin: 0.55rem 0 0;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  font-size: 0.78rem;
+}

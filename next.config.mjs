@@ -10,6 +10,8 @@ const nextConfig = {
     return [
       { source: "/wp-llm", destination: "/wplm", permanent: true },
       { source: "/wp-llm/:path*", destination: "/wplm/:path*", permanent: true },
+      // the toy-car world was replaced by the voxel island (2026-11-27)
+      { source: "/play/drive", destination: "/play/explore", permanent: true },
     ];
   },
   async rewrites() {

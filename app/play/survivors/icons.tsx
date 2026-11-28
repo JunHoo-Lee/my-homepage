@@ -38,6 +38,55 @@ function Icon({ className, size = "1em", children }: IconProps & { children: Rea
 }
 
 const CARD_ICONS: Record<CardIconId, ReactNode> = {
+  // CSF: a fingerprint
+  csf: (
+    <>
+      <path d="M6.5 7.5a7 7 0 0 1 11 0" />
+      <path d="M5 13a7 7 0 0 1 14 0v1" />
+      <path d="M8.5 20c1-2 1-4.5 1-7a2.5 2.5 0 0 1 5 0c0 3-.5 5.5-1.5 7.5" />
+      <path d="M12 13c0 3-.5 6-2 8" />
+    </>
+  ),
+  // RHD: a strong agent and a light agent passing the playbook back and forth
+  rhd: (
+    <>
+      <rect x="3" y="3.5" width="8" height="7" rx="2" />
+      <rect x="15" y="14" width="6" height="5" rx="1.5" />
+      <path d="M11 7h4a3 3 0 0 1 3 3v4" />
+      <path d="M15 16.5h-4a3 3 0 0 1-3-3v-3" />
+      <path d="m16.5 12 1.5 2 1.5-2M6.5 12.5 8 10.5l1.5 2" />
+    </>
+  ),
+  // DSF: noise in, an image out
+  dsf: (
+    <>
+      <circle cx="4" cy="6" r="1" fill="currentColor" />
+      <circle cx="7" cy="10" r="1" fill="currentColor" />
+      <circle cx="4" cy="14" r="1" fill="currentColor" />
+      <circle cx="7" cy="18" r="1" fill="currentColor" />
+      <path d="M9.5 12h3m-1.5-1.5L12.5 12 11 13.5" />
+      <rect x="14" y="6.5" width="7" height="11" rx="1.5" />
+      <path d="m14 15 2.5-2.5 2 2 2.5-2.5" />
+    </>
+  ),
+  // RobotUse: an arm that picks the target while the backend moves it
+  robotuse: (
+    <>
+      <path d="M4 20.5h8" />
+      <path d="M8 20.5V15l5-5 4.5 2" />
+      <circle cx="8" cy="15" r="1.5" />
+      <circle cx="13" cy="10" r="1.5" />
+      <path d="m17.5 12 3-3m-3 3 1 3.5" />
+    </>
+  ),
+  // ReWorld: a world inside a dashed sandbox
+  reworld: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="3" strokeDasharray="3 2.5" />
+      <circle cx="12" cy="12" r="5" />
+      <path d="M7 12h10M12 7c1.7 1.7 1.7 8.3 0 10" />
+    </>
+  ),
   // ∇, and a ball rolling down the loss curve
   gradient: (
     <>
@@ -46,7 +95,7 @@ const CARD_ICONS: Record<CardIconId, ReactNode> = {
       <path d="M4 8.5C4 14 8 18 15.5 18.5M12.5 20.85l3-2.35-2.65-2.72" />
     </>
   ),
-  // two support vectors orbiting you on a dashed margin
+  // if deep nets are SVMs: two support vectors on a dashed margin around you
   // (8 even dashes; the offset hides one under each support vector)
   dsv: (
     <>
@@ -133,7 +182,7 @@ const CARD_ICONS: Record<CardIconId, ReactNode> = {
       <path d="M21.75 13.1c-2.2.1-3.75 2-3.75 5.9" />
     </>
   ),
-  // N-way, K-shot, any-way: a grid of ways, one of them magic
+  // beam search with a wider beam: a grid of candidates, one of them picked
   anyway: (
     <>
       <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -142,7 +191,7 @@ const CARD_ICONS: Record<CardIconId, ReactNode> = {
       <path d="M17.5 13c0 2.7 1.8 4.5 4.5 4.5-2.7 0-4.5 1.8-4.5 4.5 0-2.7-1.8-4.5-4.5-4.5 2.7 0 4.5-1.8 4.5-4.5Z" fill="currentColor" />
     </>
   ),
-  // ACRO rollback: a rewind arrow around a robot arm
+  // ACRO: retract along the trajectory, a rewind arrow around a robot arm
   acro: (
     <>
       <path d="M4.21 16.5A9 9 0 1 0 4.21 7.5" />

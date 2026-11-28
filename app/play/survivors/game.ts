@@ -134,7 +134,7 @@ export const CARDS: CardDef[] = [
     maxLevel: 5,
     icon: "◉",
     paper: "dsv",
-    describe: (l) => (l === 1 ? "The decisive samples orbit you and hit what they touch." : "+1 support vector, +damage"),
+    describe: (l) => (l === 1 ? "Deep nets have support vectors too: they orbit you and hit bugs." : "+1 support vector, +damage"),
   },
   {
     id: "dropout",
@@ -159,7 +159,7 @@ export const CARDS: CardDef[] = [
     maxLevel: 5,
     icon: "◎",
     paper: "shot",
-    describe: (l) => (l === 1 ? "Flattens the landscape: a ring that hits and pushes bugs away." : "+range, +damage, more often"),
+    describe: (l) => (l === 1 ? "Flattens your optimization trajectory: a wave shoves bugs off it." : "+range, +damage, more often"),
   },
   {
     id: "looped",
@@ -171,12 +171,30 @@ export const CARDS: CardDef[] = [
   },
   {
     id: "anchors",
-    name: "Template Anchors",
+    name: "Template Infilling",
     kind: "weapon",
     maxLevel: 5,
     icon: "⚓",
     paper: "template-infilling",
-    describe: (l) => (l === 1 ? "Drops anchor tokens that fill in the gaps by shooting." : "anchors last longer and drop more often"),
+    describe: (l) => (l === 1 ? "Anchors go down across the field first; their fire fills the gaps." : "anchors last longer, drop more often"),
+  },
+  {
+    id: "csf",
+    name: "CSF Fingerprint",
+    kind: "weapon",
+    maxLevel: 5,
+    icon: "⌾",
+    paper: "csf",
+    describe: (l) => (l === 1 ? "Query-only probes fingerprint bugs; tagged bugs take +40% damage." : "+1 probe, more often"),
+  },
+  {
+    id: "rhd",
+    name: "Harness Distillation",
+    kind: "weapon",
+    maxLevel: 5,
+    icon: "⇄",
+    paper: "rhd",
+    describe: (l) => (l === 1 ? "A light agent runs your playbook; its kills refine it for you both." : "+damage, the light agent fires faster"),
   },
   {
     id: "adam",
@@ -212,23 +230,58 @@ export const CARDS: CardDef[] = [
   },
   {
     id: "anyway",
-    name: "Any-Way Meta-Learning",
+    name: "Beam Search (k=4)",
     kind: "passive",
     maxLevel: 1,
     icon: "✦",
-    paper: "any-way-meta-learning",
-    describe: () => "Learn from any number of ways: see 4 cards per level-up",
+    describe: () => "A wider beam: see 4 cards per level-up",
+  },
+  {
+    id: "dsf",
+    name: "Discriminative Score",
+    kind: "passive",
+    maxLevel: 3,
+    icon: "✧",
+    paper: "dsf",
+    describe: (l) => (l === 1 ? "If it understands, it can create: its gradients turn noise into tokens." : "samples tokens more often"),
+  },
+  {
+    id: "robotuse",
+    name: "RobotUse Subagents",
+    kind: "passive",
+    maxLevel: 3,
+    icon: "⚙",
+    paper: "robotuse",
+    describe: (l) => (l === 1 ? "Act by sight, not code: you pick the target, subagents fetch far tokens." : "+subagents, dispatched sooner"),
+  },
+  {
+    id: "reworld",
+    name: "ReWorld Sandbox",
+    kind: "passive",
+    maxLevel: 3,
+    icon: "▣",
+    describe: (l) => (l === 1 ? "Tries each hit in a sandbox world first: rolls one back every 16 s." : `the sandbox recharges in ${SANDBOX_CD[l - 1]} s`),
   },
   {
     id: "acro",
-    name: "ACRO Rollback",
+    name: "ACRO",
     kind: "passive",
     maxLevel: 1,
     icon: "⟲",
     paper: "acro",
-    describe: () => "On a fatal hit, retract 3 seconds and resume with half sanity",
+    describe: () => "On a fatal hit, a critic picks where on your path to retract and resume",
   },
 ];
+
+/** CSF: how long a queried bug stays fingerprinted, and the damage bonus on it. */
+const CSF_MARK_TIME = 6;
+const CSF_BONUS = 1.4;
+/** RHD: light-agent kills per playbook refinement (+10% bolt damage each, up to +60%). */
+const PLAYBOOK_KILLS = 15;
+/** ReWorld: sandbox recharge per level, seconds. */
+const SANDBOX_CD = [16, 12, 9];
+/** RobotUse: seconds between subagent dispatches per level. */
+const ROBOTUSE_CD = [3, 2.2, 1.5];
 
 const HEAL_CARD: CardDef = {
   id: "checkpoint",
@@ -341,9 +394,11 @@ type Enemy = {
   orbCd: number;
   boomCd: number;
   waveId: number;
+  /** CSF: seconds left fingerprinted (takes extra damage). */
+  mark: number;
 };
 
-type BulletSource = "bolt" | "anchor" | "boss";
+type BulletSource = "bolt" | "anchor" | "boss" | "drone";
 type Bullet = { src: BulletSource; x: number; y: number; vx: number; vy: number; dmg: number; r: number; life: number; pierce: number; hostile: boolean };
 type Gem = { x: number; y: number; vx: number; vy: number; value: number; pulled: boolean; magnet: boolean; phase: number; age: number };
 type Pickup = { kind: PickupKind; x: number; y: number; age: number; phase: number; pulled: boolean };
@@ -371,7 +426,7 @@ type Anchor = { x: number; y: number; age: number; life: number; fireCd: number;
 type Wave = { id: number; x: number; y: number; t: number; maxR: number; dmg: number };
 type Beam = { x1: number; y1: number; x2: number; y2: number; width: number; life: number; max: number };
 type Blast = { x: number; y: number; dmg: number; delay: number };
-type DamageSource = "bolt" | "orb" | "dropout" | "beam" | "wave" | "boomerang" | "blast";
+type DamageSource = "bolt" | "orb" | "dropout" | "beam" | "wave" | "boomerang" | "blast" | "probe";
 type BossPhase = "none" | "warning" | "entering" | "fight" | "enraged" | "defeated";
 type Mode = "attract" | "run";
 /** How draw() places an enemy this frame: anchor, height above the ground, rotation, scale, alpha, squash pivot. */
@@ -480,6 +535,11 @@ export function createGame(
   let detonating = false;
   let orbAngle = 0;
   let auraTick = 0;
+  /** RHD light agent: follows the player and fires with the shared playbook. */
+  const drone = { x: 0, y: 0, active: false };
+  let droneKills = 0;
+  let dsfCd = 0;
+  let sandboxCd = 0;
   let auraPulse = 0;
 
   const boss = { phase: "none" as BossPhase, enemy: null as Enemy | null, warn: 0, fireCd: 0, summonCd: 0, volleys: 0 };
@@ -600,6 +660,8 @@ export function createGame(
   const xpNext = () => xpFor(level + pendingLevelUps);
   const lvl = (id: string) => levels[id] ?? 0;
   const cdScale = () => Math.pow(0.91, lvl("mixed"));
+  /** RHD: the shared playbook, refined by the light agent's kills, boosts both agents' bolts. */
+  const playbook = () => 1 + 0.1 * Math.min(6, Math.floor(droneKills / PLAYBOOK_KILLS));
   const dsvCount = () => 1 + lvl("dsv");
   const dsvRadius = () => 62 + lvl("dsv") * 7;
   const dropoutRadius = () => 56 + lvl("dropout") * 13;
@@ -792,6 +854,10 @@ export function createGame(
     recomputeStats();
     if (id === "decay") player.hp = Math.min(player.maxHp, player.hp + 25);
     if (id === "acro") player.revives += 1;
+    if (id === "rhd" && lvl(id) === 1) {
+      drone.x = player.x;
+      drone.y = player.y;
+    }
   };
 
   const pushHud = () => {
@@ -902,6 +968,7 @@ export function createGame(
       orbCd: 0,
       boomCd: 0,
       waveId: -1,
+      mark: 0,
     };
   };
 
@@ -1027,7 +1094,7 @@ export function createGame(
     if (e.hp <= 0 || e.entrance > 0) return;
     if (e === boss.enemy && (victory > 0 || dying > 0)) return; // the decision is already made
     const crit = source !== "dropout" && source !== "blast" && Math.random() < CRIT_CHANCE;
-    const dealt = crit ? amount * 2 : amount;
+    const dealt = (crit ? amount * 2 : amount) * (e.mark > 0 ? CSF_BONUS : 1);
     const isBoss = e === boss.enemy;
     e.hp -= dealt;
     e.flash = 0.08;
@@ -1084,8 +1151,22 @@ export function createGame(
   // ---------------------------------------------------------- player fate
   const rollback = () => {
     player.revives -= 1;
-    // ACRO: physically retract along the recent trajectory and resume.
-    const back = history[Math.max(0, history.length - 30)] ?? player;
+    // ACRO: a critic scores the states along the executed trajectory and picks the most promising
+    // re-entry point (fewest bugs around it, then the most recent); retract there and resume.
+    let back: { x: number; y: number } = history[Math.max(0, history.length - 30)] ?? player;
+    let bestScore = Infinity;
+    for (let h = 0; h < history.length - 5; h += 1) {
+      const p = history[h];
+      let score = -h * 0.01;
+      for (let i = 0; i < enemies.length; i += 1) {
+        const e = enemies[i];
+        if (e.hp > 0 && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 < 150 * 150) score += 1;
+      }
+      if (score < bestScore) {
+        bestScore = score;
+        back = p;
+      }
+    }
     ring("revive", player.x, player.y, 46, 4, 0.35, PALETTE.blue, 3);
     player.x = back.x;
     player.y = back.y;
@@ -1121,6 +1202,16 @@ export function createGame(
 
   const hurtPlayer = (amount: number) => {
     if (mode !== "run" || godMode || player.iframes > 0 || ended || victory > 0 || dying > 0) return;
+    const rw = lvl("reworld");
+    if (rw && sandboxCd <= 0) {
+      // ReWorld: the hit is tried in the sandbox world first and rolled back before it reaches the live run
+      sandboxCd = SANDBOX_CD[rw - 1];
+      player.iframes = 0.6;
+      ring("revive", player.x, player.y, 34, 8, 0.3, PALETTE.green, 3);
+      floatText(player.x, player.y - 24, "rolled back", PALETTE.green, 13);
+      sfx("heal", { pitch: 1.3, volume: 0.7 });
+      return;
+    }
     player.hp -= amount;
     player.iframes = 0.45;
     anim.hurt = 0.3;
@@ -1401,10 +1492,19 @@ export function createGame(
     return true;
   };
 
+  const refinePlaybook = () => {
+    droneKills += 1;
+    if (droneKills % PLAYBOOK_KILLS !== 0 || droneKills > PLAYBOOK_KILLS * 6) return;
+    floatText(drone.x, drone.y - 22, `playbook v${droneKills / PLAYBOOK_KILLS + 1}`, PALETTE.green, 13);
+    ring("pickup", drone.x, drone.y, 6, 40, 0.4, PALETTE.green, 2);
+    ring("pickup", player.x, player.y, 10, 54, 0.45, PALETTE.green, 2);
+  };
+
   const updateWeapons = (dt: number) => {
+    if (sandboxCd > 0) sandboxCd -= dt;
     const g = lvl("gradient");
     if (g && ready("gradient", 0.7 - 0.07 * (g - 1), dt)) {
-      fireAt(player.x, player.y, nearestEnemy(player.x, player.y, 360), 4.5 + g * 1.5, 1 + Math.floor(g / 2), 430, "bolt");
+      fireAt(player.x, player.y, nearestEnemy(player.x, player.y, 360), (4.5 + g * 1.5) * playbook(), 1 + Math.floor(g / 2), 430, "bolt");
       sfx("shoot");
     }
 
@@ -1495,6 +1595,81 @@ export function createGame(
           }
         }
         if (zapped) sfx("zap");
+      }
+    }
+
+    const cs = lvl("csf");
+    if (cs && ready("csf", 3.4 - 0.3 * cs, dt)) {
+      // CSF: query-only probes. A few random bugs in range get fingerprinted, no weights needed.
+      const hits = nearby(player.x, player.y, 420, hitBuf);
+      let probes = 1 + cs;
+      for (let i = 0; i < hits.length && probes > 0; i += 1) {
+        const j = i + Math.floor(Math.random() * (hits.length - i));
+        const e = hits[j];
+        hits[j] = hits[i];
+        hits[i] = e;
+        if (e === boss.enemy || e.mark > 0 || (e.x - player.x) ** 2 + (e.y - player.y) ** 2 > 420 * 420) continue;
+        e.mark = CSF_MARK_TIME;
+        probes -= 1;
+        ring("pickup", e.x, e.y, 4, e.r + 16, 0.35, PALETTE.gold, 2);
+        damage(e, 1.5 + 0.8 * cs, 0, 0, "probe");
+      }
+      if (probes < 1 + cs) sfx("zap", { pitch: 1.4, volume: 0.6 });
+    }
+
+    const rh = lvl("rhd");
+    drone.active = rh > 0;
+    if (rh) {
+      // RHD: the light agent trails the strong one and runs the shared playbook
+      const k = 1 - Math.exp(-dt * 5);
+      drone.x += (player.x - player.faceX * 30 - drone.x) * k;
+      drone.y += (player.y - 30 - drone.y) * k;
+      if (ready("rhd", 1.15 - 0.1 * rh, dt)) {
+        const target = nearestEnemy(drone.x, drone.y, 380);
+        if (target) {
+          fireAt(drone.x, drone.y, target, (3 + 1.3 * rh) * playbook(), 1, 420, "drone");
+          sfx("shoot", { volume: 0.45, pitch: 1.25, pan: panAt(drone.x) });
+        }
+      }
+    }
+
+    const ds = lvl("dsf");
+    if (ds) {
+      dsfCd -= dt;
+      if (dsfCd <= 0) {
+        dsfCd = 7.5 - 1.5 * (ds - 1);
+        // DSF: samples drawn from noise by the score field of a model trained only to discriminate
+        for (let i = 0; i < 3; i += 1) {
+          const ang = Math.random() * TAU;
+          const d = rand(70, 130);
+          const gx = player.x + Math.cos(ang) * d;
+          const gy = player.y + Math.sin(ang) * d;
+          burst("sparkle", gx, gy, 6, 90, 3, PALETTE.purple, 0.45);
+          dropGem(gx, gy, 1 + Math.floor(t / 100));
+        }
+        sfx("gem", { pitch: 0.75, volume: 0.6 });
+      }
+    }
+
+    const ru = lvl("robotuse");
+    if (ru && ready("robotuse", ROBOTUSE_CD[ru - 1], dt)) {
+      // RobotUse: actions are chosen visually (pick the target), not written as code;
+  // a subagent handles the motion and reports back only the result
+      for (let k = 0; k < 2 * ru; k += 1) {
+        let best: Gem | null = null;
+        let bestD = player.pickup * player.pickup;
+        for (let i = 0; i < gems.length; i += 1) {
+          const g = gems[i];
+          if (g.pulled) continue;
+          const d = (g.x - player.x) ** 2 + (g.y - player.y) ** 2;
+          if (d > bestD && d < 560 * 560) {
+            bestD = d;
+            best = g;
+          }
+        }
+        if (!best) break;
+        best.pulled = true;
+        ring("pickup", best.x, best.y, 4, 28, 0.35, PALETTE.blue, 2);
       }
     }
 
@@ -1629,6 +1804,7 @@ export function createGame(
       e.age += dt;
       e.phase += dt * PHASE_RATE[e.kind];
       e.flash = Math.max(0, e.flash - dt);
+      if (e.mark > 0) e.mark -= dt;
       e.squash = Math.max(0, e.squash - dt / 0.12);
       if (e.entrance > 0) {
         e.entrance -= dt;
@@ -1716,7 +1892,9 @@ export function createGame(
           const rr = e.r + b.r;
           if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 >= rr * rr) continue;
           const sp = Math.hypot(b.vx, b.vy) || 1;
+          const alive = e.hp > 0;
           damage(e, b.dmg, (b.vx / sp) * 90, (b.vy / sp) * 90, "bolt");
+          if (b.src === "drone" && alive && e.hp <= 0) refinePlaybook();
           hitSpark(b.x, b.y, b.vx / sp, b.vy / sp);
           b.pierce -= 1;
           if (b.pierce <= 0) b.life = 0;
@@ -2519,6 +2697,45 @@ export function createGame(
       stamp(a.sheet.anchor, -10);
     }
     ctx.globalAlpha = 1;
+  };
+
+  // ---- paper extras: CSF fingerprints, the ReWorld sandbox bubble, the RHD light agent
+  const FINGERPRINT_DASH = [4, 4];
+  const drawAgents = (a: Art) => {
+    ctx.lineWidth = 2;
+    ctx.setLineDash(FINGERPRINT_DASH);
+    ctx.strokeStyle = PALETTE.gold;
+    for (let i = 0; i < enemies.length; i += 1) {
+      const e = enemies[i];
+      if (e.mark <= 0 || e.hp <= 0 || !inView(e.x, e.y, e.r + 8)) continue;
+      ctx.globalAlpha = Math.min(1, e.mark * 2);
+      place(e.x, e.y, clock * 1.5, 1, 1);
+      ctx.beginPath();
+      ctx.arc(0, 0, e.r + 6, 0, TAU);
+      ctx.stroke();
+    }
+    if (lvl("reworld") && sandboxCd <= 0 && deathTime < 0) {
+      ctx.strokeStyle = PALETTE.green;
+      ctx.globalAlpha = 0.55 + 0.2 * Math.sin(clock * 4);
+      place(player.x, player.y - 4, -clock, 1, 1);
+      ctx.beginPath();
+      ctx.arc(0, 0, 25, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.setLineDash(NO_DASH);
+    ctx.globalAlpha = 1;
+    if (drone.active && deathTime < 0 && inView(drone.x, drone.y, 30)) {
+      const bob = Math.sin(clock * 5) * 2;
+      blit(a.sheet.shadow, drone.x, drone.y + 18, 0, 0.28);
+      blit(a.sheet.player.body, drone.x, drone.y + bob, 0, 0.55);
+      ctx.fillStyle = PALETTE.ink;
+      place(drone.x, drone.y + bob, 0, 0.55, 0.55);
+      ctx.beginPath();
+      ctx.arc(PLAYER_VISOR.x - 4 + player.faceX * 2, PLAYER_VISOR.y, 2, 0, TAU);
+      ctx.moveTo(PLAYER_VISOR.x + 6 + player.faceX * 2, PLAYER_VISOR.y);
+      ctx.arc(PLAYER_VISOR.x + 4 + player.faceX * 2, PLAYER_VISOR.y, 2, 0, TAU);
+      ctx.fill();
+    }
   };
 
   // ---- enemies and Reviewer 2
@@ -3357,6 +3574,7 @@ export function createGame(
     drawLoot(a);
     drawAnchors(a);
     drawEnemies(a);
+    drawAgents(a);
     ctx.globalCompositeOperation = "lighter";
     drawLowLights(a);
     ctx.globalCompositeOperation = "source-over";
@@ -3431,6 +3649,10 @@ export function createGame(
     orbAngle = 0;
     auraTick = 0;
     auraPulse = 0;
+    drone.active = false;
+    droneKills = 0;
+    dsfCd = 0;
+    sandboxCd = 0;
     Object.assign(boss, { phase: "none", enemy: null, warn: 0, fireCd: 0, summonCd: 0, volleys: 0 });
     Object.assign(speech, { text: "", shown: 0, age: 0, hold: 0, gap: 0, x: 0, y: 0, visible: false, final: false, last: -1 });
     hitStop = 0;

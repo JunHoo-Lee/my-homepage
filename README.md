@@ -12,11 +12,27 @@ publication list, and dedicated project pages for selected papers.
 - `/dsv`: Deep Support Vectors project page
 - `/mysteryofunlearnedparameters`: blog post on CPU–GPU dual LMs (static page under `public/`)
 - `/wplm`: WPLM, a chatbot whose weights were programmed, not trained (static page under `public/wplm`; `/wp-llm` redirects here)
-- `/play/survivors`: Gradient Survivors, the default game behind the 🎮 icon on the homepage: a 5-minute survivors-like on a 2D canvas (NaN/Overfit/Hallucination bugs, Reviewer 2 boss at 2:30, paper-themed upgrade cards for DSV, SHOT, ACRO, Template Infilling and Any-Way Meta-Learning; `?debug` exposes state on `window.__survivors`)
+- `/play/survivors`: Gradient Survivors, the default game behind the 🎮 icon on the homepage: a 5-minute survivors-like on a 2D canvas (NaN/Overfit/Hallucination bugs, Reviewer 2 boss at 2:30, upgrade cards built on my papers: DSV, SHOT, Template Infilling, ACRO, CSF, DSF, RHD, RobotUse and ReWorld; `?debug` exposes state on `window.__survivors`)
 - `/play`: game picker, linked from each game as "Other games"
 - `/play/dsf`: **What I Cannot Create**, the Discriminative Score Function paper as a blackboard game (see "Paper games" below)
 - `/play/backdoor`: **Nothing to Declare**, the clean-data backdoor paper (DaR) as a customs game
-- `/play/drive`: Drive mode, a three.js + cannon-es world where you drive a toy car around the homepage's sections (`?debug` exposes the car's physics body on `window.__drive`)
+- `/play/explore`: Paperlands, a three.js voxel island (procedural terrain, textures and sound, no asset files) where each homepage section is a landmark and each first-author paper a shrine; mine/place blocks, day-night cycle, map with fast travel, touch controls (`?debug` exposes state on `window.__explore`; `/play/drive` redirects here)
+
+## AI Agent Access
+
+The same read-only tool set (`app/lib/agent-tools.ts`) is exposed three ways:
+
+- **WebMCP** (`app/components/WebMCPTools.tsx`): on every page, browsers with
+  `navigator.modelContext` get `get_profile`, `search_publications`,
+  `get_publication_bibtex`, `get_news`, `get_awards_and_service`, `list_pages`
+  and `open_page`. Browsers without WebMCP skip it and never download the data.
+- **Remote MCP server** at `/mcp` (Streamable HTTP, stateless, no auth): the
+  same tools minus `open_page`, plus `llms.txt` / `llms-full.txt` as resources.
+- **llms.txt**: `/llms.txt` (index) and `/llms-full.txt` (all content as Markdown).
+
+Discovery: `/.well-known/mcp/server-card.json` (alias `/.well-known/mcp.json`),
+`/.well-known/api-catalog` (RFC 9727), and `<link>` hints in the root layout.
+Add new pages to `SITE_PAGES` in `app/lib/agent-tools.ts` so agents can find them.
 
 ## Paper games
 

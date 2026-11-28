@@ -16,7 +16,6 @@
     "@react-pdf/renderer": "^4.3.1",
     "@supabase/supabase-js": "^2.87.1",
     "@types/xml2js": "^0.4.14",
-    "cannon-es": "^0.20.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "katex": "^0.16.27",

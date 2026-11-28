@@ -67,10 +67,16 @@ export function buildPlayContent(): PlayContent {
 
 /** Project page links for the papers that appear as upgrade cards. */
 export function buildPaperLinks(): Record<string, { label: string; href: string }> {
-  return Object.fromEntries(
-    (["dsv", "shot", "acro", "template-infilling", "any-way-meta-learning"] as const).map((slug) => {
-      const project = PROJECTS_BY_SLUG[slug];
-      return [slug, { label: `${project.shortTitle} (${project.venue})`, href: project.projectLink }];
-    }),
-  );
+  return {
+    ...Object.fromEntries(
+      (["dsv", "shot", "acro", "template-infilling", "csf"] as const).map((slug) => {
+        const project = PROJECTS_BY_SLUG[slug];
+        return [slug, { label: `${project.shortTitle} (${project.venue})`, href: project.projectLink }];
+      }),
+    ),
+    // papers without an entry in PROJECTS (see app/lib/data.ts)
+    dsf: { label: "DSF (NeurIPS 2026)", href: "/dsf" },
+    rhd: { label: "Recursive Harness Distillation (arXiv 2026)", href: "https://arxiv.org/abs/2609.33378" },
+    robotuse: { label: "RobotUse (arXiv 2026)", href: "https://robotuse-team.github.io/" },
+  };
 }

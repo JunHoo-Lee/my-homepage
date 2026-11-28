@@ -431,7 +431,7 @@ const SFX: Record<SfxName, (v: Voice) => void> = {
     for (let i = 0; i < sparkle.length; i++) v.tone({ f: sparkle[i], at: 0.45 + i * 0.13, dur: 0.18, gain: 0.1 });
   },
 
-  // ACRO rollback: tape rewind, a warbling swoop down and back up, and noise that swells then stops
+  // ACRO retraction: tape rewind, a warbling swoop down and back up, and noise that swells then stops
   revive: (v) => {
     v.tone({ f: 1200, to: [300, 1200], dur: 0.7, gain: 0.36, attack: 0.03, hold: 0.55, vib: [18, 60, 0.05] });
     v.noise({ dur: 0.62, gain: 0.56, bp: 500, sweep: 4000, q: 1.5, attack: 0.55 });
