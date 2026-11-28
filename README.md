@@ -37,21 +37,27 @@ Add new pages to `SITE_PAGES` in `app/lib/agent-tools.ts` so agents can find the
 ## Paper games
 
 Two NeurIPS 2026 papers have a playable version. Both are built to be opened
-from a QR code at a poster: they fit a phone held upright, take three to four
+from a QR code at a poster: they fit a phone held upright, take three to six
 minutes, need no install, and end on the paper's implications with links back
 to the project page. The project pages (`/dsf`, `/backdoor`) link to them and
 show the QR code; print-ready codes are in `public/dsf/assets/play-qr.{svg,png}`
 and `public/backdoor/assets/play-qr.{svg,png}`.
 
-- `app/play/dsf` — *What I Cannot Create*. Opens on Feynman's "What I cannot
-  create, I do not understand", then the hand-wavy idea (generating an image is
-  finding the image manifold, which is where a discriminative model is at home,
-  so search in function space). Five boards: unconditional generation, any
-  architecture, global explanation (the 10:10 clock), guidance and editing,
-  inpainting. One grain of chalk dust stands for one candidate image, the
-  hidden drawing for the data manifold. `lore.ts` holds every word and the
-  stage tuning, `drawings.ts` the chalk drawings, `engine.ts` the canvas game.
-  `?debug` exposes `window.__dsf` (`state()`, `finish()`, `expire()`, `next()`).
+- `app/play/dsf` — *What I Cannot Create*. An open-world mystery driven by one
+  question, carved on a sealed door: "What I cannot create, I do not
+  understand" (Feynman); a classifier cannot create; does it understand
+  nothing? The player walks a night island in a sea of static (the island is
+  the image manifold) and solves the puzzle in each of seven ruins, in any
+  order. Every solved puzzle is one insight of the paper, changes what the log
+  says about the question, and lights a beacon; five insights let the player
+  attempt the door, whose answer is the contrapositive. `content.ts` holds the
+  world, every word and the puzzle data; `world.ts` is the canvas island
+  (walking, light, what is nearby); `figures/` holds the puzzles: `DustBoard`
+  (static becomes a drawing), `ProbeBoard` (find the sliver), `Puzzles`
+  (`TwoLooks`, a deduction about agreeing with yourself, and `DoorPuzzle`, the
+  contrapositive), `Ruler` (pixel ruler vs function ruler) and `Footprints`
+  (align the loss gradient with −θ). `?debug` exposes `window.__dsf`
+  (`goto(id)`, `state()`).
 - `app/play/backdoor` — *Nothing to Declare*. Shift 1: artificial triggers get
   caught at customs and the student stays clean. Shift 2: every image is clean
   and the student is backdoored anyway. Shift 3: the player runs
@@ -59,7 +65,9 @@ and `public/backdoor/assets/play-qr.{svg,png}`.
   else distill, activate). `samples.ts` draws the 16×16 photos and defines the
   rules, `lore.ts` holds the words, the paper's numbers and the scoring.
   `?debug` adds `data-trigger` / `data-positive` to the card on the desk.
-- `app/play/shared` — a tiny WebAudio synth and a share-link helper.
+- `app/play/shared` — a tiny WebAudio synth, a share-link helper, and
+  `playback.ts`, which every game calls before its first sound so that a
+  phone's ringer switch does not silence it.
 
 To add a game for another paper: create `app/play/<slug>`, add a tile to
 `app/play/page.tsx`, set `gameLink` on the publication in `app/lib/data.ts`,

@@ -14,8 +14,8 @@ const GAMES = [
     href: "/play/dsf",
     badge: "Paper · NeurIPS 2026",
     title: "What I Cannot Create",
-    blurb: "You are a frozen classifier at Feynman's blackboard. Walk through the noise and an image appears. A game about the Discriminative Score Function.",
-    meta: "5 boards · about 4 minutes · phone friendly",
+    blurb: "A classifier cannot create. Does it understand nothing? Explore an island in a sea of static and solve its puzzles to answer the question on the sealed door.",
+    meta: "7 puzzles and a door · about 8 minutes · phone friendly",
     art: "dsf",
   },
   {

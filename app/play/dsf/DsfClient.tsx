@@ -4,284 +4,268 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { shareLink } from "../shared/share";
-import { createSynth, type Synth } from "../shared/synth";
+import { sharedSynth } from "../shared/synth";
+import { CLOCK_GUESSES, DOOR, DOOR_NEEDS, FEYNMAN, FINALE, LOG, PROMPT_CARDS, QUESTION, SITES, STATUES, TITLE, TOASTS, type Site, type SiteId } from "./content";
 import styles from "./dsf.module.css";
-import { createEngine, type Engine, type Hud, type StageResult } from "./engine";
-import { FEYNMAN, FINALE, IDEA, IMPLICATIONS, LOSS, PROLOGUE, STAGES, TITLE, rankFor } from "./lore";
+import DustBoard from "./figures/DustBoard";
+import Footprints from "./figures/Footprints";
+import ProbeBoard from "./figures/ProbeBoard";
+import { DoorPuzzle, TwoLooks } from "./figures/Puzzles";
+import Ruler from "./figures/Ruler";
+import { createWorld, type Near, type World } from "./world";
 
-type Screen = "quote" | "title" | "idea" | "brief" | "play" | "outro" | "lost" | "finale";
+type Screen = "title" | "play" | "finale";
+type Open = { kind: "site"; id: SiteId } | { kind: "statue"; id: string } | { kind: "log" } | null;
 type Toast = { id: number; text: string };
 
-/** The three chalk sketches that go with IDEA.steps. */
-function Doodle({ kind }: { kind: string }) {
-  const curve = "M8 56 C 30 8, 62 74, 112 18";
-  return (
-    <svg viewBox="0 0 120 72" className={styles.doodle} aria-hidden="true">
-      {kind === "manifold" ? (
-        <>
-          {[
-            [14, 16],
-            [34, 60],
-            [50, 12],
-            [70, 62],
-            [92, 52],
-            [104, 44],
-            [26, 34],
-            [84, 14],
-          ].map(([x, y]) => (
-            <circle key={`${x}-${y}`} cx={x} cy={y} r="1.8" className={styles.dDust} />
+const RUINS = SITES.filter((site) => site.id !== "door");
+
+/** The puzzle of one ruin. Each calls onSolved once. */
+function Puzzle({ site, onSolved }: { site: Site; onSolved(): void }) {
+  const synth = sharedSynth();
+  const [reveal, setReveal] = useState(0);
+  const [tapsLeft, setTapsLeft] = useState(8);
+  const [guess, setGuess] = useState<string | null>(null);
+  const [drawn, setDrawn] = useState(false);
+  const [cards, setCards] = useState<number[]>([]);
+  const [opened, setOpened] = useState(false);
+
+  let body: React.ReactNode = null;
+  let canSkip = true;
+  if (site.id === "shore") {
+    body = <DustBoard drawing="cat" solved={false} revealSignal={reveal} synth={synth} label="A slab of static. Dragging across it makes a chalk cat appear." onSolved={onSolved} />;
+  } else if (site.id === "needle") {
+    body = (
+      <>
+        <ProbeBoard mode="find" solved={false} revealSignal={reveal} synth={synth} label="A board of static with a hidden curve of pictures" onTap={(left) => setTapsLeft(left)} onSolved={() => window.setTimeout(onSolved, 1500)} />
+        <p className={styles.status}>
+          Taps left: <b>{tapsLeft}</b>
+        </p>
+      </>
+    );
+  } else if (site.id === "looks") {
+    body = <TwoLooks synth={synth} onSolved={onSolved} />;
+    canSkip = false;
+  } else if (site.id === "ruler") {
+    body = <Ruler solved={false} synth={synth} onSolved={onSolved} />;
+    canSkip = false;
+  } else if (site.id === "footprints") {
+    body = <Footprints solved={false} synth={synth} onSolved={() => window.setTimeout(onSolved, 700)} />;
+    canSkip = false;
+  } else if (site.id === "clock") {
+    canSkip = guess !== null;
+    body = (
+      <>
+        <div className={styles.choices}>
+          {CLOCK_GUESSES.map((option) => (
+            <button key={option} type="button" className={guess === option ? styles.choiceOn : undefined} onClick={() => { synth.unlock(); setGuess(option); }}>
+              {option}
+            </button>
           ))}
-          <path d={curve} className={styles.dLine} />
-          <path d="M50 14 L52 30 M70 60 L72 47 M26 35 L22 28 M92 51 L89 39" className={styles.dArrow} />
-        </>
+        </div>
+        <div className={guess === null ? styles.lockedBoard : undefined}>
+          <DustBoard drawing="clock" solved={false} locked={guess === null} revealSignal={reveal} synth={synth} label="A board of static that becomes a clock" onSolved={onSolved} />
+          {guess === null ? <span className={styles.lockNote}>Guess first.</span> : null}
+        </div>
+      </>
+    );
+  } else if (site.id === "bench") {
+    body = (
+      <>
+        <DustBoard drawing="banana" layers={[0, ...cards]} solved={drawn} revealSignal={reveal} synth={synth} label="A board of static that becomes a banana" onSolved={() => setDrawn(true)} />
+        <div className={styles.choices}>
+          {PROMPT_CARDS.map((card) => (
+            <button
+              key={card.layer}
+              type="button"
+              disabled={!drawn || cards.includes(card.layer)}
+              className={`${styles.card} ${cards.includes(card.layer) ? styles.choiceOn : ""}`}
+              onClick={() => {
+                synth.unlock();
+                synth.arp([660, 880, 1320], 0.08, { dur: 0.25, type: "triangle", gain: 0.1 });
+                const next = [...cards, card.layer];
+                setCards(next);
+                if (next.length >= PROMPT_CARDS.length) window.setTimeout(onSolved, 2600);
+              }}
+            >
+              {card.text}
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  } else {
+    canSkip = false;
+    body = opened ? (
+      <DustBoard drawing="understand" erase="feynman" solved={false} autoplay synth={synth} label="The sentence on the door is wiped and written again" onSolved={onSolved} />
+    ) : (
+      <DoorPuzzle synth={synth} onSolved={() => setOpened(true)} />
+    );
+  }
+
+  return (
+    <div className={styles.puzzle}>
+      <p className={styles.instruction}>
+        <span>Puzzle</span> {site.instruction}
+      </p>
+      {body}
+      {canSkip ? (
+        <button type="button" className={styles.linkButton} onClick={() => setReveal((value) => value + 1)}>
+          Reveal without playing
+        </button>
       ) : null}
-      {kind === "domain" ? (
-        <>
-          <path d={curve} className={styles.dBand} />
-          <path d={curve} className={styles.dLine} />
-          <path d="M56 40 l4 5 l8 -11" className={styles.dYes} />
-          <path d="M92 52 l9 9 M101 52 l-9 9" className={styles.dNo} />
-          <text x="78" y="70" className={styles.dText}>
-            99.9%
-          </text>
-        </>
-      ) : null}
-      {kind === "lift" ? (
-        <>
-          <path d="M14 66 L96 66 L110 46 L28 46 Z" className={styles.dPlane} />
-          <path d="M14 30 L96 30 L110 10 L28 10 Z" className={styles.dPlane} />
-          <circle cx="46" cy="57" r="2.6" className={styles.dDust} />
-          <path d="M46 54 L46 24" className={styles.dDash} />
-          <circle cx="46" cy="21" r="2.6" className={styles.dDust} />
-          <path d="M51 20 L78 19 M72 15 L79 19 L72 23" className={styles.dArrow} />
-          <path d="M88 13 l2 4.5 l5 0.5 l-3.7 3.3 l1.1 4.9 l-4.4 -2.6 l-4.4 2.6 l1.1 -4.9 l-3.7 -3.3 l5 -0.5 Z" className={styles.dStar} />
-          <text x="100" y="24" className={styles.dText}>
-            θ
-          </text>
-          <text x="58" y="60" className={styles.dText}>
-            x
-          </text>
-        </>
-      ) : null}
-    </svg>
+    </div>
   );
 }
 
-const EMPTY_HUD: Hud = { progress: 0, goal: 0.9, step: 0, burst: 1, boost: 0, guess: "", tokensLeft: 0 };
+/** What a solved ruin wrote into the log. */
+function Insight({ site }: { site: Site }) {
+  return (
+    <div className={styles.insight}>
+      <p className={styles.aha}>{site.aha}</p>
+      {site.note.map((paragraph) => (
+        <p key={paragraph}>{paragraph}</p>
+      ))}
+      {site.formula ? <p className={styles.formula}>{site.formula}</p> : null}
+      <p className={styles.verdictLine}>
+        <span>The question now</span> {site.verdict}
+      </p>
+    </div>
+  );
+}
 
 export default function DsfClient() {
+  const synth = sharedSynth();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const engineRef = useRef<Engine | null>(null);
-  const synthRef = useRef<Synth | null>(null);
+  const worldRef = useRef<World | null>(null);
+  const live = useRef<{ screen: Screen; open: Open; near: Near }>({ screen: "title", open: null, near: null });
   const toastId = useRef(0);
-  const screenRef = useRef<Screen>("quote");
 
-  const [screen, setScreenState] = useState<Screen>("quote");
-  const [stageIndex, setStageIndex] = useState(0);
-  const [hud, setHud] = useState<Hud>(EMPTY_HUD);
+  const [screen, setScreen] = useState<Screen>("title");
+  const [open, setOpen] = useState<Open>(null);
+  const [near, setNear] = useState<Near>(null);
+  const [solved, setSolved] = useState<SiteId[]>([]);
+  const [questioned, setQuestioned] = useState<string[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [snapshots, setSnapshots] = useState<(string | null)[]>([]);
-  const [stepsLeft, setStepsLeft] = useState(0);
-  const [lastSteps, setLastSteps] = useState(0);
-  const [retries, setRetries] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [peek, setPeek] = useState(false);
   const [shared, setShared] = useState("");
 
-  const stage = STAGES[stageIndex];
-
-  const setScreen = useCallback((next: Screen) => {
-    screenRef.current = next;
-    setScreenState(next);
-  }, []);
+  useEffect(() => {
+    live.current = { screen, open, near };
+  });
 
   const pushToast = useCallback((text: string) => {
     const id = (toastId.current += 1);
-    setToasts((current) => [...current.slice(-2), { id, text }]);
-    window.setTimeout(() => setToasts((current) => current.filter((toast) => toast.id !== id)), 2800);
+    setToasts((current) => [...current.slice(-1), { id, text }]);
+    window.setTimeout(() => setToasts((current) => current.filter((toast) => toast.id !== id)), 4200);
   }, []);
 
-  const stageIndexRef = useRef(0);
-
-  const handleEnd = useCallback(
-    (result: StageResult) => {
-      setPaused(false);
-      if (!result.won) {
-        setRetries((count) => count + 1);
-        setScreen("lost");
-        return;
-      }
-      const index = stageIndexRef.current;
-      setSnapshots((current) => {
-        const next = current.slice();
-        next[index] = result.snapshot;
-        return next;
-      });
-      setLastSteps(result.stepsLeft);
-      setStepsLeft((total) => total + result.stepsLeft);
-      setScreen("outro");
-    },
-    [setScreen],
-  );
-
-  // the engine lives as long as the page
+  // the island lives as long as the page
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const synth = createSynth();
-    synthRef.current = synth;
+    const world = createWorld(canvas, synth, { onNear: setNear, onToast: pushToast });
+    worldRef.current = world;
     // the saved mute setting is only known in the browser, after hydration
-    const syncMuted = window.setTimeout(() => setMuted(synth.muted), 0);
-    const engine = createEngine(canvas, synth, { onHud: setHud, onToast: pushToast, onEnd: handleEnd });
-    engineRef.current = engine;
+    const sync = window.setTimeout(() => setMuted(synth.muted), 0);
     if (new URLSearchParams(window.location.search).has("debug")) {
-      (window as unknown as { __dsf?: unknown }).__dsf = engine.debug;
+      (window as unknown as { __dsf?: unknown }).__dsf = world.debug;
     }
     return () => {
-      window.clearTimeout(syncMuted);
-      engine.dispose();
-      synth.dispose();
-      engineRef.current = null;
-      synthRef.current = null;
+      window.clearTimeout(sync);
+      world.dispose();
+      worldRef.current = null;
     };
-  }, [handleEnd, pushToast]);
+  }, [pushToast, synth]);
 
-  const openStage = useCallback(
-    (index: number) => {
-      stageIndexRef.current = index;
-      setStageIndex(index);
-      setHud(EMPTY_HUD);
-      setToasts([]);
-      setPeek(false);
-      setScreen("brief");
-      void engineRef.current?.load(STAGES[index]);
+  const compass = solved.includes("footprints");
+  useEffect(() => {
+    worldRef.current?.setProgress(solved, questioned, compass);
+  }, [solved, questioned, compass]);
+
+  useEffect(() => {
+    worldRef.current?.setPaused(screen !== "play" || open !== null);
+  }, [screen, open]);
+
+  const ruinsSolved = RUINS.filter((site) => solved.includes(site.id)).length;
+  const doorOpen = solved.includes("door");
+
+  const examine = useCallback(() => {
+    const now = live.current;
+    if (now.screen !== "play" || now.open || !now.near) return;
+    synth.unlock();
+    synth.tone({ freq: 500, to: 700, dur: 0.08, gain: 0.08 });
+    if (now.near.kind === "statue") {
+      const id = now.near.id;
+      setQuestioned((current) => (current.includes(id) ? current : [...current, id]));
+      setOpen({ kind: "statue", id });
+    } else setOpen({ kind: "site", id: now.near.id });
+  }, [synth]);
+
+  const solve = useCallback(
+    (id: SiteId) => {
+      setSolved((current) => {
+        if (current.includes(id)) return current;
+        if (id === "footprints") pushToast(TOASTS.compass);
+        const next = [...current, id];
+        if (id !== "door" && next.filter((item) => item !== "door").length === DOOR_NEEDS) pushToast(TOASTS.door);
+        return next;
+      });
     },
-    [setScreen],
+    [pushToast],
   );
 
-  const startStage = useCallback(() => {
-    synthRef.current?.unlock();
-    synthRef.current?.tone({ freq: 660, dur: 0.08, gain: 0.1 });
-    setScreen("play");
-    engineRef.current?.begin();
-  }, [setScreen]);
-
-  const restart = useCallback(() => {
-    setSnapshots([]);
-    setStepsLeft(0);
-    setRetries(0);
-    openStage(0);
-  }, [openStage]);
-
-  const togglePause = useCallback(() => {
-    if (screenRef.current !== "play") return;
-    setPaused((current) => {
-      engineRef.current?.setPaused(!current);
-      return !current;
-    });
-  }, []);
-
   const toggleMute = useCallback(() => {
-    const synth = synthRef.current;
-    if (!synth) return;
     synth.unlock();
     synth.setMuted(!synth.muted);
     setMuted(synth.muted);
-  }, []);
+  }, [synth]);
 
-  // keyboard: Enter advances the cards, P pauses
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      const current = screenRef.current;
-      if (event.key === "p" || event.key === "P" || event.key === "Escape") {
-        if (current === "play") togglePause();
-        return;
-      }
-      if (event.key === "m" || event.key === "M") {
-        toggleMute();
-        return;
-      }
-      if (event.key !== "Enter") return;
-      if (event.target instanceof HTMLElement && ["A", "BUTTON"].includes(event.target.tagName)) return;
-      // otherwise the same key press would also click the button the next card focuses
-      event.preventDefault();
-      synthRef.current?.unlock();
-      if (current === "quote") setScreen("title");
-      else if (current === "title") setScreen("idea");
-      else if (current === "idea") openStage(0);
-      else if (current === "brief") startStage();
-      else if (current === "lost") openStage(stageIndexRef.current);
-      else if (current === "outro") {
-        if (stageIndexRef.current + 1 < STAGES.length) openStage(stageIndexRef.current + 1);
-        else setScreen("finale");
-      }
+      if (event.target instanceof HTMLElement && ["INPUT", "BUTTON", "A"].includes(event.target.tagName) && event.key !== "Escape") return;
+      const now = live.current;
+      const key = event.key.toLowerCase();
+      if (key === "m") toggleMute();
+      else if (now.screen === "title" && key === "enter") {
+        event.preventDefault();
+        synth.unlock();
+        setScreen("play");
+      } else if (now.screen === "play" && !now.open && (key === "e" || key === " " || key === "enter")) {
+        event.preventDefault();
+        examine();
+      } else if (now.screen === "play" && !now.open && key === "l") setOpen({ kind: "log" });
+      else if (now.screen === "play" && now.open && key === "escape") setOpen(null);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openStage, setScreen, startStage, toggleMute, togglePause]);
+  }, [examine, synth, toggleMute]);
 
-  // pause when the tab is hidden
-  useEffect(() => {
-    function onVisibility() {
-      if (document.hidden && screenRef.current === "play") {
-        engineRef.current?.setPaused(true);
-        setPaused(true);
-      }
-    }
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, []);
-
-  const inStage = screen === "play" || screen === "brief" || screen === "outro" || screen === "lost";
-  const percent = Math.round(hud.progress * 100);
-  const rank = rankFor(stepsLeft, retries);
-  const lastStage = stageIndex + 1 >= STAGES.length;
+  const site = open?.kind === "site" ? SITES.find((item) => item.id === open.id) : undefined;
+  const statue = open?.kind === "statue" ? STATUES.find((item) => item.id === open.id) : undefined;
+  const siteSolved = site ? solved.includes(site.id) : false;
+  const doorLocked = site?.id === "door" && !siteSolved && ruinsSolved < DOOR_NEEDS;
 
   return (
     <div className={styles.root}>
       <header className={styles.bar}>
-        <Link href="/play" className={styles.back} aria-label="Other games">
+        <Link href="/play" className={styles.back}>
           ← Games
         </Link>
-        {inStage ? (
-          <>
-            <div className={styles.chip}>
-              <b>
-                {stageIndex + 1}/{STAGES.length} · {stage.model}
-              </b>
-              <span>{stage.title}</span>
-            </div>
-            <div className={styles.meter} role="progressbar" aria-label="Share of dust on the manifold" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
-              <div className={styles.meterFill} style={{ width: `${percent}%` }} />
-              <div className={styles.meterGoal} style={{ left: `${Math.round(hud.goal * 100)}%` }} />
-              <span className={styles.meterText}>on the manifold {percent}%</span>
-            </div>
-            <div className={`${styles.steps} ${hud.step > 800 ? styles.stepsLow : ""}`}>
-              t = {hud.step}
-              <small> / 1000</small>
-            </div>
-          </>
-        ) : (
-          <div className={styles.barTitle}>{TITLE.name}</div>
-        )}
-        <div className={styles.barButtons}>
-          {screen === "play" ? (
-            <button type="button" className={styles.icon} onClick={togglePause} aria-label={paused ? "Resume" : "Pause"}>
-              {paused ? "▶" : "Ⅱ"}
-            </button>
-          ) : null}
-          <button type="button" className={styles.icon} onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"} aria-pressed={muted}>
-            {muted ? "🔇" : "🔊"}
+        <p className={styles.question}>{screen === "play" ? QUESTION.short : TITLE.name}</p>
+        {screen === "play" ? (
+          <button type="button" className={styles.logButton} onClick={() => setOpen({ kind: "log" })}>
+            {LOG.button} {ruinsSolved + (doorOpen ? 1 : 0)}/{SITES.length}
           </button>
-        </div>
+        ) : null}
+        <button type="button" className={styles.icon} onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"} aria-pressed={muted}>
+          {muted ? "🔇" : "🔊"}
+        </button>
       </header>
 
-      <div className={styles.boardWrap}>
-        <div className={styles.fit}>
-          <canvas ref={canvasRef} className={styles.canvas} aria-label="Blackboard: move through the chalk dust to make the hidden image appear" />
-        </div>
+      <div className={styles.stage}>
+        <canvas ref={canvasRef} className={styles.canvas} aria-label="An island at night in a sea of static. Walk it to find the ruins." />
 
         <div className={styles.toasts} aria-live="polite">
           {toasts.map((toast) => (
@@ -291,48 +275,25 @@ export default function DsfClient() {
           ))}
         </div>
 
-        {screen === "quote" ? (
-          <div className={`${styles.overlay} ${styles.slate}`} onClick={() => setScreen("title")}>
-            <div className={styles.prologue}>
-              <p className={styles.quote}>“{FEYNMAN.quote}”</p>
-              <p className={styles.credit}>{FEYNMAN.credit}</p>
-              <div className={styles.lines}>
-                {PROLOGUE.map((line, index) => (
-                  <p key={line} style={{ animationDelay: `${1.9 + index * 1.5}s` }}>
-                    {line}
-                  </p>
-                ))}
-              </div>
-              <button
-                type="button"
-                className={styles.chalkButton}
-                style={{ animationDelay: `${2.2 + PROLOGUE.length * 1.5}s` }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  synthRef.current?.unlock();
-                  setScreen("title");
-                }}
-              >
-                Take the contrapositive →
-              </button>
-              <p className={styles.skip}>click anywhere or press Enter to skip</p>
-            </div>
-          </div>
+        {screen === "play" && !open && near ? (
+          <button type="button" className={styles.examine} onClick={examine}>
+            Examine: {near.name} <kbd>E</kbd>
+          </button>
         ) : null}
 
         {screen === "title" ? (
-          <div className={`${styles.overlay} ${styles.slate}`}>
-            <div className={styles.card}>
+          <div className={`${styles.overlay} ${styles.opaque}`}>
+            <div className={styles.sheet}>
               <p className={styles.kicker}>{TITLE.kicker}</p>
+              <blockquote className={styles.epigraph}>
+                <p>“{FEYNMAN.quote}”</p>
+                <footer>{FEYNMAN.credit}</footer>
+              </blockquote>
               <h1 className={styles.title}>{TITLE.name}</h1>
-              <p className={styles.sub}>{TITLE.sub}</p>
-              <ol className={styles.rules}>
-                {TITLE.rules.map(([head, rest]) => (
-                  <li key={head}>
-                    <b>{head}</b> {rest}
-                  </li>
-                ))}
-              </ol>
+              {TITLE.premise.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+              <p className={styles.bigQuestion}>{QUESTION.short}</p>
               <dl className={styles.controls}>
                 {TITLE.controls.map(([key, action]) => (
                   <div key={key}>
@@ -342,14 +303,7 @@ export default function DsfClient() {
                 ))}
               </dl>
               <div className={styles.actions}>
-                <button
-                  type="button"
-                  className={styles.primary}
-                  onClick={() => {
-                    synthRef.current?.unlock();
-                    setScreen("idea");
-                  }}
-                >
+                <button type="button" className={styles.primary} onClick={() => { synth.unlock(); synth.tone({ freq: 440, to: 660, dur: 0.2, gain: 0.1 }); setScreen("play"); }}>
                   {TITLE.start}
                 </button>
                 <Link href="/dsf" className={styles.secondary}>
@@ -357,182 +311,140 @@ export default function DsfClient() {
                 </Link>
               </div>
               <p className={styles.meta}>{TITLE.meta}</p>
-              <p className={styles.footnote}>{TITLE.footnote}</p>
             </div>
           </div>
         ) : null}
 
-        {screen === "idea" ? (
-          <div className={`${styles.overlay} ${styles.slate}`}>
-            <div className={`${styles.card} ${styles.ideaCard}`}>
-              <p className={styles.kicker}>{IDEA.kicker}</p>
-              <h2 className={styles.heading}>{IDEA.title}</h2>
-              <ol className={styles.idea}>
-                {IDEA.steps.map((step) => (
-                  <li key={step.title}>
-                    <Doodle kind={step.doodle} />
-                    <div>
-                      <b>{step.title}</b>
-                      <p>{step.body}</p>
-                    </div>
-                  </li>
-                ))}
+        {screen === "play" && site ? (
+          <div className={styles.overlay}>
+            <div className={styles.sheet}>
+              <p className={styles.kicker}>
+                Ruin {site.n} of {SITES.length} · {site.name}
+              </p>
+              {siteSolved ? (
+                <>
+                  <Insight site={site} />
+                  <div className={styles.actions}>
+                    {site.id === "door" ? (
+                      <button type="button" className={styles.primary} onClick={() => { setOpen(null); setScreen("finale"); }} autoFocus>
+                        Go through
+                      </button>
+                    ) : (
+                      <button type="button" className={styles.primary} onClick={() => setOpen(null)} autoFocus>
+                        Back to the island
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : doorLocked ? (
+                <>
+                  <p className={styles.carvedBig}>“{FEYNMAN.quote}”</p>
+                  <p>{QUESTION.long}</p>
+                  <p className={styles.reply}>{DOOR.locked(ruinsSolved)}</p>
+                  <div className={styles.actions}>
+                    <button type="button" className={styles.primary} onClick={() => setOpen(null)} autoFocus>
+                      Back to the island
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {site.setup.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                  <Puzzle key={site.id} site={site} onSolved={() => solve(site.id)} />
+                  <div className={styles.actions}>
+                    <button type="button" className={styles.secondary} onClick={() => setOpen(null)}>
+                      Leave it for now
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {screen === "play" && statue ? (
+          <div className={styles.overlay}>
+            <div className={styles.sheet}>
+              <p className={styles.kicker}>A stone figure · suspect {STATUES.indexOf(statue) + 1} of {STATUES.length}</p>
+              <h2 className={styles.heading}>{statue.name}</h2>
+              <p className={styles.charge}>{statue.charge}</p>
+              <p>
+                <b>Alibi.</b> {statue.alibi}
+              </p>
+              <div className={styles.actions}>
+                <button type="button" className={styles.primary} onClick={() => setOpen(null)} autoFocus>
+                  Rule it out
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {screen === "play" && open?.kind === "log" ? (
+          <div className={styles.overlay}>
+            <div className={styles.sheet}>
+              <p className={styles.kicker}>{LOG.title}</p>
+              <p className={styles.carvedBig}>“{FEYNMAN.quote}”</p>
+              <p className={styles.bigQuestion}>{QUESTION.short}</p>
+              <ol className={styles.log}>
+                {SITES.map((item) => {
+                  const done = solved.includes(item.id);
+                  return (
+                    <li key={item.id} className={done ? styles.logDone : undefined}>
+                      <b>{done ? item.aha : item.name}</b>
+                      <span>{done ? item.verdict : item.rumor}</span>
+                    </li>
+                  );
+                })}
               </ol>
-              <p className={styles.punch}>{IDEA.punch}</p>
-              <div className={styles.actions}>
-                <button type="button" className={styles.primary} onClick={() => openStage(0)} autoFocus>
-                  {IDEA.start}
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {screen === "brief" ? (
-          <div className={styles.overlay}>
-            <div className={styles.card}>
-              <p className={styles.kicker}>
-                Stage {stageIndex + 1} of {STAGES.length} · {stage.model} · {stage.trained}
+              <p className={styles.meta}>
+                {LOG.statues}: {questioned.length}/{STATUES.length} · {LOG.hint}
               </p>
-              <h2 className={styles.heading}>{stage.title}</h2>
-              <p className={styles.body}>{stage.brief}</p>
-              <p className={styles.hint}>{stage.hint}</p>
               <div className={styles.actions}>
-                <button type="button" className={styles.primary} onClick={startStage} autoFocus>
-                  Start sampling from noise
+                <button type="button" className={styles.primary} onClick={() => setOpen(null)} autoFocus>
+                  Back to the island
                 </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {screen === "outro" && peek ? (
-          <button type="button" className={styles.peekBack} onClick={() => setPeek(false)}>
-            ← Back to the notes
-          </button>
-        ) : null}
-
-        {screen === "outro" && !peek ? (
-          <div className={`${styles.overlay} ${styles.low}`}>
-            <div className={`${styles.card} ${styles.outro}`}>
-              <p className={styles.kicker}>
-                {stage.model} says: {stage.verdict}
-              </p>
-              <h2 className={styles.heading}>{stage.outro.headline}</h2>
-              <p className={styles.body}>{stage.outro.body}</p>
-              <p className={styles.formula}>{stage.outro.paper}</p>
-              <div className={styles.actions}>
-                <button type="button" className={styles.primary} onClick={() => (lastStage ? setScreen("finale") : openStage(stageIndex + 1))} autoFocus>
-                  {lastStage ? "Read the board" : "Next model →"}
-                </button>
-                <button type="button" className={styles.secondary} onClick={() => setPeek(true)}>
-                  Look at the image
-                </button>
-                {lastStage ? null : (
-                  <button type="button" className={styles.textButton} onClick={() => setScreen("finale")}>
-                    Skip to the ending
+                {doorOpen ? (
+                  <button type="button" className={styles.secondary} onClick={() => { setOpen(null); setScreen("finale"); }}>
+                    What follows
                   </button>
-                )}
-                <span className={styles.saved}>{lastSteps} steps to spare · sample saved to your calibration set</span>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {screen === "lost" ? (
-          <div className={styles.overlay}>
-            <div className={styles.card}>
-              <p className={styles.kicker}>t = 1000 / 1000</p>
-              <h2 className={styles.heading}>{LOSS.title}</h2>
-              <p className={styles.body}>{LOSS.body}</p>
-              <div className={styles.actions}>
-                <button type="button" className={styles.primary} onClick={() => openStage(stageIndex)} autoFocus>
-                  {LOSS.retry}
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {paused && screen === "play" ? (
-          <div className={styles.overlay}>
-            <div className={styles.card}>
-              <p className={styles.kicker}>Sampler paused</p>
-              <h2 className={styles.heading}>θ is still frozen. So is everything else.</h2>
-              <div className={styles.actions}>
-                <button type="button" className={styles.primary} onClick={togglePause} autoFocus>
-                  Resume
-                </button>
-                <Link href="/play" className={styles.secondary}>
-                  Other games
-                </Link>
+                ) : null}
               </div>
             </div>
           </div>
         ) : null}
 
         {screen === "finale" ? (
-          <div className={`${styles.overlay} ${styles.slate} ${styles.finale}`}>
-            <div className={styles.finaleInner}>
-              <p className={styles.struck}>“{FEYNMAN.quote}”</p>
+          <div className={`${styles.overlay} ${styles.opaque}`}>
+            <div className={`${styles.sheet} ${styles.wide}`}>
               <p className={styles.kicker}>{FINALE.kicker}</p>
-              <p className={styles.quote}>“{FEYNMAN.contrapositive}”</p>
-              <p className={styles.note}>{FINALE.note}</p>
+              <p className={styles.struck}>“{FEYNMAN.quote}”</p>
+              <p className={styles.kicker}>{FINALE.boardReads}</p>
+              <p className={styles.answer}>“{FEYNMAN.contrapositive}”</p>
+              <p className={styles.reviewer}>{FINALE.reviewer}</p>
+              <p className={styles.stamp}>{FINALE.stamp}</p>
 
-              <div className={styles.rank}>
-                <span>Decision</span>
-                <b>{rank.title}</b>
-                <p>
-                  {rank.line} ({stepsLeft} steps to spare{retries > 0 ? `, ${retries} ${retries === 1 ? "retry" : "retries"}` : ""})
+              <ol className={styles.log}>
+                {SITES.filter((item) => solved.includes(item.id)).map((item) => (
+                  <li key={item.id} className={styles.logDone}>
+                    <b>{item.aha}</b>
+                    <span>{item.verdict}</span>
+                  </li>
+                ))}
+              </ol>
+
+              <h2 className={styles.heading}>{FINALE.closingTitle}</h2>
+              <p>{FINALE.lead}</p>
+              {FINALE.thoughts.map((thought) => (
+                <p key={thought.lead}>
+                  <b>{thought.lead}</b> {thought.body}
                 </p>
-              </div>
-
-              <section className={styles.section}>
-                <h3>{FINALE.ideaTitle}</h3>
-                <ol className={styles.idea}>
-                  {IDEA.steps.map((step) => (
-                    <li key={step.title}>
-                      <Doodle kind={step.doodle} />
-                      <div>
-                        <b>{step.title}</b>
-                        <p>{step.body}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-                <p className={styles.punch}>{IDEA.punch}</p>
-              </section>
-
-              <section className={styles.section}>
-                <h3>{FINALE.implicationsTitle}</h3>
-                <div className={styles.implications}>
-                  {IMPLICATIONS.map((item) => (
-                    <article key={item.title}>
-                      <span>{item.tag}</span>
-                      <h4>{item.title}</h4>
-                      <p>{item.body}</p>
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              <section className={styles.section}>
-                <h3>{FINALE.calibrationTitle}</h3>
-                <div className={styles.gallery}>
-                  {STAGES.map((item, index) =>
-                    snapshots[index] ? (
-                      <figure key={item.id}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={snapshots[index] ?? ""} alt={`Generated sample: ${item.title}`} />
-                        <figcaption>{item.model}</figcaption>
-                      </figure>
-                    ) : null,
-                  )}
-                </div>
-                <p>{FINALE.calibrationBody}</p>
-              </section>
-
-              <p className={styles.fine}>{FINALE.honest}</p>
+              ))}
+              <h2 className={styles.heading}>{FINALE.limitsTitle}</h2>
+              <p>{FINALE.limits}</p>
+              <p>{FINALE.ending}</p>
 
               <div className={styles.actions}>
                 <Link href="/dsf" className={styles.primary}>
@@ -541,6 +453,9 @@ export default function DsfClient() {
                 <a href="/dsf/assets/dsf-paper.pdf" className={styles.secondary}>
                   {FINALE.links.paper}
                 </a>
+                <button type="button" className={styles.secondary} onClick={() => setScreen("play")}>
+                  {FINALE.links.back}
+                </button>
                 <Link href="/play/backdoor" className={styles.secondary}>
                   {FINALE.links.other}
                 </Link>
@@ -548,15 +463,10 @@ export default function DsfClient() {
                   type="button"
                   className={styles.secondary}
                   onClick={() => {
-                    void shareLink("What I Cannot Create", "A blackboard game about the Discriminative Score Function (NeurIPS 2026)", "/play/dsf").then((result) =>
-                      setShared(result === "copied" ? "Link copied" : result === "failed" ? "Copy failed" : ""),
-                    );
+                    void shareLink("What I Cannot Create", "An island mystery about the Discriminative Score Function (NeurIPS 2026)", "/play/dsf").then((result) => setShared(result === "copied" ? "Link copied" : result === "failed" ? "Copy failed" : ""));
                   }}
                 >
                   {shared || FINALE.links.share}
-                </button>
-                <button type="button" className={styles.secondary} onClick={restart}>
-                  {FINALE.links.again}
                 </button>
                 <Link href="/play" className={styles.secondary}>
                   {FINALE.links.games}
@@ -566,35 +476,6 @@ export default function DsfClient() {
           </div>
         ) : null}
       </div>
-
-      <footer className={styles.foot}>
-        {screen === "play" ? (
-          <>
-            <div className={styles.softmax}>
-              <span>f(x; θ) says</span>
-              <b>{hud.guess}</b>
-              {hud.boost > 0 ? <em>H100 · {Math.ceil(hud.boost)}s</em> : null}
-              {hud.tokensLeft > 0 ? <em>CLIP cards left: {hud.tokensLeft}</em> : null}
-            </div>
-            <button
-              type="button"
-              className={styles.burst}
-              disabled={hud.burst < 1}
-              onClick={() => {
-                synthRef.current?.unlock();
-                engineRef.current?.burst();
-              }}
-              style={{ "--charge": `${Math.round(Math.min(1, Math.max(0, hud.burst)) * 100)}%` } as React.CSSProperties}
-            >
-              ⚡ Burst <kbd>Space</kbd>
-            </button>
-          </>
-        ) : (
-          <div className={styles.softmax}>
-            <span>Discriminative Score Function · Lee, Kim, Han, Kwak · NeurIPS 2026</span>
-          </div>
-        )}
-      </footer>
     </div>
   );
 }

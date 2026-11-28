@@ -2,18 +2,18 @@
  * The hidden chalk drawings of "What I Cannot Create".
  *
  * A drawing is one or more layers of chalk strokes, authored on a 1000 x 620
- * sheet and then fitted (uniformly scaled and centred) onto whatever board
- * the screen allows: wide on a laptop, tall on a phone held upright. The game
- * never shows the strokes directly: it rasterizes each layer once, samples
- * points from the ink, and uses those points as the "data manifold" the dust
- * has to reach. The crisp strokes are only faded in when a stage is finished.
+ * sheet and then fitted (uniformly scaled and centred) onto the board of the
+ * figure that shows it. A figure never shows the strokes directly: it
+ * rasterizes each layer once, samples points from the ink, and uses those
+ * points as the "data manifold" the dust has to reach. The crisp strokes are
+ * only faded in once the figure is solved.
  */
 
-/** The authoring sheet, and the board of a landscape screen. */
+/** The authoring sheet. */
 export const BOARD_W = 1000;
 export const BOARD_H = 620;
 
-/** The board a stage is played on, in board units. */
+/** The board a drawing is fitted onto, in board units. */
 export type Board = { w: number; h: number };
 
 /** Chalk colours. Index 0 is white; drawings refer to colours by index. */
@@ -27,7 +27,7 @@ const ORANGE = 5;
 
 export const HAND_FONT = '"Caveat", "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
-export type DrawingId = "cat" | "scene" | "clock" | "banana" | "understand" | "feynman";
+export type DrawingId = "cat" | "scene" | "landscape" | "clock" | "banana" | "understand" | "feynman";
 
 /** A tiny chalk-drawing API over a 2D context. Coordinates are board units. */
 class Pen {
@@ -286,6 +286,32 @@ function feynmanDiagram(p: Pen, cx: number, cy: number) {
   p.color(WHITE).dot(cx - 80, cy, 6).dot(cx + 80, cy, 6);
 }
 
+// What a self-supervised encoder draws: broad natural-image structure, nothing to label.
+const landscape: Layer[] = [
+  {
+    grains: 2300,
+    draw(p) {
+      p.color(YELLOW).width(6).ellipse(760, 150, 54, 54);
+      p.width(4);
+      for (let i = 0; i < 8; i += 1) {
+        const a = (i / 8) * Math.PI * 2;
+        p.line(760 + Math.cos(a) * 72, 150 + Math.sin(a) * 72, 760 + Math.cos(a) * 96, 150 + Math.sin(a) * 96);
+      }
+      p.color(WHITE).width(6);
+      p.quad(60, 430, 250, 190, 470, 400);
+      p.quad(360, 430, 600, 150, 940, 430);
+      p.color(BLUE).width(5);
+      p.quad(150, 130, 200, 84, 262, 126).quad(262, 126, 322, 92, 366, 138).line(150, 130, 366, 138);
+      p.color(GREEN).width(6);
+      p.quad(60, 470, 500, 420, 940, 480);
+      p.line(250, 468, 250, 400).ellipse(250, 366, 40, 46);
+      p.color(BLUE).width(4);
+      p.quad(540, 500, 620, 540, 560, 580).quad(600, 500, 690, 540, 640, 580);
+      p.color(WHITE).width(3).line(540, 200, 556, 212, 572, 200).line(596, 176, 612, 188, 628, 176);
+    },
+  },
+];
+
 /** A sentence in two colours. Wide boards get two lines, tall boards four. */
 function sentence(white: string[], yellow: string[], doodle: boolean): Layer[] {
   return [
@@ -308,6 +334,7 @@ function sentence(white: string[], yellow: string[], doodle: boolean): Layer[] {
 
 const DRAWINGS: Record<DrawingId, Layer[]> = {
   cat,
+  landscape,
   scene,
   clock,
   banana,
@@ -368,9 +395,9 @@ function fitFor(id: DrawingId, board: Board): Fit {
       }
     }
     if (x1 > x0 && y1 > y0) {
-      const side = 34;
-      const top = 54;
-      const bottom = 44;
+      const side = 26;
+      const top = 26;
+      const bottom = 26;
       const k = Math.min((board.w - side * 2) / (x1 - x0), (board.h - top - bottom) / (y1 - y0), 1.25);
       fit = {
         k,
@@ -429,8 +456,8 @@ export function sampleLayer(id: DrawingId, layerIndex: number, board: Board, den
   return targets;
 }
 
-/** The crisp strokes of the first `layers` layers, for the reveal at the end of a stage. */
-export function renderDrawing(id: DrawingId, layers: number, board: Board, scale: number): HTMLCanvasElement {
+/** The crisp strokes of the given layers, for the reveal once a drawing is finished. */
+export function renderDrawing(id: DrawingId, layers: number[], board: Board, scale: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(board.w * scale);
   canvas.height = Math.round(board.h * scale);
@@ -439,7 +466,7 @@ export function renderDrawing(id: DrawingId, layers: number, board: Board, scale
   const fit = fitFor(id, board);
   const all = layersOf(id, board);
   ctx.setTransform(scale * fit.k, 0, 0, scale * fit.k, scale * fit.x, scale * fit.y);
-  for (let i = 0; i < Math.min(layers, all.length); i += 1) all[i].draw(new Pen(ctx));
+  for (const index of layers) all[index]?.draw(new Pen(ctx));
   return canvas;
 }
 
