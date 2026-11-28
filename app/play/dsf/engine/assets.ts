@@ -9,29 +9,41 @@ export const ATLAS_URL = "/play/dsf/world/atlas.png";
 
 export type Sheets = Record<Grade, HTMLCanvasElement>;
 
+/** Loads the atlas, trying a second time after a short wait before giving up. */
 export function loadSheets(onReady: (sheets: Sheets) => void, onError: () => void): () => void {
   let cancelled = false;
-  const image = new Image();
-  image.decoding = "async";
-  image.onload = () => {
-    if (cancelled) return;
-    const [w, h] = ATLAS_SIZE;
-    onReady({
-      raw: gradeCanvas(image, w, h, "raw"),
-      night: gradeCanvas(image, w, h, "night"),
-      lit: gradeCanvas(image, w, h, "lit"),
-      dawn: gradeCanvas(image, w, h, "dawn"),
-      flash: gradeCanvas(image, w, h, "flash"),
-    });
+  let image: HTMLImageElement | null = null;
+  let timer = 0;
+  const attempt = (tries: number) => {
+    const next = new Image();
+    image = next;
+    next.decoding = "async";
+    next.onload = () => {
+      if (cancelled) return;
+      const [w, h] = ATLAS_SIZE;
+      onReady({
+        raw: gradeCanvas(next, w, h, "raw"),
+        night: gradeCanvas(next, w, h, "night"),
+        lit: gradeCanvas(next, w, h, "lit"),
+        dawn: gradeCanvas(next, w, h, "dawn"),
+        flash: gradeCanvas(next, w, h, "flash"),
+      });
+    };
+    next.onerror = () => {
+      if (cancelled) return;
+      if (tries > 0) onError();
+      else timer = window.setTimeout(() => attempt(1), 1200);
+    };
+    next.src = tries > 0 ? `${ATLAS_URL}?retry=${Date.now()}` : ATLAS_URL;
   };
-  image.onerror = () => {
-    if (!cancelled) onError();
-  };
-  image.src = ATLAS_URL;
+  attempt(0);
   return () => {
     cancelled = true;
-    image.onload = null;
-    image.onerror = null;
+    window.clearTimeout(timer);
+    if (image) {
+      image.onload = null;
+      image.onerror = null;
+    }
   };
 }
 

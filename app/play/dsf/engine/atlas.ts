@@ -81,6 +81,7 @@ export const ATLAS = {
   doorOpen: [70, 224, 22, 30], // drawn for this game
   arrows: [189, 336, 56, 7], // drawn for this game
   bracket: [0, 320, 32, 16], // drawn for this game
+  stoneMarked: [176, 112, 16, 48], // stone (above) with a footprint carved in it
 } as const;
 
 export type SpriteName = keyof typeof ATLAS;

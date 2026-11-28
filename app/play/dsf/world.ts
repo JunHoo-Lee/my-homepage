@@ -59,6 +59,7 @@ export type WorldEvents = {
   onToast(text: string): void; // only TOASTS.sea, at most once per 6 s
   onInteract?(near: NonNullable<Near>): void; // a tap on an object arrived next to it
   onReady?(): void; // atlas decoded and graded
+  onLoadError?(): void; // the atlas failed twice; the canvas says so too
   onScale?(cssPxPerArtPx: number): void; // k / devicePixelRatio, on every resize
 };
 
@@ -806,6 +807,24 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
     ctx.drawImage(tideCanvas, x, y);
   }
 
+  /** The island could not be loaded: say so plainly over the sea. */
+  function drawBroken(w: number, h: number) {
+    const lines = ["Could not load the island.", "Check your connection and reload."];
+    const size = Math.max(6, Math.min(10, Math.floor(w / 26)));
+    ctx.font = `bold ${size}px system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const lineH = Math.round(size * 1.5);
+    const boxW = Math.min(w - 8, Math.ceil(Math.max(...lines.map((line) => ctx.measureText(line).width))) + size * 2);
+    const boxH = lineH * lines.length + size;
+    const bx = Math.round((w - boxW) / 2);
+    const by = Math.round((h - boxH) / 2);
+    ctx.fillStyle = "rgba(10, 16, 20, 0.85)";
+    ctx.fillRect(bx, by, boxW, boxH);
+    ctx.fillStyle = GOLD;
+    lines.forEach((line, index) => ctx.fillText(line, w / 2, by + size / 2 + lineH * (index + 0.5), w - 12));
+  }
+
   function draw() {
     if (disposed) return;
     placeCamera();
@@ -839,7 +858,7 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
       }
       drawTide();
       drawGlow();
-    }
+    } else if (broken) drawBroken(w, h);
     if (fadeIn >= 0) {
       // the opening: out of the dark in four flat steps
       ctx.globalAlpha = 1 - Math.floor(fadeIn / 225) / 4;
@@ -1182,6 +1201,8 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
     () => {
       // without the atlas there is still a sea, and the story must not wait for pictures that will not come
       broken = true;
+      events.onLoadError?.();
+      draw();
     },
   );
 

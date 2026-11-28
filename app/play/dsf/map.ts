@@ -212,7 +212,7 @@ export const THINGS: Thing[] = [
     bubble: [px(33) + 8, px(7) + 1],
     focus: [px(33) + 8, px(9)],
     lamp: [34, 9],
-    parts: [part("stone", 33, 7, 10)],
+    parts: [part("stoneMarked", 33, 7, 10)],
   },
   {
     id: "clock",
@@ -359,7 +359,7 @@ export const DECOR: Decor[] = [
   tall("frog", 8, 34, 2, 2),
   tall("seated", 7, 21, 2, 3),
   tall("pillarBroken", 23, 35, 1, 3),
-  tall("stone", 34, 27, 1, 3),
+  tall("pillarBroken", 34, 27, 1, 3),
   tall("rock", 34, 33, 2, 2),
   tall("rock", 11, 7, 2, 2),
   tall("rock", 16, 7, 2, 2),

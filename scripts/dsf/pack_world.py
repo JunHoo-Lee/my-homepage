@@ -403,6 +403,60 @@ for frame, inset in enumerate((1, 3)):
                     bracket.putpixel((frame * 16 + px, py), PALETTE_RGB["k"] + (255,))
 hand("bracket", bracket)
 
+# the Footprint Stones: the plain standing stone with a pale footprint carved in its face,
+# so the puzzle site cannot be taken for the decorative stone by the pond
+_stone = next(image for name, image, _ in entries if name == "stone")
+stone_marked = _stone.copy()
+PRINT = [".YY.", "YYYY", "YYYY", "YYYY", ".YY.", "....", ".YY.", ".YY."]
+for ox, oy in ((3, 22), (9, 18)):  # a left and a right foot, one a stride ahead
+    for gy, row in enumerate(PRINT):
+        for gx, key in enumerate(row):
+            if key != ".":
+                stone_marked.putpixel((ox + gx, oy + gy + 1), PALETTE_RGB["k"] + (255,))
+    for gy, row in enumerate(PRINT):
+        for gx, key in enumerate(row):
+            if key != ".":
+                stone_marked.putpixel((ox + gx, oy + gy), PALETTE_RGB["Y"] + (255,))
+add("stoneMarked", stone_marked, "stone (above) with a footprint carved in it")
+
+# ----------------------------------------------------------------------------- prop outline
+# Free-standing props get the 1px #141b1b outline the characters have, or at night the
+# mossy ruins read as ghosts on the grass. Only edges that are not already dark are outlined;
+# where a sprite runs to its own border the border pixel itself becomes outline.
+PROPS = {
+    "treeRound", "treeDark", "treeDead", "rock", "rockSmall", "slab", "board", "hall", "cave",
+    "stone", "stoneMarked", "tower", "arch", "pillar", "post", "lamp", "lampOff", "desk",
+    "bookcase", "seated", "pillarBroken", "frog", "fenceEnd", "fenceMid", "fenceEndR",
+}
+DARK = 70
+
+
+def outline(image):
+    src = image.load()
+    out = image.copy()
+    dst = out.load()
+    w, h = image.size
+
+    def solid(x, y):
+        return 0 <= x < w and 0 <= y < h and src[x, y][3] > 0
+
+    def light(x, y):
+        r, g, b, a = src[x, y]
+        return a > 0 and 0.3 * r + 0.59 * g + 0.11 * b > DARK
+
+    for y in range(h):
+        for x in range(w):
+            if solid(x, y):
+                if light(x, y) and (x in (0, w - 1) or y in (0, h - 1)):
+                    dst[x, y] = OUTLINE + (255,)
+                continue
+            if any(solid(nx, ny) and light(nx, ny) for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1))):
+                dst[x, y] = OUTLINE + (255,)
+    return out
+
+
+entries = [(name, outline(image) if name in PROPS else image, note) for name, image, note in entries]
+
 # ----------------------------------------------------------------------------- shelf packing
 order = sorted(range(len(entries)), key=lambda index: (-entries[index][1].height, -entries[index][1].width))
 rects = {}
