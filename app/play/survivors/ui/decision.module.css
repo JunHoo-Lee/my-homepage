@@ -529,6 +529,16 @@
   background: color-mix(in srgb, var(--sand) 45%, var(--paper));
 }
 
+.shareImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.6rem;
+  background: var(--paper);
+}
+
 .shareText {
   margin: 0 0 0.6rem;
   font-family: var(--font-paper);

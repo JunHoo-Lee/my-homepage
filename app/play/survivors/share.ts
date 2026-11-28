@@ -49,7 +49,7 @@ export function encodeShare(data: ShareData) {
   const papers = data.papers.filter((id) => id in SHARE_PAPERS).join(".");
   return [
     GRADE_CODE[data.grade],
-    Math.round(data.time),
+    Math.floor(data.time),
     data.kills,
     data.level,
     data.maxCombo,
