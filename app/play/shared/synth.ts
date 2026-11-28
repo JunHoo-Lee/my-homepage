@@ -7,6 +7,8 @@
  * that (it just does nothing) and never throws.
  */
 
+import { preferPlayback } from "./playback";
+
 const MUTE_KEY = "junhoo-paper-games-muted";
 
 export type ToneOptions = {
@@ -59,11 +61,14 @@ export function createSynth(): Synth {
   let muted = typeof window === "undefined" ? false : readMuted();
   let disposed = false;
 
-  const ready = () => !disposed && !muted && ctx !== null && master !== null && ctx.state === "running";
+  // A context that is still resuming keeps what is scheduled on it and plays it once it runs,
+  // so the very first sound of a gesture is not lost.
+  const ready = () => !disposed && !muted && ctx !== null && master !== null && ctx.state !== "closed";
 
   return {
     unlock() {
       if (disposed || typeof window === "undefined") return;
+      preferPlayback();
       try {
         if (!ctx) {
           const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;

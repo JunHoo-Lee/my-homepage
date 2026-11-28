@@ -1,5 +1,7 @@
 // Tiny synthesised sound set: no audio files, everything is oscillators and noise.
 
+import { preferPlayback } from "../shared/playback";
+
 export type Sfx = {
   step(): void;
   dig(): void;
@@ -99,6 +101,7 @@ export function createSfx(): Sfx {
       if (master && ctx) master.gain.setTargetAtTime(next ? 0 : 0.5, ctx.currentTime, 0.05);
     },
     resume: () => {
+      preferPlayback();
       const context = ensure();
       if (context && context.state === "suspended") void context.resume();
     },

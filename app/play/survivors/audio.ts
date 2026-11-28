@@ -12,6 +12,7 @@
  * Browser audio APIs are only touched once createAudio().unlock() runs.
  */
 
+import { preferPlayback } from "../shared/playback";
 import type { AudioEngine, AudioSettings, MusicMode, SfxName, SfxOptions } from "./contracts";
 
 export const DEFAULT_AUDIO_SETTINGS: Readonly<AudioSettings> = Object.freeze({ muted: false, music: 0.5, sfx: 0.7 });
@@ -1174,6 +1175,7 @@ export function createAudio(initial?: Partial<AudioSettings>): AudioEngine & { r
   return {
     unlock() {
       if (disposed || failed) return;
+      preferPlayback();
       if (!ctx) {
         const w = typeof window === "undefined" ? undefined : (window as unknown as Record<string, AudioContextConstructor | undefined>);
         const Ctor = w?.AudioContext ?? w?.webkitAudioContext;
