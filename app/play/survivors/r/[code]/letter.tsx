@@ -9,7 +9,6 @@ import { SHARE_PAPERS, decodeShare, plainTitle, type ShareData } from "../../sha
 export const OG_SIZE = { width: 1200, height: 630 };
 
 const STAMP_COLOR = { Oral: PALETTE.purple, Accept: PALETTE.green, Borderline: PALETTE.gold, Reject: PALETTE.red, DeskReject: PALETTE.red } as const;
-const scoreColor = (score: number) => (score <= 3 ? PALETTE.red : score <= 5 ? PALETTE.orange : score === 6 ? PALETTE.gold : PALETTE.green);
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 // The area chair's note, laid out like a forum post on a review site. The texts are terse
@@ -32,71 +31,62 @@ const METAREVIEWS: Record<ShareData["grade"], string[]> = {
   Oral: ["Scores {s}. All reviewers positive after the rebuttal, R2 raised to 6.", "Scores {s}. Unanimous after the rebuttal. Nominated for oral."],
 };
 const AC_ID_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const FORUM = { title: "#3e6775", label: "#8c1b13", meta: "#8a8a8a", line: "#d9d4c7", text: "#2b2b2b" };
+const FORUM = { title: "#3f6978", label: "#8c1b13", meta: "#777", rule: "#e2e2e2", text: "#2b2b2b" };
+const ratingLabel = (score: number) =>
+  score <= 2 ? "strong reject" : score <= 4 ? "reject, not good enough" : score === 5 ? "marginally below threshold" : score === 6 ? "marginally above threshold" : score <= 8 ? "accept, good paper" : "strong accept";
 
-function Badge({ children }: { children: string }) {
-  return <span style={{ display: "flex", background: FORUM.label, color: "#fff", borderRadius: 3, padding: "1px 8px", fontSize: 15, fontWeight: 700 }}>{children}</span>;
+/** "Label: value" the way a forum note prints its fields. */
+function Field({ label, value, size = 19 }: { label: string; value: string; size?: number }) {
+  return (
+    <span style={{ display: "flex", fontSize: size, color: FORUM.text }}>
+      <span style={{ display: "flex", fontWeight: 700, color: FORUM.label, marginRight: 7 }}>{label}:</span>
+      <span style={{ display: "flex" }}>{value}</span>
+    </span>
+  );
 }
 
-function Forum({ data, accent }: { data: ShareData; accent: string }) {
+// Flat on purpose: a plain white page with hairlines and an indented reply
+// thread, like a screenshot of the forum pasted into the letter.
+function Forum({ data }: { data: ShareData }) {
   const n = data.submission;
-  const acId = [0, 1, 2, 3].map((i) => AC_ID_CHARS[(n * (i * 7 + 3) + i * 11) % AC_ID_CHARS.length]).join("");
+  const id = (salt: number) => [0, 1, 2, 3].map((i) => AC_ID_CHARS[(n * (i * 7 + 3 + salt) + i * 11 + salt * 5) % AC_ID_CHARS.length]).join("");
+  const acId = id(0);
   const options = METAREVIEWS[data.grade];
   const desk = data.grade === "DeskReject";
   const reviews = desk
     ? []
     : reviewsFor({ time: data.time, level: data.level, kills: data.kills, maxCombo: data.maxCombo, bossDefeated: data.bossDefeated, runLength: 300 });
   const seconds = Math.floor(data.time);
-  const fields: [string, string][] = [
-    [desk ? "Desk Reject Comments" : "Metareview", options[n % options.length].replace("{s}", reviews.map((r) => r.score).join("/"))],
-    ["Recommendation", plainTitle(data.grade)],
-  ];
   return (
-    <div style={{ display: "flex", flexDirection: "column", marginTop: 8, gap: 6 }}>
-      <div style={{ display: "flex", flexDirection: "column", background: "#fff", border: `1.5px solid ${FORUM.line}`, borderLeft: `7px solid ${accent}`, borderRadius: 6, padding: "10px 20px 11px" }}>
-        <div style={{ display: "flex", fontSize: 24, fontWeight: 700, color: FORUM.title }}>Meta Review of Submission{n} by Area Chair {acId}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 16, color: FORUM.meta, marginTop: 3 }}>
-          <Badge>Meta Review</Badge>
-          <span style={{ display: "flex" }}>Area Chair {acId} · 23:59 AoE · Readers: Everyone</span>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 1, marginTop: 7 }}>
-          {fields.map(([label, value]) => (
-            <div key={label} style={{ display: "flex", fontSize: 20, color: FORUM.text }}>
-              <span style={{ display: "flex", fontWeight: 700, color: FORUM.label, marginRight: 8 }}>{label}:</span>
-              <span style={{ display: "flex" }}>{value}</span>
-            </div>
-          ))}
-        </div>
+    <div style={{ display: "flex", flexDirection: "column", marginTop: 6, background: "#fff", border: `1px solid ${FORUM.rule}`, padding: "8px 18px 9px" }}>
+      <div style={{ display: "flex", fontSize: 22, fontWeight: 700, color: FORUM.title }}>Meta Review of Submission{n} by Area Chair {acId}</div>
+      <div style={{ display: "flex", fontSize: 15, color: FORUM.meta, marginTop: 1 }}>
+        Meta Review · Area Chair {acId} · 23:59 AoE · Everyone
       </div>
-      {/* replies in the thread: one line per official review */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginLeft: 26 }}>
-        {desk ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 19, color: FORUM.meta, background: "#fff", border: `1.5px solid ${FORUM.line}`, borderRadius: 6, padding: "5px 14px" }}>
-            <span style={{ display: "flex" }}>0 Official Reviews</span>
-            <span style={{ display: "flex" }}>·</span>
-            <span style={{ display: "flex" }}>Time to decision: {seconds} second{seconds === 1 ? "" : "s"}</span>
+      <div style={{ display: "flex", marginTop: 5 }}>
+        <Field label={desk ? "Desk Reject Comments" : "Metareview"} value={options[n % options.length].replace("{s}", reviews.map((r) => r.score).join("/"))} size={20} />
+      </div>
+      {desk ? (
+        <div style={{ display: "flex", fontSize: 16, color: FORUM.meta, marginTop: 8, paddingTop: 7, borderTop: `1px solid ${FORUM.rule}` }}>
+          0 Replies · no official reviews · decided in {seconds} second{seconds === 1 ? "" : "s"}
+        </div>
+      ) : (
+        reviews.map((r, i) => (
+          <div key={r.reviewer} style={{ display: "flex", flexDirection: "column", marginTop: 6, paddingTop: 5, borderTop: `1px solid ${FORUM.rule}` }}>
+            <div style={{ display: "flex", flexDirection: "column", marginLeft: 14, paddingLeft: 12, borderLeft: `3px solid ${FORUM.rule}` }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                <span style={{ display: "flex", fontSize: 18, fontWeight: 700, color: FORUM.title }}>Official Review of Submission{n} by {r.reviewer}</span>
+                <span style={{ display: "flex", fontSize: 14, color: FORUM.meta }}>Reviewer {id(i + 1)} · Everyone</span>
+              </div>
+              <div style={{ display: "flex", gap: 18 }}>
+                <Field label="Rating" value={`${r.score}: ${ratingLabel(r.score)}`} size={17} />
+                <Field label="Confidence" value={String(r.confidence)} size={17} />
+                <Field label="Comment" value={r.comment} size={17} />
+              </div>
+            </div>
           </div>
-        ) : (
-          reviews.map((r) => (
-            <div
-              key={r.reviewer}
-              style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 19, background: "#fff", border: `1.5px solid ${FORUM.line}`, borderRadius: 6, padding: "4px 14px" }}
-            >
-              <Badge>Official Review</Badge>
-              <span style={{ display: "flex", fontWeight: 700, color: FORUM.title }}>{r.reviewer}</span>
-              <span style={{ display: "flex", color: FORUM.text }}>
-                <span style={{ display: "flex", fontWeight: 700, color: FORUM.label, marginRight: 6 }}>Rating:</span>
-                <span style={{ display: "flex", fontWeight: 800, color: scoreColor(r.score) }}>{r.score}</span>
-              </span>
-              <span style={{ display: "flex", color: FORUM.text }}>
-                <span style={{ display: "flex", fontWeight: 700, color: FORUM.label, marginRight: 6 }}>Confidence:</span>
-                <span style={{ display: "flex" }}>{r.confidence}</span>
-              </span>
-              <span style={{ display: "flex", color: "#555", fontStyle: "italic" }}>“{r.comment}”</span>
-            </div>
-          ))
-        )}
-      </div>
+        ))
+      )}
     </div>
   );
 }
@@ -128,7 +118,7 @@ function Letter({ data }: { data: ShareData }) {
         <div style={{ display: "flex", color: PALETTE.blue, fontSize: 22, fontWeight: 700, letterSpacing: 3, marginTop: 6 }}>
           DECISION · SUBMISSION #{data.submission}
         </div>
-        <div style={{ display: "flex", fontSize: 44, fontWeight: 800, color: PALETTE.ink, marginTop: 2 }}>{plainTitle(data.grade)}</div>
+        <div style={{ display: "flex", fontSize: 40, fontWeight: 800, color: PALETTE.ink, marginTop: 2 }}>{plainTitle(data.grade)}</div>
         <div
           style={{
             display: "flex",
@@ -149,7 +139,7 @@ function Letter({ data }: { data: ShareData }) {
           {DECISIONS[data.grade].stamp}
         </div>
 
-        <Forum data={data} accent={stampColor} />
+        <Forum data={data} />
 
         <div style={{ display: "flex", gap: 14, marginTop: "auto" }}>
           {stats.map(([label, value]) => (
