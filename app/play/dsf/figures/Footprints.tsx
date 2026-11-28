@@ -55,7 +55,7 @@ export default function Footprints({ solved, synth, onSolved }: Props) {
     if (!canvas || !ctx) return;
     canvas.width = 320;
     canvas.height = 200;
-    ctx.fillStyle = "#0f141b";
+    ctx.fillStyle = "#141b1b";
     ctx.fillRect(0, 0, 320, 200);
     const clarity = step / ROUNDS.length;
     if (clarity > 0) {
@@ -91,15 +91,17 @@ export default function Footprints({ solved, synth, onSolved }: Props) {
         })}
         <Arrow angle={current.theta} length={90} className={styles.dialTheta} />
         <Arrow angle={current.theta + off} length={72} className={styles.dialPush} />
-        <text x="12" y="20" className={styles.dialLabelTheta}>
-          −θ: the way the weights went
-        </text>
-        <text x="12" y="212" className={styles.dialLabelPush}>
-          the push of this image
-        </text>
       </svg>
       <div className={styles.footSide}>
-        <canvas ref={boardRef} className={styles.footBoard} aria-hidden="true" />
+        <div className={styles.frame}>
+          <canvas ref={boardRef} className={styles.footBoard} aria-hidden="true" />
+        </div>
+      </div>
+      <div className={styles.footControls}>
+        <p className={styles.footLegend}>
+          <span className={styles.legendTheta}>−θ: the way the weights went</span>
+          <span className={styles.legendPush}>the push of this image</span>
+        </p>
         <p className={styles.footRead}>
           alignment <b>{cosine.toFixed(2)}</b> · step <b>{step}</b> of {ROUNDS.length}
         </p>

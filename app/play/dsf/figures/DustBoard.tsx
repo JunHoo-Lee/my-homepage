@@ -28,7 +28,7 @@ const SET = 2;
 const FROZEN = 3;
 const REACH = 48;
 const GOAL = 0.85;
-const NIGHT = "#0f141b";
+const NIGHT = "#141b1b";
 
 type Props = {
   drawing: DrawingId;
@@ -287,7 +287,7 @@ export default function DustBoard({ drawing, layers = [0], erase, solved, autopl
           ctx.rect(px[i] - 0.9, py[i] - 0.9, 1.8, 1.8);
         }
         ctx.fill();
-        ctx.strokeStyle = "rgba(150,205,245,0.95)";
+        ctx.strokeStyle = "rgba(113,221,238,0.95)";
         ctx.lineWidth = 1.6;
         ctx.beginPath();
         for (let i = 0; i < count; i += 1) {
@@ -302,19 +302,20 @@ export default function DustBoard({ drawing, layers = [0], erase, solved, autopl
         ctx.stroke();
       }
       if (sweeping) {
-        ctx.fillStyle = "#b98a4f";
-        ctx.fillRect(eraser - 16, 20, 32, H - 40);
-        ctx.fillStyle = "#3a3f44";
-        ctx.fillRect(eraser - 16, 20, 12, H - 40);
-        ctx.fillStyle = "rgba(244,241,230,0.9)";
-        ctx.font = "700 15px ui-monospace, Menlo, Consolas, monospace";
+        ctx.fillStyle = "#965340";
+        ctx.fillRect(eraser - 16, 40, 32, H - 60);
+        ctx.fillStyle = "#4a5270";
+        ctx.fillRect(eraser - 16, 40, 12, H - 60);
+        // the label is 30 board units tall: about 15 px on a phone
+        ctx.fillStyle = "#f2eaf1";
+        ctx.font = '700 30px "DM Sans", system-ui, sans-serif';
         ctx.textAlign = "center";
-        ctx.fillText("Reviewer 2", clamp(eraser, 60, W - 60), 15);
+        ctx.fillText("Reviewer 2", clamp(eraser, 96, W - 96), 30);
       }
       if (pointer.on && !done && !frozen && !isLocked) {
         ctx.setLineDash([6, 7]);
         ctx.lineDashOffset = -clock * 24;
-        ctx.strokeStyle = "rgba(150,205,245,0.75)";
+        ctx.strokeStyle = "rgba(113,221,238,0.8)";
         ctx.lineWidth = 1.6;
         ctx.beginPath();
         ctx.arc(pointer.x, pointer.y, REACH, 0, Math.PI * 2);

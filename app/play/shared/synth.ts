@@ -41,6 +41,8 @@ export type Synth = {
   /** Several tones spaced `step` seconds apart: a tiny arpeggio. */
   arp(freqs: number[], step?: number, options?: Omit<ToneOptions, "freq" | "delay">): void;
   noise(options?: NoiseOptions): void;
+  /** The context and the master gain once unlock() has run, for callers that build their own graph (music). */
+  audio(): { ctx: AudioContext; out: AudioNode } | null;
   readonly muted: boolean;
   setMuted(muted: boolean): void;
   dispose(): void;
@@ -138,6 +140,10 @@ export function createSynth(): Synth {
       } catch {
         /* see tone() */
       }
+    },
+
+    audio() {
+      return !disposed && ctx && master && ctx.state !== "closed" ? { ctx, out: master } : null;
     },
 
     get muted() {

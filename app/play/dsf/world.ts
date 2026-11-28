@@ -10,14 +10,41 @@
 import type { Synth } from "../shared/synth";
 import { SITES, STATUES, WORLD, type SiteId } from "./content";
 
+export type StatueId = "prompter" | "bookkeeper" | "copyist" | "artist";
+export type TargetId = SiteId | StatueId;
 export type Near = { kind: "site"; id: SiteId; name: string } | { kind: "statue"; id: string; name: string } | null;
+export type Scene = "title" | "play" | "ending";
 
-export type WorldEvents = { onNear(near: Near): void; onToast(text: string): void };
+export type Cue =
+  | { type: "wake" }
+  | { type: "mote" }
+  | { type: "tide" }
+  | { type: "pan"; to: TargetId | "player"; ms?: number }
+  | { type: "lamp"; id: SiteId }
+  | { type: "five" }
+  | { type: "face"; id: StatueId }
+  | { type: "emote"; who: "you" | StatueId; mark: "!" | "?" | "..."; ms?: number }
+  | { type: "petrify"; id: StatueId }
+  | { type: "doorOpen" }
+  | { type: "walkThrough" }
+  | { type: "dawn" }
+  | { type: "overview" }
+  | { type: "wait"; ms: number };
+
+export type WorldEvents = {
+  onNear(near: Near): void;
+  onToast(text: string): void;
+  onInteract?(near: NonNullable<Near>): void;
+  onReady?(): void;
+  onScale?(cssPxPerArtPx: number): void;
+};
 
 export type World = {
   setPaused(paused: boolean): void;
-  /** Ruins that are solved, statues that have been questioned, and whether the compass is known. */
   setProgress(solved: SiteId[], questioned: string[], compass: boolean): void;
+  setScene(scene: Scene): void;
+  cue(cue: Cue): Promise<void>;
+  finishCues(): void;
   dispose(): void;
   debug: { goto(id: string): void; state(): Record<string, number | string> };
 };
@@ -585,6 +612,15 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
       solved = nextSolved;
       questioned = nextQuestioned;
       compass = nextCompass;
+    },
+    setScene() {
+      /* stub: the tile engine replaces this file */
+    },
+    cue() {
+      return Promise.resolve();
+    },
+    finishCues() {
+      /* stub */
     },
     dispose() {
       disposed = true;

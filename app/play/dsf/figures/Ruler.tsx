@@ -92,7 +92,7 @@ export default function Ruler({ solved, synth, onSolved }: Props) {
         {at && !solved ? <i className={styles.padDot} style={{ left: `${at.u * 100}%`, top: `${at.v * 100}%` }} /> : null}
         {solved && home ? (
           <b className={styles.padHome} style={{ left: `${home.u * 100}%`, top: `${home.v * 100}%` }}>
-            ★ θ
+            θ
           </b>
         ) : null}
         {!at && !solved ? <span className={styles.padHint}>drag here</span> : null}

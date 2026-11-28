@@ -22,7 +22,7 @@ const ROWS = H / CELL;
 const HIT = 11;
 const BAND = 21;
 const TAPS = 8;
-const NIGHT = "#0f141b";
+const NIGHT = "#141b1b";
 
 // two quadratic arcs, sampled once: the hidden curve
 const CURVE: [number, number][] = [];
@@ -173,7 +173,7 @@ export default function ProbeBoard(props: Props) {
         const upto = Math.floor(reveal * (CURVE.length - 1));
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        ctx.strokeStyle = now.mode === "home" ? "rgba(244,241,230,0.55)" : "rgba(246,216,107,0.3)";
+        ctx.strokeStyle = now.mode === "home" ? "rgba(244,241,230,0.55)" : "rgba(255,225,141,0.3)";
         ctx.lineWidth = HIT * 2;
         ctx.beginPath();
         ctx.moveTo(CURVE[0][0], CURVE[0][1]);
@@ -184,14 +184,14 @@ export default function ProbeBoard(props: Props) {
         ctx.stroke();
       }
       for (const tap of taps) {
-        ctx.lineWidth = 2.4;
+        ctx.lineWidth = 3.2;
         if (tap.hit) {
-          ctx.strokeStyle = "#a5d99a";
+          ctx.strokeStyle = "#adbc3a";
           ctx.beginPath();
           ctx.arc(tap.x, tap.y, 9, 0, Math.PI * 2);
           ctx.stroke();
         } else {
-          ctx.strokeStyle = "#f2a0b5";
+          ctx.strokeStyle = "#e0394c";
           ctx.beginPath();
           ctx.moveTo(tap.x - 6, tap.y - 6);
           ctx.lineTo(tap.x + 6, tap.y + 6);

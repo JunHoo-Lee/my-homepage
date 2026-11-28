@@ -45,30 +45,25 @@ export const QUESTION = {
 export const TITLE = {
   kicker: "An island mystery · NeurIPS 2026",
   name: "What I Cannot Create",
-  premise: [
-    "You are a classifier. You look at a picture and say which of 1,000 drawers it belongs in. You have never produced a pixel.",
-    "You wake on an island in a sea of static. At its centre is a sealed door with a sentence carved on it, and one question.",
-    "Eight ruins hold what the door wants. Each is a puzzle. Solve them in any order.",
-  ],
-  controls: [
-    ["WASD / arrows / drag", "walk"],
-    ["E / Space / tap Examine", "examine"],
-    ["L", "log"],
-  ],
-  meta: "8 puzzles and a door · no timer · about 9 minutes",
+  /** The one paragraph of the title screen. */
+  box: "You are a classifier. You have never produced a pixel. Tonight you wake on an island in a sea of static.",
+  meta: "8 puzzles and a door · about 9 minutes",
   start: "Wake up",
+  /** Shown once, when control is first handed over. */
+  hintTouch: "Tap the ground to walk",
+  hintKeys: "Arrows or WASD to walk · Space to examine",
 } as const;
 
 export type Site = {
   id: SiteId;
-  /** Order in the log. */
+  /** Order in the Notebook. */
   n: number;
   name: string;
   /** One glyph carved on the stone. */
   glyph: string;
   x: number;
   y: number;
-  /** What the log says before the ruin is solved. */
+  /** What the Notebook says before the ruin is solved. */
   rumor: string;
   /** Read before the puzzle. */
   setup: string[];
@@ -185,7 +180,8 @@ export const SITES: Site[] = [
     verdict: "It can measure the way home, against itself.",
     math: {
       tex: [
-        String.raw`\mathcal{F}_{\mathcal{A},f}:\ \mathcal{D} \mapsto f^{\star} \qquad x_{t+1} = x_t - \eta_t\, \nabla_x\, d\big(\mathcal{F}(x_t),\, \mathcal{F}(\mathcal{D}_s)\big)`,
+        String.raw`\mathcal{F}_{\mathcal{A},f}:\ \mathcal{D} \mapsto f^{\star}`,
+        String.raw`x_{t+1} = x_t - \eta_t\, \nabla_x\, d\big(\mathcal{F}(x_t),\, \mathcal{F}(\mathcal{D}_s)\big)`,
         String.raw`\Theta(x,x') = \nabla_\theta f(x)^{\top}\, \nabla_\theta f(x')`,
         String.raw`K(x,x') = \nabla_f \ell(f(x))^{\top}\, \Theta(x,x')\, \nabla_f \ell(f(x'))`,
         String.raw`\phantom{K(x,x')} = \nabla_\theta \ell(f(x))^{\top}\, \nabla_\theta \ell(f(x'))`,
@@ -253,7 +249,10 @@ export const SITES: Site[] = [
     ],
     verdict: "And it can be steered.",
     math: {
-      tex: [String.raw`x_{t+1} = x_t \underbrace{-\, \nabla_x\, d\big(\nabla_\theta \ell(f(x_t;\theta)),\, -\theta\big)}_{\text{DSF: the prior}} + \underbrace{\nabla_x \log p_\phi(y \mid x_t)}_{\text{the nudge}}`],
+      tex: [
+        String.raw`x_{t+1} = x_t \underbrace{-\, \nabla_x\, d\big(\nabla_\theta \ell(f(x_t;\theta)),\, -\theta\big)}_{\text{DSF: the prior}}`,
+        String.raw`\phantom{x_{t+1} = x_t} + \underbrace{\nabla_x \log p_\phi(y \mid x_t)}_{\text{the nudge}}`,
+      ],
       caption: "Classifier-style guidance: the DSF field as the prior, plus the gradient of any model that scores the condition y.",
     },
   },
@@ -274,7 +273,7 @@ export const SITES: Site[] = [
     ],
     verdict: "Answered. It understands, so it can create.",
     math: {
-      tex: [String.raw`(\lnot\,\text{create} \Rightarrow \lnot\,\text{understand}) \iff (\text{understand} \Rightarrow \text{create})`],
+      tex: [String.raw`(\lnot\,\text{create} \Rightarrow \lnot\,\text{understand})`, String.raw`\iff\; (\text{understand} \Rightarrow \text{create})`],
       caption: "A statement and its contrapositive are the same statement.",
     },
   },
@@ -371,12 +370,18 @@ export const DOOR = {
 } as const;
 
 export const LOG = {
-  button: "Log",
-  title: "The question",
-  unsolved: "Not yet understood.",
+  button: "Notebook",
+  title: "Notebook",
   statues: "Ruled out",
-  hint: "Solved ruins light a beacon. The door wants five.",
+  hint: "Each solved ruin lights a lamp on the causeway. The door wants five.",
+  then: "Then the question became",
+  back: "Back to the island",
+  all: "All notes",
 } as const;
+
+/** Shown in the Notebook and at the end of the Finale, and saved as public/play/dsf/CREDITS.txt. */
+export const CREDITS =
+  "Pixel art: Ninja Adventure Asset Pack by Pixel-boy and AAA (CC0), https://pixel-boy.itch.io/ninja-adventure-asset-pack. Additional sprites drawn for this game. Fonts: Jersey 10, DM Sans and Caveat, under the SIL Open Font License 1.1.";
 
 export const TOASTS = {
   compass: "You can read the field now. The arrow at your feet points to what you have not understood yet.",

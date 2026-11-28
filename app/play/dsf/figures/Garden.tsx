@@ -55,7 +55,7 @@ function Board({ targets, child }: { targets: Target[]; child: Child }) {
     canvas.width = W * 2;
     canvas.height = H * 2;
     ctx.setTransform(2, 0, 0, 2, 0, 0);
-    ctx.fillStyle = "#0f141b";
+    ctx.fillStyle = "#141b1b";
     ctx.fillRect(0, 0, W, H);
     const random = mulberry(child.seed);
     const reach = child.sigma * 62;
@@ -79,6 +79,9 @@ export default function Garden({ synth, onSolved }: { synth: Synth | null; onSol
   const [last, setLast] = useState<"closer" | "further" | "">("");
   const children = useMemo(() => breed(sigma, generation), [sigma, generation]);
   const finished = sigma <= DONE;
+  // a garden that is left before the picture is reported must not report it later
+  const report = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(report.current), []);
 
   function choose(child: Child) {
     if (finished) return;
@@ -90,7 +93,7 @@ export default function Garden({ synth, onSolved }: { synth: Synth | null; onSol
     setGeneration((value) => value + 1);
     if (child.sigma <= DONE) {
       synth?.arp([523, 659, 784, 1047], 0.09, { dur: 0.4, type: "triangle", gain: 0.11 });
-      window.setTimeout(onSolved, 1700);
+      report.current = window.setTimeout(onSolved, 1700);
     }
   }
 
