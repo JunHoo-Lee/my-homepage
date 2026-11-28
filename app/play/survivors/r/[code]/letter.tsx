@@ -12,36 +12,24 @@ const STAMP_COLOR = { Oral: PALETTE.purple, Accept: PALETTE.green, Borderline: P
 const scoreColor = (score: number) => (score <= 3 ? PALETTE.red : score <= 5 ? PALETTE.orange : score === 6 ? PALETTE.gold : PALETTE.green);
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
-// The area chair's note, laid out like a forum post on a review site. The texts are the
-// boilerplate every author has received at least once; one is picked per submission number.
+// The area chair's note, laid out like a forum post on a review site. The texts are terse
+// the way real ones are: scores, initials for the reviewers, no punchline. {s} is the scores.
 const METAREVIEWS: Record<ShareData["grade"], string[]> = {
-  DeskReject: [
-    "This submission does not follow the formatting instructions. Rejected without review.",
-    "The submission exceeds the page limit and is desk rejected without further review.",
-    "Out of scope for this venue. We encourage the authors to submit elsewhere.",
-    "Due to the record number of submissions, this paper was not sent out for review.",
-  ],
+  DeskReject: ["Exceeds the page limit.", "Not anonymized (acknowledgements left in the PDF).", "Wrong style file.", "Out of scope for the venue."],
   Reject: [
-    "The reviewers raised concerns about novelty. The rebuttal did not change their minds.",
-    "I have read the reviews and the rebuttal, and I agree with Reviewer 2.",
-    "Not ready for publication in its current form. We encourage a resubmission.",
-    "Reviews are mixed, but the most confident reviewer is negative.",
+    "Scores {s}. No reviewer changed their score after the rebuttal.",
+    "Scores {s}. R2's novelty concern stands, and no one championed the paper.",
+    "Thanks to the authors for the rebuttal. The reviewers were not convinced ({s}).",
   ],
   Borderline: [
-    "A borderline paper. The reviewers did not reach a consensus during the discussion.",
-    "The paper has merits and weaknesses. The program chairs will make the final call.",
-    "Reviewer 2 was not convinced by the rebuttal. The other reviewers did not respond.",
+    "Scores {s}. Split reviews, no consensus in the discussion. Deferring to the SAC.",
+    "R1 and R3 lean positive, R2 does not ({s}). Could go either way.",
   ],
   Accept: [
-    "The reviewers are generally positive. Reviewer 2 remains unconvinced.",
-    "All concerns except Reviewer 2's were addressed in the rebuttal.",
-    "A solid paper. Please address the remaining comments in the camera-ready version.",
+    "Scores {s}. R2 did not update, but the majority is positive.",
+    "Scores {s}. The rebuttal addressed most concerns. Please fix the rest for camera-ready.",
   ],
-  Oral: [
-    "All reviewers agree, including Reviewer 2, who raised their score after the rebuttal.",
-    "A clear accept. Reviewer 2 raised their score, which the AC notes is rare.",
-    "Strong consensus after the rebuttal. Recommended for an oral presentation.",
-  ],
+  Oral: ["Scores {s}. All reviewers positive after the rebuttal, R2 raised to 6.", "Scores {s}. Unanimous after the rebuttal. Nominated for oral."],
 };
 const AC_ID_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const FORUM = { title: "#3e6775", label: "#8c1b13", meta: "#8a8a8a", line: "#d9d4c7", text: "#2b2b2b" };
@@ -60,7 +48,7 @@ function Forum({ data, accent }: { data: ShareData; accent: string }) {
     : reviewsFor({ time: data.time, level: data.level, kills: data.kills, maxCombo: data.maxCombo, bossDefeated: data.bossDefeated, runLength: 300 });
   const seconds = Math.floor(data.time);
   const fields: [string, string][] = [
-    ["Metareview", options[n % options.length]],
+    [desk ? "Desk Reject Comments" : "Metareview", options[n % options.length].replace("{s}", reviews.map((r) => r.score).join("/"))],
     ["Recommendation", plainTitle(data.grade)],
   ];
   return (
