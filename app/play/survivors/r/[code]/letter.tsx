@@ -12,6 +12,49 @@ const STAMP_COLOR = { Oral: PALETTE.purple, Accept: PALETTE.green, Borderline: P
 const scoreColor = (score: number) => (score <= 3 ? PALETTE.red : score <= 5 ? PALETTE.orange : score === 6 ? PALETTE.gold : PALETTE.green);
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
+// A desk reject has no reviews, only the area chair's note: laid out like a forum
+// post on a review site, and written with the least effort an AC can spend.
+const LAZY_METAREVIEWS = [
+  "I agree with the reviewers.",
+  "Formatting. I did not read further.",
+  "Not a good fit for this venue. Good luck elsewhere.",
+  "The reasons for rejection are self-evident.",
+  "Margins.",
+  "Please see the call for papers.",
+  "Rejected. No further comments.",
+  "Out of scope, I think. I only read the title.",
+];
+const AC_ID_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function MetaReviewNote({ data }: { data: ShareData }) {
+  const n = data.submission;
+  const acId = [0, 1, 2, 3].map((i) => AC_ID_CHARS[(n * (i * 7 + 3) + i * 11) % AC_ID_CHARS.length]).join("");
+  const seconds = Math.floor(data.time);
+  const fields: [string, string][] = [
+    ["Metareview", LAZY_METAREVIEWS[n % LAZY_METAREVIEWS.length]],
+    ["Confidence", "5: The area chair is absolutely certain"],
+    ["Reviews received", "0"],
+    ["Time spent on this submission", `${seconds} second${seconds === 1 ? "" : "s"}`],
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", background: "#fff", border: "1.5px solid #d9d4c7", borderLeft: `7px solid ${PALETTE.red}`, borderRadius: 6, padding: "12px 20px 14px" }}>
+      <div style={{ display: "flex", fontSize: 25, fontWeight: 700, color: "#3e6775" }}>Meta Review of Submission{n} by Area Chair {acId}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 16, color: "#8a8a8a", marginTop: 3 }}>
+        <span style={{ display: "flex", background: "#8c1b13", color: "#fff", borderRadius: 3, padding: "1px 8px", fontWeight: 700 }}>Meta Review</span>
+        <span style={{ display: "flex" }}>Area Chair {acId} · 23:59 AoE · Readers: Everyone</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 9 }}>
+        {fields.map(([label, value]) => (
+          <div key={label} style={{ display: "flex", fontSize: 21, color: "#2b2b2b" }}>
+            <span style={{ display: "flex", fontWeight: 700, color: "#8c1b13", marginRight: 8 }}>{label}:</span>
+            <span style={{ display: "flex" }}>{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Letter({ data }: { data: ShareData }) {
   const stampColor = STAMP_COLOR[data.grade];
   const reviews =
@@ -43,8 +86,8 @@ function Letter({ data }: { data: ShareData }) {
         <div style={{ display: "flex", color: PALETTE.blue, fontSize: 22, fontWeight: 700, letterSpacing: 3, marginTop: 6 }}>
           DECISION · SUBMISSION #{data.submission}
         </div>
-        <div style={{ display: "flex", fontSize: 64, fontWeight: 800, color: PALETTE.ink, marginTop: 6 }}>{plainTitle(data.grade)}</div>
-        <div style={{ display: "flex", fontSize: 26, color: "#555", marginTop: 4 }}>{headline(data)}</div>
+        <div style={{ display: "flex", fontSize: data.grade === "DeskReject" ? 54 : 64, fontWeight: 800, color: PALETTE.ink, marginTop: 6 }}>{plainTitle(data.grade)}</div>
+        {data.grade === "DeskReject" ? null : <div style={{ display: "flex", fontSize: 26, color: "#555", marginTop: 4 }}>{headline(data)}</div>}
         <div
           style={{
             display: "flex",
@@ -65,7 +108,7 @@ function Letter({ data }: { data: ShareData }) {
           {DECISIONS[data.grade].stamp}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", marginTop: 22, gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: data.grade === "DeskReject" ? 14 : 22, gap: 10 }}>
           {reviews.length ? (
             reviews.map((r) => (
               <div
@@ -88,9 +131,7 @@ function Letter({ data }: { data: ShareData }) {
               </div>
             ))
           ) : (
-            <div style={{ display: "flex", fontSize: 26, color: "#555", padding: "8px 16px", background: "#f6f1e7", borderRadius: 12 }}>
-              No reviews: desk rejected before any reviewer opened the PDF.
-            </div>
+            <MetaReviewNote data={data} />
           )}
         </div>
 
