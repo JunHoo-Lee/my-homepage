@@ -79,6 +79,8 @@ const DAWN_STEPS = 8;
 const TIDE_STEPS = 6;
 const TIDE_BLOCK = 4;
 const SEA_TOAST_GAP_MS = 6000;
+/** Radius, in art pixels, of the glow of the robot's own visor before Mote joins it. */
+const VISOR_LIGHT = 17;
 const STATUE_IDS: readonly string[] = ["prompter", "bookkeeper", "copyist", "artist"];
 const MARK_SPRITE: Record<"!" | "?" | "...", SpriteName> = { "!": "emoteBang", "?": "emoteAsk", "...": "emoteDots" };
 
@@ -670,6 +672,11 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
       add(x, y, 32 + pulse, running < 0 ? 4 : opening(running - 300));
     });
     if (solved.has("door") || anim.door >= 1000) add(DOOR_GLOW[0], DOOR_GLOW[1], 72, anim.door >= 0 ? opening(anim.door - 1000) : 4);
+    // until Mote is at its shoulder the robot has only the glow of its own visor: enough to tell who you are
+    if (!gone && scene === "play" && (!moteHere() || anim.mote >= 0)) {
+      const [x, y] = playerPx();
+      add(x + 8, y + 5, VISOR_LIGHT);
+    }
     if (moteHere()) {
       const [mx, my, alpha] = motePx();
       const flicker = reduced ? 54 : 52 + 2 * (Math.floor(clock / 143) % 3);
