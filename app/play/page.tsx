@@ -14,7 +14,7 @@ const GAMES = [
     href: "/play/dsf",
     badge: "Paper · NeurIPS 2026",
     title: "What I Cannot Create",
-    blurb: "A classifier cannot create. Does it understand nothing? Explore an island in a sea of static and solve its puzzles to answer the question on the sealed door.",
+    blurb: "A classifier cannot create. Does it understand nothing? A 16-bit adventure: walk an island in a sea of static and solve its puzzles to answer the question on the sealed door.",
     meta: "8 puzzles and a door · about 9 minutes · phone friendly",
     art: "dsf",
   },

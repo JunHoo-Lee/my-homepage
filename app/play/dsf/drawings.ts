@@ -9,10 +9,6 @@
  * only faded in once the figure is solved.
  */
 
-/** The authoring sheet. */
-export const BOARD_W = 1000;
-export const BOARD_H = 620;
-
 /** The board a drawing is fitted onto, in board units. */
 export type Board = { w: number; h: number };
 
@@ -27,7 +23,7 @@ const ORANGE = 5;
 
 export const HAND_FONT = '"Caveat", "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
-export type DrawingId = "cat" | "scene" | "landscape" | "clock" | "banana" | "understand" | "feynman";
+export type DrawingId = "cat" | "landscape" | "clock" | "banana" | "understand" | "feynman";
 
 /** A tiny chalk-drawing API over a 2D context. Coordinates are board units. */
 class Pen {
@@ -172,40 +168,6 @@ const cat: Layer[] = [
   },
 ];
 
-const scene: Layer[] = [
-  {
-    grains: 3000,
-    draw(p) {
-      // ground
-      p.color(GREEN).width(4).line(70, 505, 930, 505);
-      // person, mid-throw
-      p.color(WHITE).width(6);
-      p.ellipse(262, 216, 31, 31);
-      p.line(262, 247, 262, 382);
-      p.line(262, 292, 204, 346).line(262, 292, 342, 236);
-      p.line(262, 382, 218, 502).line(262, 382, 306, 502);
-      // frisbee
-      p.color(ORANGE).width(6).ellipse(522, 172, 44, 12);
-      p.width(3).line(452, 170, 420, 172).line(456, 184, 430, 190);
-      // dog
-      p.color(WHITE).width(6);
-      p.ellipse(742, 412, 86, 42);
-      p.ellipse(846, 356, 33, 31);
-      p.line(828, 332, 814, 292, 846, 324);
-      p.ellipse(884, 366, 17, 12);
-      p.dot(853, 348, 5);
-      p.line(690, 446, 684, 502).line(716, 452, 712, 502).line(772, 452, 776, 502).line(798, 446, 804, 502);
-      p.quad(660, 398, 628, 388, 620, 340);
-      // the boxes a detector cannot help drawing
-      p.color(YELLOW).width(3);
-      p.rect(182, 170, 184, 344).rect(404, 146, 166, 56).rect(604, 278, 312, 236);
-      p.text("person 0.99", 184, 160, 30);
-      p.text("frisbee 0.91", 406, 136, 30);
-      p.text("dog 0.98", 606, 268, 30);
-    },
-  },
-];
-
 const clock: Layer[] = [
   {
     grains: 2600,
@@ -335,7 +297,6 @@ function sentence(white: string[], yellow: string[], doodle: boolean): Layer[] {
 const DRAWINGS: Record<DrawingId, Layer[]> = {
   cat,
   landscape,
-  scene,
   clock,
   banana,
   understand: sentence(["What I understand,"], ["I can create."], true),
@@ -358,10 +319,6 @@ export type Target = { x: number; y: number; color: number };
 
 function paletteRgb() {
   return CHALK.map((hex) => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]);
-}
-
-export function layerCount(id: DrawingId) {
-  return DRAWINGS[id].length;
 }
 
 type Fit = { k: number; x: number; y: number };

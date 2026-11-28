@@ -82,8 +82,6 @@ const INITIAL: Snap = {
   finished: false,
 };
 
-export type Shell = ReturnType<typeof createShell>;
-
 export function createShell(synth: Synth) {
   let snap: Snap = INITIAL;
   let world: World | null = null;

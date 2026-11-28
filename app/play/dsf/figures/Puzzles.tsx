@@ -18,7 +18,7 @@ import type { Synth } from "../../shared/synth";
 import { BOARDS, DOOR, LOOKS_HINTS } from "../content";
 import styles from "../dsf.module.css";
 
-export function TwoLooks({ synth, onSolved }: { synth: Synth | null; onSolved(): void }) {
+export function TwoLooks({ solved, synth, onSolved }: { solved: boolean; synth: Synth | null; onSolved(): void }) {
   const [looked, setLooked] = useState<number[]>([]);
   const [marked, setMarked] = useState<number[]>([]);
   const [message, setMessage] = useState("");
@@ -31,6 +31,7 @@ export function TwoLooks({ synth, onSolved }: { synth: Synth | null; onSolved():
   }, [message, fails]);
 
   function tap(index: number) {
+    if (solved) return;
     synth?.unlock();
     if (!looked.includes(index)) {
       synth?.tone({ freq: 520, dur: 0.05, gain: 0.07 });
@@ -77,15 +78,18 @@ export function TwoLooks({ synth, onSolved }: { synth: Synth | null; onSolved():
           );
         })}
       </div>
-      <div className={styles.puzzleFoot}>
-        <span>
-          Marked {marked.length} of {need}
-        </span>
-        <button type="button" className={styles.primary} disabled={marked.length !== need} onClick={check}>
-          {LOOKS_HINTS.check}
-        </button>
-      </div>
-      {message ? (
+      {/* once the five are found the count and the button have done their work; the insight takes their place */}
+      {solved ? null : (
+        <div className={styles.puzzleFoot}>
+          <span>
+            Marked {marked.length} of {need}
+          </span>
+          <button type="button" className={styles.primary} disabled={marked.length !== need} onClick={check}>
+            {LOOKS_HINTS.check}
+          </button>
+        </div>
+      )}
+      {message && !solved ? (
         <p ref={replyRef} className={styles.reply} role="status">
           {message}
           {fails >= 2 ? ` ${LOOKS_HINTS.nudge}` : ""}

@@ -1186,6 +1186,29 @@ button.entry b {
   }
 }
 
+/* a phone on its side is too short for a strip of island under the words: the cover takes the whole screen */
+@media (max-height: 480px) and (orientation: landscape) {
+  .title {
+    padding-top: calc(var(--safe-t) + 12px);
+  }
+
+  .titleCover {
+    height: 100%;
+  }
+
+  .titleKicker {
+    margin-bottom: 6px;
+  }
+
+  .titleName {
+    margin-bottom: 8px;
+  }
+
+  .titleName span {
+    display: inline;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .veil,
   .veilOut,

@@ -76,7 +76,7 @@ export default function Panel({ site, solved, leaving, synth, onSolved, onContin
     body = (
       <>
         <div className={styles.frame}>
-          <ProbeBoard mode="find" solved={false} revealSignal={reveal} synth={synth} label="A board of static with a hidden curve of pictures" onTap={(left) => setTapsLeft(left)} onSolved={() => later(onSolved, 1500)} />
+          <ProbeBoard solved={false} revealSignal={reveal} synth={synth} label="A board of static with a hidden curve of pictures" onTap={(left) => setTapsLeft(left)} onSolved={() => later(onSolved, 1500)} />
         </div>
         <p className={styles.status}>
           Taps left: <b>{tapsLeft}</b>
@@ -84,7 +84,7 @@ export default function Panel({ site, solved, leaving, synth, onSolved, onContin
       </>
     );
   } else if (site.id === "looks") {
-    body = <TwoLooks synth={synth} onSolved={onSolved} />;
+    body = <TwoLooks solved={solved} synth={synth} onSolved={onSolved} />;
   } else if (site.id === "garden") {
     body = <Garden synth={synth} onSolved={onSolved} />;
   } else if (site.id === "ruler") {

@@ -37,7 +37,6 @@ export const FEYNMAN = {
 
 export const QUESTION = {
   short: "A classifier cannot create. Does it understand nothing?",
-  long: "Feynman's test says that what you cannot create, you do not understand. A classifier only ever says which drawer a picture belongs in. It has never created anything. Does it understand nothing?",
 } as const;
 
 export const TITLE = {
@@ -249,34 +248,17 @@ export const SITES: Site[] = [
 /** The door opens for an attempt once this many ruins are solved. */
 export const DOOR_NEEDS = 5;
 
-export type Statue = { id: string; name: string; charge: string; alibi: string };
+export type Statue = { id: string; name: string };
 
-/** Four suspects on the island: the helpers earlier methods needed. None of them was on the shore. Ruled out, they turn to stone. */
+/**
+ * Four suspects on the island: the helpers earlier methods needed. None of them was on the shore.
+ * Ruled out, they turn to stone. What each one says and how it is answered is in script.ts.
+ */
 export const STATUES: Statue[] = [
-  {
-    id: "prompter",
-    name: "The Prompter",
-    charge: "“Someone told the picture what to become: a class label, an activation to maximize.”",
-    alibi: "There was no label on the shore. Detectors and self-supervised encoders have no single label to give, and they draw too.",
-  },
-  {
-    id: "bookkeeper",
-    name: "The Bookkeeper",
-    charge: "“BatchNorm keeps running averages of everything that passes his desk. He could describe a typical image from his ledger.”",
-    alibi: "DINOv2 is a vision transformer and keeps no such ledger. Pictures appear there all the same.",
-  },
-  {
-    id: "copyist",
-    name: "The Copyist",
-    charge: "“A real photograph was smuggled in, or a target to reconstruct.”",
-    alibi: "Nothing real is on the island. Sampling starts from noise and is never shown an image to match.",
-  },
-  {
-    id: "artist",
-    name: "The Uptown Artist",
-    charge: "“It is always the diffusion model. Just use diffusion.”",
-    alibi: "No generator is trained or borrowed. She needs two billion references and a month of GPUs to paint a cat, and has an invoice for all of them.",
-  },
+  { id: "prompter", name: "The Prompter" },
+  { id: "bookkeeper", name: "The Bookkeeper" },
+  { id: "copyist", name: "The Copyist" },
+  { id: "artist", name: "The Uptown Artist" },
 ];
 
 /** The twelve boards of the Hall of Two Looks: what the classifier says, first and second time. */
@@ -352,7 +334,6 @@ export type Thought = { lead: string; body: string };
 
 export const FINALE = {
   kicker: "The door is open",
-  boardReads: "The door now reads",
   reviewer: "Reviewer 2: “The novelty is limited.”",
   stamp: "Accept, with minor revisions",
   closingTitle: "What follows",
