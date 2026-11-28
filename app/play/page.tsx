@@ -59,12 +59,8 @@ export default function PlayLauncher() {
           <Link key={game.href} href={game.href} className={styles.tile}>
             <div className={`${styles.art} ${styles[game.art]}`} aria-hidden="true">
               {game.art === "dsf" ? (
-                <>
-                  <span className={styles.chalkQuote}>What I cannot create…</span>
-                  <span className={styles.chalkBot} />
-                  <span className={styles.chalkRing} />
-                  <span className={styles.chalkCat}>=^.^=</span>
-                </>
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src="/play/dsf/tile.png" alt="" className={styles.dsfImg} width={480} height={240} />
               ) : game.art === "customs" ? (
                 <>
                   <span className={`${styles.passport} ${styles.pp1}`} />

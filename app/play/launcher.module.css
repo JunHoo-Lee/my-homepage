@@ -260,64 +260,20 @@
   }
 }
 
-/* paper-game art: a blackboard and a customs desk */
+/* dsf art: a real in-game frame */
 .dsf {
-  background-color: #1f2e2b;
-  background-image: radial-gradient(rgb(244 241 230 / 30%) 1px, transparent 1.2px);
-  background-size: 13px 17px;
+  background: #0d1230;
 }
 
-.chalkQuote {
-  position: absolute;
-  left: 0.9rem;
-  top: 0.7rem;
-  color: rgb(244 241 230 / 75%);
-  font: italic 700 0.95rem/1 "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+.dsfImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
 }
 
-.chalkBot {
-  position: absolute;
-  left: 22%;
-  top: 52%;
-  width: 2.3rem;
-  height: 1.9rem;
-  border: 2.5px solid #f4f1e6;
-  border-radius: 0.5rem;
-  background: #1f2e2b;
-  animation: bob 1.6s ease-in-out infinite;
-}
-
-.chalkBot::after {
-  content: "";
-  position: absolute;
-  left: 0.42rem;
-  top: 0.5rem;
-  width: 0.34rem;
-  height: 0.34rem;
-  border-radius: 50%;
-  background: #f4f1e6;
-  box-shadow: 0.85rem 0 0 #f4f1e6;
-}
-
-.chalkRing {
-  position: absolute;
-  left: calc(22% - 1.35rem);
-  top: calc(52% - 1.55rem);
-  width: 5rem;
-  height: 5rem;
-  border: 2px dashed rgb(143 199 238 / 75%);
-  border-radius: 50%;
-}
-
-.chalkCat {
-  position: absolute;
-  right: 12%;
-  top: 38%;
-  color: #f6d86b;
-  font: 700 2rem/1 ui-monospace, Menlo, Consolas, monospace;
-  text-shadow: 0 0 12px rgb(246 216 107 / 40%);
-}
-
+/* customs desk */
 .customs {
   background-color: #e7dcc3;
   background-image: repeating-linear-gradient(0deg, rgb(0 0 0 / 4%) 0 1px, transparent 1px 22px);
