@@ -39,7 +39,7 @@ export const SITE_PAGES: SitePage[] = [
   { path: "/backdoor", title: "Clean Data Can Still Carry Backdoors: Support-Persistent Backdoors for Model Reuse", kind: "project", description: "NeurIPS 2026. Why malicious behavior can survive knowledge transfer on clean data." },
   ...POSTS.map((p) => ({ path: p.href, title: p.title, kind: "post" as const, description: `${p.date}. ${p.description}` })),
   { path: "/play", title: "Games", kind: "game", description: "Small browser games built around the homepage and its papers (Gradient Survivors, Paperlands, and two playable papers)." },
-  { path: "/play/dsf", title: "What I Cannot Create", kind: "game", description: "The Discriminative Score Function paper (NeurIPS 2026) as an island mystery: seven puzzles and a sealed door about whether a model that cannot create understands anything." },
+  { path: "/play/dsf", title: "What I Cannot Create", kind: "game", description: "The Discriminative Score Function paper (NeurIPS 2026) as an island mystery: eight puzzles and a sealed door about whether a model that cannot create understands anything." },
   { path: "/play/backdoor", title: "Nothing to Declare", kind: "game", description: "The clean-data backdoor paper (NeurIPS 2026) as a customs game: every transfer image is clean and the student is backdoored anyway." },
 ];
 

@@ -47,16 +47,19 @@ and `public/backdoor/assets/play-qr.{svg,png}`.
   question, carved on a sealed door: "What I cannot create, I do not
   understand" (Feynman); a classifier cannot create; does it understand
   nothing? The player walks a night island in a sea of static (the island is
-  the image manifold) and solves the puzzle in each of seven ruins, in any
+  the image manifold) and solves the puzzle in each of eight ruins, in any
   order. Every solved puzzle is one insight of the paper, changes what the log
   says about the question, and lights a beacon; five insights let the player
   attempt the door, whose answer is the contrapositive. `content.ts` holds the
   world, every word and the puzzle data; `world.ts` is the canvas island
   (walking, light, what is nearby); `figures/` holds the puzzles: `DustBoard`
-  (static becomes a drawing), `ProbeBoard` (find the sliver), `Puzzles`
+  (static becomes a drawing), `ProbeBoard` (find the sliver), `Garden` (breed a picture out of static by
+  only choosing which of six boards looks most real), `Puzzles`
   (`TwoLooks`, a deduction about agreeing with yourself, and `DoorPuzzle`, the
   contrapositive), `Ruler` (pixel ruler vs function ruler) and `Footprints`
-  (align the loss gradient with −θ). `?debug` exposes `window.__dsf`
+  (align the loss gradient with −θ). Each insight shows its mathematics typeset
+  with KaTeX: sampling from p(x) and the score, the NTK and Loss Tangent Kernel,
+  and the DSF update. `?debug` exposes `window.__dsf`
   (`goto(id)`, `state()`).
 - `app/play/backdoor` — *Nothing to Declare*. Shift 1: artificial triggers get
   caught at customs and the student stays clean. Shift 2: every image is clean

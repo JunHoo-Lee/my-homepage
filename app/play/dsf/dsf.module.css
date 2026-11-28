@@ -24,8 +24,8 @@
 .root {
   --night: #070a0f;
   --board: #0f141b;
-  --ink: #e8e4d8;
-  --dim: rgb(232 228 216 / 62%);
+  --ink: #f3f0e8;
+  --dim: rgb(243 240 232 / 70%);
   --rule: rgb(232 228 216 / 22%);
   --yellow: #f6d86b;
   --pink: #f2a0b5;
@@ -70,11 +70,8 @@
   flex: 1;
   min-width: 0;
   margin: 0;
-  overflow: hidden;
-  color: var(--yellow);
-  font: 700 1.25rem/1.1 var(--hand);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--ink);
+  font: 600 0.95rem/1.25 var(--ui);
 }
 
 .logButton,
@@ -128,12 +125,13 @@
 }
 
 .toast {
-  padding: 0.35rem 0.75rem;
-  border: 1.5px solid rgb(150 205 245 / 60%);
-  border-radius: 0.5rem;
-  background: rgb(7 10 15 / 90%);
-  color: var(--blue);
-  font: 700 1.15rem/1.2 var(--hand);
+  padding: 0.5rem 0.8rem;
+  border: 1px solid rgb(150 205 245 / 55%);
+  border-radius: 0.6rem;
+  background: rgb(10 15 22 / 94%);
+  color: var(--ink);
+  font: 500 0.92rem/1.4 var(--ui);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
   animation: toast 4.2s ease both;
 }
 
@@ -191,12 +189,12 @@
 }
 
 .sheet {
-  width: min(100%, 40rem);
-  padding: 1.2rem 1.3rem 1.3rem;
-  border: 1.5px solid rgb(232 228 216 / 40%);
-  border-radius: 0.8rem;
-  background: rgb(13 18 25 / 97%);
-  box-shadow: 0 20px 60px rgb(0 0 0 / 60%);
+  width: min(100%, 41rem);
+  padding: 1.5rem 1.6rem 1.6rem;
+  border: 1px solid rgb(243 240 232 / 28%);
+  border-radius: 1rem;
+  background: #111923;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 65%);
 }
 
 .wide {
@@ -204,9 +202,9 @@
 }
 
 .sheet p {
-  margin: 0 0 0.9rem;
-  color: rgb(232 228 216 / 92%);
-  font: 1.02rem/1.66 var(--serif);
+  margin: 0 0 1rem;
+  color: rgb(243 240 232 / 90%);
+  font: 400 1.04rem/1.68 var(--ui);
 }
 
 .sheet b {
@@ -214,10 +212,14 @@
 }
 
 .sheet .kicker {
-  margin: 0 0 0.6rem;
+  display: inline-block;
+  margin: 0 0 0.9rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  background: rgb(150 205 245 / 14%);
   color: var(--blue);
   font: 700 0.7rem/1.4 var(--mono);
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -258,11 +260,12 @@
 }
 
 .sheet .bigQuestion {
-  padding: 0.6rem 0.8rem;
-  border: 1.5px dashed rgb(246 216 107 / 60%);
-  border-radius: 0.6rem;
+  padding: 0.8rem 1rem;
+  border-left: 4px solid var(--yellow);
+  border-radius: 0 0.6rem 0.6rem 0;
+  background: rgb(246 216 107 / 9%);
   color: var(--yellow);
-  font: 700 1.5rem/1.15 var(--hand);
+  font: 700 1.15rem/1.35 var(--ui);
 }
 
 .sheet .charge {
@@ -371,28 +374,24 @@
 }
 
 .sheet .aha {
-  margin: 0 0 0.7rem;
+  margin: 0 0 0.9rem;
   color: var(--yellow);
-  font: 700 clamp(2rem, 7vw, 2.8rem) / 1.03 var(--hand);
+  font: 800 clamp(1.7rem, 6vw, 2.3rem) / 1.12 var(--ui);
+  letter-spacing: -0.02em;
 }
 
 .sheet .formula {
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.4rem;
-  background: rgb(150 205 245 / 8%);
-  color: var(--blue);
-  font: 0.8rem/1.6 var(--mono);
-  overflow-wrap: anywhere;
+  display: none;
 }
 
 .sheet .verdictLine {
   display: grid;
-  gap: 0.1rem;
-  padding: 0.55rem 0.8rem;
-  border: 1.5px solid rgb(165 217 154 / 55%);
-  border-radius: 0.5rem;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.7rem;
+  background: rgb(165 217 154 / 11%);
   color: var(--green);
-  font: 700 1.3rem/1.15 var(--hand);
+  font: 700 1.08rem/1.35 var(--ui);
 }
 
 .verdictLine span {
@@ -430,12 +429,12 @@
 
 .log b {
   color: var(--dim);
-  font: 700 1.2rem/1.15 var(--hand);
+  font: 700 1rem/1.3 var(--ui);
 }
 
 .log span {
   color: var(--dim);
-  font: 0.82rem/1.4 var(--ui);
+  font: 0.88rem/1.45 var(--ui);
 }
 
 .logDone {
@@ -448,6 +447,38 @@
 
 .logDone span {
   color: var(--green);
+}
+
+/* the mathematics behind an insight, typeset with KaTeX */
+.math {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem 0.2rem;
+  border: 1px solid rgb(150 205 245 / 30%);
+  border-radius: 0.8rem;
+  background: rgb(150 205 245 / 6%);
+}
+
+.math figcaption {
+  margin-bottom: 0.3rem;
+  color: var(--blue);
+  font: 700 0.68rem/1.4 var(--mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.equation {
+  padding: 0.15rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--ink);
+  font-size: 1.02rem;
+}
+
+.sheet .math p {
+  margin: 0.4rem 0 0.8rem;
+  color: var(--dim);
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 /* ---------------------------------------------------------------- puzzles */
@@ -465,7 +496,7 @@
 
 .sheet .instruction {
   margin: 0;
-  font: 600 0.95rem/1.4 var(--ui);
+  font: 600 1rem/1.45 var(--ui);
 }
 
 .instruction span {
@@ -514,7 +545,6 @@
 .choices .card {
   border-color: rgb(246 216 107 / 60%);
   color: var(--yellow);
-  font: 700 1.15rem/1.1 var(--hand);
 }
 
 .choices .card.choiceOn {
@@ -541,8 +571,55 @@
   display: grid;
   place-items: center;
   color: var(--yellow);
-  font: 700 2rem/1 var(--hand);
+  font: 700 1.2rem/1 var(--ui);
   pointer-events: none;
+}
+
+/* the selection garden */
+.garden {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.gardenGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.gardenGrid button {
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid rgb(243 240 232 / 30%);
+  border-radius: 0.5rem;
+  background: var(--board);
+  cursor: pointer;
+}
+
+.gardenGrid button:hover {
+  border-color: var(--yellow);
+}
+
+.garden canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+.gardenFinal {
+  overflow: hidden;
+  border: 2px solid var(--yellow);
+  border-radius: 0.6rem;
+}
+
+.good {
+  color: var(--green) !important;
+}
+
+.bad {
+  color: var(--pink) !important;
 }
 
 /* the hall of two looks */
@@ -575,18 +652,18 @@
 }
 
 .boardTile b {
-  font: 700 0.74rem/1.3 var(--mono);
+  font: 700 0.82rem/1.3 var(--ui);
 }
 
 .boardTile em {
   color: var(--blue);
-  font: 0.7rem/1.3 var(--mono);
+  font: 600 0.78rem/1.3 var(--ui);
   font-style: normal;
 }
 
 .boardTile i {
   color: var(--dim);
-  font: 0.66rem/1.3 var(--mono);
+  font: 0.74rem/1.3 var(--ui);
   font-style: normal;
   text-decoration: underline;
 }
@@ -623,7 +700,7 @@
 .carved b {
   margin: 0 0.3rem;
   color: var(--ink);
-  font: 700 1.5rem/1.2 var(--hand);
+  font: 700 1.1rem/1.3 var(--ui);
   letter-spacing: 0;
 }
 
@@ -636,7 +713,7 @@
   border-radius: 0.5rem;
   background: rgb(246 216 107 / 8%);
   color: var(--yellow);
-  font: 700 1.4rem/1.1 var(--hand);
+  font: 700 1.02rem/1.2 var(--ui);
   cursor: pointer;
 }
 
@@ -647,12 +724,12 @@
 }
 
 .tiles button {
-  min-height: 2.8rem;
-  border: 1.5px solid rgb(232 228 216 / 50%);
-  border-radius: 0.5rem;
+  min-height: 3rem;
+  border: 1.5px solid rgb(243 240 232 / 45%);
+  border-radius: 0.6rem;
   background: var(--board);
   color: var(--ink);
-  font: 700 1.35rem/1.1 var(--hand);
+  font: 700 1.02rem/1.2 var(--ui);
   cursor: pointer;
 }
 
@@ -682,9 +759,9 @@
 
 .padDot,
 .padHome {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+  color: var(--yellow);
+  font: 800 1.1rem/1 var(--ui);
+  white-space: nowrap;
 }
 
 .padDot {
@@ -707,7 +784,7 @@
   display: grid;
   place-items: center;
   color: var(--dim);
-  font: 700 1.4rem/1 var(--hand);
+  font: 600 1rem/1 var(--ui);
   pointer-events: none;
 }
 
@@ -744,7 +821,7 @@
 .gauge small {
   grid-column: 1 / -1;
   color: var(--yellow);
-  font: 700 1.1rem/1.2 var(--hand);
+  font: 700 0.9rem/1.3 var(--ui);
 }
 
 /* the footprint stones */
@@ -874,8 +951,15 @@
   }
 
   .question {
-    font-size: 1.02rem;
-    white-space: normal;
+    font-size: 0.84rem;
+  }
+
+  .sheet p {
+    font-size: 1rem;
+  }
+
+  .equation {
+    font-size: 0.86rem;
   }
 
   .boardTile b {
@@ -897,7 +981,6 @@
 
   .slot {
     min-width: 7rem;
-    font-size: 1.2rem;
   }
 
   .examine kbd {

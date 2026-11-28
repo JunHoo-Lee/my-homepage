@@ -116,14 +116,14 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
           g.fill();
         }
       };
-      shape(HALF * 2 + 34, 17, "rgba(150,205,245,0.10)"); // surf
-      shape(HALF * 2 + 12, 6, "rgba(150,205,245,0.20)");
-      shape(HALF * 2, 0, "#15222a"); // ground
-      shape(HALF * 2 - 30, -15, "#192a31");
+      shape(HALF * 2 + 40, 20, "rgba(150,205,245,0.14)"); // surf
+      shape(HALF * 2 + 14, 7, "rgba(170,215,250,0.42)");
+      shape(HALF * 2, 0, "#24414f"); // ground
+      shape(HALF * 2 - 30, -15, "#2c4e5c");
       // worn trails
       g.setLineDash([3, 16]);
-      g.strokeStyle = "rgba(232,228,216,0.30)";
-      g.lineWidth = 4;
+      g.strokeStyle = "rgba(240,236,224,0.55)";
+      g.lineWidth = 5;
       g.beginPath();
       for (const [a, b] of PATHS) {
         g.moveTo(a[0], a[1]);
@@ -144,7 +144,7 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
         if (PATHS.some(([a, b]) => toSegment(x, y, a, b) < 26)) continue;
         if (SITES.some((site) => (x - site.x) ** 2 + (y - site.y) ** 2 < 70 ** 2)) continue;
         if (random() < 0.55) {
-          g.fillStyle = "#22383c";
+          g.fillStyle = "#3b6a66";
           g.beginPath();
           g.moveTo(x, y - 13);
           g.lineTo(x + 8, y + 6);
@@ -152,7 +152,7 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
           g.closePath();
           g.fill();
         } else {
-          g.fillStyle = "#24333c";
+          g.fillStyle = "#47606e";
           g.beginPath();
           g.ellipse(x, y, 7 + random() * 5, 5, 0, 0, Math.PI * 2);
           g.fill();
@@ -346,9 +346,9 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
     ctx.setTransform(scale, 0, 0, scale, -camX * scale, -camY * scale);
 
     // the sea of static
-    ctx.fillStyle = "rgba(214,222,235,0.42)";
+    ctx.fillStyle = "rgba(176,206,240,0.6)";
     ctx.beginPath();
-    const specks = Math.round((W * H) / 520);
+    const specks = Math.round((W * H) / 330);
     for (let n = 0; n < specks; n += 1) ctx.rect(camX + Math.random() * W, camY + Math.random() * H, 1.8, 1.8);
     ctx.fill();
     ctx.drawImage(island, 0, 0, WW, WH);
@@ -358,7 +358,7 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
     for (const statue of STATUES) {
       if (!visible(statue.x, statue.y, 80)) continue;
       const out = questioned.includes(statue.id);
-      ctx.fillStyle = out ? "#3a4650" : "#566673";
+      ctx.fillStyle = out ? "#55636f" : "#93a4b3";
       ctx.beginPath();
       ctx.moveTo(statue.x - 13, statue.y + 18);
       ctx.lineTo(statue.x - 9, statue.y - 8);
@@ -379,8 +379,8 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
       if (!visible(site.x, site.y, 160)) continue;
       const done = solved.includes(site.id);
       const door = site.id === "door";
-      const w = door ? 76 : 44;
-      const h = door ? 96 : 62;
+      const w = door ? 88 : 54;
+      const h = door ? 112 : 76;
       if (done) {
         const beam = ctx.createLinearGradient(0, site.y - h / 2 - 190, 0, site.y - h / 2);
         beam.addColorStop(0, "rgba(246,216,107,0)");
@@ -402,9 +402,6 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
       ctx.fillStyle = done ? "#f6d86b" : "rgba(232,228,216,0.9)";
       ctx.font = `700 ${door ? 40 : 26}px Georgia, serif`;
       ctx.fillText(done && !door ? "✓" : site.glyph, site.x, site.y + 2);
-      ctx.font = "700 13px ui-monospace, Menlo, Consolas, monospace";
-      ctx.fillStyle = done ? "rgba(246,216,107,0.9)" : "rgba(232,228,216,0.7)";
-      ctx.fillText(site.name, site.x, site.y + h / 2 + 16);
     }
 
     // the compass: the field, read from where you stand
@@ -437,6 +434,10 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
     }
 
     // the classifier, carrying a lantern
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.scale(1.35, 1.35);
+    ctx.translate(-player.x, -player.y);
     const { x, y } = player;
     const bob = player.moving > 30 ? Math.sin(clock * 16) * 1.6 : Math.sin(clock * 3) * 0.8;
     const top = y - 17 + bob;
@@ -469,23 +470,49 @@ export function createWorld(canvas: HTMLCanvasElement, synth: Synth, events: Wor
     ctx.arc(x + 7 + player.fx * 2.6, top + 12 + player.fy * 2, 2.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // night: everything is dark except the lantern and the beacons of what is understood
+    ctx.restore();
+
+    // night: everything is dimmed except the lantern and the beacons of what is understood
     const g = dark.getContext("2d");
     if (g) {
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.globalCompositeOperation = "source-over";
       g.clearRect(0, 0, dark.width, dark.height);
-      g.fillStyle = "rgba(4,6,10,0.9)";
+      g.fillStyle = "rgba(5,9,20,0.6)";
       g.fillRect(0, 0, dark.width, dark.height);
       g.globalCompositeOperation = "destination-out";
-      light(g, x, y, 230 + Math.sin(clock * 2.3) * 6, 1);
+      light(g, x, y, 290 + Math.sin(clock * 2.3) * 6, 1);
       for (const site of SITES) {
         if (!visible(site.x, site.y, 320)) continue;
-        if (solved.includes(site.id)) light(g, site.x, site.y, 300, 0.95);
-        else light(g, site.x, site.y, 70, 0.5);
+        if (solved.includes(site.id)) light(g, site.x, site.y, 340, 1);
+        else light(g, site.x, site.y, 110, 0.7);
       }
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(dark, 0, 0);
+    }
+
+    // name plates, drawn over the night so they are always readable
+    ctx.setTransform(scale, 0, 0, scale, -camX * scale, -camY * scale);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = '600 15px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    const plate = (text: string, px: number, py: number, ink: string) => {
+      const width = ctx.measureText(text).width + 18;
+      ctx.fillStyle = "rgba(7,10,15,0.82)";
+      ctx.beginPath();
+      ctx.roundRect(px - width / 2, py - 12, width, 24, 7);
+      ctx.fill();
+      ctx.fillStyle = ink;
+      ctx.fillText(text, px, py + 1);
+    };
+    for (const site of SITES) {
+      if (!visible(site.x, site.y, 200)) continue;
+      const tall = site.id === "door" ? 112 : 76;
+      plate(site.name, site.x, site.y - tall / 2 - 22, solved.includes(site.id) ? "#f6d86b" : "#f1eee6");
+    }
+    for (const statue of STATUES) {
+      if (near?.id !== statue.id) continue;
+      plate(statue.name, statue.x, statue.y - 44, "#f1eee6");
     }
 
     // joystick and a small map, in screen space

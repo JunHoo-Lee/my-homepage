@@ -1,5 +1,6 @@
 "use client";
 
+import katex from "katex";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -9,6 +10,7 @@ import { CLOCK_GUESSES, DOOR, DOOR_NEEDS, FEYNMAN, FINALE, LOG, PROMPT_CARDS, QU
 import styles from "./dsf.module.css";
 import DustBoard from "./figures/DustBoard";
 import Footprints from "./figures/Footprints";
+import Garden from "./figures/Garden";
 import ProbeBoard from "./figures/ProbeBoard";
 import { DoorPuzzle, TwoLooks } from "./figures/Puzzles";
 import Ruler from "./figures/Ruler";
@@ -45,6 +47,9 @@ function Puzzle({ site, onSolved }: { site: Site; onSolved(): void }) {
     );
   } else if (site.id === "looks") {
     body = <TwoLooks synth={synth} onSolved={onSolved} />;
+    canSkip = false;
+  } else if (site.id === "garden") {
+    body = <Garden synth={synth} onSolved={onSolved} />;
     canSkip = false;
   } else if (site.id === "ruler") {
     body = <Ruler solved={false} synth={synth} onSolved={onSolved} />;
@@ -126,7 +131,15 @@ function Insight({ site }: { site: Site }) {
       {site.note.map((paragraph) => (
         <p key={paragraph}>{paragraph}</p>
       ))}
-      {site.formula ? <p className={styles.formula}>{site.formula}</p> : null}
+      {site.math ? (
+        <figure className={styles.math}>
+          <figcaption>The mathematics</figcaption>
+          {site.math.tex.map((tex) => (
+            <div key={tex} className={styles.equation} dangerouslySetInnerHTML={{ __html: katex.renderToString(tex, { displayMode: true, throwOnError: false }) }} />
+          ))}
+          <p>{site.math.caption}</p>
+        </figure>
+      ) : null}
       <p className={styles.verdictLine}>
         <span>The question now</span> {site.verdict}
       </p>
@@ -202,15 +215,14 @@ export default function DsfClient() {
     } else setOpen({ kind: "site", id: now.near.id });
   }, [synth]);
 
+  const solvedRef = useRef<SiteId[]>([]);
   const solve = useCallback(
     (id: SiteId) => {
-      setSolved((current) => {
-        if (current.includes(id)) return current;
-        if (id === "footprints") pushToast(TOASTS.compass);
-        const next = [...current, id];
-        if (id !== "door" && next.filter((item) => item !== "door").length === DOOR_NEEDS) pushToast(TOASTS.door);
-        return next;
-      });
+      if (solvedRef.current.includes(id)) return;
+      solvedRef.current = [...solvedRef.current, id];
+      setSolved(solvedRef.current);
+      if (id === "footprints") pushToast(TOASTS.compass);
+      if (id !== "door" && solvedRef.current.filter((item) => item !== "door").length === DOOR_NEEDS) pushToast(TOASTS.door);
     },
     [pushToast],
   );

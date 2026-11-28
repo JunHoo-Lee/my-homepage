@@ -7,13 +7,14 @@
  *   "What I cannot create, I do not understand."  (Feynman)
  *   A classifier cannot create. Does it understand nothing?
  *
- * Seven ruins stand around the island. Each holds one puzzle, and each
+ * Eight ruins stand around the island. Each holds one puzzle, and each
  * solved puzzle is one insight of the Discriminative Score Function paper
  * (NeurIPS 2026) and one step toward an answer:
  *
  *   shore       it can draw, with no label and no prompt
  *   needle      generating an image is finding the image manifold
  *   looks       that manifold is where a classifier agrees with itself
+ *   garden      telling real from unreal is already enough to generate
  *   ruler       so measure in function space, against the model itself
  *   footprints  the model's own training direction is the compass (DSF)
  *   clock       what it draws is what it believes, biases included
@@ -26,7 +27,7 @@
  * are cartoons and the ending says so.
  */
 
-export type SiteId = "shore" | "needle" | "looks" | "ruler" | "footprints" | "clock" | "bench" | "door";
+export type SiteId = "shore" | "needle" | "looks" | "garden" | "ruler" | "footprints" | "clock" | "bench" | "door";
 
 export const WORLD = { w: 2400, h: 1700, start: { x: 1200, y: 1560 } } as const;
 
@@ -47,14 +48,14 @@ export const TITLE = {
   premise: [
     "You are a classifier. You look at a picture and say which of 1,000 drawers it belongs in. You have never produced a pixel.",
     "You wake on an island in a sea of static. At its centre is a sealed door with a sentence carved on it, and one question.",
-    "Seven ruins hold what the door wants. Each is a puzzle. Solve them in any order.",
+    "Eight ruins hold what the door wants. Each is a puzzle. Solve them in any order.",
   ],
   controls: [
     ["WASD / arrows / drag", "walk"],
     ["E / Space / tap Examine", "examine"],
     ["L", "log"],
   ],
-  meta: "7 puzzles and a door · no timer · about 8 minutes",
+  meta: "8 puzzles and a door · no timer · about 9 minutes",
   start: "Wake up",
 } as const;
 
@@ -77,7 +78,8 @@ export type Site = {
   note: string[];
   /** What the insight does to the question on the door. */
   verdict: string;
-  formula?: string;
+  /** The mathematics behind the insight, as LaTeX, with a plain-words caption. */
+  math?: { tex: string[]; caption: string };
 };
 
 export const SITES: Site[] = [
@@ -114,7 +116,14 @@ export const SITES: Site[] = [
       "So generating an image is not inventing one. It is getting from the static onto the sliver. Creating is a problem of direction: from here, which way is the manifold?",
     ],
     verdict: "To create is to find the sliver.",
-    formula: "x_{t+1} = x_t − η ∇ₓ d(x_t, M)",
+    math: {
+      tex: [
+        String.raw`\text{generate} \;\equiv\; \text{draw } x \sim p(x)`,
+        String.raw`x_{t+1} = x_t + \eta_t\, \nabla_x \log p(x_t)`,
+        String.raw`\nabla_x \log p(x_t) \;\longleftrightarrow\; -\,\nabla_x\, d(x_t, \mathcal{M})`,
+      ],
+      caption: "To generate is to sample from the image distribution p(x). Score-based models do it by following the score ∇ₓ log p(x); geometrically, that is moving toward the manifold M on which p is concentrated.",
+    },
   },
   {
     id: "looks",
@@ -132,11 +141,35 @@ export const SITES: Site[] = [
       "The region where its answers hold is its in-distribution domain, and that region is the sliver. A model that generalizes to photographs it has never seen already knows where pictures live. Understanding, for a classifier, is that knowledge.",
     ],
     verdict: "To understand is to know where the sliver is. Same place.",
-    formula: "ℓ_aug(x) = 1 − cos( h(A₁x), h(A₂x) )",
+    math: {
+      tex: [String.raw`d(\,\cdot\,, \mathcal{D}_s) \;\simeq\; d(\,\cdot\,, \mathcal{D}_t) \qquad \forall\, \mathcal{D}_t \subseteq \mathcal{M}`],
+      caption: "What a usable distance to the manifold must satisfy: built from the training set, it has to hold for any other sample of the manifold. Generalization is exactly this property.",
+    },
+  },
+  {
+    id: "garden",
+    n: 4,
+    name: "The Selection Garden",
+    glyph: "✦",
+    x: 548,
+    y: 556,
+    rumor: "Six boards grow here. You can only choose.",
+    setup: ["You still cannot draw. Here you do not have to. Six boards grow from one parent, each a slightly different handful of dust. Do the only thing you know how to do: say which one looks most like a picture."],
+    instruction: "Tap the board that is closest to a picture. It becomes the parent of the next six.",
+    aha: "Choosing is a direction.",
+    note: [
+      "You never drew a stroke. You only discriminated, again and again, and a picture came out of the static. Telling “more real” from “less real” is already enough to generate, as long as something keeps proposing candidates.",
+      "This is generation at its slowest: try six neighbours and keep the best. A score function is the same idea made exact. Instead of sampling neighbours and choosing, it asks in which direction “more real” increases, and steps that way. The rest of the island is about getting that direction out of a classifier.",
+    ],
+    verdict: "Telling real from unreal is already enough to create.",
+    math: {
+      tex: [String.raw`x_{t+1} = \operatorname*{arg\,max}_{x' \in \mathcal{N}(x_t)} \; p(x')`, String.raw`\eta \to 0: \qquad x_{t+1} = x_t + \eta_t\, \nabla_x \log p(x_t)`],
+      caption: "Selection among neighbours N(x) climbs the data density p(x) one comparison at a time. With infinitely many neighbours and infinitely small steps it becomes following the score.",
+    },
   },
   {
     id: "ruler",
-    n: 4,
+    n: 5,
     name: "The Dark Room",
     glyph: "↧",
     x: 760,
@@ -147,14 +180,22 @@ export const SITES: Site[] = [
     aha: "Measure in function space.",
     note: [
       "The pixel ruler read “far” almost everywhere. In 150,528 dimensions static is about equally far from every photograph, so the number only moves once you have arrived.",
-      "The second ruler asks a different question: what would this image teach the model, and how far is that from what the model was actually taught? Training maps nearby data to nearby models, so that distance slopes all the way home. And the point it measures against never has to be searched for. It is the model itself.",
+      "The second ruler asks a different question: what would this image teach the model, and how far is that from what the model was actually taught? Training maps nearby data to nearby models, so that distance slopes all the way home. And the point it measures against never has to be searched for. It is the model itself. The paper builds this ruler from the Neural Tangent Kernel: two inputs are close when they would move the weights in the same way.",
     ],
     verdict: "It can measure the way home, against itself.",
-    formula: "x_{t+1} = x_t − η ∇ₓ d( F(x_t), F(D) )",
+    math: {
+      tex: [
+        String.raw`\mathcal{F}_{\mathcal{A},f}:\ \mathcal{D} \mapsto f^{\star} \qquad x_{t+1} = x_t - \eta_t\, \nabla_x\, d\big(\mathcal{F}(x_t),\, \mathcal{F}(\mathcal{D}_s)\big)`,
+        String.raw`\Theta(x,x') = \nabla_\theta f(x)^{\top}\, \nabla_\theta f(x')`,
+        String.raw`K(x,x') = \nabla_f \ell(f(x))^{\top}\, \Theta(x,x')\, \nabla_f \ell(f(x'))`,
+        String.raw`\phantom{K(x,x')} = \nabla_\theta \ell(f(x))^{\top}\, \nabla_\theta \ell(f(x'))`,
+      ],
+      caption: "Training as a map F from data to a model. The Neural Tangent Kernel Θ calls two inputs close when they would move the weights the same way; adding the loss gives the Loss Tangent Kernel K, the ruler that needs no retraining.",
+    },
   },
   {
     id: "footprints",
-    n: 5,
+    n: 6,
     name: "The Footprint Stones",
     glyph: "➶",
     x: 1580,
@@ -164,15 +205,23 @@ export const SITES: Site[] = [
     instruction: "Move the slider to change the image. Line the two arrows up, four times.",
     aha: "Follow your own footprints.",
     note: [
-      "Each time the push agreed with the footprints, the board looked more like a picture. The push needs no label: it is the gradient of the two-looks test. Images whose push lines up with −θ are images like the training data.",
+      "Each time the push agreed with the footprints, the board looked more like a picture. The push is the loss gradient with respect to the weights, the feature the Loss Tangent Kernel compares, and it needs no label: the loss only asks that two looks at the image agree. Images whose push lines up with −θ are images like the training data.",
       "You did it by hand, one image at a time. Differentiate the agreement with respect to the image instead and every pixel gets its own arrow. That field is the Discriminative Score Function. The dust on the shore was following it.",
     ],
     verdict: "This is the how. Its own training direction is the compass.",
-    formula: "x_{t+1} = x_t − η ∇ₓ d( ∇_θ ℓ_aug(x_t; θ), −θ )",
+    math: {
+      tex: [
+        String.raw`x_{t+1} = x_t + \eta_t\, \nabla_{x_t} K(x_t, \mathcal{D}_s)`,
+        String.raw`\phantom{x_{t+1}} = x_t + \eta_t\, \nabla_{x_t} \big\{ \nabla_\theta \ell(f(x_t;\theta))^{\top}\, \bar g_{\mathcal{D}}(\theta) \big\}`,
+        String.raw`\nabla_\theta L_{\mathcal{D}}(\theta) + \rho\,\theta \simeq 0 \;\;\Longrightarrow\;\; \bar g_{\mathcal{D}}(\theta) \propto -\theta`,
+        String.raw`x_{t+1} = x_t - \eta_t\, \nabla_x\, d\big(\nabla_\theta \ell(f(x_t;\theta)),\, -\theta\big)`,
+      ],
+      caption: "Move the image to raise its kernel alignment with the training data. The data's mean gradient is not available, but at a weight-decay stationary point it is proportional to −θ. The last line is the Discriminative Score Function.",
+    },
   },
   {
     id: "clock",
-    n: 6,
+    n: 7,
     name: "The Clock Tower",
     glyph: "◷",
     x: 2040,
@@ -189,7 +238,7 @@ export const SITES: Site[] = [
   },
   {
     id: "bench",
-    n: 7,
+    n: 8,
     name: "The Conservator's Bench",
     glyph: "✎",
     x: 1800,
@@ -203,11 +252,14 @@ export const SITES: Site[] = [
       "The same rule also works beyond classifiers: in the paper it pulls a field out of ResNet classifiers, DETR detectors, DINOv2 encoders and CLIP, all public checkpoints, none retrained.",
     ],
     verdict: "And it can be steered.",
-    formula: "x_{t+1} = x_t − ∇ₓ d(·, −θ) + ∇ₓ log p_φ(y | x_t)",
+    math: {
+      tex: [String.raw`x_{t+1} = x_t \underbrace{-\, \nabla_x\, d\big(\nabla_\theta \ell(f(x_t;\theta)),\, -\theta\big)}_{\text{DSF: the prior}} + \underbrace{\nabla_x \log p_\phi(y \mid x_t)}_{\text{the nudge}}`],
+      caption: "Classifier-style guidance: the DSF field as the prior, plus the gradient of any model that scores the condition y.",
+    },
   },
   {
     id: "door",
-    n: 8,
+    n: 9,
     name: "The Sealed Door",
     glyph: "∴",
     x: 1200,
@@ -221,6 +273,10 @@ export const SITES: Site[] = [
       "Everyone agreed that a classifier understands images. That is what it was built for. So the mystery was never whether it understands. It was why we assumed that something which knows where every picture lives could not find its way to one.",
     ],
     verdict: "Answered. It understands, so it can create.",
+    math: {
+      tex: [String.raw`(\lnot\,\text{create} \Rightarrow \lnot\,\text{understand}) \iff (\text{understand} \Rightarrow \text{create})`],
+      caption: "A statement and its contrapositive are the same statement.",
+    },
   },
 ];
 

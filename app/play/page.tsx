@@ -15,7 +15,7 @@ const GAMES = [
     badge: "Paper · NeurIPS 2026",
     title: "What I Cannot Create",
     blurb: "A classifier cannot create. Does it understand nothing? Explore an island in a sea of static and solve its puzzles to answer the question on the sealed door.",
-    meta: "7 puzzles and a door · about 8 minutes · phone friendly",
+    meta: "8 puzzles and a door · about 9 minutes · phone friendly",
     art: "dsf",
   },
   {
