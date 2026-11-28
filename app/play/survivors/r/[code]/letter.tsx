@@ -12,23 +12,36 @@ const STAMP_COLOR = { Oral: PALETTE.purple, Accept: PALETTE.green, Borderline: P
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 // The area chair's note, laid out like a forum post on a review site. The texts are terse
-// the way real ones are: scores, initials for the reviewers, no punchline. {s} is the scores.
+// the way real ones are (scores, initials for the reviewers), with a community in-joke here
+// and there. {s} is the scores.
 const METAREVIEWS: Record<ShareData["grade"], string[]> = {
-  DeskReject: ["Exceeds the page limit.", "Not anonymized (acknowledgements left in the PDF).", "Wrong style file.", "Out of scope for the venue."],
+  DeskReject: [
+    "Exceeds the page limit by one line.",
+    "Not anonymized (acknowledgements left in the PDF).",
+    "Wrong style file. This is last year's template.",
+    "Out of scope for the venue.",
+  ],
   Reject: [
     "Scores {s}. No reviewer changed their score after the rebuttal.",
-    "Scores {s}. R2's novelty concern stands, and no one championed the paper.",
-    "Thanks to the authors for the rebuttal. The reviewers were not convinced ({s}).",
+    "Scores {s}. I agree with Reviewer 2.",
+    "Scores {s}. Limited novelty. R2 also asks the authors to cite [1-7].",
+    "Scores {s}. The authors are encouraged to compare with more baselines.",
   ],
   Borderline: [
     "Scores {s}. Split reviews, no consensus in the discussion. Deferring to the SAC.",
-    "R1 and R3 lean positive, R2 does not ({s}). Could go either way.",
+    "Scores {s}. R3 did not respond during the discussion. Could go either way.",
+    "Scores {s}. The reviewers did not reply to the rebuttal. Neither did I.",
   ],
   Accept: [
     "Scores {s}. R2 did not update, but the majority is positive.",
-    "Scores {s}. The rebuttal addressed most concerns. Please fix the rest for camera-ready.",
+    "Scores {s}. R2 still disagrees. R2 always disagrees.",
+    "Scores {s}. Please fix the remaining concerns for camera-ready.",
   ],
-  Oral: ["Scores {s}. All reviewers positive after the rebuttal, R2 raised to 6.", "Scores {s}. Unanimous after the rebuttal. Nominated for oral."],
+  Oral: [
+    "Scores {s}. All reviewers positive after the rebuttal, R2 raised to 6.",
+    "Scores {s}. R2 raised their score. I have not seen this before.",
+    "Scores {s}. Unanimous after the rebuttal. Nominated for oral.",
+  ],
 };
 const AC_ID_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const FORUM = { title: "#3f6978", label: "#8c1b13", meta: "#777", rule: "#e2e2e2", text: "#2b2b2b" };
