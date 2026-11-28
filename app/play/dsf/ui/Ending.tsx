@@ -1,7 +1,8 @@
 "use client";
 
 /*
- * The last minute: the closing cards over the island at dawn, and the
+ * The last minute: the closing cards in one window beside the island at
+ * dawn (a sheet at the foot on a phone, a column on a desktop), and the
  * Finale, a paper sheet with what the paper says follows from all this.
  */
 
@@ -23,26 +24,28 @@ export function EndCards({ phase, onFinale }: { phase: number; onFinale(): void 
   const dim = phase >= END.first ? kit.endDim : "";
   return (
     <div className={kit.end}>
-      <p className={`${kit.endQuote} ${dim}`}>“{FEYNMAN.quote}”</p>
-      <p className={`${kit.endCredit} ${dim}`}>{FEYNMAN.credit}</p>
-      <p key={`a${phase >= END.first}`} className={`${kit.endLine} ${phase >= END.first ? "" : kit.hid}`}>
-        {first},
-      </p>
-      <p key={`b${phase >= END.second}`} className={`${kit.endLine} ${kit.endGold} ${phase >= END.second ? "" : kit.hid}`}>
-        {second}
-      </p>
-      <p key={`c${phase >= END.stamp}`} className={`${kit.stamp} ${phase >= END.stamp ? "" : kit.hid}`}>
-        {FINALE.stamp}
-      </p>
-      {phase >= END.button ? (
-        <button type="button" className={`${kit.btn} ${kit.endGo}`} onClick={onFinale} autoFocus>
-          {FINALE.closingTitle}
-        </button>
-      ) : (
-        <span className={`${kit.btn} ${kit.endGo} ${kit.hid}`} aria-hidden="true">
-          {FINALE.closingTitle}
-        </span>
-      )}
+      <div className={`${kit.slateWin} ${kit.endWin}`}>
+        <p className={`${kit.endQuote} ${dim}`}>“{FEYNMAN.quote}”</p>
+        <p className={`${kit.endCredit} ${dim}`}>{FEYNMAN.credit}</p>
+        <p key={`a${phase >= END.first}`} className={`${kit.endLine} ${phase >= END.first ? "" : kit.hid}`}>
+          {first},
+        </p>
+        <p key={`b${phase >= END.second}`} className={`${kit.endLine} ${kit.endGold} ${phase >= END.second ? "" : kit.hid}`}>
+          {second}
+        </p>
+        <p key={`c${phase >= END.stamp}`} className={`${kit.stamp} ${phase >= END.stamp ? "" : kit.hid}`}>
+          {FINALE.stamp}
+        </p>
+        {phase >= END.button ? (
+          <button type="button" className={`${kit.btn} ${kit.endGo}`} onClick={onFinale} autoFocus>
+            {FINALE.closingTitle}
+          </button>
+        ) : (
+          <span className={`${kit.btn} ${kit.endGo} ${kit.hid}`} aria-hidden="true">
+            {FINALE.closingTitle}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

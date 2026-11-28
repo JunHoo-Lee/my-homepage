@@ -1,7 +1,7 @@
 "use client";
 
 /*
- * The title: the sleeping island behind, one flat cover for the words, and
+ * The title: the sleeping island behind, a soft scrim for the words, and
  * one paper box with the only thing there is to do.
  */
 

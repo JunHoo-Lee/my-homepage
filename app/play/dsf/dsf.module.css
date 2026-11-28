@@ -606,7 +606,7 @@
 
 .slider {
   display: grid;
-  gap: 2px;
+  gap: calc(2 * var(--px) + 6px);
   color: var(--dim);
   font: 400 15px/22px var(--body);
 }
@@ -660,6 +660,11 @@
     inset 0 0 0 var(--px) #141b1b,
     0 0 0 var(--px) var(--blue),
     0 0 0 calc(2 * var(--px)) #141b1b;
+}
+
+/* the focus ring sits inside the 48 px strip, clear of the label above */
+.slider input:focus-visible {
+  outline-offset: calc(-2 * var(--px));
 }
 
 .slider input:disabled {
