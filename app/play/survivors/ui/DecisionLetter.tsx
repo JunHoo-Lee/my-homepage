@@ -132,7 +132,6 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   };
   const text = shareText(shareData);
   const shareUrl = () => `${window.location.origin}${sharePath(shareData)}`;
-  const enc = encodeURIComponent;
 
   const copy = async (value: string) => {
     try {
@@ -142,25 +141,58 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
       // clipboard blocked
     }
   };
-  const toggleShare = () => {
+  // The letter image is fetched ahead of the tap: the share sheet only opens
+  // straight from a user gesture, so there is no time to download it then.
+  const imagePath = `${sharePath(shareData)}/opengraph-image`;
+  const imageName = `gradient-survivors-${shareData.submission}.png`;
+  const [image, setImage] = useState<File | null>(null);
+  const [imageCopied, setImageCopied] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(imagePath)
+      .then((response) => (response.ok ? response.blob() : Promise.reject(new Error(String(response.status)))))
+      .then((blob) => {
+        if (!cancelled) setImage(new File([blob], imageName, { type: "image/png" }));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [imagePath, imageName]);
+  useEffect(() => {
+    if (!imageCopied) return;
+    const timer = window.setTimeout(() => setImageCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [imageCopied]);
+
+  /** One Share button: the system share sheet with the letter image where it exists, the panel otherwise. */
+  const share = async () => {
     ui.play("click");
+    const payload = { title: SCREENS.title, text: `${text}\n${shareUrl()}`, files: image ? [image] : [] };
+    if (image && typeof navigator.canShare === "function" && navigator.canShare(payload)) {
+      try {
+        await navigator.share(payload);
+        return;
+      } catch (error) {
+        if ((error as DOMException)?.name === "AbortError") return; // sheet dismissed
+      }
+    }
     setShareOpen((open) => !open);
+  };
+  const copyImage = async () => {
+    ui.play("click");
+    if (!image) return;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": image })]);
+      setImageCopied(true);
+    } catch {
+      // clipboard blocked
+    }
   };
   // on a long letter the panel opens below the fold, behind the sticky action bar
   useEffect(() => {
     if (shareOpen) shareRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [shareOpen]);
-  // real links rather than window.open: in-app browsers and popup blockers drop scripted popups
-  const xHref = () => `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(shareUrl())}`;
-  const linkedInHref = () => `https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl())}`;
-  const shareNative = async () => {
-    ui.play("click");
-    try {
-      await navigator.share({ title: SCREENS.title, text, url: shareUrl() });
-    } catch {
-      // share sheet dismissed
-    }
-  };
 
   const stats = [
     { label: "Survived", value: formatTime(result.time * progress) },
@@ -249,38 +281,23 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
 
         {shareOpen ? (
           <section id="gs-share" ref={shareRef} className={styles.share} aria-label="Share this decision">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.shareImage} src={imagePath} alt="Your decision letter as a shareable image" width={1200} height={630} />
             <pre className={styles.shareText}>{text}</pre>
             <div className={styles.shareButtons}>
-              <a className={kit.button} href={xHref()} target="_blank" rel="noopener noreferrer" onClick={() => ui.play("click")} {...ui.hover}>
-                Post on X
-              </a>
-              {/* LinkedIn only takes a URL (the letter image comes from its preview); the post text goes to the clipboard */}
-              <a
-                className={kit.button}
-                href={linkedInHref()}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  ui.play("click");
-                  void copy(`${text}\n${shareUrl()}`);
-                }}
-                {...ui.hover}
-              >
-                LinkedIn
+              {image && typeof ClipboardItem !== "undefined" ? (
+                <button type="button" className={`${kit.button} ${kit.primary}`} onClick={copyImage} {...ui.hover}>
+                  <span aria-live="polite">{imageCopied ? "Image copied!" : "Copy image"}</span>
+                </button>
+              ) : null}
+              <a className={kit.button} href={imagePath} download={imageName} onClick={() => ui.play("click")} {...ui.hover}>
+                Save image
               </a>
               <button type="button" className={kit.button} onClick={() => { ui.play("click"); void copy(`${text}\n${shareUrl()}`); }} {...ui.hover}>
                 <span aria-live="polite">{copied ? "Copied!" : "Copy text + link"}</span>
               </button>
-              <a className={kit.button} href={`${sharePath(shareData)}/opengraph-image`} download={`gradient-survivors-${shareData.submission}.png`} onClick={() => ui.play("click")} {...ui.hover}>
-                Save image
-              </a>
-              {typeof navigator !== "undefined" && "share" in navigator ? (
-                <button type="button" className={kit.button} onClick={shareNative} {...ui.hover}>
-                  More…
-                </button>
-              ) : null}
             </div>
-            <p className={styles.shareHint}>The link previews as this decision letter on X and LinkedIn. For LinkedIn, the post text is copied, so paste it in.</p>
+            <p className={styles.shareHint}>Paste the image into a post, or share the link: it previews as this letter.</p>
           </section>
         ) : null}
 
@@ -294,7 +311,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
               </span>
             )}
           </button>
-          <button type="button" className={kit.button} onClick={toggleShare} aria-expanded={shareOpen} aria-controls="gs-share" {...ui.hover}>
+          <button type="button" className={kit.button} onClick={share} aria-expanded={shareOpen} aria-controls="gs-share" {...ui.hover}>
             <ShareIcon />
             Share
           </button>
