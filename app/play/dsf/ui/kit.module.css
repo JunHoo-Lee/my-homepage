@@ -966,6 +966,16 @@ button.entry b {
   animation: fade 400ms steps(4, end) both;
 }
 
+/* while Reviewer 2 speaks, the window stands clear of the message window */
+.root:has([data-msg]) .end {
+  padding-bottom: calc(var(--msg-h) + var(--plate-h) + 36px + var(--safe-b));
+}
+
+/* and keeps no room for the stamp and the button yet: they arrive after the talk */
+.root:has([data-msg]) .endWin > .hid {
+  display: none;
+}
+
 .endWin {
   display: flex;
   flex-direction: column;
@@ -1179,7 +1189,8 @@ button.entry b {
   .end {
     align-items: flex-end;
     justify-content: center;
-    padding: 24px 16px 24px 0;
+    /* below "Skip" at the top right */
+    padding: 72px 16px 24px 0;
   }
 
   .endWin {
