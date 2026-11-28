@@ -21,6 +21,7 @@ export function loadSheets(onReady: (sheets: Sheets) => void, onError: () => voi
       night: gradeCanvas(image, w, h, "night"),
       lit: gradeCanvas(image, w, h, "lit"),
       dawn: gradeCanvas(image, w, h, "dawn"),
+      flash: gradeCanvas(image, w, h, "flash"),
     });
   };
   image.onerror = () => {

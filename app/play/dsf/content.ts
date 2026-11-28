@@ -29,8 +29,6 @@
 
 export type SiteId = "shore" | "needle" | "looks" | "garden" | "ruler" | "footprints" | "clock" | "bench" | "door";
 
-export const WORLD = { w: 2400, h: 1700, start: { x: 1200, y: 1560 } } as const;
-
 export const FEYNMAN = {
   quote: "What I cannot create, I do not understand.",
   credit: "Richard P. Feynman, on his blackboard, 1988",
@@ -59,10 +57,6 @@ export type Site = {
   /** Order in the Notebook. */
   n: number;
   name: string;
-  /** One glyph carved on the stone. */
-  glyph: string;
-  x: number;
-  y: number;
   /** What the Notebook says before the ruin is solved. */
   rumor: string;
   /** Read before the puzzle. */
@@ -82,9 +76,6 @@ export const SITES: Site[] = [
     id: "shore",
     n: 1,
     name: "The Slab on the Shore",
-    glyph: "?",
-    x: 1200,
-    y: 1430,
     rumor: "A slab of static stands where you woke.",
     setup: ["A slab of static stands on the shore. There is no label on it, no caption and no picture to copy. There is only you."],
     instruction: "Drag across the static.",
@@ -99,9 +90,6 @@ export const SITES: Site[] = [
     id: "needle",
     n: 2,
     name: "The Needle Field",
-    glyph: "∿",
-    x: 620,
-    y: 1290,
     rumor: "A field where people went looking for pictures.",
     setup: ["The board here has 640 × 400 = 256,000 places to tap. Somewhere on it are the boards that are pictures of something. Earlier visitors searched it by hand. You get eight taps."],
     instruction: "Tap the board. Eight tries to land on a picture.",
@@ -124,12 +112,9 @@ export const SITES: Site[] = [
     id: "looks",
     n: 3,
     name: "The Hall of Two Looks",
-    glyph: "◐",
-    x: 350,
-    y: 770,
     rumor: "Twelve boards. Five of them are real.",
     setup: ["Twelve boards hang in the hall, and you have already labelled every one. Five are real pictures. Seven are static that you labelled anyway. You may look at any board a second time, from another angle."],
-    instruction: "Tap a board to look again. Tap it once more to mark it as a real picture. Mark all five.",
+    instruction: "Tap a board to look again. Tap once more to mark it real. Mark all five.",
     aha: "Sure is not the same as right.",
     note: [
       "The loudest boards were static: “ostrich, 99.9%”. Confidence is no guide, because a classifier always answers. What separated pictures from static was the second look. On a real picture the classifier agrees with itself; off the manifold it changes its mind.",
@@ -145,9 +130,6 @@ export const SITES: Site[] = [
     id: "garden",
     n: 4,
     name: "The Selection Garden",
-    glyph: "✦",
-    x: 548,
-    y: 556,
     rumor: "Six boards grow here. You can only choose.",
     setup: ["You still cannot draw. Here you do not have to. Six boards grow from one parent, each a slightly different handful of dust. Do the only thing you know how to do: say which one looks most like a picture."],
     instruction: "Tap the board that is closest to a picture. It becomes the parent of the next six.",
@@ -166,9 +148,6 @@ export const SITES: Site[] = [
     id: "ruler",
     n: 5,
     name: "The Dark Room",
-    glyph: "↧",
-    x: 760,
-    y: 330,
     rumor: "A room with nothing in it but two rulers.",
     setup: ["Knowing that home exists is not knowing the way. For that you need a ruler: a number that gets smaller as you get closer. Home is hidden somewhere in this dark room. Start with the pixel ruler."],
     instruction: "Drag to move. Read the ruler. Find home.",
@@ -183,7 +162,7 @@ export const SITES: Site[] = [
         String.raw`\mathcal{F}_{\mathcal{A},f}:\ \mathcal{D} \mapsto f^{\star}`,
         String.raw`x_{t+1} = x_t - \eta_t\, \nabla_x\, d\big(\mathcal{F}(x_t),\, \mathcal{F}(\mathcal{D}_s)\big)`,
         String.raw`\Theta(x,x') = \nabla_\theta f(x)^{\top}\, \nabla_\theta f(x')`,
-        String.raw`K(x,x') = \nabla_f \ell(f(x))^{\top}\, \Theta(x,x')\, \nabla_f \ell(f(x'))`,
+        String.raw`K(x,x') = \nabla_f \ell(f(x))^{\top} \Theta(x,x') \nabla_f \ell(f(x'))`,
         String.raw`\phantom{K(x,x')} = \nabla_\theta \ell(f(x))^{\top}\, \nabla_\theta \ell(f(x'))`,
       ],
       caption: "Training as a map F from data to a model. The Neural Tangent Kernel Θ calls two inputs close when they would move the weights the same way; adding the loss gives the Loss Tangent Kernel K, the ruler that needs no retraining.",
@@ -193,9 +172,6 @@ export const SITES: Site[] = [
     id: "footprints",
     n: 6,
     name: "The Footprint Stones",
-    glyph: "➶",
-    x: 1580,
-    y: 310,
     rumor: "Footprints in the stone. Your size.",
     setup: ["During training your weights walked, and where they ended up, θ, still records the way they went. The stones call that direction −θ. Change the image until the way its loss would push the weights lines up with the footprints."],
     instruction: "Move the slider to change the image. Line the two arrows up, four times.",
@@ -219,9 +195,6 @@ export const SITES: Site[] = [
     id: "clock",
     n: 7,
     name: "The Clock Tower",
-    glyph: "◷",
-    x: 2040,
-    y: 730,
     rumor: "Every clock on this island shows the same time.",
     setup: ["Ask the ImageNet classifier for an “analog clock” and let it draw. Before you look: what time will the clock show?"],
     instruction: "Make your guess, then drag across the static.",
@@ -236,9 +209,6 @@ export const SITES: Site[] = [
     id: "bench",
     n: 8,
     name: "The Conservator's Bench",
-    glyph: "✎",
-    x: 1800,
-    y: 1270,
     rumor: "Someone left prompt cards next to an unfinished picture.",
     setup: ["The field is unconditional. To steer it, add a second gradient on top, from a classifier or from CLIP. Draw what is on the bench, then hand it the cards."],
     instruction: "Drag across the static. Then turn on both prompt cards.",
@@ -260,9 +230,6 @@ export const SITES: Site[] = [
     id: "door",
     n: 9,
     name: "The Sealed Door",
-    glyph: "∴",
-    x: 1200,
-    y: 850,
     rumor: "A door with a sentence carved on it.",
     setup: ["The sentence on the door has not changed. What has changed is what you know about yourself: the island has shown that you understand pictures. Write what follows from the sentence for someone who does understand."],
     instruction: "Tap two tiles to complete the sentence.",
@@ -282,39 +249,31 @@ export const SITES: Site[] = [
 /** The door opens for an attempt once this many ruins are solved. */
 export const DOOR_NEEDS = 5;
 
-export type Statue = { id: string; name: string; x: number; y: number; charge: string; alibi: string };
+export type Statue = { id: string; name: string; charge: string; alibi: string };
 
-/** Four stone figures on the paths: the helpers earlier methods needed. None of them was on the shore. */
+/** Four suspects on the island: the helpers earlier methods needed. None of them was on the shore. Ruled out, they turn to stone. */
 export const STATUES: Statue[] = [
   {
     id: "prompter",
     name: "The Prompter",
-    x: 900,
-    y: 1392,
     charge: "“Someone told the picture what to become: a class label, an activation to maximize.”",
     alibi: "There was no label on the shore. Detectors and self-supervised encoders have no single label to give, and they draw too.",
   },
   {
     id: "bookkeeper",
     name: "The Bookkeeper",
-    x: 470,
-    y: 1040,
     charge: "“BatchNorm keeps running averages of everything that passes his desk. He could describe a typical image from his ledger.”",
     alibi: "DINOv2 is a vision transformer and keeps no such ledger. Pictures appear there all the same.",
   },
   {
     id: "copyist",
     name: "The Copyist",
-    x: 1170,
-    y: 300,
     charge: "“A real photograph was smuggled in, or a target to reconstruct.”",
     alibi: "Nothing real is on the island. Sampling starts from noise and is never shown an image to match.",
   },
   {
     id: "artist",
     name: "The Uptown Artist",
-    x: 1960,
-    y: 1010,
     charge: "“It is always the diffusion model. Just use diffusion.”",
     alibi: "No generator is trained or borrowed. She needs two billion references and a month of GPUs to paint a cat, and has an invoice for all of them.",
   },
@@ -327,7 +286,7 @@ export const BOARDS: { first: string; second: string; real: boolean }[] = [
   { first: "harbour · 0.84", second: "harbour · 0.86", real: true },
   { first: "gibbon · 0.993", second: "guacamole · 0.990", real: false },
   { first: "tench · 1.000", second: "ostrich · 0.997", real: false },
-  { first: "golden retriever · 0.93", second: "golden retriever · 0.94", real: true },
+  { first: "beagle · 0.93", second: "beagle · 0.94", real: true },
   { first: "guacamole · 0.990", second: "gibbon · 0.989", real: false },
   { first: "banana · 0.88", second: "banana · 0.90", real: true },
   { first: "toaster · 0.991", second: "tench · 0.998", real: false },
@@ -384,7 +343,7 @@ export const CREDITS =
   "Pixel art: Ninja Adventure Asset Pack by Pixel-boy and AAA (CC0), https://pixel-boy.itch.io/ninja-adventure-asset-pack. Additional sprites drawn for this game. Fonts: Jersey 10, DM Sans and Caveat, under the SIL Open Font License 1.1.";
 
 export const TOASTS = {
-  compass: "You can read the field now. The arrow at your feet points to what you have not understood yet.",
+  compass: "You can read the field now. The arrow at your feet points to what is not yet understood.",
   door: "The door is listening.",
   sea: "Static. Nothing to stand on out there.",
 } as const;

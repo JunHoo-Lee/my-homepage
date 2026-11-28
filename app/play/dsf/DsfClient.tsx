@@ -27,7 +27,15 @@ import { createWorld } from "./world";
 
 const RUINS = SITES.filter((site) => site.id !== "door");
 
-type DebugHandle = { goto(id: string): void; state(): Record<string, number | string>; skip(): void; pages: typeof allPages };
+type DebugHandle = {
+  goto(id: string): void;
+  state(): Record<string, number | string>;
+  skip(): void;
+  /** Extras for the layout tests: every page of the script, a way to show one, and a way to mark a ruin solved. */
+  pages: typeof allPages;
+  show(index: number): void;
+  solve(id: string): void;
+};
 
 export default function DsfClient() {
   const synth = sharedSynth();
@@ -55,7 +63,14 @@ export default function DsfClient() {
     const sync = window.setTimeout(() => shell.syncMuted(), 0);
     const holder = window as unknown as { __dsf?: DebugHandle };
     if (new URLSearchParams(window.location.search).has("debug")) {
-      holder.__dsf = { goto: (id) => shell.debugGoto(id), state: () => shell.debugState(), skip: () => shell.debugSkip(), pages: allPages };
+      holder.__dsf = {
+        goto: (id) => shell.debugGoto(id),
+        state: () => shell.debugState(),
+        skip: () => shell.debugSkip(),
+        pages: allPages,
+        show: (index) => shell.debugShow(index),
+        solve: (id) => shell.debugSolve(id),
+      };
     }
     return () => {
       window.clearTimeout(sync);

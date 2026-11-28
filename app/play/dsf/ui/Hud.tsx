@@ -32,7 +32,17 @@ export function Hud({ question, flash, insights, muted, inert, onBook, onMute }:
           {Math.min(insights, DOOR_NEEDS)}/{DOOR_NEEDS}
         </span>
       </button>
-      <button type="button" className={`${kit.hudWin} ${kit.hudBtn} ${kit.hudMute}`} onClick={onMute} aria-label="Mute" aria-pressed={muted}>
+      <button
+        type="button"
+        className={`${kit.hudWin} ${kit.hudBtn} ${kit.hudMute}`}
+        aria-label="Mute"
+        aria-pressed={muted}
+        onClick={(event) => {
+          onMute();
+          // after a click with the mouse the focus goes back to the game, so that Space examines again
+          if (event.detail > 0) event.currentTarget.blur();
+        }}
+      >
         <i className={`${kit.icon} ${muted ? kit.iconMuted : kit.iconSound}`} aria-hidden="true" />
       </button>
     </div>

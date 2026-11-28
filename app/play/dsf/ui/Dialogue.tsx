@@ -229,8 +229,9 @@ function PageView({ page, instant, synth, onNext, onPick, onSkip, canSkip }: Omi
               }}
               type="button"
               className={`${kit.rowBtn} ${index === selected ? kit.rowOn : ""}`}
-              onPointerEnter={(event) => {
-                if (event.pointerType === "mouse") setSelected(index);
+              // a real movement of the mouse, not a list that appears under a resting one
+              onPointerMove={(event) => {
+                if (event.pointerType === "mouse" && index !== selected) setSelected(index);
               }}
               onClick={() => pick(index)}
             >

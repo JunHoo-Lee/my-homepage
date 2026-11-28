@@ -3,14 +3,12 @@
  * the coast and the decals. Also the shore mask the surf is drawn through.
  */
 
-import { DECALS, FOOTPRINTS, GROUND, MAP_H, MAP_W, TILE, groundAt, isLand, tileHash } from "../map";
+import { DECALS, FOOTPRINTS, GROUND, MAP_H, MAP_W, TILE, isLand, isPath, tileHash } from "../map";
 import { ATLAS, type SpriteName } from "./atlas";
 import { makeCanvas } from "./assets";
 
 export const MAP_PX_W = MAP_W * TILE;
 export const MAP_PX_H = MAP_H * TILE;
-
-const isPath = (x: number, y: number) => groundAt(x, y) === "=";
 
 export function bakeGround(sheet: HTMLCanvasElement): HTMLCanvasElement {
   const [canvas, ctx] = makeCanvas(MAP_PX_W, MAP_PX_H);
@@ -40,9 +38,10 @@ export function bakeGround(sheet: HTMLCanvasElement): HTMLCanvasElement {
         else if (isLand(x - 1, y - 1)) blit("convex", TILE, TILE, TILE, TILE, dx, dy);
         continue;
       }
-      if (kind !== "=" && tileHash(x, y, 1) < 0.38) blit("tufts", Math.floor(tileHash(x, y, 2) * 4) * TILE, 0, TILE, TILE, dx, dy);
+      const path = isPath(x, y);
+      if (!path && tileHash(x, y, 1) < 0.38) blit("tufts", Math.floor(tileHash(x, y, 2) * 4) * TILE, 0, TILE, TILE, dx, dy);
       else blit("grass", 0, 0, TILE, TILE, dx, dy);
-      if (kind !== "=") continue;
+      if (!path) continue;
       // dirt, assembled from 8 x 8 quadrants so one-tile paths, corners and junctions all work
       for (let qy = 0; qy < 2; qy += 1) {
         for (let qx = 0; qx < 2; qx += 1) {

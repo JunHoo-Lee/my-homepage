@@ -15,7 +15,7 @@
 
 import type { Synth } from "../../shared/synth";
 import { DOOR_NEEDS, QUESTION, SITES, TITLE, type SiteId } from "../content";
-import { END, checkScript, doorLocked, doorPre, ending, opening, ruinPost, ruinPre, suspectStone, suspectTalk, type Act, type Speaker, type Step } from "../script";
+import { END, allPages, checkScript, doorLocked, doorPre, ending, opening, ruinPost, ruinPre, suspectStone, suspectTalk, type Act, type Speaker, type Step } from "../script";
 import type { Near, Scene, StatueId, World } from "../world";
 
 export type Screen = "title" | "play" | "ending" | "finale";
@@ -575,6 +575,31 @@ export function createShell(synth: Synth) {
       resumeAfterBook = false;
       if (snap.open || snap.closing) set({ open: null, closing: null });
       world?.debug.goto(id);
+    },
+
+    /** Layout test: any page of the script in the real message window, fully typed. */
+    debugShow(index: number) {
+      const page = allPages()[index];
+      if (!page || snap.screen !== "play") return;
+      clearTimers();
+      gen += 1;
+      run = { steps: [{ t: "say", who: page.who, text: page.text, sub: page.sub }], i: 0, interject: false };
+      serial += 1;
+      set({ open: null, closing: null, talk: { serial, page: { kind: "say", who: page.who, text: page.text, sub: page.sub }, instant: true } });
+    },
+
+    /** Marks a ruin as solved and shown without playing it, for tests of what comes after. */
+    debugSolve(id: string) {
+      const site = SITES.find((item) => item.id === id);
+      if (!site || snap.solved.includes(site.id)) return;
+      set({
+        solved: [...snap.solved, site.id],
+        shown: [...snap.shown, site.id],
+        question: site.verdict,
+        compass: snap.compass || site.id === "footprints",
+        finished: snap.finished || site.id === "door",
+      });
+      if (!fiveDone && ruinsSolved() >= DOOR_NEEDS) fiveDone = true;
     },
 
     debugState(): Record<string, number | string> {

@@ -75,7 +75,8 @@
 /* a board sits in one art pixel of outline and one of rule colour */
 .frame {
   position: relative;
-  margin: calc(2 * var(--px));
+  /* on a phone the board takes a little of the panel's padding: every pixel of it is touch area */
+  margin: calc(2 * var(--px)) calc(2 * var(--px) - 6px);
   background: var(--board);
   box-shadow:
     0 0 0 var(--px) #141b1b,
@@ -292,8 +293,9 @@
   display: grid;
   gap: 0;
   align-content: center;
-  min-height: 48px;
-  padding: 4px 6px 4px 14px;
+  /* room for three lines, so the grid does not move when a board is looked at again */
+  min-height: 62px;
+  padding: 4px 4px 4px 12px;
   border: 0;
   background: var(--board);
   color: var(--ink);
@@ -307,18 +309,28 @@
   top: 0;
   bottom: 0;
   left: 0;
-  width: 8px;
+  width: 6px;
   background: var(--rule);
 }
 
 .boardTile b {
   font: 700 15px/18px var(--body);
+  white-space: nowrap;
 }
 
 .boardTile em {
   color: var(--blue);
   font: 500 15px/18px var(--body);
   font-style: normal;
+}
+
+/* on a phone the second answer goes on its own line, under the first, where the two can be compared */
+.againTag {
+  margin-right: 72px;
+}
+
+.againWhat {
+  white-space: nowrap;
 }
 
 .boardTile i {
@@ -426,7 +438,7 @@
 .pad {
   position: relative;
   aspect-ratio: 16 / 10;
-  margin: calc(2 * var(--px));
+  margin: calc(2 * var(--px)) calc(2 * var(--px) - 6px);
   overflow: hidden;
   background: var(--board);
   box-shadow:
@@ -599,16 +611,76 @@
   font: 400 15px/22px var(--body);
 }
 
+/* a pixel slider: a flat track and a square handle big enough for a thumb */
 .slider input {
   width: 100%;
-  height: 44px;
+  height: 48px;
   margin: 0;
-  accent-color: var(--blue);
+  padding: 0 var(--px);
+  border-radius: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.slider input::-webkit-slider-runnable-track {
+  height: calc(3 * var(--px));
+  background: var(--board);
+  box-shadow: 0 0 0 var(--px) var(--rule);
+}
+
+.slider input::-moz-range-track {
+  height: calc(3 * var(--px));
+  background: var(--board);
+  box-shadow: 0 0 0 var(--px) var(--rule);
+}
+
+.slider input::-webkit-slider-thumb {
+  width: 26px;
+  height: 34px;
+  margin-top: calc(1.5 * var(--px) - 17px);
+  border: 0;
+  border-radius: 0;
+  background: var(--blue);
+  box-shadow:
+    inset 0 0 0 var(--px) #141b1b,
+    0 0 0 var(--px) var(--blue),
+    0 0 0 calc(2 * var(--px)) #141b1b;
+  appearance: none;
+}
+
+.slider input::-moz-range-thumb {
+  width: 26px;
+  height: 34px;
+  border: 0;
+  border-radius: 0;
+  background: var(--blue);
+  box-shadow:
+    inset 0 0 0 var(--px) #141b1b,
+    0 0 0 var(--px) var(--blue),
+    0 0 0 calc(2 * var(--px)) #141b1b;
+}
+
+.slider input:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 /* ---------------------------------------------------------------- wider screens */
 
-@media (min-width: 900px) {
+@media (min-width: 521px) {
+  .boardTile {
+    min-height: 48px;
+  }
+
+  .againTag {
+    margin-right: 0;
+  }
+}
+
+/* desktops, and tablets held upright; a phone on its side keeps the small scale */
+@media (min-width: 900px), (min-width: 700px) and (min-height: 700px) {
   .sheet {
     gap: 12px;
     padding: 14px 20px 18px;
@@ -618,8 +690,33 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  /* a board never pushes the panel past the bottom of a short window */
+  .frame,
+  .pad {
+    justify-self: center;
+    width: min(100% - 4 * var(--px), (100vh - 420px) * 1.6);
+    width: min(100% - 4 * var(--px), (100dvh - 420px) * 1.6);
+    margin: calc(2 * var(--px)) auto;
+  }
+
   .boardTile {
-    min-height: 56px;
+    min-height: 60px;
+    padding: 6px 8px 6px 18px;
+  }
+
+  .boardStatic {
+    width: 8px;
+  }
+
+  .boardTile b,
+  .boardTile em,
+  .boardTile i {
+    font-size: 17px;
+    line-height: 22px;
+  }
+
+  .againTag {
+    margin-right: 0;
   }
 
   .sentence {

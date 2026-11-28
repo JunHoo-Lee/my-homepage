@@ -1,9 +1,13 @@
 """
-Builds the two UI images of /play/dsf that are not copied as they are:
+Builds the UI images of /play/dsf:
 
   public/play/dsf/ui/faces.png   228 x 38, one row of 38 x 38 portraits:
                                  you, mote, prompter, bookkeeper, copyist, artist
   public/play/dsf/ui/icons.png   27 x 9, three 9 x 9 icons: book, speaker on, speaker off
+  public/play/dsf/ui/win-*.png   the three window frames of scripts/dsf/src/ui/win,
+                                 enlarged 8 times without smoothing (a 4-pixel border
+                                 becomes a 32-pixel slice). A browser that smooths
+                                 border images then still draws hard pixel edges.
 
 Run by hand from the repository root, output committed:
 
@@ -22,6 +26,8 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC = os.path.join(ROOT, "scripts", "dsf", "src", "ui", "faces")
+WIN = os.path.join(ROOT, "scripts", "dsf", "src", "ui", "win")
+WIN_SCALE = 8
 OUT = os.path.join(ROOT, "public", "play", "dsf", "ui")
 CELL = 38
 
@@ -158,6 +164,12 @@ def main():
         sheet.paste(icon(ICONS[name]), (index * 9, 0))
     sheet.save(os.path.join(OUT, "icons.png"), optimize=True)
     print("faces.png", strip.size, "icons.png", sheet.size)
+
+    for name in ("win-paper", "win-slate", "win-hud"):
+        frame = Image.open(os.path.join(WIN, name + ".png")).convert("RGBA")
+        big = frame.resize((frame.width * WIN_SCALE, frame.height * WIN_SCALE), Image.NEAREST)
+        big.save(os.path.join(OUT, name + ".png"), optimize=True)
+        print(name + ".png", big.size)
 
 
 if __name__ == "__main__":

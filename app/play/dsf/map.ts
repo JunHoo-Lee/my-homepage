@@ -9,7 +9,7 @@
  */
 
 import type { SiteId } from "./content";
-import type { SpriteName } from "./engine/atlas";
+import { ATLAS, type SpriteName } from "./engine/atlas";
 
 export const TILE = 16;
 export const MAP_W = 42;
@@ -397,6 +397,8 @@ export function groundAt(x: number, y: number): string {
 }
 
 export const isLand = (x: number, y: number) => groundAt(x, y) !== "~";
+/** The dirt path. It runs on under the tide, so the spine is whole once the static is gone. */
+export const isPath = (x: number, y: number) => groundAt(x, y) === "=" || (x === 21 && groundAt(x, y) === "t");
 
 /** A stable pseudo-random number in [0, 1) for a tile, so decoration never moves. */
 export function tileHash(x: number, y: number, salt = 0): number {
@@ -421,9 +423,26 @@ export const isTide = (x: number, y: number) => groundAt(x, y) === "t";
 const RESERVED: Set<number> = new Set([key(SPAWN[0], SPAWN[1]), key(TITLE_BED[0], TITLE_BED[1])]);
 for (const thing of THINGS) RESERVED.add(key(thing.use[0], thing.use[1]));
 
-/** Plain grass with nothing on it and nothing standing on it: where decoration may go. */
+/** Tiles a sprite reaches over, though only its base blocks: nothing small should grow there and poke out. */
+const COVERED: Set<number> = new Set();
+{
+  const cover = (x: number, y: number, w: number, h: number) => {
+    for (let ty = Math.floor(y / TILE); ty <= Math.floor((y + h - 1) / TILE); ty += 1) {
+      for (let tx = Math.floor(x / TILE); tx <= Math.floor((x + w - 1) / TILE); tx += 1) COVERED.add(key(tx, ty));
+    }
+  };
+  const coverPart = (item: Part) => cover(item.x, item.y, item.fw ?? ATLAS[item.sprite][2], ATLAS[item.sprite][3]);
+  for (const thing of THINGS) thing.parts.forEach(coverPart);
+  for (const decor of DECOR) decor.parts.forEach(coverPart);
+  for (const lamp of RUIN_LAMPS) cover(lamp.tile[0] * TILE, (lamp.tile[1] - 1) * TILE, TILE, TILE * 2);
+  for (const [x, y] of CAUSEWAY_LAMPS) cover(x * TILE, (y - 1) * TILE, TILE, TILE * 2);
+  // the suspects, and the bubbles over everything that has one
+  for (const thing of THINGS) cover(thing.bubble[0] - 7, thing.bubble[1] - 14, 14, 14);
+}
+
+/** Plain grass with nothing on it, over it or standing on it: where decoration may go. */
 export function isFreeGrass(x: number, y: number): boolean {
-  return groundAt(x, y) === "." && !BLOCKED.has(key(x, y)) && !RESERVED.has(key(x, y));
+  return groundAt(x, y) === "." && !BLOCKED.has(key(x, y)) && !RESERVED.has(key(x, y)) && !COVERED.has(key(x, y));
 }
 
 export type Decal = { sprite: SpriteName; frame: number; x: number; y: number };
@@ -437,7 +456,6 @@ export const PLANTS: Tile[] = [];
   for (let y = 0; y < MAP_H; y += 1) {
     for (let x = 0; x < MAP_W; x += 1) {
       if (!isFreeGrass(x, y)) continue;
-      // keep the row under a tall prop clear so nothing pokes out from behind it
       const roll = tileHash(x, y, 7);
       if (roll < 0.05) DECALS.push({ sprite: "details", frame: Math.floor(tileHash(x, y, 8) * 5), x: px(x), y: px(y) });
       else if (roll < 0.064) DECALS.push({ sprite: "details", frame: 5 + Math.floor(tileHash(x, y, 8) * 3), x: px(x), y: px(y) });

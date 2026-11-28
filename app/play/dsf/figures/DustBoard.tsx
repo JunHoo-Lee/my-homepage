@@ -411,6 +411,8 @@ export default function DustBoard({ drawing, layers = [0], erase, solved, autopl
         since = 10;
       }
       ready = true;
+      // the board may have come into view before the font did: start the eraser now
+      if (visible && frozen && !sweeping && !isLocked) sweeping = true;
       if (wantReveal) api.current?.reveal();
       render();
     });

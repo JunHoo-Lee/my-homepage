@@ -40,15 +40,19 @@ function pattern(random: () => number, density: number, bright: boolean, ramp: s
   return canvas;
 }
 
+/** At dawn the static is still there, thin and pale on a morning sea (mock4-dawn.png). */
+const DAWN_BASE = "#86a8c2";
+const DAWN_RAMP = ["#7fc7db", "#7fc7db", "#7fc7db", "#bfc6d4", "#bfc6d4", "#ffe3e8"];
+
 function makeSet(random: () => number, grade: Grade, thin: number): Set {
-  const ramp = RAMP.map((hex) => gradeColor(hex, grade));
+  const ramp = grade === "dawn" ? DAWN_RAMP : RAMP.map((hex) => gradeColor(hex, grade));
   const deep: HTMLCanvasElement[] = [];
   const surf: HTMLCanvasElement[] = [];
   for (let n = 0; n < FRAMES; n += 1) {
     deep.push(pattern(random, 0.1 * thin, false, ramp));
     surf.push(pattern(random, 0.45 * thin, true, ramp));
   }
-  return { deep, surf, base: gradeColor(SEA_BASE, grade) };
+  return { deep, surf, base: grade === "dawn" ? DAWN_BASE : gradeColor(SEA_BASE, grade) };
 }
 
 function tile(ctx: CanvasRenderingContext2D, image: HTMLCanvasElement, ox: number, oy: number, x0: number, y0: number, w: number, h: number) {
@@ -83,7 +87,7 @@ export function createSea(): Sea {
     return seed / 2147483647;
   };
   const night = makeSet(random, "raw", 1);
-  const morning = makeSet(random, "dawn", 0.25);
+  const morning = makeSet(random, "dawn", 0.3);
   let timer = 0;
   let ticks = 0;
   let frame = 0;
@@ -124,6 +128,13 @@ export function createSea(): Sea {
       scratch.globalCompositeOperation = "destination-in";
       scratch.drawImage(shore, -camX, -camY);
       scratch.globalCompositeOperation = "source-over";
+      // beyond the map there is no shore: make sure nothing is left there, whatever the browser composited
+      const left = -camX;
+      const top = -camY;
+      if (left > 0) scratch.clearRect(0, 0, left, height);
+      if (top > 0) scratch.clearRect(0, 0, width, top);
+      if (left + shore.width < width) scratch.clearRect(left + shore.width, 0, width - left - shore.width, height);
+      if (top + shore.height < height) scratch.clearRect(0, top + shore.height, width, height - top - shore.height);
       ctx.drawImage(scratch.canvas, 0, 0);
     }
   }

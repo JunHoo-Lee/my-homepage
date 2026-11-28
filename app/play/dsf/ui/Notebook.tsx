@@ -69,6 +69,7 @@ function NotePage({ site, onBack, onAll }: { site: Site; onBack(): void; onAll()
         Note {site.n} of {SITES.length} · {site.name}
       </p>
       <p className={kit.noteAha}>{site.aha}</p>
+      <p className={kit.noteSetup}>{site.setup.join(" ")}</p>
       {site.note.map((paragraph) => (
         <p key={paragraph} data-note="">
           {paragraph}
@@ -80,7 +81,7 @@ function NotePage({ site, onBack, onAll }: { site: Site; onBack(): void; onAll()
         {site.verdict}
       </p>
       <div className={kit.row}>
-        <button type="button" className={kit.btn} onClick={onBack} autoFocus>
+        <button type="button" className={kit.btn} onClick={onBack}>
           {LOG.back}
         </button>
         <button type="button" className={kit.ghostPaper} onClick={onAll}>
@@ -107,14 +108,15 @@ export default function Notebook({ note, solved, questioned, muted, finished, on
   const ref = useRef<HTMLDivElement | null>(null);
   const site = note ? SITES.find((item) => item.id === note && solved.includes(item.id)) : undefined;
 
-  // every page starts at its top
+  // every page starts at its top, with the focus inside the sheet
   useEffect(() => {
     ref.current?.scrollTo(0, 0);
+    ref.current?.focus({ preventScroll: true });
   }, [note]);
 
   return (
     <div className={`${kit.veil} ${kit.veilBook}`}>
-      <div ref={ref} className={`${kit.paper} ${kit.book}`} role="dialog" aria-modal="true" aria-label={LOG.title}>
+      <div ref={ref} className={`${kit.paper} ${kit.book}`} role="dialog" aria-modal="true" aria-label={LOG.title} tabIndex={-1}>
         {site ? (
           <NotePage key={site.id} site={site} onBack={onClose} onAll={() => onNote(null)} />
         ) : (
@@ -156,7 +158,7 @@ export default function Notebook({ note, solved, questioned, muted, finished, on
             </div>
             <p className={kit.small}>{LOG.hint}</p>
             <div className={kit.row}>
-              <button type="button" className={kit.btn} onClick={onClose} autoFocus>
+              <button type="button" className={kit.btn} onClick={onClose}>
                 {LOG.back}
               </button>
               {finished ? (

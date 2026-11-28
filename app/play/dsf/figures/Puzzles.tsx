@@ -12,7 +12,7 @@
  * implies for someone who does understand: its contrapositive.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Synth } from "../../shared/synth";
 import { BOARDS, DOOR, LOOKS_HINTS } from "../content";
@@ -24,6 +24,11 @@ export function TwoLooks({ synth, onSolved }: { synth: Synth | null; onSolved():
   const [message, setMessage] = useState("");
   const [fails, setFails] = useState(0);
   const need = BOARDS.filter((board) => board.real).length;
+  // the answer to a wrong guess appears under the boards: bring it into view
+  const replyRef = useRef<HTMLParagraphElement | null>(null);
+  useEffect(() => {
+    if (message) replyRef.current?.scrollIntoView({ block: "nearest" });
+  }, [message, fails]);
 
   function tap(index: number) {
     synth?.unlock();
@@ -60,7 +65,14 @@ export function TwoLooks({ synth, onSolved }: { synth: Synth | null; onSolved():
             <button key={board.first + index} type="button" className={`${styles.boardTile} ${on ? styles.boardOn : ""}`} aria-pressed={on} onClick={() => tap(index)}>
               <span className={styles.boardStatic} aria-hidden="true" />
               <b>{board.first}</b>
-              {twice ? <em>again: {board.second}</em> : <i>look again</i>}
+              {twice ? (
+                <em>
+                  <span className={styles.againTag}>again: </span>
+                  <span className={styles.againWhat}>{board.second}</span>
+                </em>
+              ) : (
+                <i>look again</i>
+              )}
             </button>
           );
         })}
@@ -74,7 +86,7 @@ export function TwoLooks({ synth, onSolved }: { synth: Synth | null; onSolved():
         </button>
       </div>
       {message ? (
-        <p className={styles.reply}>
+        <p ref={replyRef} className={styles.reply} role="status">
           {message}
           {fails >= 2 ? ` ${LOOKS_HINTS.nudge}` : ""}
         </p>
@@ -130,7 +142,11 @@ export function DoorPuzzle({ synth, onSolved }: { synth: Synth | null; onSolved(
           </button>
         ))}
       </div>
-      {reply ? <p className={styles.reply}>{reply}</p> : null}
+      {reply ? (
+        <p className={styles.reply} role="status">
+          {reply}
+        </p>
+      ) : null}
     </div>
   );
 }

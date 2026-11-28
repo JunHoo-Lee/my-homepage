@@ -159,7 +159,7 @@ export default function Panel({ site, solved, leaving, synth, onSolved, onContin
     <div className={`${kit.veil} ${leaving ? kit.veilOut : ""}`} inert={leaving}>
       <div ref={sheetRef} className={`${kit.slateWin} ${styles.sheet}`} role="dialog" aria-modal="true" aria-label={site.name} tabIndex={-1}>
         <h2 className={styles.heading}>{site.name}</h2>
-        <p className={styles.instruction}>{site.instruction}</p>
+        {site.id === "door" && opened ? null : <p className={styles.instruction}>{site.instruction}</p>}
         <div className={styles.puzzle}>{body}</div>
         {solved ? (
           <div className={styles.solvedFoot}>

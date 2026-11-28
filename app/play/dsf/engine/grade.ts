@@ -3,7 +3,8 @@
  * game loads. Nothing is graded per frame.
  */
 
-export type Grade = "raw" | "night" | "lit" | "dawn";
+/** `flash` is a flat pale silhouette: one frame of it marks a suspect turning to stone. */
+export type Grade = "raw" | "night" | "lit" | "dawn" | "flash";
 
 type Rgb = [number, number, number];
 
@@ -22,7 +23,9 @@ const lit = ([r, g, b]: Rgb): Rgb => [r, 0.94 * g, 0.8 * b];
 /** Dawn: washed and warm. */
 const dawn = ([r, g, b]: Rgb): Rgb => [0.9 * r + 26, 0.82 * g + 18, 0.78 * b + 34];
 
-const FN: Record<Grade, (c: Rgb) => Rgb> = { raw: (c) => c, night, lit, dawn };
+const flash = (): Rgb => [242, 234, 241];
+
+const FN: Record<Grade, (c: Rgb) => Rgb> = { raw: (c) => c, night, lit, dawn, flash };
 
 const byte = (value: number) => (value < 0 ? 0 : value > 255 ? 255 : Math.round(value));
 

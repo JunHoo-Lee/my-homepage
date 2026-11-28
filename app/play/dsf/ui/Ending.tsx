@@ -6,38 +6,57 @@
  */
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { shareLink } from "../../shared/share";
 import { CREDITS, FEYNMAN, FINALE } from "../content";
 import { END } from "../script";
 import kit from "./kit.module.css";
 
-/** Feynman's sentence, then its contrapositive in two clauses, then Reviewer 2's stamp. */
+/**
+ * Feynman's sentence, then its contrapositive in two clauses, then Reviewer 2's stamp.
+ * Every line has its place from the start and only becomes visible, so nothing moves when the next one arrives.
+ */
 export function EndCards({ phase, onFinale }: { phase: number; onFinale(): void }) {
   if (phase < END.quote) return null;
   const [first, second] = FEYNMAN.contrapositive.split(", ");
+  const dim = phase >= END.first ? kit.endDim : "";
   return (
     <div className={kit.end}>
-      <p className={`${kit.endQuote} ${phase >= END.first ? kit.endDim : ""}`}>“{FEYNMAN.quote}”</p>
-      <p className={`${kit.endCredit} ${phase >= END.first ? kit.endDim : ""}`}>{FEYNMAN.credit}</p>
-      {phase >= END.first ? <p className={kit.endLine}>{first},</p> : null}
-      {phase >= END.second ? <p className={`${kit.endLine} ${kit.endGold}`}>{second}</p> : null}
-      {phase >= END.stamp ? <p className={kit.stamp}>{FINALE.stamp}</p> : null}
+      <p className={`${kit.endQuote} ${dim}`}>“{FEYNMAN.quote}”</p>
+      <p className={`${kit.endCredit} ${dim}`}>{FEYNMAN.credit}</p>
+      <p key={`a${phase >= END.first}`} className={`${kit.endLine} ${phase >= END.first ? "" : kit.hid}`}>
+        {first},
+      </p>
+      <p key={`b${phase >= END.second}`} className={`${kit.endLine} ${kit.endGold} ${phase >= END.second ? "" : kit.hid}`}>
+        {second}
+      </p>
+      <p key={`c${phase >= END.stamp}`} className={`${kit.stamp} ${phase >= END.stamp ? "" : kit.hid}`}>
+        {FINALE.stamp}
+      </p>
       {phase >= END.button ? (
         <button type="button" className={`${kit.btn} ${kit.endGo}`} onClick={onFinale} autoFocus>
           {FINALE.closingTitle}
         </button>
-      ) : null}
+      ) : (
+        <span className={`${kit.btn} ${kit.endGo} ${kit.hid}`} aria-hidden="true">
+          {FINALE.closingTitle}
+        </span>
+      )}
     </div>
   );
 }
 
 export function Finale({ onBack }: { onBack(): void }) {
   const [shared, setShared] = useState("");
+  const ref = useRef<HTMLDivElement | null>(null);
+  // focus moves into the sheet, which is read from its top
+  useEffect(() => {
+    ref.current?.focus({ preventScroll: true });
+  }, []);
   return (
     <div className={`${kit.veil} ${kit.veilBook}`}>
-      <div className={`${kit.paper} ${kit.book}`} role="dialog" aria-modal="true" aria-label={FINALE.closingTitle}>
+      <div ref={ref} className={`${kit.paper} ${kit.book}`} role="dialog" aria-modal="true" aria-label={FINALE.closingTitle} tabIndex={-1}>
         <p className={kit.kick}>{FINALE.kicker}</p>
         <p className={kit.carvedLine}>“{FEYNMAN.contrapositive}”</p>
         <h2>{FINALE.closingTitle}</h2>
@@ -51,7 +70,7 @@ export function Finale({ onBack }: { onBack(): void }) {
         <p>{FINALE.limits}</p>
         <p>{FINALE.ending}</p>
         <div className={kit.row}>
-          <button type="button" className={kit.btn} onClick={onBack} autoFocus>
+          <button type="button" className={kit.btn} onClick={onBack}>
             {FINALE.links.back}
           </button>
           <Link href="/dsf" className={kit.ghostPaper}>

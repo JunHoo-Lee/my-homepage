@@ -319,6 +319,7 @@ export function ending(): Step[] {
   return [
     cue({ type: "doorOpen" }),
     act({ kind: "shown", id: "door" }),
+    act({ kind: "question", text: site("door").verdict }),
     { t: "say", who: "Y", text: "Feynman's test was never a verdict against me.", auto: 2200 },
     { t: "say", who: "M", text: "It was a prediction about you.", auto: 2200 },
     cue({ type: "walkThrough" }),
