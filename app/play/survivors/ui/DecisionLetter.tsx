@@ -119,6 +119,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   };
 
   const [shareOpen, setShareOpen] = useState(false);
+  const shareRef = useRef<HTMLElement>(null);
   const shareData: ShareData = {
     grade: result.grade,
     time: result.time,
@@ -145,16 +146,13 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
     ui.play("click");
     setShareOpen((open) => !open);
   };
-  const openShare = (href: string) => {
-    ui.play("click");
-    window.open(href, "_blank", "noopener,noreferrer");
-  };
-  const shareX = () => openShare(`https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(shareUrl())}`);
-  // LinkedIn only takes a URL (the letter image comes from its preview); the post text goes to the clipboard
-  const shareLinkedIn = () => {
-    void copy(`${text}\n${shareUrl()}`);
-    openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl())}`);
-  };
+  // on a long letter the panel opens below the fold, behind the sticky action bar
+  useEffect(() => {
+    if (shareOpen) shareRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [shareOpen]);
+  // real links rather than window.open: in-app browsers and popup blockers drop scripted popups
+  const xHref = () => `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(shareUrl())}`;
+  const linkedInHref = () => `https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl())}`;
   const shareNative = async () => {
     ui.play("click");
     try {
@@ -250,15 +248,26 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
         ) : null}
 
         {shareOpen ? (
-          <section id="gs-share" className={styles.share} aria-label="Share this decision">
+          <section id="gs-share" ref={shareRef} className={styles.share} aria-label="Share this decision">
             <pre className={styles.shareText}>{text}</pre>
             <div className={styles.shareButtons}>
-              <button type="button" className={kit.button} onClick={shareX} {...ui.hover}>
+              <a className={kit.button} href={xHref()} target="_blank" rel="noopener noreferrer" onClick={() => ui.play("click")} {...ui.hover}>
                 Post on X
-              </button>
-              <button type="button" className={kit.button} onClick={shareLinkedIn} {...ui.hover}>
+              </a>
+              {/* LinkedIn only takes a URL (the letter image comes from its preview); the post text goes to the clipboard */}
+              <a
+                className={kit.button}
+                href={linkedInHref()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  ui.play("click");
+                  void copy(`${text}\n${shareUrl()}`);
+                }}
+                {...ui.hover}
+              >
                 LinkedIn
-              </button>
+              </a>
               <button type="button" className={kit.button} onClick={() => { ui.play("click"); void copy(`${text}\n${shareUrl()}`); }} {...ui.hover}>
                 <span aria-live="polite">{copied ? "Copied!" : "Copy text + link"}</span>
               </button>
