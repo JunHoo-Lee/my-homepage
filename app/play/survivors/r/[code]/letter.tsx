@@ -44,7 +44,8 @@ const METAREVIEWS: Record<ShareData["grade"], string[]> = {
   ],
 };
 const AC_ID_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const FORUM = { title: "#3f6978", label: "#8c1b13", meta: "#777", rule: "#e2e2e2", text: "#2b2b2b" };
+// near-black titles, grey signatures, dark red field names: no accent colours beyond that
+const FORUM = { title: "#1f2328", label: "#8c1b13", meta: "#6b6b6b", rule: "#dcdcdc", text: "#1f2328" };
 const ratingLabel = (score: number) =>
   score <= 2 ? "strong reject" : score <= 4 ? "reject, not good enough" : score === 5 ? "marginally below threshold" : score === 6 ? "marginally above threshold" : score <= 8 ? "accept, good paper" : "strong accept";
 
