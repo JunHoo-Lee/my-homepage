@@ -302,9 +302,9 @@ export const DOOR = {
   ],
   answer: ["u", "c"],
   replies: {
-    "c>u": "That is the converse: what I can create, I understand. It may be how language models got here, but it does not follow from the sentence on the door.",
+    "c>u": "That is the inverse: what I can create, I understand. It may be how language models got here, but it does not follow from the sentence on the door.",
     "nc>nu": "That is the sentence itself. You were asked what follows for someone who does understand.",
-    "nu>nc": "That is the inverse. It does not follow, and the island has shown that you do understand.",
+    "nu>nc": "That is the converse. It does not follow, and the island has shown that you do understand.",
     other: "That does not follow from the sentence on the door.",
   } as Record<string, string>,
   locked: (have: number) => `The door does not answer yet. It wants ${DOOR_NEEDS} insights. You have ${have}.`,
