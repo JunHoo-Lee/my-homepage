@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type AnimationEvent } from "react";
 
 import { RUN_LENGTH, formatTime, type RunResult } from "../game";
-import { CardIcon, Reviewer2Icon, RestartIcon, ShareIcon, StampIcon, isCardIconId } from "../icons";
-import { DECISIONS, HUD_TERMS, SCREENS, TOASTS, reviewsFor, type Review } from "../lore";
-import { SHARE_PAPERS, sharePath, shareText, type ShareData } from "../share";
+import { CardIcon, RestartIcon, ShareIcon, StampIcon, isCardIconId } from "../icons";
+import { DECISIONS, HUD_TERMS, SCREENS, TOASTS } from "../lore";
+import { SHARE_PAPERS, forumThread, sharePath, shareText, type ShareData } from "../share";
 import styles from "./decision.module.css";
 import kit from "./kit.module.css";
 import type { Best } from "./records";
@@ -49,26 +49,6 @@ function useCountUp(start: boolean, motion: boolean) {
   return motion ? progress : 1;
 }
 
-/** Score colour on the usual 1-10 scale. */
-const scoreTone = (score: number) => (score <= 3 ? styles.low : score <= 5 ? styles.mid : score === 6 ? styles.weak : styles.high);
-
-function ReviewRow({ review }: { review: Review }) {
-  const isR2 = review.reviewer === "Reviewer 2";
-  return (
-    <li className={`${styles.review} ${isR2 ? styles.r2 : ""}`}>
-      <span className={styles.avatar} aria-hidden="true">
-        {isR2 ? <Reviewer2Icon /> : review.reviewer.replace("Reviewer ", "R")}
-      </span>
-      <span className={styles.reviewBody}>
-        <strong>{review.reviewer}</strong>
-        <span className={`${styles.score} ${scoreTone(review.score)}`}>Score {review.score}</span>
-        <span className={styles.confidence}>Confidence {review.confidence}</span>
-        <q className={styles.comment}>{review.comment}</q>
-      </span>
-    </li>
-  );
-}
-
 export default function DecisionLetter({ result, submission, best, newBest, motion, touch, onResubmit }: Props) {
   const ui = useUiSound();
   const letterRef = useRef<HTMLElement>(null);
@@ -80,19 +60,8 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
   const counted = progress >= 1;
 
   const decision = DECISIONS[result.grade];
-  // a desk-rejected paper never reaches a reviewer
-  const reviews =
-    result.grade === "DeskReject"
-      ? []
-      : reviewsFor({
-          time: result.time,
-          level: result.level,
-          kills: result.kills,
-          maxCombo: result.maxCombo,
-          bossDefeated: result.bossDefeated,
-          runLength: RUN_LENGTH,
-        });
   const papers = result.build.filter((card) => card.paper);
+
 
   // focus the letter itself, so screen readers announce the decision first;
   // the timer covers browsers that never run the stamp animation
@@ -130,6 +99,7 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
     submission: submission ?? 1000,
     papers: result.build.filter((card) => card.id in SHARE_PAPERS).map((card) => card.id),
   };
+  const thread = forumThread(shareData);
   const text = shareText(shareData);
   const shareUrl = () => `${window.location.origin}${sharePath(shareData)}`;
 
@@ -227,21 +197,37 @@ export default function DecisionLetter({ result, submission, best, newBest, moti
           {decision.stamp}
         </div>
 
-        <section className={styles.meta}>
-          <h3 className={styles.label}>Meta-review</h3>
-          <p id="gs-meta">{decision.metaReview}</p>
-        </section>
-
-        {reviews.length ? (
-          <section>
-            <h3 className={styles.label}>Reviews</h3>
-            <ol className={styles.reviews}>
-              {reviews.map((review) => (
-                <ReviewRow key={review.reviewer} review={review} />
+        {/* the decision as a thread on the review forum: the AC's note, then one reply per review */}
+        <section className={styles.forum} aria-label="Meta-review and reviews">
+          <h3 className={styles.noteTitle}>{thread.title}</h3>
+          <p className={styles.signature}>{thread.signature}</p>
+          <p id="gs-meta" className={styles.field}>
+            <b>{thread.field}:</b> {thread.text}
+          </p>
+          {thread.reviews.length ? (
+            <ol className={styles.replies}>
+              {thread.reviews.map((review) => (
+                <li key={review.title}>
+                  <h4 className={styles.noteTitle}>{review.title}</h4>
+                  <p className={styles.signature}>{review.signature}</p>
+                  <p className={`${styles.field} ${styles.pair}`}>
+                    <span>
+                      <b>Rating:</b> {review.rating}
+                    </span>
+                    <span>
+                      <b>Confidence:</b> {review.confidence}
+                    </span>
+                  </p>
+                  <p className={styles.field}>
+                    <b>Comment:</b> {review.comment}
+                  </p>
+                </li>
               ))}
             </ol>
-          </section>
-        ) : null}
+          ) : (
+            <p className={styles.noReplies}>{thread.empty}</p>
+          )}
+        </section>
 
         <dl className={styles.stats}>
           {stats.map((stat) => (

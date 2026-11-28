@@ -59,15 +59,6 @@
   text-transform: uppercase;
 }
 
-.meta p {
-  margin: 0;
-  padding: 0.55rem 0.85rem;
-  border-left: 4px solid var(--blue);
-  border-radius: 0 0.6rem 0.6rem 0;
-  background: color-mix(in srgb, var(--blue) 7%, var(--paper));
-  font: 1.02rem/1.4 var(--font-paper);
-}
-
 /* ---------------------------------------------------------------- stamp */
 
 .stamp {
@@ -125,103 +116,76 @@
   --stamp-room: 5.6rem;
 }
 
-/* ---------------------------------------------------------------- reviews */
+/* ---------------------------------------------------------------- review thread */
 
-.reviews {
-  display: grid;
-  gap: 0.4rem;
+/* Flat on purpose: a plain white page with hairlines and an indented reply
+   thread, like the forum itself rather than a card in this game's style. */
+.forum {
+  --forum-ink: #1f2328;
+  --forum-meta: #6b6b6b;
+  --forum-rule: #dcdcdc;
+  --forum-label: #8c1b13;
+
+  margin-top: 0.9rem;
+  padding: 0.65rem 0.85rem 0.7rem;
+  border: 1px solid var(--forum-rule);
+  background: #fff;
+  color: var(--forum-ink);
+  font: 0.88rem/1.4 var(--font-ui);
+}
+
+.noteTitle {
   margin: 0;
+  font: 700 0.95rem/1.3 var(--font-ui);
+}
+
+.signature {
+  margin: 0.05rem 0 0.3rem;
+  color: var(--forum-meta);
+  font-size: 0.72rem;
+}
+
+.field {
+  margin: 0;
+}
+
+.pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+
+.field b {
+  color: var(--forum-label);
+}
+
+.replies {
+  margin: 0.55rem 0 0;
   padding: 0;
   list-style: none;
 }
 
-.review {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.4rem 0.7rem;
-  border: 1.5px solid color-mix(in srgb, var(--ink) 14%, transparent);
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--sand) 40%, var(--paper));
+.replies li {
+  margin-left: 0.5rem;
+  padding: 0.5rem 0 0.5rem 0.7rem;
+  border-top: 1px solid var(--forum-rule);
+  border-left: 3px solid var(--forum-rule);
 }
 
-.avatar {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 1.9rem;
-  height: 1.9rem;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
-  background: var(--paper);
-  font: 800 0.68rem/1 var(--font-mono);
+.replies li:last-child {
+  padding-bottom: 0.1rem;
 }
 
-.avatar svg {
-  width: 1.3rem;
-  height: 1.3rem;
+.replies .noteTitle {
+  font-size: 0.88rem;
 }
 
-/* "Reviewer 2 · Score 3 · Confidence 5 — "The novelty is limited."" on one line when it fits */
-.reviewBody {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.15rem 0.45rem;
-  min-width: 0;
-  font: 0.86rem/1.25 var(--font-ui);
-}
-
-.score {
-  --tone: var(--grey);
-
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  background: var(--tone);
-  color: #fff;
-  font: 800 0.72rem/1 var(--font-ui);
-}
-
-.low {
-  --tone: var(--red);
-}
-
-.mid {
-  --tone: var(--orange);
-}
-
-.weak {
-  --tone: color-mix(in srgb, var(--gold) 80%, var(--ink));
-}
-
-.high {
-  --tone: var(--green);
-}
-
-.confidence {
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
-  font: 700 0.72rem/1 var(--font-mono);
-}
-
-.comment {
-  font: italic 0.98rem/1.3 var(--font-paper);
-  quotes: "— “" "”";
-}
-
-/* Reviewer 2 is always confident */
-.r2 {
-  border-color: color-mix(in srgb, var(--red) 45%, transparent);
-  background: color-mix(in srgb, var(--red) 7%, var(--paper));
-}
-
-.r2 .avatar {
-  border-color: color-mix(in srgb, var(--red) 65%, #000);
-  background: var(--red);
-  color: #fff;
-}
-
-.r2 .confidence {
-  color: var(--red);
+.noReplies {
+  margin: 0.55rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--forum-rule);
+  color: var(--forum-meta);
+  font-size: 0.78rem;
 }
 
 /* ---------------------------------------------------------------- stats */
@@ -427,14 +391,8 @@
     font-size: 1.05rem;
   }
 
-  .review {
-    align-items: flex-start;
-    padding: 0.45rem 0.6rem;
-  }
-
-  .comment {
-    flex-basis: 100%;
-    quotes: "“" "”";
+  .forum {
+    padding: 0.55rem 0.65rem 0.6rem;
   }
 
   .stats {

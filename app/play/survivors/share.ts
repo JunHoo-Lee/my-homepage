@@ -5,7 +5,7 @@
  * instead of a bare link. Pure module: safe on the server and in the browser.
  */
 
-import { DECISIONS, type DecisionId } from "./lore";
+import { DECISIONS, reviewsFor, type DecisionId } from "./lore";
 
 export const SITE = "https://junhoo.me";
 
@@ -103,4 +103,82 @@ export function shareText(data: ShareData) {
   const trophy = data.grade === "Oral" ? " 🏆" : data.grade === "DeskReject" ? " 🫠" : "";
   const papers = data.papers.length ? ` Built with ${data.papers.map((id) => SHARE_PAPERS[id]).join(" + ")}.` : "";
   return `Submission #${data.submission}: ${title}${trophy}\n${headline(data)}${papers}\nCan you survive Reviewer 2?`;
+}
+
+// ------------------------------------------------------------------ the review thread
+// The decision as a thread on a review forum: the area chair's note, then one
+// reply per official review. Shared by the letter in the game and its image.
+
+// The area chair's note, laid out like a forum post on a review site. The texts are terse
+// the way real ones are (scores, initials for the reviewers), with a community in-joke here
+// and there. {s} is the scores.
+const METAREVIEWS: Record<DecisionId, string[]> = {
+  DeskReject: [
+    "Exceeds the page limit by one line.",
+    "Not anonymized (acknowledgements left in the PDF).",
+    "Wrong style file. This is last year's template.",
+    "Out of scope for the venue.",
+  ],
+  Reject: [
+    "Scores {s}. No reviewer changed their score after the rebuttal.",
+    "Scores {s}. I agree with Reviewer 2.",
+    "Scores {s}. Limited novelty. R2 also asks the authors to cite [1-7].",
+    "Scores {s}. The authors are encouraged to compare with more baselines.",
+  ],
+  Borderline: [
+    "Scores {s}. Split reviews, no consensus in the discussion. Deferring to the SAC.",
+    "Scores {s}. R3 did not respond during the discussion. Could go either way.",
+    "Scores {s}. The reviewers did not reply to the rebuttal. Neither did I.",
+  ],
+  Accept: [
+    "Scores {s}. R2 did not update, but the majority is positive.",
+    "Scores {s}. R2 still disagrees. R2 always disagrees.",
+    "Scores {s}. Please fix the remaining concerns for camera-ready.",
+  ],
+  Oral: [
+    "Scores {s}. All reviewers positive after the rebuttal, R2 raised to 6.",
+    "Scores {s}. R2 raised their score. I have not seen this before.",
+    "Scores {s}. Unanimous after the rebuttal. Nominated for oral.",
+  ],
+};
+const ID_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+const ratingLabel = (score: number) =>
+  score <= 2 ? "strong reject" : score <= 4 ? "reject, not good enough" : score === 5 ? "marginally below threshold" : score === 6 ? "marginally above threshold" : score <= 8 ? "accept, good paper" : "strong accept";
+
+export type ForumThread = {
+  /** note title, e.g. "Meta Review of Submission4702 by Area Chair xK3f" */
+  title: string;
+  signature: string;
+  /** "Metareview", or "Desk Reject Comments" when nobody reviewed the paper */
+  field: string;
+  text: string;
+  reviews: { title: string; signature: string; rating: string; confidence: number; comment: string }[];
+  /** the line under a note with no replies */
+  empty: string;
+};
+
+export function forumThread(data: ShareData): ForumThread {
+  const n = data.submission;
+  const id = (salt: number) => [0, 1, 2, 3].map((i) => ID_CHARS[(n * (i * 7 + 3 + salt) + i * 11 + salt * 5) % ID_CHARS.length]).join("");
+  const desk = data.grade === "DeskReject";
+  const reviews = desk
+    ? []
+    : reviewsFor({ time: data.time, level: data.level, kills: data.kills, maxCombo: data.maxCombo, bossDefeated: data.bossDefeated, runLength: 300 });
+  const options = METAREVIEWS[data.grade];
+  const seconds = Math.floor(data.time);
+  return {
+    title: `Meta Review of Submission${n} by Area Chair ${id(0)}`,
+    signature: `Meta Review · Area Chair ${id(0)} · 23:59 AoE · Everyone`,
+    field: desk ? "Desk Reject Comments" : "Metareview",
+    text: options[n % options.length].replace("{s}", reviews.map((r) => r.score).join("/")),
+    reviews: reviews.map((r, i) => ({
+      title: `Official Review of Submission${n} by ${r.reviewer}`,
+      signature: `Reviewer ${id(i + 1)} · Everyone`,
+      rating: `${r.score}: ${ratingLabel(r.score)}`,
+      confidence: r.confidence,
+      comment: r.comment,
+    })),
+    empty: `0 Replies · no official reviews · decided in ${seconds} second${seconds === 1 ? "" : "s"}`,
+  };
 }
